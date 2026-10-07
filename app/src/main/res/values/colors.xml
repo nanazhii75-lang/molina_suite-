@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="molina_bg">#0E0E10</color>
+    <color name="molina_surface">#16161A</color>
+    <color name="molina_amber">#FFB300</color>
+    <color name="molina_amber_container">#33FFB300</color>
+    <color name="molina_border">#3A3320</color>
+    <color name="molina_text_secondary">#9A9A9A</color>
+    <color name="molina_status_on">#4CAF50</color>
+    <color name="molina_status_off">#6B6B6B</color>
+    <color name="molina_status_error">#E53935</color>
+</resources>

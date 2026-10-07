@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">molina-suite</string>
+    <string name="header_title">🌟 molina</string>
+
+    <string name="nav_kodi">Kodi</string>
+    <string name="nav_files">Material</string>
+    <string name="nav_terminal">Terminal</string>
+    <string name="nav_webdash">WebDash</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="daemon_terminal">Terminal</string>
+    <string name="daemon_webdav">WebDAV</string>
+    <string name="daemon_kodi">Kodi</string>
+
+    <string name="status_unavailable">Tidak tersedia</string>
+    <string name="status_stopped">Berhenti</string>
+    <string name="status_starting">Memulai</string>
+    <string name="status_running">Berjalan</string>
+    <string name="status_error">Galat</string>
+
+    <string name="engine_unavailable">Modul %1$s belum terpasang pada build ini.</string>
+</resources>
