@@ -11,3 +11,6 @@ captures/
 *.keystore
 *.jks
 .DS_Store
+
+# zip bootstrap diunduh saat build
+engines/termux/app/src/main/cpp/bootstrap-*.zip

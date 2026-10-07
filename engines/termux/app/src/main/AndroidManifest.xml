@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.molina.suite.terminal"
-    android:installLocation="internalOnly"
-    android:sharedUserId="${TERMUX_PACKAGE_NAME}"
-    android:sharedUserLabel="@string/shared_user_label">
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- molina-suite: dimodifikasi dari upstream; lihat MOLINA-CHANGES.md -->
 
     <uses-feature
         android:name="android.hardware.touchscreen"
@@ -37,50 +35,16 @@
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
     <application
-        android:name=".app.TermuxApplication"
-        android:allowBackup="false"
-        android:banner="@drawable/banner"
-        android:extractNativeLibs="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/application_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="false"
-        android:theme="@style/Theme.Termux">
+        android:allowBackup="false">
 
         <activity
             android:name=".app.TermuxActivity"
+            android:theme="@style/Theme.Termux"
             android:configChanges="orientation|screenSize|smallestScreenSize|density|screenLayout|uiMode|keyboard|keyboardHidden|navigation"
             android:label="@string/application_name"
             android:launchMode="singleTask"
             android:resizeableActivity="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
         </activity>
-
-        <activity-alias
-            android:name=".HomeActivity"
-            android:targetActivity=".app.TermuxActivity">
-
-            <!-- Launch activity automatically on boot on Android Things devices -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.IOT_LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity-alias>
 
         <activity
             android:name=".app.activities.HelpActivity"
@@ -104,6 +68,7 @@
 
         <activity
             android:name=".filepicker.TermuxFileReceiverActivity"
+            android:theme="@style/Theme.Termux"
             android:excludeFromRecents="true"
             android:label="@string/application_name"
             android:noHistory="true"
@@ -152,7 +117,7 @@
 
         <provider
             android:name=".app.TermuxOpenReceiver$ContentProvider"
-            android:authorities="${TERMUX_PACKAGE_NAME}.files"
+            android:authorities="${TERMUX_PACKAGE_NAME}.terminal.files"
             android:exported="true"
             android:grantUriPermissions="true"
             android:permission="${TERMUX_PACKAGE_NAME}.permission.RUN_COMMAND" />

@@ -279,6 +279,9 @@ public final class TermuxConstants {
     public static final String TERMUX_APP_NAME = "Termux"; // Default: "Termux"
     /** Termux package name */
     public static final String TERMUX_PACKAGE_NAME = "com.molina.suite"; // Default: "com.molina.suite"
+
+    /** Paket Java engine terminal (beda dari applicationId); untuk nama kelas komponen. */
+    public static final String TERMUX_JAVA_PACKAGE_NAME = "com.molina.suite.terminal";
     /** Termux Github repo name */
     public static final String TERMUX_GITHUB_REPO_NAME = "termux-app"; // Default: "termux-app"
     /** Termux Github repo url */
@@ -808,7 +811,7 @@ public final class TermuxConstants {
     public static final String BROADCAST_TERMUX_OPENED = TERMUX_PACKAGE_NAME + ".app.OPENED";
 
     /** The Uri authority for Termux app file shares */
-    public static final String TERMUX_FILE_SHARE_URI_AUTHORITY = TERMUX_PACKAGE_NAME + ".files"; // Default: "com.molina.suite.terminal.files"
+    public static final String TERMUX_FILE_SHARE_URI_AUTHORITY = TERMUX_PACKAGE_NAME + ".terminal.files"; // Default: "com.molina.suite.terminal.files"
 
     /** The normal comma character (U+002C, &comma;, &#44;, comma) */
     public static final String COMMA_NORMAL = ","; // Default: ","
@@ -828,7 +831,7 @@ public final class TermuxConstants {
     public static final class TERMUX_APP {
 
         /** Termux app core activity name. */
-        public static final String TERMUX_ACTIVITY_NAME = TERMUX_PACKAGE_NAME + ".app.TermuxActivity"; // Default: "com.molina.suite.terminal.app.TermuxActivity"
+        public static final String TERMUX_ACTIVITY_NAME = TERMUX_JAVA_PACKAGE_NAME + ".app.TermuxActivity"; // Default: "com.molina.suite.terminal.app.TermuxActivity"
 
         /**
          * Termux app core activity.
@@ -855,14 +858,14 @@ public final class TermuxConstants {
 
 
         /** Termux app settings activity name. */
-        public static final String TERMUX_SETTINGS_ACTIVITY_NAME = TERMUX_PACKAGE_NAME + ".app.activities.SettingsActivity"; // Default: "com.molina.suite.terminal.app.activities.SettingsActivity"
+        public static final String TERMUX_SETTINGS_ACTIVITY_NAME = TERMUX_JAVA_PACKAGE_NAME + ".app.activities.SettingsActivity"; // Default: "com.molina.suite.terminal.app.activities.SettingsActivity"
 
 
 
 
 
         /** Termux app core service name. */
-        public static final String TERMUX_SERVICE_NAME = TERMUX_PACKAGE_NAME + ".app.TermuxService"; // Default: "com.molina.suite.terminal.app.TermuxService"
+        public static final String TERMUX_SERVICE_NAME = TERMUX_JAVA_PACKAGE_NAME + ".app.TermuxService"; // Default: "com.molina.suite.terminal.app.TermuxService"
 
         /**
          * Termux app core service.
@@ -995,7 +998,7 @@ public final class TermuxConstants {
 
 
         /** Termux app run command service name. */
-        public static final String RUN_COMMAND_SERVICE_NAME = TERMUX_PACKAGE_NAME + ".app.RunCommandService"; // Termux app service to receive commands from 3rd party apps "com.molina.suite.terminal.app.RunCommandService"
+        public static final String RUN_COMMAND_SERVICE_NAME = TERMUX_JAVA_PACKAGE_NAME + ".app.RunCommandService"; // Termux app service to receive commands from 3rd party apps "com.molina.suite.terminal.app.RunCommandService"
 
         /**
          * Termux app run command service to receive commands sent by 3rd party apps.

@@ -18,3 +18,8 @@ rootProject.name = "molina-suite"
 
 include(":app")
 include(":core:core-common")
+include(":features:feature-terminal")
+include(":engines:termux:terminal-emulator")
+include(":engines:termux:terminal-view")
+include(":engines:termux:termux-shared")
+include(":engines:termux:app")
