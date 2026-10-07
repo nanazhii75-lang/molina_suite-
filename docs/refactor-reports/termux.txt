@@ -1,0 +1,262 @@
+=== MODE: APPLY | dir: /storage/emulated/0/molina-suite/engines/termux ===
+Pindah direktori paket: 7
+  app/src/main/java/com/termux -> app/src/main/java/com/molina/suite/terminal
+  app/src/test/java/com/termux -> app/src/test/java/com/molina/suite/terminal
+  terminal-emulator/src/main/java/com/termux -> terminal-emulator/src/main/java/com/molina/suite/terminal
+  terminal-emulator/src/test/java/com/termux -> terminal-emulator/src/test/java/com/molina/suite/terminal
+  terminal-view/src/main/java/com/termux -> terminal-view/src/main/java/com/molina/suite/terminal
+  termux-shared/src/androidTest/java/com/termux -> termux-shared/src/androidTest/java/com/molina/suite/terminal
+  termux-shared/src/main/java/com/termux -> termux-shared/src/main/java/com/molina/suite/terminal
+File berubah: 174
+  branding           10
+  java_package       749
+  jni_symbol         6
+  manifest_package   1
+  runtime_literal    17
+  runtime_path       38
+
+--- CONTOH PERUBAHAN ---
+app/build.gradle
+    30: applicationId "com.molina.suite"
+    39: manifestPlaceholders.TERMUX_PACKAGE_NAME = "com.molina.suite"
+app/src/main/AndroidManifest.xml
+    4: package="com.molina.suite.terminal"
+app/src/main/cpp/termux-bootstrap.c
+    6: JNIEXPORT jbyteArray JNICALL Java_com_molina_suite_terminal_app_TermuxInstaller_getZip(JNIEnv *env, __attribut
+app/src/main/java/com/termux/app/RunCommandService.java
+    1: package com.molina.suite.terminal.app;
+    12: import com.molina.suite.terminal.R;
+    13: import com.molina.suite.terminal.shared.data.DataUtils;
+app/src/main/java/com/termux/app/TermuxActivity.java
+    1: package com.molina.suite.terminal.app;
+    33: import com.molina.suite.terminal.R;
+    34: import com.molina.suite.terminal.app.terminal.TermuxActivityRootView;
+app/src/main/java/com/termux/app/TermuxApplication.java
+    1: package com.molina.suite.terminal.app;
+    5: import com.molina.suite.terminal.shared.crash.TermuxCrashUtils;
+    6: import com.molina.suite.terminal.shared.settings.preferences.TermuxAppSharedPreferences;
+app/src/main/java/com/termux/app/TermuxInstaller.java
+    1: package com.molina.suite.terminal.app;
+    12: import com.molina.suite.terminal.R;
+    13: import com.molina.suite.terminal.app.utils.CrashUtils;
+app/src/main/java/com/termux/app/TermuxOpenReceiver.java
+    1: package com.molina.suite.terminal.app;
+    16: import com.molina.suite.terminal.app.utils.PluginUtils;
+    17: import com.molina.suite.terminal.shared.data.IntentUtils;
+app/src/main/java/com/termux/app/TermuxService.java
+    1: package com.molina.suite.terminal.app;
+    24: import com.molina.suite.terminal.R;
+    25: import com.molina.suite.terminal.app.settings.properties.TermuxAppSharedProperties;
+app/src/main/java/com/termux/app/activities/HelpActivity.java
+    1: package com.molina.suite.terminal.app.activities;
+    15: import com.molina.suite.terminal.shared.termux.TermuxConstants;
+app/src/main/java/com/termux/app/activities/SettingsActivity.java
+    1: package com.molina.suite.terminal.app.activities;
+    13: import com.molina.suite.terminal.R;
+    14: import com.molina.suite.terminal.shared.activities.ReportActivity;
+app/src/main/java/com/termux/app/fragments/settings/TermuxAPIPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings;
+    11: import com.molina.suite.terminal.R;
+    12: import com.molina.suite.terminal.shared.settings.preferences.TermuxAPIAppSharedPreferences;
+app/src/main/java/com/termux/app/fragments/settings/TermuxFloatPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings;
+    11: import com.molina.suite.terminal.R;
+    12: import com.molina.suite.terminal.shared.settings.preferences.TermuxFloatAppSharedPreferences;
+app/src/main/java/com/termux/app/fragments/settings/TermuxPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings;
+    11: import com.molina.suite.terminal.R;
+    12: import com.molina.suite.terminal.shared.settings.preferences.TermuxAppSharedPreferences;
+app/src/main/java/com/termux/app/fragments/settings/TermuxTaskerPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings;
+    11: import com.molina.suite.terminal.R;
+    12: import com.molina.suite.terminal.shared.settings.preferences.TermuxTaskerAppSharedPreferences;
+app/src/main/java/com/termux/app/fragments/settings/TermuxWidgetPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings;
+    11: import com.molina.suite.terminal.R;
+    12: import com.molina.suite.terminal.shared.settings.preferences.TermuxWidgetAppSharedPreferences;
+app/src/main/java/com/termux/app/fragments/settings/termux/DebuggingPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings.termux;
+    15: import com.molina.suite.terminal.R;
+    16: import com.molina.suite.terminal.shared.settings.preferences.TermuxAppSharedPreferences;
+app/src/main/java/com/termux/app/fragments/settings/termux/TerminalIOPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings.termux;
+    11: import com.molina.suite.terminal.R;
+    12: import com.molina.suite.terminal.shared.settings.preferences.TermuxAppSharedPreferences;
+app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings.termux;
+    11: import com.molina.suite.terminal.R;
+    12: import com.molina.suite.terminal.shared.settings.preferences.TermuxAppSharedPreferences;
+app/src/main/java/com/termux/app/fragments/settings/termux_api/DebuggingPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings.termux_api;
+    15: import com.molina.suite.terminal.R;
+    16: import com.molina.suite.terminal.shared.settings.preferences.TermuxAPIAppSharedPreferences;
+app/src/main/java/com/termux/app/fragments/settings/termux_float/DebuggingPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings.termux_float;
+    15: import com.molina.suite.terminal.R;
+    16: import com.molina.suite.terminal.shared.settings.preferences.TermuxFloatAppSharedPreferences;
+app/src/main/java/com/termux/app/fragments/settings/termux_tasker/DebuggingPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings.termux_tasker;
+    15: import com.molina.suite.terminal.R;
+    16: import com.molina.suite.terminal.shared.settings.preferences.TermuxTaskerAppSharedPreferences;
+app/src/main/java/com/termux/app/fragments/settings/termux_widget/DebuggingPreferencesFragment.java
+    1: package com.molina.suite.terminal.app.fragments.settings.termux_widget;
+    15: import com.molina.suite.terminal.R;
+    16: import com.molina.suite.terminal.shared.settings.preferences.TermuxWidgetAppSharedPreferences;
+app/src/main/java/com/termux/app/models/UserAction.java
+    1: package com.molina.suite.terminal.app.models;
+app/src/main/java/com/termux/app/settings/properties/TermuxAppSharedProperties.java
+    1: package com.molina.suite.terminal.app.settings.properties;
+    7: import com.molina.suite.terminal.app.terminal.io.KeyboardShortcut;
+    8: import com.molina.suite.terminal.shared.terminal.io.extrakeys.ExtraKeysConstants;
+
+--- REVIEW STRUKTURAL (perlu keputusan manual) ---
+app/build.gradle:2: id "com.android.application"
+app/build.gradle:30: applicationId "com.molina.suite"
+app/src/main/AndroidManifest.xml:111: android:taskAffinity="${TERMUX_PACKAGE_NAME}.filereceiver">
+app/src/main/AndroidManifest.xml:144: android:authorities="${TERMUX_PACKAGE_NAME}.documents"
+app/src/main/AndroidManifest.xml:155: android:authorities="${TERMUX_PACKAGE_NAME}.files"
+app/src/main/AndroidManifest.xml:158: android:permission="${TERMUX_PACKAGE_NAME}.permission.RUN_COMMAND" />
+app/src/main/AndroidManifest.xml:173: android:permission="${TERMUX_PACKAGE_NAME}.permission.RUN_COMMAND">
+app/src/main/AndroidManifest.xml:175: <action android:name="${TERMUX_PACKAGE_NAME}.RUN_COMMAND" />
+app/src/main/AndroidManifest.xml:17: android:name="${TERMUX_PACKAGE_NAME}.permission.RUN_COMMAND"
+app/src/main/AndroidManifest.xml:40: android:name=".app.TermuxApplication"
+app/src/main/AndroidManifest.xml:59: <category android:name="android.intent.category.LAUNCHER" />
+app/src/main/AndroidManifest.xml:6: android:sharedUserId="${TERMUX_PACKAGE_NAME}"
+app/src/main/java/com/termux/app/TermuxActivity.java:202: // This will also fail if TermuxConstants.TERMUX_PACKAGE_NAME does not equal applicationId
+app/src/main/res/xml/shortcuts.xml:6: If applicationId in build.gradle is changed from "com.molina.suite", then targetPackage will
+app/src/main/res/xml/shortcuts.xml:7: need to be manually patched since ${applicationId} variable or resource string does not work.
+termux-shared/src/main/java/com/termux/shared/file/TermuxFileUtils.java:330: .append(" '/data/user/0/" + TermuxConstants.TERMUX_PACKAGE_NAME + "'")
+termux-shared/src/main/java/com/termux/shared/file/TermuxFileUtils.java:333: .append(" '/data/user/0/" + TermuxConstants.TERMUX_PACKAGE_NAME + "/files'")
+termux-shared/src/main/java/com/termux/shared/file/TermuxFileUtils.java:334: .append(" '/data/user/" + TermuxConstants.TERMUX_PACKAGE_NAME + "/files'")
+termux-shared/src/main/java/com/termux/shared/notification/TermuxNotificationUtils.java:13: * Termux app and its plugin must use unique notification ids from the same pool due to usage of android:shared
+termux-shared/src/main/java/com/termux/shared/packages/PackageUtils.java:244: * sharedUserId apps to test. Currently, if its done, PackageManager just doesn't load
+termux-shared/src/main/java/com/termux/shared/packages/PackageUtils.java:308: * Get the process id of the main app process of a package. This will work for sharedUserId. Note
+termux-shared/src/main/java/com/termux/shared/packages/PackageUtils.java:337: * share `sharedUserId` with the an app.
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1010: public static final String ACTION_RUN_COMMAND = TERMUX_PACKAGE_NAME + ".RUN_COMMAND"; // Default: "com.molina.
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1013: public static final String EXTRA_COMMAND_PATH = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_PATH"; // Default: "com.mo
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1015: public static final String EXTRA_ARGUMENTS = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_ARGUMENTS"; // Default: "com.
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1017: public static final String EXTRA_REPLACE_COMMA_ALTERNATIVE_CHARS_IN_ARGUMENTS = TERMUX_PACKAGE_NAME + ".RUN_CO
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1019: public static final String EXTRA_COMMA_ALTERNATIVE_CHARS_IN_ARGUMENTS = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_CO
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1022: public static final String EXTRA_STDIN = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_STDIN"; // Default: "com.molina.s
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1024: public static final String EXTRA_WORKDIR = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_WORKDIR"; // Default: "com.moli
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1026: public static final String EXTRA_BACKGROUND = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_BACKGROUND"; // Default: "co
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1028: public static final String EXTRA_BACKGROUND_CUSTOM_LOG_LEVEL = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_BACKGROUND_
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1030: public static final String EXTRA_SESSION_ACTION = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_SESSION_ACTION"; // Defa
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1032: public static final String EXTRA_COMMAND_LABEL = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_COMMAND_LABEL"; // Defaul
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1034: public static final String EXTRA_COMMAND_DESCRIPTION = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_COMMAND_DESCRIPTION
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1036: public static final String EXTRA_COMMAND_HELP = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_COMMAND_HELP"; // Default:
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1038: public static final String EXTRA_PENDING_INTENT = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_PENDING_INTENT"; // Defa
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1041: public static final String EXTRA_RESULT_DIRECTORY = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_RESULT_DIRECTORY"; // 
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1045: public static final String EXTRA_RESULT_SINGLE_FILE = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_RESULT_SINGLE_FILE";
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1049: public static final String EXTRA_RESULT_FILE_BASENAME = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_RESULT_FILE_BASENA
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1052: public static final String EXTRA_RESULT_FILE_OUTPUT_FORMAT = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_RESULT_FILE_O
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1055: public static final String EXTRA_RESULT_FILE_ERROR_FORMAT = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_RESULT_FILE_ER
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1059: public static final String EXTRA_RESULT_FILES_SUFFIX = TERMUX_PACKAGE_NAME + ".RUN_COMMAND_RESULT_FILES_SUFFIX
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:1218: public static final String EXTRA_TOKEN_NAME = TERMUX_PACKAGE_NAME + ".shortcut.token"; // Default: "com.molina
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:227: * The {@link #TERMUX_PACKAGE_NAME} must be the same as the applicationId of termux-app build.gradle
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:235: * - The "applicationId" in "build.gradle" of termux-app. This is package name that android and app
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:250: * "AndroidManifest.xml" and "applicationId" in "build.gradle".
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:295: public static final String TERMUX_API_PACKAGE_NAME = TERMUX_PACKAGE_NAME + ".api"; // Default: "com.molina.sui
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:309: public static final String TERMUX_BOOT_PACKAGE_NAME = TERMUX_PACKAGE_NAME + ".boot"; // Default: "com.molina.s
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:323: public static final String TERMUX_FLOAT_PACKAGE_NAME = TERMUX_PACKAGE_NAME + ".window"; // Default: "com.molin
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:337: public static final String TERMUX_STYLING_PACKAGE_NAME = TERMUX_PACKAGE_NAME + ".styling"; // Default: "com.mo
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:351: public static final String TERMUX_TASKER_PACKAGE_NAME = TERMUX_PACKAGE_NAME + ".tasker"; // Default: "com.moli
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:365: public static final String TERMUX_WIDGET_PACKAGE_NAME = TERMUX_PACKAGE_NAME + ".widget"; // Default: "com.moli
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:641: public static final String TERMUX_DEFAULT_PREFERENCES_FILE_BASENAME_WITHOUT_EXTENSION = TERMUX_PACKAGE_NAME + 
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:799: public static final String PERMISSION_RUN_COMMAND = TERMUX_PACKAGE_NAME + ".permission.RUN_COMMAND"; // Defaul
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:808: public static final String BROADCAST_TERMUX_OPENED = TERMUX_PACKAGE_NAME + ".app.OPENED";
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:811: public static final String TERMUX_FILE_SHARE_URI_AUTHORITY = TERMUX_PACKAGE_NAME + ".files"; // Default: "com.
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:831: public static final String TERMUX_ACTIVITY_NAME = TERMUX_PACKAGE_NAME + ".app.TermuxActivity"; // Default: "co
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:839: public static final String EXTRA_FAILSAFE_SESSION = TermuxConstants.TERMUX_PACKAGE_NAME + ".app.failsafe_sessi
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:843: public static final String ACTION_REQUEST_PERMISSIONS = TermuxConstants.TERMUX_PACKAGE_NAME + ".app.request_st
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:846: public static final String ACTION_RELOAD_STYLE = TermuxConstants.TERMUX_PACKAGE_NAME + ".app.reload_style"; //
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:849: public static final String EXTRA_RELOAD_STYLE = TermuxConstants.TERMUX_PACKAGE_NAME + ".app.reload_style"; // 
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:858: public static final String TERMUX_SETTINGS_ACTIVITY_NAME = TERMUX_PACKAGE_NAME + ".app.activities.SettingsActi
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:865: public static final String TERMUX_SERVICE_NAME = TERMUX_PACKAGE_NAME + ".app.TermuxService"; // Default: "com.
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:873: public static final String ACTION_STOP_SERVICE = TERMUX_PACKAGE_NAME + ".service_stop"; // Default: "com.molin
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:877: public static final String ACTION_WAKE_LOCK = TERMUX_PACKAGE_NAME + ".service_wake_lock"; // Default: "com.mol
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:881: public static final String ACTION_WAKE_UNLOCK = TERMUX_PACKAGE_NAME + ".service_wake_unlock"; // Default: "com
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:885: public static final String ACTION_SERVICE_EXECUTE = TERMUX_PACKAGE_NAME + ".service_execute"; // Default: "com
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:888: public static final String URI_SCHEME_SERVICE_EXECUTE = TERMUX_PACKAGE_NAME + ".file"; // Default: "com.molina
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:890: public static final String EXTRA_ARGUMENTS = TERMUX_PACKAGE_NAME + ".execute.arguments"; // Default: "com.moli
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:892: public static final String EXTRA_STDIN = TERMUX_PACKAGE_NAME + ".execute.stdin"; // Default: "com.molina.suite
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:894: public static final String EXTRA_WORKDIR = TERMUX_PACKAGE_NAME + ".execute.cwd"; // Default: "com.molina.suite
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:896: public static final String EXTRA_BACKGROUND = TERMUX_PACKAGE_NAME + ".execute.background"; // Default: "com.mo
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:898: public static final String EXTRA_BACKGROUND_CUSTOM_LOG_LEVEL = TERMUX_PACKAGE_NAME + ".execute.background_cust
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:900: public static final String EXTRA_SESSION_ACTION = TERMUX_PACKAGE_NAME + ".execute.session_action"; // Default:
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:902: public static final String EXTRA_COMMAND_LABEL = TERMUX_PACKAGE_NAME + ".execute.command_label"; // Default: "
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:904: public static final String EXTRA_COMMAND_DESCRIPTION = TERMUX_PACKAGE_NAME + ".execute.command_description"; /
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:906: public static final String EXTRA_COMMAND_HELP = TERMUX_PACKAGE_NAME + ".execute.command_help"; // Default: "co
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:908: public static final String EXTRA_PLUGIN_API_HELP = TERMUX_PACKAGE_NAME + ".execute.plugin_api_help"; // Defaul
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:914: public static final String EXTRA_RESULT_DIRECTORY = TERMUX_PACKAGE_NAME + ".execute.result_directory"; // Defa
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:918: public static final String EXTRA_RESULT_SINGLE_FILE = TERMUX_PACKAGE_NAME + ".execute.result_single_file"; // 
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:922: public static final String EXTRA_RESULT_FILE_BASENAME = TERMUX_PACKAGE_NAME + ".execute.result_file_basename";
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:925: public static final String EXTRA_RESULT_FILE_OUTPUT_FORMAT = TERMUX_PACKAGE_NAME + ".execute.result_file_outpu
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:928: public static final String EXTRA_RESULT_FILE_ERROR_FORMAT = TERMUX_PACKAGE_NAME + ".execute.result_file_error_
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:932: public static final String EXTRA_RESULT_FILES_SUFFIX = TERMUX_PACKAGE_NAME + ".execute.result_files_suffix"; /
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:998: public static final String RUN_COMMAND_SERVICE_NAME = TERMUX_PACKAGE_NAME + ".app.RunCommandService"; // Termu
+termux-shared/src/main/java/com/termux/shared/termux/TermuxUtils.java:109: * share `sharedUserId` with the Termux app.
+termux-shared/src/main/java/com/termux/shared/termux/TermuxUtils.java:137: * share `sharedUserId` with the Termux:API app.
+termux-shared/src/main/java/com/termux/shared/termux/TermuxUtils.java:149: * `sharedUserId` with the Termux app.
+
+--- REVIEW URL berisi 'termux' (jangan ganti buta; ada yang fungsional) ---
+https://github.com/agnostic-apollo/termux-app/blob/terminal-code-point-custom-mapping/terminal-view/src/main/java/com/termux/view/TerminalView.java  [terminal-view/src/main/java/com/termux/view/TerminalView.java]
+https://github.com/termux  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/game-packages  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/game-packages/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/libandroid-support  [terminal-emulator/src/main/java/com/termux/terminal/WcWidth.java]
+https://github.com/termux/science-packages  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/science-packages/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-api  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-api/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-api/issues/2  [app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java]
+https://github.com/termux/termux-app  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-app/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-app/issues/1166  [app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java]
+https://github.com/termux/termux-app/issues/126  [terminal-view/src/main/java/com/termux/view/TerminalView.java]
+https://github.com/termux/termux-app/issues/1340  [terminal-emulator/src/test/java/com/termux/terminal/ScrollRegionTest.java]
+https://github.com/termux/termux-app/issues/137  [terminal-view/src/main/java/com/termux/view/TerminalView.java]
+https://github.com/termux/termux-app/issues/1539  [app/src/main/java/com/termux/app/terminal/TermuxActivityRootView.java]
+https://github.com/termux/termux-app/issues/1995#issuecomment-837080079  [termux-shared/src/main/java/com/termux/shared/view/KeyboardUtils.java]
+https://github.com/termux/termux-app/issues/221  [terminal-view/src/main/java/com/termux/view/TerminalView.java]
+https://github.com/termux/termux-app/issues/501  [terminal-emulator/src/test/java/com/termux/terminal/TerminalTest.java]
+https://github.com/termux/termux-app/issues/686  [terminal-view/src/main/java/com/termux/view/TerminalView.java]
+https://github.com/termux/termux-app/issues/731  [terminal-view/src/main/java/com/termux/view/TerminalView.java]
+https://github.com/termux/termux-app/issues/87  [terminal-view/src/main/java/com/termux/view/TerminalView.java]
+https://github.com/termux/termux-app/pull/2237  [terminal-view/src/main/java/com/termux/view/TerminalView.java]
+https://github.com/termux/termux-app/wiki  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-app/wiki/RUN_COMMAND-Intent  [app/src/main/java/com/termux/app/RunCommandService.java, termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-boot  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-boot/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-float  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-float/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-packages  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-packages/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-packages/issues/12556  [terminal-emulator/src/test/java/com/termux/terminal/ScrollRegionTest.java]
+https://github.com/termux/termux-packages/issues/25  [terminal-view/src/main/java/com/termux/view/TerminalView.java]
+https://github.com/termux/termux-packages/releases/download/bootstrap-  [app/build.gradle]
+https://github.com/termux/termux-packages/tree/master/packages/libandroid-support  [terminal-emulator/src/main/java/com/termux/terminal/WcWidth.java]
+https://github.com/termux/termux-packages/wiki  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-packages/wiki/Building-packages  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-root-packages  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-root-packages/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-styling  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-styling/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-tasker  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-tasker/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-widget  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/termux-widget/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/unstable-packages  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/unstable-packages/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/wcwidth  [terminal-emulator/src/main/java/com/termux/terminal/WcWidth.java]
+https://github.com/termux/x11-packages  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://github.com/termux/x11-packages/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://termux.dev  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://termux.dev/donate  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://wiki.termux.com  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+https://wiki.termux.com/wiki/Main_Page  [fastlane/metadata/android/en-US/full_description.txt]
+https://wiki.termux.com/wiki/Touch_Keyboard  [termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysInfo.java]
+https://www.reddit.com/r/termux  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
+
+--- SISA 'com.termux' SETELAH REFACTOR ---
+termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java:641: public static final String TERMUX_DEFAULT_PREFERENCES_FILE_BASENAME_WITHOUT_EXTENSION = TERMUX_PACKAGE_NAME + 
