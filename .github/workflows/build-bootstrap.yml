@@ -626,6 +626,28 @@ jobs:
           path: bscache
           key: bsc-${{ env.CACHE_EPOCH }}-${{ inputs.commit }}-${{ github.run_id }}-${{ github.run_attempt }}
 
+      - name: Diagnosa pasca-build
+        if: ${{ always() && inputs.build }}
+        continue-on-error: true
+        run: |
+          set +e
+          echo "=== zip yang ada di tp ==="
+          find tp -maxdepth 3 -name '*.zip' -printf '%p %s byte\n' 2>/dev/null
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          echo "ZIP=$ZIP"
+          if [ -n "$ZIP" ]; then
+            p=$(unzip -Z1 "$ZIP" | grep 'second-stage' | head -1)
+            echo "=== berkas second-stage dalam zip: $p ==="
+            unzip -p "$ZIP" "$p" | head -3
+            echo "=== jumlah berkas dalam zip ==="
+            unzip -Z1 "$ZIP" | wc -l
+          fi
+          echo "=== exit code atau error di build.log (30 terakhir) ==="
+          grep -n -i "exited with exit code\|exit code\|Failed to\|ERROR" build.log | tail -30
+          echo "=== 15 baris terakhir scripts/build-bootstraps.sh ==="
+          tail -15 tp/scripts/build-bootstraps.sh
+          exit 0
+
       - name: Verifikasi hasil
         if: ${{ inputs.build }}
         run: |
