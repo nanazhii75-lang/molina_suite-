@@ -157,6 +157,28 @@ jobs:
           echo "=== DEPENDS gnupg dan gnutls ==="
           grep -n "DEPENDS" packages/gnupg/build.sh packages/gnutls/build.sh || true
 
+      - name: Patch libunbound tanpa binding Python
+        if: ${{ inputs.build }}
+        run: |
+          cd tp
+          F=packages/libunbound/build.sh
+          chk() {
+            n=$(grep -c -x -F -- "$1" "$F" || true)
+            if [ "$n" != "1" ]; then
+              echo "GAGAL: baris '$1' ditemukan $n kali di $F, diharapkan 1"
+              exit 1
+            fi
+          }
+          chk 'TERMUX_PKG_BUILD_DEPENDS="python, swig"'
+          chk 'TERMUX_PKG_PYTHON_COMMON_DEPS="wheel"'
+          chk 'TERMUX_PKG_PYTHON_BUILD_DEPS="swig"'
+          chk '--with-pyunbound'
+          sed -i '/^TERMUX_PKG_BUILD_DEPENDS="python, swig"$/d' "$F"
+          sed -i '/^TERMUX_PKG_PYTHON_COMMON_DEPS="wheel"$/d' "$F"
+          sed -i '/^TERMUX_PKG_PYTHON_BUILD_DEPS="swig"$/d' "$F"
+          sed -i 's|^--with-pyunbound$|--without-pyunbound|' "$F"
+          grep -n "pyunbound\|PYTHON\|BUILD_DEPENDS" "$F" || echo "tidak ada sisa referensi python"
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
