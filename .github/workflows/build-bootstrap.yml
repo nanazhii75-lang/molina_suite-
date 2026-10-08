@@ -144,6 +144,19 @@ jobs:
           sed -i "s|$OLD|$NEW|" "$F"
           grep -n "TERMUX_PKG_SHA256" "$F"
 
+      - name: Diagnosa libunbound
+        if: ${{ always() }}
+        run: |
+          cd tp
+          echo "=== libunbound build.sh ==="
+          cat packages/libunbound/build.sh
+          echo "=== swig dan python di setup-ubuntu.sh ==="
+          grep -n -i "swig\|python" scripts/setup-ubuntu.sh | head -20 || true
+          echo "=== siapa yang bergantung pada libunbound ==="
+          grep -ln "libunbound" packages/*/build.sh | head -20 || true
+          echo "=== DEPENDS gnupg dan gnutls ==="
+          grep -n "DEPENDS" packages/gnupg/build.sh packages/gnutls/build.sh || true
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
