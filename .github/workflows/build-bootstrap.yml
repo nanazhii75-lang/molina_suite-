@@ -646,6 +646,42 @@ jobs:
           echo "OK: termux-tools meneruskan TERMUX_APP_PACKAGE ke configure"
           sed -n '1,12p' "$F"
 
+      - name: Patch termux-tools (komponen app memakai namespace Java)
+        if: inputs.build
+        run: |
+          F=tp/packages/termux-tools/build.sh
+          SNIP=$(mktemp)
+          cat > "$SNIP" << 'SNIPEOF'
+            # molina: komponen app memakai namespace Java, bukan nama paket
+            local _mf _mn=0
+            for _mf in termux-open termux-reset termux-wake-lock termux-wake-unlock; do
+              _mn=$((_mn + $(grep -cF '@TERMUX_APP_PACKAGE@/@TERMUX_APP_PACKAGE@.app.' "$TERMUX_PKG_SRCDIR/scripts/${_mf}.in" || true)))
+            done
+            if [ "$_mn" != 4 ] || [ -z "${TERMUX_APP__NAMESPACE:-}" ]; then
+              echo "GAGAL molina: komponen=$_mn (harus 4), namespace='${TERMUX_APP__NAMESPACE:-}'" 1>&2
+              exit 1
+            fi
+            for _mf in termux-open termux-reset termux-wake-lock termux-wake-unlock; do
+              sed -i "s|@TERMUX_APP_PACKAGE@/@TERMUX_APP_PACKAGE@\.app\.|@TERMUX_APP_PACKAGE@/${TERMUX_APP__NAMESPACE}.app.|g" "$TERMUX_PKG_SRCDIR/scripts/${_mf}.in"
+            done
+          SNIPEOF
+          n_fn=$(grep -c '^termux_step_pre_configure() {$' "$F" || true)
+          n_done=$(grep -c 'molina: komponen app' "$F" || true)
+          if [ "$n_fn" != 1 ] || [ "$n_done" != 0 ]; then
+            echo "GAGAL: fungsi=$n_fn (harus 1), sudah ditambal=$n_done (harus 0)"
+            grep -n "termux_step_pre_configure" "$F"
+            exit 1
+          fi
+          sed -i '/^termux_step_pre_configure() {$/r '"$SNIP" "$F"
+          n_done=$(grep -c 'molina: komponen app' "$F" || true)
+          if [ "$n_done" != 1 ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n_done)"
+            exit 1
+          fi
+          bash -n "$F"
+          echo "OK: build.sh termux-tools ditambal"
+          sed -n '/^termux_step_pre_configure() {$/,/^}/p' "$F"
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
@@ -841,6 +877,26 @@ jobs:
           head -150 /tmp/bz3/etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh
           echo "=== isi direktori termux-bootstrap ==="
           find /tmp/bz3/etc/termux/termux-bootstrap -type f | sed 's|/tmp/bz3/||' | sort
+          exit 0
+
+      - name: Diagnosa komponen app di bootstrap
+        if: ${{ always() && inputs.build }}
+        continue-on-error: true
+        run: |
+          set +e
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          echo "ZIP=$ZIP"
+          [ -n "$ZIP" ] || exit 0
+          for f in bin/termux-wake-lock bin/termux-wake-unlock bin/termux-open bin/termux-reset bin/termux-reload-settings bin/termux-setup-storage; do
+            echo "=== $f ==="
+            unzip -p "$ZIP" "$f" | grep -n "com\.\(molina\|termux\)"
+          done
+          echo "=== bin/pkg ==="
+          unzip -p "$ZIP" bin/pkg | grep -n "com\.\(molina\|termux\)" | head -25
+          echo "=== bin/login ==="
+          unzip -p "$ZIP" bin/login | grep -n "com\.\(molina\|termux\)" | head -15
+          echo "=== bin/chsh ==="
+          unzip -p "$ZIP" bin/chsh | grep -n "com\.\(molina\|termux\)" | head -10
           exit 0
 
       - name: Verifikasi hasil
