@@ -19,3 +19,7 @@ tercatat sebagai commit terpisah.
 
 ## Kompatibilitas compileSdk 34
 - HelpActivity: hapus WebSettings.setAppCacheEnabled(false) dari WebView settings. API ini dihapus di SDK 33+ dan tidak berefek (nilai bawaan false, App Cache deprecated sejak API 33). Berkas terdampak: app/src/main/java/com/molina/suite/terminal/app/activities/HelpActivity.java
+
+## Fase 1b: selaraskan engine dengan bootstrap berprefix com.molina.suite
+- `app/.../TermuxInstaller.java`: path second stage diganti ke `etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh` (chmod saat ekstraksi dan eksekusi), sesuai bootstrap hasil build termux-packages terbaru.
+- `termux-shared/.../shell/TermuxShellUtils.java`: environment shell mengekspor `TERMUX__USER_ID` (`Process.myUid() / 100000`), karena skrip termux-tools terbaru memakai `am --user "$TERMUX__USER_ID"`.

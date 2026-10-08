@@ -49,6 +49,8 @@ public class TermuxShellUtils {
 
         loadTermuxEnvVariables(currentPackageContext);
 
+        // molina: skrip termux-tools terbaru memakai TERMUX__USER_ID untuk am --user
+        environment.add("TERMUX__USER_ID=" + (android.os.Process.myUid() / 100000));
         if (TERMUX_VERSION_NAME != null)
             environment.add("TERMUX_VERSION=" + TERMUX_VERSION_NAME);
         if (TERMUX_IS_DEBUGGABLE_BUILD != null)
