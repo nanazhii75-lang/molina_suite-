@@ -78,6 +78,26 @@ jobs:
           echo "=== properties.sh namespace 1828-1905 ==="
           sed -n 1828,1905p scripts/properties.sh
 
+      - name: Diagnosa lanjutan: image dan namespace
+        if: ${{ always() }}
+        run: |
+          cd tp
+          echo "=== properties.sh 300-335 (versi NDK) ==="
+          sed -n 300,335p scripts/properties.sh
+          echo "=== run-docker.sh ==="
+          head -150 scripts/run-docker.sh
+          echo "=== update-docker.sh ==="
+          head -60 scripts/update-docker.sh
+          echo "=== Dockerfile ==="
+          head -80 scripts/Dockerfile
+          echo "=== semua TERMUX_APP__NAMESPACE di properties.sh ==="
+          grep -n "TERMUX_APP__NAMESPACE" scripts/properties.sh
+          echo "=== definisi nama kelas komponen 1905-1990 ==="
+          sed -n 1905,1990p scripts/properties.sh | grep -v '^#' | grep -v '^$'
+          echo "=== jumlah paket yang memuat com.termux ==="
+          grep -rIl "com\.termux" packages | cut -d/ -f2 | sort -u | wc -l
+          grep -rIl "com\.termux" packages | cut -d/ -f2 | sort -u | head -80
+
       - name: Build bootstrap aarch64
         if: ${{ inputs.build }}
         run: |
