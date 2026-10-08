@@ -591,6 +591,37 @@ jobs:
           echo "OK: trap ditambal"
           grep -n -B2 -A3 'killtree "\$1" \$\$' "$F"
 
+      - name: Diagnosa sumber com.termux di termux-tools
+        if: always()
+        continue-on-error: true
+        run: |
+          set +e
+          cd tp
+          echo "=== isi packages/termux-tools ==="
+          ls -la packages/termux-tools
+          echo "=== packages/termux-tools/build.sh ==="
+          cat packages/termux-tools/build.sh
+          echo "=== baris com.termux/com.molina di scripts/properties.sh (maks 40) ==="
+          grep -n "TERMUX_APP__PACKAGE_NAME\|TERMUX_APP__NAMESPACE\|com\.termux\|com\.molina" scripts/properties.sh | head -40
+          echo "=== termux-am dan termux-exec: baris relevan di build.sh ==="
+          grep -n "com\.termux\|TERMUX_APP\|sed \|SRCURL\|VERSION=" packages/termux-am/build.sh packages/termux-exec/build.sh | head -40
+          cd ..
+          rm -rf dg && mkdir dg && cd dg
+          curl -fsSL -o tt.tar.gz https://github.com/termux/termux-tools/archive/refs/tags/v1.45.0.tar.gz
+          ls -l tt.tar.gz
+          tar xzf tt.tar.gz || { echo "tar gagal"; exit 0; }
+          cd termux-tools-1.45.0 || { echo "folder hasil ekstrak tidak ada"; ls; exit 0; }
+          echo "=== daftar berkas di tarball (maks 60) ==="
+          find . -type f | sort | head -60
+          echo "=== berkas yang memuat com.termux di tarball asli ==="
+          grep -rlF "com.termux" . | sort
+          echo "=== placeholder @...@ di tarball (jumlah per jenis) ==="
+          grep -rhoE "@[A-Z_]+@" . | sort | uniq -c | sort -rn | head -30
+          echo "=== contoh baris com.termux (maks 50) ==="
+          grep -rnF "com.termux" . | head -50
+          echo "=== berkas hasil build di zip untuk pembanding: baris com.termux di pkg ==="
+          exit 0
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
