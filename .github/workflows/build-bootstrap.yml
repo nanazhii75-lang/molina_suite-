@@ -229,6 +229,40 @@ jobs:
             if [ "$code" = "200" ]; then curl -fsSL "$u" | sha256sum; fi
           done
 
+      - name: Uji URL docbook-xml di oasis-open
+        if: always()
+        run: |
+          set -u
+          want_for() {
+            case "$1" in
+              4.1.2) echo 30f0644064e0ea71751438251940b1431f46acada814a062870f486c772e7772 ;;
+              4.2) echo acc4601e4f97a196076b7e64b368d9248b07c7abf26b34a02cca40eeebe60fa2 ;;
+              4.3) echo 23068a94ea6fd484b004c5a73ec36a66aa47ea8f0d6b62cc1695931f5c143464 ;;
+              4.4) echo 02f159eb88c4254d95e831c51c144b1863b216d909b5ff45743a1ce6f5273090 ;;
+              4.5) echo 4e4e037a2b83c98c6c94818390d4bdd3f6e10f6ec62dd79188594e26190dc7b4 ;;
+            esac
+          }
+          check() {
+            local url="$1" want="$2" code got
+            code=$(curl -sL --retry 2 -o /tmp/dbx.zip -w '%{http_code}' "$url" || echo 000)
+            if [ "$code" = "200" ]; then
+              got=$(sha256sum /tmp/dbx.zip | cut -d' ' -f1)
+              if [ "$got" = "$want" ]; then
+                echo "COCOK  $code $url"
+              else
+                echo "BEDA   $code $url got=$got want=$want"
+              fi
+            else
+              echo "GAGAL  $code $url"
+            fi
+          }
+          for ver in 4.1.2 4.2 4.3 4.4 4.5; do
+            want=$(want_for "$ver")
+            if [ "$ver" = "4.1.2" ]; then f=docbkx412.zip; else f=docbook-xml-$ver.zip; fi
+            check "https://docbook.org/xml/$ver/$f" "$want"
+            check "https://www.oasis-open.org/docbook/xml/$ver/$f" "$want"
+          done
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
