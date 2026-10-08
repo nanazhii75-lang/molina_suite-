@@ -208,6 +208,27 @@ jobs:
           sed -i '/^TERMUX_PKG_DEPENDS="libevent, libnghttp2, openssl, resolv-conf"$/a TERMUX_PKG_BUILD_DEPENDS="libexpat"' "$F"
           grep -n "DEPENDS\|pyunbound\|libexpat" "$F"
 
+      - name: Diagnosa docbook-xml
+        if: ${{ always() }}
+        run: |
+          cd tp
+          echo "=== docbook-xml build.sh ==="
+          cat packages/docbook-xml/build.sh
+          echo "=== apt: baris docbook dan dokumentasi ==="
+          grep -n -i "docbook\|WITH_DOC\|DOC\b\|DEPENDS" packages/apt/build.sh || true
+          echo "=== siapa lagi yang butuh docbook-xml ==="
+          grep -ln "docbook-xml" packages/*/build.sh | head -30 || true
+          echo "=== uji kandidat URL (status HTTP, sha256 bila 200) ==="
+          for u in \
+            https://docbook.org/xml/4.1.2/docbkx412.zip \
+            https://docbook.org/xml/4.1.2/docbook-xml-4.1.2.zip \
+            https://www.oasis-open.org/docbook/xml/4.1.2/docbkx412.zip \
+            https://web.archive.org/web/2024/https://docbook.org/xml/4.1.2/docbkx412.zip ; do
+            code=$(curl -sIL -o /dev/null -w '%{http_code}' "$u" || echo ERR)
+            echo "$code $u"
+            if [ "$code" = "200" ]; then curl -fsSL "$u" | sha256sum; fi
+          done
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
