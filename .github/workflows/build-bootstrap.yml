@@ -622,6 +622,30 @@ jobs:
           echo "=== berkas hasil build di zip untuk pembanding: baris com.termux di pkg ==="
           exit 0
 
+      - name: Patch termux-tools (teruskan nama paket ke configure)
+        if: inputs.build
+        run: |
+          F=tp/packages/termux-tools/build.sh
+          P=tp/scripts/properties.sh
+          LINE='TERMUX_PKG_EXTRA_CONFIGURE_ARGS="TERMUX_APP_PACKAGE=${TERMUX_APP__PACKAGE_NAME}"'
+          n_pkg=$(grep -c '^TERMUX_APP__PACKAGE_NAME="com.molina.suite"$' "$P" || true)
+          n_old=$(grep -c '^TERMUX_PKG_EXTRA_CONFIGURE_ARGS' "$F" || true)
+          n_anchor=$(grep -c '^TERMUX_PKG_ESSENTIAL=true$' "$F" || true)
+          if [ "$n_pkg" != 1 ] || [ "$n_old" != 0 ] || [ "$n_anchor" != 1 ]; then
+            echo "GAGAL: properties=$n_pkg (harus 1), EXTRA_CONFIGURE_ARGS=$n_old (harus 0), anchor=$n_anchor (harus 1)"
+            grep -n "TERMUX_PKG_EXTRA_CONFIGURE_ARGS\|TERMUX_PKG_ESSENTIAL" "$F"
+            exit 1
+          fi
+          sed -i '/^TERMUX_PKG_ESSENTIAL=true$/a TERMUX_PKG_EXTRA_CONFIGURE_ARGS="TERMUX_APP_PACKAGE=${TERMUX_APP__PACKAGE_NAME}"' "$F"
+          n_new=$(grep -cF "$LINE" "$F" || true)
+          if [ "$n_new" != 1 ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n_new)"
+            exit 1
+          fi
+          bash -n "$F"
+          echo "OK: termux-tools meneruskan TERMUX_APP_PACKAGE ke configure"
+          sed -n '1,12p' "$F"
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
@@ -670,6 +694,19 @@ jobs:
           echo "CACHE_RESTORED=true" >> "$GITHUB_ENV"
           echo "=== paket bertanda selesai ==="
           docker exec termux-package-builder ls /data/data/.built-packages 2>/dev/null | head -60 || true
+
+      - name: Hapus penanda built termux-tools (paksa bangun ulang)
+        if: ${{ inputs.build }}
+        run: |
+          docker exec termux-package-builder sudo rm -f /data/data/.built-packages/termux-tools
+          docker exec termux-package-builder sudo rm -rf /home/builder/.termux-build/termux-tools
+          if docker exec termux-package-builder test -e /data/data/.built-packages/termux-tools; then
+            echo "GAGAL: penanda termux-tools masih ada"
+            exit 1
+          fi
+          echo "OK: penanda dan direktori build termux-tools dihapus"
+          echo "=== paket bertanda selesai (seharusnya tanpa termux-tools) ==="
+          docker exec termux-package-builder ls /data/data/.built-packages | head -60 || true
 
       - name: Build bootstrap aarch64
         if: ${{ inputs.build }}
