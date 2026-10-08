@@ -356,6 +356,24 @@ jobs:
           ls packages/zile/ 2>&1
           cat packages/zile/*.alternatives 2>&1 || true
 
+      - name: Diagnosa command-not-found bagian 3
+        if: always()
+        run: |
+          set -u
+          cd tp
+          rm -rf /tmp/cnf3 && mkdir -p /tmp/cnf3
+          curl -fsSL --retry 3 https://github.com/termux/command-not-found/archive/3.1.tar.gz | tar -xz -C /tmp/cnf3 --strip-components=1
+          echo "=== generate-db.js baris 260-400 ==="
+          sed -n '260,400p' /tmp/cnf3/generate-db.js
+          echo "=== CMakeLists.txt ==="
+          cat /tmp/cnf3/CMakeLists.txt
+          echo "=== command-not-found.cpp (PREFIX dan include) ==="
+          grep -n "PREFIX\|#include\|commands-" /tmp/cnf3/command-not-found.cpp | head -40
+          echo "=== baris command-not-found di build.sh shell ==="
+          grep -n "command-not-found" packages/bash/build.sh packages/fish/build.sh packages/nushell/build.sh packages/zsh/build.sh
+          echo "=== build-bootstraps.sh baris 600-640 ==="
+          sed -n '600,640p' scripts/build-bootstraps.sh
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
