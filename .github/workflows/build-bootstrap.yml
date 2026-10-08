@@ -728,6 +728,24 @@ jobs:
           head -5 /tmp/bz2/etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh
           exit 0
 
+      - name: Diagnosa second-stage baru
+        if: ${{ always() && inputs.build }}
+        continue-on-error: true
+        run: |
+          set +e
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          [ -n "$ZIP" ] || { echo "zip tidak ada"; exit 0; }
+          rm -rf /tmp/bz3 && mkdir -p /tmp/bz3 && unzip -q "$ZIP" -d /tmp/bz3
+          echo "=== izin berkas second-stage di zip ==="
+          unzip -Z "$ZIP" 'etc/termux/termux-bootstrap/*' 'etc/profile.d/01-*'
+          echo "=== skrip fallback (maks 120 baris) ==="
+          head -120 /tmp/bz3/etc/profile.d/01-termux-bootstrap-second-stage-fallback.sh
+          echo "=== skrip second-stage (maks 150 baris) ==="
+          head -150 /tmp/bz3/etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh
+          echo "=== isi direktori termux-bootstrap ==="
+          find /tmp/bz3/etc/termux/termux-bootstrap -type f | sed 's|/tmp/bz3/||' | sort
+          exit 0
+
       - name: Verifikasi hasil
         if: ${{ inputs.build }}
         run: |
