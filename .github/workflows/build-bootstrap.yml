@@ -451,6 +451,42 @@ jobs:
           echo "OK: URL dos2unix dialihkan ke arsip Debian, checksum tidak diubah"
           grep -n "TERMUX_PKG_SRCURL\|TERMUX_PKG_SHA256" "$f"
 
+      - name: Diagnosa nano
+        if: always()
+        continue-on-error: true
+        run: |
+          set +e
+          cd tp
+          echo "=== packages/nano/build.sh ==="
+          cat packages/nano/build.sh
+          echo "=== nano di daftar bootstrap ==="
+          grep -n '"nano"' scripts/build-bootstraps.sh
+          echo "=== paket yang menyebut nano di DEPENDS atau RECOMMENDS ==="
+          grep -n "DEPENDS.*nano\|RECOMMENDS.*nano" packages/*/build.sh
+          echo "=== isi dist/latest di situs nano ==="
+          curl -sL --retry 2 https://nano-editor.org/dist/latest/ | grep -o 'nano-[0-9][0-9.]*tar.xz' | sort -u | head
+          want=$(grep '^TERMUX_PKG_SHA256=' packages/nano/build.sh | cut -d= -f2)
+          echo "=== checksum yang diharapkan: $want ==="
+          for url in \
+            https://nano-editor.org/dist/latest/nano-8.5.tar.xz \
+            https://nano-editor.org/dist/v8/nano-8.5.tar.xz \
+            https://www.nano-editor.org/dist/v8/nano-8.5.tar.xz \
+            https://ftp.gnu.org/gnu/nano/nano-8.5.tar.xz ; do
+            code=$(curl -sL --retry 2 -o /tmp/nano.tar.xz -w '%{http_code}' "$url")
+            if [ "$code" = "200" ]; then
+              got=$(sha256sum /tmp/nano.tar.xz | cut -d' ' -f1)
+              size=$(stat -c %s /tmp/nano.tar.xz)
+              if [ "$got" = "$want" ]; then
+                echo "COCOK  $code $url ($size byte)"
+              else
+                echo "BEDA   $code $url ($size byte) got=$got"
+              fi
+            else
+              echo "GAGAL  $code $url"
+            fi
+          done
+          exit 0
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
