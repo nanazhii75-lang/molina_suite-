@@ -17,6 +17,11 @@ on:
         type: boolean
         required: true
         default: true
+      release:
+        description: "Izinkan publikasi ke release repo (biarkan false sampai semua diagnosa tuntas)"
+        type: boolean
+        required: true
+        default: false
 
 permissions:
   contents: write
@@ -562,6 +567,30 @@ jobs:
           sed -n '655,690p' scripts/build-bootstraps.sh
           exit 0
 
+      - name: Patch trap build-bootstraps (kode keluar palsu)
+        if: inputs.build
+        run: |
+          F=tp/scripts/build-bootstraps.sh
+          old='build_bootstrap_killtree "$1" $$;'
+          new='build_bootstrap_killtree "$1" $$ || true;'
+          n_old=$(grep -cF "$old" "$F" || true)
+          n_new=$(grep -cF "$new" "$F" || true)
+          if [ "$n_old" != 1 ] || [ "$n_new" != 0 ]; then
+            echo "GAGAL: harus 1 baris lama dan 0 baris baru, ditemukan $n_old dan $n_new"
+            grep -n "build_bootstrap_killtree" "$F"
+            exit 1
+          fi
+          sed -i 's#build_bootstrap_killtree "\$1" \$\$;#build_bootstrap_killtree "$1" $$ || true;#' "$F"
+          n_old=$(grep -cF "$old" "$F" || true)
+          n_new=$(grep -cF "$new" "$F" || true)
+          if [ "$n_old" != 0 ] || [ "$n_new" != 1 ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n_old dan $n_new)"
+            exit 1
+          fi
+          bash -n "$F"
+          echo "OK: trap ditambal"
+          grep -n -B2 -A3 'killtree "\$1" \$\$' "$F"
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
@@ -754,7 +783,7 @@ jobs:
           cp "$ZIP" bootstrap-aarch64.zip
           sha256sum bootstrap-aarch64.zip | tee bootstrap-aarch64.zip.sha256
           ls -l bootstrap-aarch64.zip
-          SHEBANG=$(unzip -p bootstrap-aarch64.zip etc/termux/bootstrap/termux-bootstrap-second-stage.sh | head -1)
+          SHEBANG=$(unzip -p bootstrap-aarch64.zip etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh | head -1)
           echo "Shebang second stage: $SHEBANG"
           case "$SHEBANG" in
             *"/data/data/$NEW_PKG/files/usr/bin/"*) echo "OK: shebang berprefix $NEW_PKG" ;;
@@ -772,8 +801,19 @@ jobs:
           path: build.log
           if-no-files-found: ignore
 
+      - name: Unggah zip bootstrap (sementara, bukan rilis)
+        if: ${{ always() && inputs.build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-aarch64-uji
+          path: |
+            bootstrap-aarch64.zip
+            bootstrap-aarch64.zip.sha256
+          retention-days: 3
+          if-no-files-found: ignore
+
       - name: Publikasikan ke release repo
-        if: ${{ inputs.build }}
+        if: ${{ inputs.build && inputs.release }}
         run: |
           TAG="bootstrap-molina-$(date -u +%Y.%m.%d)-r${GITHUB_RUN_NUMBER}"
           gh release create "$TAG" bootstrap-aarch64.zip bootstrap-aarch64.zip.sha256 \
