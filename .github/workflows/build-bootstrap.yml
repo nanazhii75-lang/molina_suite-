@@ -263,6 +263,59 @@ jobs:
             check "https://www.oasis-open.org/docbook/xml/$ver/$f" "$want"
           done
 
+      - name: Patch URL docbook-xml ke oasis-open
+        if: inputs.build
+        run: |
+          set -euo pipefail
+          cd tp
+          f=packages/docbook-xml/build.sh
+          old='https://docbook.org/xml/'
+          new='https://www.oasis-open.org/docbook/xml/'
+          n_old=$(grep -cF -- "$old" "$f" || true)
+          n_new=$(grep -cF -- "$new" "$f" || true)
+          if [ "$n_old" = "0" ] && [ "$n_new" = "5" ]; then
+            echo "SUDAH: URL docbook-xml sudah memakai oasis-open."
+            exit 0
+          fi
+          if [ "$n_old" != "5" ] || [ "$n_new" != "0" ]; then
+            echo "GAGAL: harus 5 URL docbook.org dan 0 oasis-open, ditemukan $n_old dan $n_new"
+            exit 1
+          fi
+          want_for() {
+            case "$1" in
+              4.1.2) echo 30f0644064e0ea71751438251940b1431f46acada814a062870f486c772e7772 ;;
+              4.2) echo acc4601e4f97a196076b7e64b368d9248b07c7abf26b34a02cca40eeebe60fa2 ;;
+              4.3) echo 23068a94ea6fd484b004c5a73ec36a66aa47ea8f0d6b62cc1695931f5c143464 ;;
+              4.4) echo 02f159eb88c4254d95e831c51c144b1863b216d909b5ff45743a1ce6f5273090 ;;
+              4.5) echo 4e4e037a2b83c98c6c94818390d4bdd3f6e10f6ec62dd79188594e26190dc7b4 ;;
+            esac
+          }
+          for ver in 4.1.2 4.2 4.3 4.4 4.5; do
+            want=$(want_for "$ver")
+            if [ "$ver" = "4.1.2" ]; then fn=docbkx412.zip; else fn=docbook-xml-$ver.zip; fi
+            url="${new}${ver}/${fn}"
+            code=$(curl -sL --retry 3 -o /tmp/dbx.zip -w '%{http_code}' "$url" || echo 000)
+            if [ "$code" != "200" ]; then
+              echo "GAGAL: $url membalas $code, build.sh tidak ditambal"
+              exit 1
+            fi
+            got=$(sha256sum /tmp/dbx.zip | cut -d' ' -f1)
+            if [ "$got" != "$want" ]; then
+              echo "GAGAL: hash beda untuk $url got=$got want=$want, build.sh tidak ditambal"
+              exit 1
+            fi
+            echo "COCOK  $url"
+          done
+          sed -i "s|${old}|${new}|g" "$f"
+          n_old=$(grep -cF -- "$old" "$f" || true)
+          n_new=$(grep -cF -- "$new" "$f" || true)
+          if [ "$n_old" != "0" ] || [ "$n_new" != "5" ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n_old dan $n_new)"
+            exit 1
+          fi
+          echo "OK: 5 URL docbook-xml dialihkan ke oasis-open"
+          grep -nF -- "$new" "$f"
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
