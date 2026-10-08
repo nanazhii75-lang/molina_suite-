@@ -16,3 +16,6 @@ tercatat sebagai commit terpisah.
 - `TermuxConstants`: ditambah `TERMUX_JAVA_PACKAGE_NAME` untuk nama kelas komponen.
 - `TermuxApplication`: ditambah `initialize(Application)`.
 - Label aplikasi pada `strings.xml`: "Termux" -> "Molina Terminal".
+
+## Kompatibilitas compileSdk 34
+- HelpActivity: hapus WebSettings.setAppCacheEnabled(false) dari WebView settings. API ini dihapus di SDK 33+ dan tidak berefek (nilai bawaan false, App Cache deprecated sejak API 33). Berkas terdampak: app/src/main/java/com/molina/suite/terminal/app/activities/HelpActivity.java
