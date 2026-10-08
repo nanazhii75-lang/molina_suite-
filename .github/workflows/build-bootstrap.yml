@@ -316,6 +316,27 @@ jobs:
           echo "OK: 5 URL docbook-xml dialihkan ke oasis-open"
           grep -nF -- "$new" "$f"
 
+      - name: Diagnosa command-not-found
+        if: always()
+        run: |
+          set -u
+          cd tp
+          echo "=== packages/command-not-found/build.sh ==="
+          cat packages/command-not-found/build.sh
+          echo "=== paket zile di packages ==="
+          ls -d packages/zile* 2>&1 || true
+          grep -ln "zile" packages/*/build.sh 2>/dev/null | head -20 || true
+          echo "=== unduh tarball command-not-found 3.1 ==="
+          rm -rf /tmp/cnf && mkdir -p /tmp/cnf
+          curl -fsSL --retry 3 https://github.com/termux/command-not-found/archive/3.1.tar.gz | tar -xz -C /tmp/cnf --strip-components=1
+          find /tmp/cnf -maxdepth 2 -type f | sort
+          echo "=== lokasi pesan error ==="
+          grep -rn "Package name not found" /tmp/cnf || true
+          echo "=== generate-db.js (maks 200 baris) ==="
+          f=$(find /tmp/cnf -name generate-db.js | head -1)
+          echo "berkas: $f"
+          head -200 "$f"
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
