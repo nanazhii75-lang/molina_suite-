@@ -646,6 +646,8 @@ jobs:
           grep -n -i "exited with exit code\|exit code\|Failed to\|ERROR" build.log | tail -30
           echo "=== 15 baris terakhir scripts/build-bootstraps.sh ==="
           tail -15 tp/scripts/build-bootstraps.sh
+          echo "=== 25 baris terakhir scripts/run-docker.sh ==="
+          tail -25 tp/scripts/run-docker.sh
           exit 0
 
       - name: Verifikasi hasil
