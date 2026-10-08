@@ -550,6 +550,18 @@ jobs:
           sed -n '1,160p' scripts/utils/docker/docker.sh
           exit 0
 
+      - name: Diagnosa trap build-bootstraps
+        if: always()
+        continue-on-error: true
+        run: |
+          set +e
+          cd tp
+          echo "=== build-bootstraps.sh baris 286-350 ==="
+          sed -n '286,350p' scripts/build-bootstraps.sh
+          echo "=== build-bootstraps.sh baris 655-690 ==="
+          sed -n '655,690p' scripts/build-bootstraps.sh
+          exit 0
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
