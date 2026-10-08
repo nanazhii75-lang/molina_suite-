@@ -124,6 +124,26 @@ jobs:
           echo "=== paket lain yang mengunduh dari codeberg ==="
           grep -rl "codeberg.org" packages | head -20 || true
 
+      - name: Patch checksum arsip foot
+        if: ${{ inputs.build }}
+        run: |
+          cd tp
+          OLD=02072b8f0aaf26907b6b02293c875539ce52fc59079344e7cf811ab03394cfa3
+          NEW=b3fa774983abb5f95aecca4557d146091d8666bc65fb310d4d3e38327357ade9
+          F=x11-packages/foot/build.sh
+          n=$(grep -c "$OLD" "$F" || true)
+          if [ "$n" != "1" ]; then
+            echo "GAGAL: checksum lama ditemukan $n kali di $F, diharapkan 1"
+            exit 1
+          fi
+          ACTUAL=$(curl -fsSL https://codeberg.org/dnkl/foot/archive/1.23.1.tar.gz | sha256sum | cut -d' ' -f1)
+          if [ "$ACTUAL" != "$NEW" ]; then
+            echo "GAGAL: unduhan sekarang $ACTUAL, bukan $NEW; tidak ditambal"
+            exit 1
+          fi
+          sed -i "s|$OLD|$NEW|" "$F"
+          grep -n "TERMUX_PKG_SHA256" "$F"
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
