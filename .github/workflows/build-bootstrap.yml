@@ -687,6 +687,35 @@ jobs:
           ls -la /tmp/bz/SYMLINKS.txt
           exit 0
 
+      - name: Diagnosa sisa com.termux
+        if: ${{ always() && inputs.build }}
+        continue-on-error: true
+        run: |
+          set +e
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          [ -n "$ZIP" ] || { echo "zip tidak ada"; exit 0; }
+          rm -rf /tmp/bz2 && mkdir -p /tmp/bz2 && unzip -q "$ZIP" -d /tmp/bz2
+          echo "=== token unik yang memuat com.termux ==="
+          grep -rIoh '[A-Za-z0-9_./@:-]*com\.termux[A-Za-z0-9_./@:-]*' /tmp/bz2 | sort | uniq -c | sort -rn | head -60
+          echo "=== berkas dan jumlah baris ==="
+          grep -rIc 'com\.termux' /tmp/bz2 | grep -v ':0$' | sed 's|/tmp/bz2/||' | sort
+          echo "=== paket pemilik tiap berkas ==="
+          P=/data/data/com.molina.suite/files/usr
+          for f in $(grep -rIl 'com\.termux' /tmp/bz2 | sed 's|/tmp/bz2/||' | grep -v '^var/lib/dpkg'); do
+            own=$(grep -lxF "$P/$f" /tmp/bz2/var/lib/dpkg/info/*.list | xargs -r -n1 basename | tr '\n' ' ')
+            echo "$f -> $own"
+          done
+          echo "=== waktu build paket di container ==="
+          docker exec termux-package-builder ls -l --time-style=full-iso /data/data/.built-packages 2>/dev/null | grep -E 'termux-tools|termux-exec|termux-am|termux-core|apt|bash'
+          echo "=== packages/termux-tools ==="
+          ls tp/packages/termux-tools
+          grep -n "com.termux\|TERMUX_APP\|TERMUX_REPO\|@TERMUX" tp/packages/termux-tools/build.sh | head -40
+          grep -rn "com\.termux" tp/packages/termux-tools 2>/dev/null | head -40
+          echo "=== second-stage baru ==="
+          ls -la /tmp/bz2/etc/termux/termux-bootstrap /tmp/bz2/etc/termux/termux-bootstrap/second-stage
+          head -5 /tmp/bz2/etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh
+          exit 0
+
       - name: Verifikasi hasil
         if: ${{ inputs.build }}
         run: |
