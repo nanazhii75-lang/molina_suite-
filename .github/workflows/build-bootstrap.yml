@@ -78,7 +78,7 @@ jobs:
           echo "=== properties.sh namespace 1828-1905 ==="
           sed -n 1828,1905p scripts/properties.sh
 
-      - name: Diagnosa lanjutan: image dan namespace
+      - name: Diagnosa lanjutan - image dan namespace
         if: ${{ always() }}
         run: |
           cd tp
