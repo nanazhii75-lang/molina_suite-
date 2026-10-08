@@ -535,6 +535,21 @@ jobs:
           echo "OK: URL nano dialihkan ke ftp.gnu.org, checksum tidak diubah"
           grep -n "TERMUX_PKG_SRCURL\|TERMUX_PKG_SHA256" "$f"
 
+      - name: Diagnosa kode keluar run-docker
+        if: always()
+        continue-on-error: true
+        run: |
+          set +e
+          cd tp
+          echo "=== set, trap, exit di run-docker.sh ==="
+          grep -n "set -\|trap\|exit" scripts/run-docker.sh
+          echo "=== set, trap, exit di build-bootstraps.sh (60 pertama) ==="
+          grep -n "^set \|set -\|trap \|exit " scripts/build-bootstraps.sh | head -60
+          echo "=== scripts/utils/docker/docker.sh ==="
+          wc -l scripts/utils/docker/docker.sh
+          sed -n '1,160p' scripts/utils/docker/docker.sh
+          exit 0
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
@@ -648,6 +663,28 @@ jobs:
           tail -15 tp/scripts/build-bootstraps.sh
           echo "=== 25 baris terakhir scripts/run-docker.sh ==="
           tail -25 tp/scripts/run-docker.sh
+          exit 0
+
+      - name: Diagnosa isi bootstrap
+        if: ${{ always() && inputs.build }}
+        continue-on-error: true
+        run: |
+          set +e
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          [ -n "$ZIP" ] || { echo "zip tidak ada"; exit 0; }
+          rm -rf /tmp/bz && mkdir -p /tmp/bz && unzip -q "$ZIP" -d /tmp/bz
+          echo "=== semua berkas second-stage ==="
+          (cd /tmp/bz && find . -name '*second-stage*' | sort)
+          echo "=== shebang second-stage utama ==="
+          head -3 /tmp/bz/etc/termux/bootstrap/termux-bootstrap-second-stage.sh
+          echo "=== jumlah berkas yang memuat com.termux ==="
+          grep -rIl 'com\.termux' /tmp/bz | wc -l
+          echo "=== daftar berkas (30 pertama) ==="
+          grep -rIl 'com\.termux' /tmp/bz | sed 's|/tmp/bz/||' | head -30
+          echo "=== baris yang memuat com.termux (40 pertama) ==="
+          grep -rIn 'com\.termux' /tmp/bz | sed 's|/tmp/bz/||' | head -40
+          echo "=== SYMLINKS.txt ==="
+          ls -la /tmp/bz/SYMLINKS.txt
           exit 0
 
       - name: Verifikasi hasil
