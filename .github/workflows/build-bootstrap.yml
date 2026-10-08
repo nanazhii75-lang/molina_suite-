@@ -62,6 +62,22 @@ jobs:
           echo "=== second-stage di sumber ==="
           grep -rIl "second-stage" scripts | head || true
 
+      - name: Diagnosa NDK dan properti namespace
+        if: ${{ always() }}
+        run: |
+          cd tp
+          echo "=== sumber error NDK ==="
+          grep -rn "NDK not pointing" -B10 -A3 scripts build-package.sh | head -60 || true
+          echo "=== referensi NDK di skrip ==="
+          grep -n "NDK" scripts/Dockerfile scripts/run-docker.sh scripts/setup-android-sdk.sh | head -40 || true
+          grep -n "NDK_VERSION" scripts/properties.sh | head -10 || true
+          echo "=== isi image package-builder ==="
+          docker pull -q ghcr.io/termux/package-builder:latest
+          docker image inspect ghcr.io/termux/package-builder:latest --format '{{.Id}} {{.Created}}'
+          docker run --rm ghcr.io/termux/package-builder:latest bash -c 'env | grep -i -E "ndk|android|builder"; ls /home/builder/lib 2>&1; ls /home/builder 2>&1' || true
+          echo "=== properties.sh namespace 1828-1905 ==="
+          sed -n 1828,1905p scripts/properties.sh
+
       - name: Build bootstrap aarch64
         if: ${{ inputs.build }}
         run: |
