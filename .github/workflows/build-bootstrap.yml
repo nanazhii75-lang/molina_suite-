@@ -111,6 +111,19 @@ jobs:
           grep -rIl "com\.termux" packages | cut -d/ -f2 | sort -u | wc -l
           grep -rIl "com\.termux" packages | cut -d/ -f2 | sort -u | head -80
 
+      - name: Diagnosa ncurses dan stabilitas checksum
+        if: ${{ always() }}
+        run: |
+          cd tp
+          echo "=== ncurses build.sh: baris foot ==="
+          grep -n -i "foot" packages/ncurses/build.sh || echo "tidak ada"
+          echo "=== ncurses build.sh 1-70 ==="
+          sed -n 1,70p packages/ncurses/build.sh
+          echo "=== stabilitas unduhan foot (3 kali) ==="
+          for i in 1 2 3; do curl -fsSL https://codeberg.org/dnkl/foot/archive/1.23.1.tar.gz | sha256sum; sleep 10; done
+          echo "=== paket lain yang mengunduh dari codeberg ==="
+          grep -rl "codeberg.org" packages | head -20 || true
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
