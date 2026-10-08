@@ -374,6 +374,35 @@ jobs:
           echo "=== build-bootstraps.sh baris 600-640 ==="
           sed -n '600,640p' scripts/build-bootstraps.sh
 
+      - name: Patch bootstrap tanpa command-not-found
+        if: inputs.build
+        run: |
+          set -euo pipefail
+          cd tp
+          f=scripts/build-bootstraps.sh
+          pat='PACKAGES_LIST+=("command-not-found")'
+          note='molina - command-not-found dikeluarkan'
+          n=$(grep -cF -- "$pat" "$f" || true)
+          m=$(grep -cF -- "$note" "$f" || true)
+          if [ "$n" = "0" ] && [ "$m" = "1" ]; then
+            echo "SUDAH: command-not-found sudah dikeluarkan dari PACKAGES_LIST."
+            exit 0
+          fi
+          if [ "$n" != "1" ] || [ "$m" != "0" ]; then
+            echo "GAGAL: harus 1 baris paket dan 0 penanda, ditemukan $n dan $m"
+            exit 1
+          fi
+          sed -i 's|^\([[:space:]]*\)PACKAGES_LIST+=("command-not-found")[[:space:]]*$|\1: # molina - command-not-found dikeluarkan (db memakai repo resmi berprefix com.termux)|' "$f"
+          n=$(grep -cF -- "$pat" "$f" || true)
+          m=$(grep -cF -- "$note" "$f" || true)
+          if [ "$n" != "0" ] || [ "$m" != "1" ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n dan $m)"
+            exit 1
+          fi
+          bash -n "$f"
+          echo "OK: command-not-found dikeluarkan, sintaks skrip valid"
+          grep -n "command-not-found" "$f"
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
