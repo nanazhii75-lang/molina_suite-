@@ -337,6 +337,25 @@ jobs:
           echo "berkas: $f"
           head -200 "$f"
 
+      - name: Diagnosa command-not-found bagian 2
+        if: always()
+        run: |
+          set -u
+          cd tp
+          rm -rf /tmp/cnf2 && mkdir -p /tmp/cnf2
+          curl -fsSL --retry 3 https://github.com/termux/command-not-found/archive/3.1.tar.gz | tar -xz -C /tmp/cnf2 --strip-components=1
+          echo "=== generate-db.js baris 195-260 ==="
+          sed -n '195,260p' /tmp/cnf2/generate-db.js
+          echo "=== repo.json ==="
+          cat repo.json
+          echo "=== referensi command-not-found di scripts ==="
+          grep -rn "command-not-found" scripts/ | head -30 || true
+          echo "=== paket yang bergantung command-not-found ==="
+          grep -ln "command-not-found" packages/*/build.sh || true
+          echo "=== alternatives zile ==="
+          ls packages/zile/ 2>&1
+          cat packages/zile/*.alternatives 2>&1 || true
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
