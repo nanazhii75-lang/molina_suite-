@@ -46,6 +46,19 @@ jobs:
           sed -i "s|^TERMUX_APP__PACKAGE_NAME=\"com.termux\"\$|TERMUX_APP__PACKAGE_NAME=\"$NEW_PKG\"|" scripts/properties.sh
           grep -n '^TERMUX_APP__PACKAGE_NAME=' scripts/properties.sh
 
+      - name: Patch namespace komponen app
+        run: |
+          cd tp
+          n=$(grep -c '^TERMUX_APP__NAMESPACE="com.termux"$' scripts/properties.sh || true)
+          if [ "$n" != "1" ]; then
+            echo "GAGAL: diharapkan tepat 1 baris TERMUX_APP__NAMESPACE=com.termux, ditemukan $n"
+            exit 1
+          fi
+          sed -i 's|^TERMUX_APP__NAMESPACE="com.termux"$|TERMUX_APP__NAMESPACE="com.molina.suite.terminal"|' scripts/properties.sh
+          grep -n '^TERMUX_APP__NAMESPACE=' scripts/properties.sh
+          echo "=== com.termux di paket yang mungkin masuk bootstrap ==="
+          grep -rIn "com\.termux" packages/dpkg packages/openssh packages/apr packages/libandroid-wordexp packages/nlohmann-json | head -40 || true
+
       - name: Preflight (bukti untuk ditinjau)
         run: |
           cd tp
@@ -98,6 +111,16 @@ jobs:
           grep -rIl "com\.termux" packages | cut -d/ -f2 | sort -u | wc -l
           grep -rIl "com\.termux" packages | cut -d/ -f2 | sort -u | head -80
 
+      - name: Bangun image builder dari commit terpin
+        if: ${{ inputs.build }}
+        run: |
+          docker build -t molina-package-builder:local tp/scripts
+
+      - name: Verifikasi image builder
+        if: ${{ inputs.build }}
+        run: |
+          docker run --rm molina-package-builder:local bash -c 'ls -d /home/builder/lib/android-ndk-r28c && ls -ld /data/data /data/data/*'
+
       - name: Build bootstrap aarch64
         if: ${{ inputs.build }}
         run: |
@@ -105,7 +128,7 @@ jobs:
           (while sleep 600; do echo "== heartbeat $(date -u +%T) =="; tail -n 3 ../build.log; done) &
           HB=$!
           set +e
-          ./scripts/run-docker.sh ./scripts/build-bootstraps.sh --architectures aarch64 --no-build-unneeded-subpackages &> ../build.log
+          TERMUX_BUILDER_IMAGE_NAME=molina-package-builder:local ./scripts/run-docker.sh ./scripts/build-bootstraps.sh --architectures aarch64 --no-build-unneeded-subpackages &> ../build.log
           rc=$?
           kill $HB 2>/dev/null
           if [ $rc -ne 0 ]; then
