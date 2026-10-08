@@ -487,6 +487,54 @@ jobs:
           done
           exit 0
 
+      - name: Patch URL sumber nano
+        if: inputs.build
+        run: |
+          set -euo pipefail
+          cd tp
+          f=packages/nano/build.sh
+          old='TERMUX_PKG_SRCURL=https://nano-editor.org/dist/latest/nano-$TERMUX_PKG_VERSION.tar.xz'
+          new='TERMUX_PKG_SRCURL=https://ftp.gnu.org/gnu/nano/nano-$TERMUX_PKG_VERSION.tar.xz'
+          n_old=$(grep -cxF -- "$old" "$f" || true)
+          n_new=$(grep -cxF -- "$new" "$f" || true)
+          if [ "$n_old" = "0" ] && [ "$n_new" = "1" ]; then
+            echo "SUDAH: URL nano sudah memakai ftp.gnu.org."
+            exit 0
+          fi
+          if [ "$n_old" != "1" ] || [ "$n_new" != "0" ]; then
+            echo "GAGAL: harus 1 baris lama dan 0 baris baru, ditemukan $n_old dan $n_new"
+            exit 1
+          fi
+          v=$(grep -c '^TERMUX_PKG_VERSION="8.5"$' "$f" || true)
+          if [ "$v" != "1" ]; then
+            echo "GAGAL: versi paket bukan 8.5 ($v)"
+            exit 1
+          fi
+          want=$(grep '^TERMUX_PKG_SHA256=' "$f" | cut -d= -f2)
+          url=https://ftp.gnu.org/gnu/nano/nano-8.5.tar.xz
+          code=$(curl -sL --retry 3 -o /tmp/nano.tar.xz -w '%{http_code}' "$url" || echo 000)
+          if [ "$code" != "200" ]; then
+            echo "GAGAL: $url membalas $code, build.sh tidak ditambal"
+            exit 1
+          fi
+          got=$(sha256sum /tmp/nano.tar.xz | cut -d' ' -f1)
+          if [ "$got" != "$want" ]; then
+            echo "GAGAL: hash beda got=$got want=$want, build.sh tidak ditambal"
+            exit 1
+          fi
+          echo "COCOK  $url"
+          echo "entri pertama arsip: $(tar -tJf /tmp/nano.tar.xz | head -1)"
+          OLD="$old" NEW="$new" perl -0pi -e 's/\Q$ENV{OLD}\E/$ENV{NEW}/' "$f"
+          n_old=$(grep -cxF -- "$old" "$f" || true)
+          n_new=$(grep -cxF -- "$new" "$f" || true)
+          if [ "$n_old" != "0" ] || [ "$n_new" != "1" ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n_old dan $n_new)"
+            exit 1
+          fi
+          bash -n "$f"
+          echo "OK: URL nano dialihkan ke ftp.gnu.org, checksum tidak diubah"
+          grep -n "TERMUX_PKG_SRCURL\|TERMUX_PKG_SHA256" "$f"
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
