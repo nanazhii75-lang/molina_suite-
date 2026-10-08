@@ -12,6 +12,11 @@ on:
         type: boolean
         required: true
         default: false
+      use_cache:
+        description: "Pakai cache build antar-run (matikan setelah mengubah patch global)"
+        type: boolean
+        required: true
+        default: true
 
 permissions:
   contents: write
@@ -24,6 +29,7 @@ jobs:
       TP_REPO: agnostic-apollo/termux-packages
       TP_COMMIT: ${{ inputs.commit }}
       NEW_PKG: com.molina.suite
+      CACHE_EPOCH: "1"
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Ambil termux-packages pada commit terpin
@@ -212,14 +218,56 @@ jobs:
         run: |
           docker run --rm molina-package-builder:local bash -c 'ls -d /home/builder/lib/android-ndk-r28c && ls -ld /data/data /data/data/*'
 
+      - name: Siapkan container builder
+        if: ${{ inputs.build }}
+        run: |
+          if [ "$(id -u)" != "1001" ]; then
+            echo "GAGAL: uid runner $(id -u) bukan 1001; run-docker.sh biasanya menyesuaikan uid builder, container manual belum"
+            exit 1
+          fi
+          docker run --detach --init --name termux-package-builder \
+            --volume "$PWD/tp:/home/builder/termux-packages" \
+            --security-opt "seccomp=$PWD/tp/scripts/profile.json" \
+            --tty molina-package-builder:local
+          docker ps --filter name=termux-package-builder --format '{{.Names}} {{.Status}}'
+
+      - name: Pulihkan cache build (unduh)
+        id: bscache
+        if: ${{ inputs.build && inputs.use_cache }}
+        uses: actions/cache/restore@v4
+        with:
+          path: bscache
+          key: bsc-${{ env.CACHE_EPOCH }}-${{ inputs.commit }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            bsc-${{ env.CACHE_EPOCH }}-${{ inputs.commit }}-
+
+      - name: Pulihkan state ke container
+        if: ${{ inputs.build && inputs.use_cache && steps.bscache.outputs.cache-matched-key != '' }}
+        run: |
+          command -v zstd >/dev/null || sudo apt-get install -y -qq zstd
+          ls -lh bscache
+          if [ ! -f bscache/state.tar.zst ]; then
+            echo "GAGAL: state.tar.zst tidak ada di cache"; exit 1
+          fi
+          zstd -dc bscache/state.tar.zst | docker exec -i termux-package-builder sudo tar -C / -xpf -
+          if [ -f bscache/output.tar.zst ]; then
+            zstd -dc bscache/output.tar.zst | tar -C tp -xpf -
+          fi
+          echo "CACHE_RESTORED=true" >> "$GITHUB_ENV"
+          echo "=== paket bertanda selesai ==="
+          docker exec termux-package-builder ls /data/data/.built-packages 2>/dev/null | head -60 || true
+
       - name: Build bootstrap aarch64
         if: ${{ inputs.build }}
         run: |
           cd tp
           (while sleep 600; do echo "== heartbeat $(date -u +%T) =="; tail -n 3 ../build.log; done) &
           HB=$!
+          NOCLEAN=""
+          if [ "${CACHE_RESTORED:-}" = "true" ]; then NOCLEAN="--no-clean"; fi
+          echo "NOCLEAN='$NOCLEAN'"
           set +e
-          TERMUX_BUILDER_IMAGE_NAME=molina-package-builder:local ./scripts/run-docker.sh ./scripts/build-bootstraps.sh --architectures aarch64 --no-build-unneeded-subpackages &> ../build.log
+          TERMUX_BUILDER_IMAGE_NAME=molina-package-builder:local ./scripts/run-docker.sh ./scripts/build-bootstraps.sh --architectures aarch64 --no-build-unneeded-subpackages $NOCLEAN &> ../build.log
           rc=$?
           kill $HB 2>/dev/null
           if [ $rc -ne 0 ]; then
@@ -227,6 +275,29 @@ jobs:
             tail -n 80 ../build.log
             exit $rc
           fi
+
+      - name: Simpan state dari container
+        id: bssave
+        if: ${{ always() && inputs.build && inputs.use_cache }}
+        run: |
+          command -v zstd >/dev/null || sudo apt-get install -y -qq zstd
+          if ! docker ps -q --filter name=termux-package-builder | grep -q .; then
+            echo "container tidak berjalan; lewati penyimpanan"; exit 0
+          fi
+          rm -rf bscache && mkdir -p bscache
+          docker exec termux-package-builder sudo tar -C / -cpf - data home/builder/.termux-build | zstd -T0 -3 -q -o bscache/state.tar.zst
+          if [ -d tp/output ]; then
+            tar -C tp -cpf - output | zstd -T0 -3 -q -o bscache/output.tar.zst
+          fi
+          du -sh bscache/*
+          echo "saved=true" >> "$GITHUB_OUTPUT"
+
+      - name: Simpan cache build (unggah)
+        if: ${{ always() && inputs.build && inputs.use_cache && steps.bssave.outputs.saved == 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: bscache
+          key: bsc-${{ env.CACHE_EPOCH }}-${{ inputs.commit }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Verifikasi hasil
         if: ${{ inputs.build }}
