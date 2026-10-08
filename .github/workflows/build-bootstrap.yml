@@ -179,6 +179,29 @@ jobs:
           sed -i 's|^--with-pyunbound$|--without-pyunbound|' "$F"
           grep -n "pyunbound\|PYTHON\|BUILD_DEPENDS" "$F" || echo "tidak ada sisa referensi python"
 
+      - name: Patch libunbound tambah libexpat
+        if: ${{ inputs.build }}
+        run: |
+          cd tp
+          F=packages/libunbound/build.sh
+          if [ ! -f packages/libexpat/build.sh ]; then
+            echo "GAGAL: packages/libexpat/build.sh tidak ada; paket bernama expat:"
+            ls packages | grep -i expat || true
+            exit 1
+          fi
+          n=$(grep -c '^TERMUX_PKG_DEPENDS="libevent, libnghttp2, openssl, resolv-conf"$' "$F" || true)
+          if [ "$n" != "1" ]; then
+            echo "GAGAL: baris DEPENDS ditemukan $n kali, diharapkan 1"
+            exit 1
+          fi
+          b=$(grep -c '^TERMUX_PKG_BUILD_DEPENDS=' "$F" || true)
+          if [ "$b" != "0" ]; then
+            echo "GAGAL: BUILD_DEPENDS sudah ada ($b), patch sebelumnya tidak sesuai harapan"
+            exit 1
+          fi
+          sed -i '/^TERMUX_PKG_DEPENDS="libevent, libnghttp2, openssl, resolv-conf"$/a TERMUX_PKG_BUILD_DEPENDS="libexpat"' "$F"
+          grep -n "DEPENDS\|pyunbound\|libexpat" "$F"
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
