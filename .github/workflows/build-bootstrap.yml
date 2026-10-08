@@ -1,0 +1,115 @@
+name: Build Bootstrap (com.molina.suite)
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit termux-packages (fork agnostic-apollo, branch infra-improvs)"
+        required: true
+        default: "fb44d31f3445d7efd2cee6dada47aa19401c1329"
+      build:
+        description: "Jalankan build bootstrap sungguhan (false = hanya preflight)"
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      TP_REPO: agnostic-apollo/termux-packages
+      TP_COMMIT: ${{ inputs.commit }}
+      NEW_PKG: com.molina.suite
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Ambil termux-packages pada commit terpin
+        run: |
+          mkdir tp && cd tp
+          git init -q
+          git remote add origin "https://github.com/$TP_REPO.git"
+          git fetch -q --depth 1 origin "$TP_COMMIT"
+          git checkout -q FETCH_HEAD
+          echo "COMMIT: $(git rev-parse HEAD)"
+
+      - name: Patch nama paket di properties.sh
+        run: |
+          cd tp
+          n=$(grep -c '^TERMUX_APP__PACKAGE_NAME="com.termux"$' scripts/properties.sh || true)
+          if [ "$n" != "1" ]; then
+            echo "GAGAL: diharapkan tepat 1 baris TERMUX_APP__PACKAGE_NAME=\"com.termux\", ditemukan $n"
+            exit 1
+          fi
+          sed -i "s|^TERMUX_APP__PACKAGE_NAME=\"com.termux\"\$|TERMUX_APP__PACKAGE_NAME=\"$NEW_PKG\"|" scripts/properties.sh
+          grep -n '^TERMUX_APP__PACKAGE_NAME=' scripts/properties.sh
+
+      - name: Preflight (bukti untuk ditinjau)
+        run: |
+          cd tp
+          echo "=== properties.sh 395-410 ==="
+          sed -n 395,410p scripts/properties.sh
+          echo "=== properties.sh 467-520 ==="
+          sed -n 467,520p scripts/properties.sh
+          echo "=== Nilai turunan setelah patch ==="
+          bash -c 'source scripts/properties.sh >/dev/null 2>&1; for v in TERMUX_APP__PACKAGE_NAME TERMUX_APP__DATA_DIR TERMUX__PREFIX TERMUX__HOME; do echo "$v=${!v}"; done' || echo "source properties.sh gagal"
+          echo "=== com.termux hardcode di luar packages/ ==="
+          grep -rIn "com\.termux" Dockerfile scripts build-package.sh clean.sh 2>/dev/null | head -80 || true
+          echo "=== isi scripts/bootstrap ==="
+          ls -R scripts/bootstrap | head -40
+          echo "=== second-stage di sumber ==="
+          grep -rIl "second-stage" scripts | head || true
+
+      - name: Build bootstrap aarch64
+        if: ${{ inputs.build }}
+        run: |
+          cd tp
+          (while sleep 600; do echo "== heartbeat $(date -u +%T) =="; tail -n 3 ../build.log; done) &
+          HB=$!
+          set +e
+          ./scripts/run-docker.sh ./scripts/build-bootstraps.sh --architectures aarch64 --no-build-unneeded-subpackages &> ../build.log
+          rc=$?
+          kill $HB 2>/dev/null
+          if [ $rc -ne 0 ]; then
+            echo "GAGAL: build exit $rc; 80 baris terakhir:"
+            tail -n 80 ../build.log
+            exit $rc
+          fi
+
+      - name: Verifikasi hasil
+        if: ${{ inputs.build }}
+        run: |
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          [ -n "$ZIP" ] || { echo "GAGAL: bootstrap-aarch64.zip tidak ditemukan"; exit 1; }
+          cp "$ZIP" bootstrap-aarch64.zip
+          sha256sum bootstrap-aarch64.zip | tee bootstrap-aarch64.zip.sha256
+          ls -l bootstrap-aarch64.zip
+          SHEBANG=$(unzip -p bootstrap-aarch64.zip etc/termux/bootstrap/termux-bootstrap-second-stage.sh | head -1)
+          echo "Shebang second stage: $SHEBANG"
+          case "$SHEBANG" in
+            *"/data/data/$NEW_PKG/files/usr/bin/"*) echo "OK: shebang berprefix $NEW_PKG" ;;
+            *) echo "GAGAL: shebang tidak berprefix $NEW_PKG"; exit 1 ;;
+          esac
+          mkdir x && cd x && unzip -q ../bootstrap-aarch64.zip
+          echo "Berkas yang masih memuat com.termux (jumlah): $(grep -rlaF 'com.termux' . | wc -l)"
+          grep -rlaF 'com.termux' . | head -20 || true
+
+      - name: Unggah log build
+        if: ${{ always() && inputs.build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: ignore
+
+      - name: Publikasikan ke release repo
+        if: ${{ inputs.build }}
+        run: |
+          TAG="bootstrap-molina-$(date -u +%Y.%m.%d)-r${GITHUB_RUN_NUMBER}"
+          gh release create "$TAG" bootstrap-aarch64.zip bootstrap-aarch64.zip.sha256 \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Bootstrap $NEW_PKG ($TAG)" \
+            --notes "Bootstrap aarch64 untuk prefix $NEW_PKG. Sumber: $TP_REPO @ $TP_COMMIT"
+          echo "RELEASE_TAG=$TAG"
