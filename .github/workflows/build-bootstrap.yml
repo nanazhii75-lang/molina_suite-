@@ -403,50 +403,6 @@ jobs:
           echo "OK: command-not-found dikeluarkan, sintaks skrip valid"
           grep -n "command-not-found" "$f"
 
-      - name: Diagnosa dos2unix
-        if: always()
-        run: |
-          set -u
-          cd tp
-          echo "=== packages/dos2unix/build.sh ==="
-          cat packages/dos2unix/build.sh
-          echo "=== siapa yang butuh dos2unix ==="
-          grep -ln "dos2unix" packages/*/build.sh || true
-          echo "=== unduh 3x dari waterlan (stabil atau tidak) ==="
-          W=https://waterlan.home.xs4all.nl/dos2unix/dos2unix-7.5.2.tar.gz
-          for i in 1 2 3; do
-            if curl -fsSL --retry 3 -o /tmp/d2u-w$i.tgz "$W"; then
-              echo "waterlan $i: $(sha256sum /tmp/d2u-w$i.tgz | cut -d' ' -f1) $(stat -c %s /tmp/d2u-w$i.tgz) byte"
-            else
-              echo "waterlan $i: GAGAL unduh"
-            fi
-          done
-          echo "=== mirror SourceForge ==="
-          S=https://sourceforge.net/projects/dos2unix/files/dos2unix/7.5.2/dos2unix-7.5.2.tar.gz/download
-          if curl -fsSL --retry 3 -o /tmp/d2u-s.tgz "$S"; then
-            echo "sourceforge: $(sha256sum /tmp/d2u-s.tgz | cut -d' ' -f1) $(stat -c %s /tmp/d2u-s.tgz) byte"
-          else
-            echo "sourceforge: GAGAL unduh"
-          fi
-          echo "=== arsip sumber Debian ==="
-          D=https://deb.debian.org/debian/pool/main/d/dos2unix/dos2unix_7.5.2.orig.tar.gz
-          if curl -fsSL --retry 3 -o /tmp/d2u-d.tgz "$D"; then
-            echo "debian: $(sha256sum /tmp/d2u-d.tgz | cut -d' ' -f1) $(stat -c %s /tmp/d2u-d.tgz) byte"
-          else
-            echo "debian: GAGAL unduh"
-          fi
-          echo "=== bandingkan isi pohon berkas ==="
-          rm -rf /tmp/d2u && mkdir -p /tmp/d2u/w /tmp/d2u/s /tmp/d2u/d
-          [ -f /tmp/d2u-w1.tgz ] && tar -xzf /tmp/d2u-w1.tgz -C /tmp/d2u/w --strip-components=1
-          [ -f /tmp/d2u-s.tgz ] && tar -xzf /tmp/d2u-s.tgz -C /tmp/d2u/s --strip-components=1 || true
-          [ -f /tmp/d2u-d.tgz ] && tar -xzf /tmp/d2u-d.tgz -C /tmp/d2u/d --strip-components=1 || true
-          echo "--- waterlan vs sourceforge ---"
-          diff -rq /tmp/d2u/w /tmp/d2u/s && echo "ISI SAMA" || true
-          echo "--- waterlan vs debian ---"
-          diff -rq /tmp/d2u/w /tmp/d2u/d && echo "ISI SAMA" || true
-          echo "--- daftar berkas waterlan (20 pertama, dengan waktu) ---"
-          tar -tzvf /tmp/d2u-w1.tgz | head -20
-
       - name: Patch URL sumber dos2unix
         if: inputs.build
         run: |
