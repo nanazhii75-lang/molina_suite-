@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="code_title">Molina Code</string>
+    <string name="code_state_rootfs_missing">Debian belum terpasang. Pasang Debian lewat tab Terminal terlebih dahulu.</string>
+    <string name="code_state_not_installed">code-server belum terpasang. Unduhan sekitar %1$s dan membutuhkan koneksi internet.</string>
+    <string name="code_state_downloading">Mengunduh code-server: %1$s dari %2$s</string>
+    <string name="code_state_installed">code-server %1$s terpasang.</string>
+    <string name="code_state_failed">Pemasangan gagal:\n%1$s</string>
+    <string name="code_phase_prepare">Menyiapkan pemasangan…</string>
+    <string name="code_phase_verify">Memverifikasi berkas unduhan…</string>
+    <string name="code_phase_extract">Mengekstrak code-server…</string>
+    <string name="code_phase_finish">Menyelesaikan pemasangan…</string>
+    <string name="code_action_install">Unduh dan pasang</string>
+    <string name="code_action_retry">Coba lagi</string>
+</resources>
