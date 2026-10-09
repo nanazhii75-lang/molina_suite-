@@ -760,6 +760,32 @@ jobs:
           echo "=== isi packages/termux-tools"
           ls packages/termux-tools | head -30
 
+      - name: Diagnosa dependensi paket tambahan
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          S=scripts/build-bootstraps.sh
+          echo "=== penanganan dependensi (85-135)"
+          sed -n '85,135p' $S || true
+          echo "=== loop build paket (566-614)"
+          sed -n '566,614p' $S || true
+          echo "=== setelah daftar paket (658-770)"
+          sed -n '658,770p' $S || true
+          echo "=== kata kunci dpkg/status/depends"
+          grep -n -i -E 'dpkg|status|depends|Packages' $S | head -60 || true
+          echo "=== metadata paket kandidat"
+          for p in proot libtalloc proot-distro file; do
+            echo "--- $p"
+            grep -n -E '^TERMUX_PKG_(VERSION|REVISION|DEPENDS|BUILD_DEPENDS)=' packages/$p/build.sh || true
+          done
+          echo "=== ncurses-utils"
+          ls packages/ncurses 2>&1 | head -20 || true
+          grep -rn 'ncurses-utils' packages/ncurses 2>/dev/null | head -10 || true
+          echo "=== file dan libmagic"
+          ls packages/file 2>&1 | head -20 || true
+          echo "=== termux-tools build.sh"
+          grep -n -E 'SRCURL|VERSION|REVISION|mirror|pkg|change-repo' packages/termux-tools/build.sh | head -40 || true
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
