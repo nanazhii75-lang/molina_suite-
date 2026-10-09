@@ -786,6 +786,33 @@ jobs:
           echo "=== termux-tools build.sh"
           grep -n -E 'SRCURL|VERSION|REVISION|mirror|pkg|change-repo' packages/termux-tools/build.sh | head -40 || true
 
+      - name: Diagnosa sumber termux-tools (skrip pkg dan berkas mirror)
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          F=packages/termux-tools/build.sh
+          [ -f "$F" ] || { echo "GAGAL: $F tidak ada"; exit 1; }
+          echo "=== build.sh lengkap"
+          cat "$F"
+          echo "=== URL sumber"
+          url=$(bash -c 'set +u; source "$1" >/dev/null 2>&1; echo "$TERMUX_PKG_SRCURL"' _ "$F")
+          echo "SRCURL=$url"
+          if [ -n "$url" ]; then
+            mkdir -p /tmp/tt
+            if curl -fsSL --retry 3 "$url" -o /tmp/tt.src; then
+              tar -xf /tmp/tt.src -C /tmp/tt --strip-components=1 || echo "ekstrak gagal"
+              echo "=== struktur sumber"
+              find /tmp/tt -maxdepth 3 -not -path '*/.git*' | sort | head -80
+              echo "=== lokasi select_mirror dan chosen_mirrors"
+              grep -rIn -E 'select_mirror|chosen_mirrors|MIRROR_BASE_DIR' /tmp/tt | head -30 || true
+              echo "=== direktori mirrors"
+              find /tmp/tt -type d -name mirrors | head
+              echo "jumlah berkas di bawah mirrors: $(find /tmp/tt -path '*mirrors*' -type f | wc -l)"
+            else
+              echo "unduh sumber gagal"
+            fi
+          fi
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
