@@ -734,7 +734,7 @@ jobs:
           fi
           echo "OK: uji kering penjaga pkg lolos"
 
-      - name: Patch termux-tools (penjaga pkg: repo resmi Termux tidak dipakai)
+      - name: Patch termux-tools (penjaga pkg, repo resmi Termux tidak dipakai)
         if: inputs.build
         run: |
           F=tp/packages/termux-tools/build.sh
