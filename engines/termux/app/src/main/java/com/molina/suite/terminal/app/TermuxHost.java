@@ -63,6 +63,8 @@ public interface TermuxHost {
 
     boolean isOnResumeAfterOnCreate();
 
+    int getNavBarHeight();
+
     void toggleTerminalToolbar();
 
     void finishActivityIfNotFinishing();

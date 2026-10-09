@@ -10,7 +10,7 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.molina.suite.terminal.R;
-import com.molina.suite.terminal.app.TermuxActivity;
+import com.molina.suite.terminal.app.TermuxHost;
 import com.molina.suite.terminal.shared.terminal.io.extrakeys.ExtraKeysView;
 import com.molina.suite.terminal.terminal.TerminalSession;
 
@@ -18,11 +18,11 @@ public class TerminalToolbarViewPager {
 
     public static class PageAdapter extends PagerAdapter {
 
-        final TermuxActivity mActivity;
+        final TermuxHost mHost;
         String mSavedTextInput;
 
-        public PageAdapter(TermuxActivity activity, String savedTextInput) {
-            this.mActivity = activity;
+        public PageAdapter(TermuxHost host, String savedTextInput) {
+            this.mHost = host;
             this.mSavedTextInput = savedTextInput;
         }
 
@@ -39,20 +39,20 @@ public class TerminalToolbarViewPager {
         @NonNull
         @Override
         public Object instantiateItem(@NonNull ViewGroup collection, int position) {
-            LayoutInflater inflater = LayoutInflater.from(mActivity);
+            LayoutInflater inflater = LayoutInflater.from(mHost.getHostActivity());
             View layout;
             if (position == 0) {
                 layout = inflater.inflate(R.layout.view_terminal_toolbar_extra_keys, collection, false);
                 ExtraKeysView extraKeysView = (ExtraKeysView) layout;
-                extraKeysView.setExtraKeysViewClient(new TermuxTerminalExtraKeys(mActivity.getTerminalView(),
-                    mActivity.getTermuxTerminalViewClient(), mActivity.getTermuxTerminalSessionClient()));
-                extraKeysView.setButtonTextAllCaps(mActivity.getProperties().shouldExtraKeysTextBeAllCaps());
-                mActivity.setExtraKeysView(extraKeysView);
-                extraKeysView.reload(mActivity.getProperties().getExtraKeysInfo());
+                extraKeysView.setExtraKeysViewClient(new TermuxTerminalExtraKeys(mHost.getTerminalView(),
+                    mHost.getTermuxTerminalViewClient(), mHost.getTermuxTerminalSessionClient()));
+                extraKeysView.setButtonTextAllCaps(mHost.getProperties().shouldExtraKeysTextBeAllCaps());
+                mHost.setExtraKeysView(extraKeysView);
+                extraKeysView.reload(mHost.getProperties().getExtraKeysInfo());
 
                 // apply extra keys fix if enabled in prefs
-                if (mActivity.getProperties().isUsingFullScreen() && mActivity.getProperties().isUsingFullScreenWorkAround()) {
-                    FullScreenWorkAround.apply(mActivity);
+                if (mHost.getProperties().isUsingFullScreen() && mHost.getProperties().isUsingFullScreenWorkAround()) {
+                    FullScreenWorkAround.apply(mHost);
                 }
 
             } else {
@@ -65,14 +65,14 @@ public class TerminalToolbarViewPager {
                 }
 
                 editText.setOnEditorActionListener((v, actionId, event) -> {
-                    TerminalSession session = mActivity.getCurrentSession();
+                    TerminalSession session = mHost.getCurrentSession();
                     if (session != null) {
                         if (session.isRunning()) {
                             String textToSend = editText.getText().toString();
                             if (textToSend.length() == 0) textToSend = "\r";
                             session.write(textToSend);
                         } else {
-                            mActivity.getTermuxTerminalSessionClient().removeFinishedSession(session);
+                            mHost.getTermuxTerminalSessionClient().removeFinishedSession(session);
                         }
                         editText.setText("");
                     }
@@ -94,18 +94,18 @@ public class TerminalToolbarViewPager {
 
     public static class OnPageChangeListener extends ViewPager.SimpleOnPageChangeListener {
 
-        final TermuxActivity mActivity;
+        final TermuxHost mHost;
         final ViewPager mTerminalToolbarViewPager;
 
-        public OnPageChangeListener(TermuxActivity activity, ViewPager viewPager) {
-            this.mActivity = activity;
+        public OnPageChangeListener(TermuxHost host, ViewPager viewPager) {
+            this.mHost = host;
             this.mTerminalToolbarViewPager = viewPager;
         }
 
         @Override
         public void onPageSelected(int position) {
             if (position == 0) {
-                mActivity.getTerminalView().requestFocus();
+                mHost.getTerminalView().requestFocus();
             } else {
                 final EditText editText = mTerminalToolbarViewPager.findViewById(R.id.terminal_toolbar_text_input);
                 if (editText != null) editText.requestFocus();

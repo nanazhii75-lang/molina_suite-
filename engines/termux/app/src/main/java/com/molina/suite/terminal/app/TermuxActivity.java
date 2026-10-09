@@ -210,7 +210,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection,
         setMargins();
 
         mTermuxActivityRootView = findViewById(R.id.activity_termux_root_view);
-        mTermuxActivityRootView.setActivity(this);
+        mTermuxActivityRootView.setHost(this);
         mTermuxActivityBottomSpaceView = findViewById(R.id.activity_termux_bottom_space_view);
         mTermuxActivityRootView.setOnApplyWindowInsetsListener(new TermuxActivityRootView.WindowInsetsListener());
 

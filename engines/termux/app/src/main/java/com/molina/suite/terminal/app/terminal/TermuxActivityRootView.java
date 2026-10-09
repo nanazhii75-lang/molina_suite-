@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.molina.suite.terminal.app.TermuxActivity;
+import com.molina.suite.terminal.app.TermuxHost;
 import com.molina.suite.terminal.shared.logger.Logger;
 import com.molina.suite.terminal.shared.view.ViewUtils;
 
@@ -63,7 +64,7 @@ import com.molina.suite.terminal.shared.view.ViewUtils;
  */
 public class TermuxActivityRootView extends LinearLayout implements ViewTreeObserver.OnGlobalLayoutListener {
 
-    public TermuxActivity mActivity;
+    public TermuxHost mHost;
     public Integer marginBottom;
     public Integer lastMarginBottom;
     public long lastMarginBottomTime;
@@ -88,8 +89,8 @@ public class TermuxActivityRootView extends LinearLayout implements ViewTreeObse
         super(context, attrs, defStyleAttr);
     }
 
-    public void setActivity(TermuxActivity activity) {
-        mActivity = activity;
+    public void setHost(TermuxHost host) {
+        mHost = host;
     }
 
     /**
@@ -118,9 +119,9 @@ public class TermuxActivityRootView extends LinearLayout implements ViewTreeObse
 
     @Override
     public void onGlobalLayout() {
-        if (mActivity == null || !mActivity.isVisible()) return;
+        if (mHost == null || !mHost.isVisible()) return;
 
-        View bottomSpaceView = mActivity.getTermuxActivityBottomSpaceView();
+        View bottomSpaceView = mHost.getTermuxActivityBottomSpaceView();
         if (bottomSpaceView == null) return;
 
         boolean root_view_logging_enabled = ROOT_VIEW_LOGGING_ENABLED;

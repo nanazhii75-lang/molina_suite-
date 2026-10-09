@@ -4,7 +4,7 @@ import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.molina.suite.terminal.app.TermuxActivity;
+import com.molina.suite.terminal.app.TermuxHost;
 
 /**
  * Work around for fullscreen mode in Termux to fix ExtraKeysView not being visible.
@@ -22,15 +22,15 @@ public class FullScreenWorkAround {
     private final int mNavBarHeight;
 
 
-    public static void apply(TermuxActivity activity) {
-        new FullScreenWorkAround(activity);
+    public static void apply(TermuxHost host) {
+        new FullScreenWorkAround(host);
     }
 
-    private FullScreenWorkAround(TermuxActivity activity) {
-        ViewGroup content = activity.findViewById(android.R.id.content);
+    private FullScreenWorkAround(TermuxHost host) {
+        ViewGroup content = host.getHostActivity().findViewById(android.R.id.content);
         mChildOfContent = content.getChildAt(0);
         mViewGroupLayoutParams = mChildOfContent.getLayoutParams();
-        mNavBarHeight = activity.getNavBarHeight();
+        mNavBarHeight = host.getNavBarHeight();
         mChildOfContent.getViewTreeObserver().addOnGlobalLayoutListener(this::possiblyResizeChildOfContent);
     }
 

@@ -1,5 +1,6 @@
 package com.molina.suite.terminal.app.terminal;
 
+import android.app.Activity;
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -19,7 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.molina.suite.terminal.R;
-import com.molina.suite.terminal.app.TermuxActivity;
+import com.molina.suite.terminal.app.TermuxHost;
 import com.molina.suite.terminal.shared.shell.TermuxSession;
 import com.molina.suite.terminal.terminal.TerminalSession;
 
@@ -27,14 +28,16 @@ import java.util.List;
 
 public class TermuxSessionsListViewController extends ArrayAdapter<TermuxSession> implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
 
-    final TermuxActivity mActivity;
+    final TermuxHost mHost;
+    final Activity mActivity;
 
     final StyleSpan boldSpan = new StyleSpan(Typeface.BOLD);
     final StyleSpan italicSpan = new StyleSpan(Typeface.ITALIC);
 
-    public TermuxSessionsListViewController(TermuxActivity activity, List<TermuxSession> sessionList) {
-        super(activity.getApplicationContext(), R.layout.item_terminal_sessions_list, sessionList);
-        this.mActivity = activity;
+    public TermuxSessionsListViewController(TermuxHost host, List<TermuxSession> sessionList) {
+        super(host.getHostActivity().getApplicationContext(), R.layout.item_terminal_sessions_list, sessionList);
+        this.mHost = host;
+        this.mActivity = host.getHostActivity();
     }
 
     @SuppressLint("SetTextI18n")
@@ -55,7 +58,7 @@ public class TermuxSessionsListViewController extends ArrayAdapter<TermuxSession
             return sessionRowView;
         }
 
-        boolean isUsingBlackUI = mActivity.getProperties().isUsingBlackUI();
+        boolean isUsingBlackUI = mHost.getProperties().isUsingBlackUI();
 
         if (isUsingBlackUI) {
             sessionTitleView.setBackground(
@@ -93,14 +96,14 @@ public class TermuxSessionsListViewController extends ArrayAdapter<TermuxSession
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         TermuxSession clickedSession = getItem(position);
-        mActivity.getTermuxTerminalSessionClient().setCurrentSession(clickedSession.getTerminalSession());
-        mActivity.getDrawer().closeDrawers();
+        mHost.getTermuxTerminalSessionClient().setCurrentSession(clickedSession.getTerminalSession());
+        mHost.getDrawer().closeDrawers();
     }
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         final TermuxSession selectedSession = getItem(position);
-        mActivity.getTermuxTerminalSessionClient().renameSession(selectedSession.getTerminalSession());
+        mHost.getTermuxTerminalSessionClient().renameSession(selectedSession.getTerminalSession());
         return true;
     }
 

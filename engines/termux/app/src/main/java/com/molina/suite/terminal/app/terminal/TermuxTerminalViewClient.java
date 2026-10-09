@@ -1,5 +1,6 @@
 package com.molina.suite.terminal.app.terminal;
 
+import android.app.Activity;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
@@ -20,7 +21,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.molina.suite.terminal.R;
-import com.molina.suite.terminal.app.TermuxActivity;
+import com.molina.suite.terminal.app.TermuxHost;
 import com.molina.suite.terminal.shared.data.UrlUtils;
 import com.molina.suite.terminal.shared.file.FileUtils;
 import com.molina.suite.terminal.shared.interact.MessageDialogUtils;
@@ -55,7 +56,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
-    final TermuxActivity mActivity;
+    final TermuxHost mHost;
+    final Activity mActivity;
 
     final TermuxTerminalSessionClient mTermuxTerminalSessionClient;
 
@@ -71,21 +73,22 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
     private static final String LOG_TAG = "TermuxTerminalViewClient";
 
-    public TermuxTerminalViewClient(TermuxActivity activity, TermuxTerminalSessionClient termuxTerminalSessionClient) {
-        this.mActivity = activity;
+    public TermuxTerminalViewClient(TermuxHost host, TermuxTerminalSessionClient termuxTerminalSessionClient) {
+        this.mHost = host;
+        this.mActivity = host.getHostActivity();
         this.mTermuxTerminalSessionClient = termuxTerminalSessionClient;
     }
 
-    public TermuxActivity getActivity() {
-        return mActivity;
+    public TermuxHost getHost() {
+        return mHost;
     }
 
     /**
      * Should be called when mActivity.onCreate() is called
      */
     public void onCreate() {
-        mActivity.getTerminalView().setTextSize(mActivity.getPreferences().getFontSize());
-        mActivity.getTerminalView().setKeepScreenOn(mActivity.getPreferences().shouldKeepScreenOn());
+        mHost.getTerminalView().setTextSize(mHost.getPreferences().getFontSize());
+        mHost.getTerminalView().setKeepScreenOn(mHost.getPreferences().shouldKeepScreenOn());
     }
 
     /**
@@ -94,11 +97,11 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
     public void onStart() {
         // Set {@link TerminalView#TERMINAL_VIEW_KEY_LOGGING_ENABLED} value
         // Also required if user changed the preference from {@link TermuxSettings} activity and returns
-        boolean isTerminalViewKeyLoggingEnabled = mActivity.getPreferences().isTerminalViewKeyLoggingEnabled();
-        mActivity.getTerminalView().setIsTerminalViewKeyLoggingEnabled(isTerminalViewKeyLoggingEnabled);
+        boolean isTerminalViewKeyLoggingEnabled = mHost.getPreferences().isTerminalViewKeyLoggingEnabled();
+        mHost.getTerminalView().setIsTerminalViewKeyLoggingEnabled(isTerminalViewKeyLoggingEnabled);
 
         // Piggyback on the terminal view key logging toggle for now, should add a separate toggle in future
-        mActivity.getTermuxActivityRootView().setIsRootViewLoggingEnabled(isTerminalViewKeyLoggingEnabled);
+        mHost.getTermuxActivityRootView().setIsRootViewLoggingEnabled(isTerminalViewKeyLoggingEnabled);
         ViewUtils.setIsViewUtilsLoggingEnabled(isTerminalViewKeyLoggingEnabled);
     }
 
@@ -111,7 +114,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
         mTerminalCursorBlinkerStateAlreadySet = false;
 
-        if (mActivity.getTerminalView().mEmulator != null) {
+        if (mHost.getTerminalView().mEmulator != null) {
             // Start terminal cursor blinking if enabled
             // If emulator is already set, then start blinker now, otherwise wait for onEmulatorSet()
             // event to start it. This is needed since onEmulatorSet() may not be called after
@@ -173,10 +176,10 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
     @Override
     public void onSingleTapUp(MotionEvent e) {
-        TerminalEmulator term = mActivity.getCurrentSession().getEmulator();
+        TerminalEmulator term = mHost.getCurrentSession().getEmulator();
 
-        if (mActivity.getProperties().shouldOpenTerminalTranscriptURLOnClick()) {
-            int[] columnAndRow = mActivity.getTerminalView().getColumnAndRow(e, true);
+        if (mHost.getProperties().shouldOpenTerminalTranscriptURLOnClick()) {
+            int[] columnAndRow = mHost.getTerminalView().getColumnAndRow(e, true);
             String wordAtTap = term.getScreen().getWordAtLocation(columnAndRow[0], columnAndRow[1]);
             LinkedHashSet<CharSequence> urlSet = UrlUtils.extractUrls(wordAtTap);
 
@@ -189,7 +192,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
         if (!term.isMouseTrackingActive() && !e.isFromSource(InputDevice.SOURCE_MOUSE)) {
             if (!KeyboardUtils.areDisableSoftKeyboardFlagsSet(mActivity))
-                KeyboardUtils.showSoftKeyboard(mActivity, mActivity.getTerminalView());
+                KeyboardUtils.showSoftKeyboard(mActivity, mHost.getTerminalView());
             else
                 Logger.logVerbose(LOG_TAG, "Not showing soft keyboard onSingleTapUp since its disabled");
         }
@@ -197,22 +200,22 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
     @Override
     public boolean shouldBackButtonBeMappedToEscape() {
-        return mActivity.getProperties().isBackKeyTheEscapeKey();
+        return mHost.getProperties().isBackKeyTheEscapeKey();
     }
 
     @Override
     public boolean shouldEnforceCharBasedInput() {
-        return mActivity.getProperties().isEnforcingCharBasedInput();
+        return mHost.getProperties().isEnforcingCharBasedInput();
     }
 
     @Override
     public boolean shouldUseCtrlSpaceWorkaround() {
-        return mActivity.getProperties().isUsingCtrlSpaceWorkaround();
+        return mHost.getProperties().isUsingCtrlSpaceWorkaround();
     }
 
     @Override
     public boolean isTerminalViewSelected() {
-        return mActivity.getTerminalToolbarViewPager() == null || mActivity.isTerminalViewSelected() || mActivity.getTerminalView().hasFocus();
+        return mHost.getTerminalToolbarViewPager() == null || mHost.isTerminalViewSelected() || mHost.getTerminalView().hasFocus();
     }
 
 
@@ -220,7 +223,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
     @Override
     public void copyModeChanged(boolean copyMode) {
         // Disable drawer while copying.
-        mActivity.getDrawer().setDrawerLockMode(copyMode ? DrawerLayout.LOCK_MODE_LOCKED_CLOSED : DrawerLayout.LOCK_MODE_UNLOCKED);
+        mHost.getDrawer().setDrawerLockMode(copyMode ? DrawerLayout.LOCK_MODE_LOCKED_CLOSED : DrawerLayout.LOCK_MODE_UNLOCKED);
     }
 
 
@@ -233,7 +236,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
         if (keyCode == KeyEvent.KEYCODE_ENTER && !currentSession.isRunning()) {
             mTermuxTerminalSessionClient.removeFinishedSession(currentSession);
             return true;
-        } else if (!mActivity.getProperties().areHardwareKeyboardShortcutsDisabled() &&
+        } else if (!mHost.getProperties().areHardwareKeyboardShortcutsDisabled() &&
             e.isCtrlPressed() && e.isAltPressed()) {
             // Get the unmodified code point:
             int unicodeChar = e.getUnicodeChar(0);
@@ -243,13 +246,13 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
             } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP || unicodeChar == 'p' /* previous */) {
                 mTermuxTerminalSessionClient.switchToSession(false);
             } else if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                mActivity.getDrawer().openDrawer(Gravity.LEFT);
+                mHost.getDrawer().openDrawer(Gravity.LEFT);
             } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-                mActivity.getDrawer().closeDrawers();
+                mHost.getDrawer().closeDrawers();
             } else if (unicodeChar == 'k'/* keyboard */) {
                 onToggleSoftKeyboardRequest();
             } else if (unicodeChar == 'm'/* menu */) {
-                mActivity.getTerminalView().showContextMenu();
+                mHost.getTerminalView().showContextMenu();
             } else if (unicodeChar == 'r'/* rename */) {
                 mTermuxTerminalSessionClient.renameSession(currentSession);
             } else if (unicodeChar == 'c'/* create */) {
@@ -281,8 +284,8 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
     public boolean onKeyUp(int keyCode, KeyEvent e) {
         // If emulator is not set, like if bootstrap installation failed and user dismissed the error
         // dialog, then just exit the activity, otherwise they will be stuck in a broken state.
-        if (keyCode == KeyEvent.KEYCODE_BACK && mActivity.getTerminalView().mEmulator == null) {
-            mActivity.finishActivityIfNotFinishing();
+        if (keyCode == KeyEvent.KEYCODE_BACK && mHost.getTerminalView().mEmulator == null) {
+            mHost.finishActivityIfNotFinishing();
             return true;
         }
 
@@ -292,7 +295,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
     /** Handle dedicated volume buttons as virtual keys if applicable. */
     private boolean handleVirtualKeys(int keyCode, KeyEvent event, boolean down) {
         InputDevice inputDevice = event.getDevice();
-        if (mActivity.getProperties().areVirtualVolumeKeysDisabled()) {
+        if (mHost.getProperties().areVirtualVolumeKeysDisabled()) {
             return false;
         } else if (inputDevice != null && inputDevice.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
             // Do not steal dedicated buttons from a full external keyboard.
@@ -330,8 +333,8 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
     }
 
     public boolean readExtraKeysSpecialButton(SpecialButton specialButton) {
-        if (mActivity.getExtraKeysView() == null) return false;
-        Boolean state = mActivity.getExtraKeysView().readSpecialButton(specialButton, true);
+        if (mHost.getExtraKeysView() == null) return false;
+        Boolean state = mHost.getExtraKeysView().readSpecialButton(specialButton, true);
         if (state == null) {
             Logger.logError(LOG_TAG,"Failed to read an unregistered " + specialButton + " special button value from extra keys.");
             return false;
@@ -436,7 +439,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
                 // Writing mode:
                 case 'q':
                 case 'k':
-                    mActivity.toggleTerminalToolbar();
+                    mHost.toggleTerminalToolbar();
                     mVirtualFnKeyDown=false; // force disable fn key down to restore keyboard input into terminal view, fixes termux/termux-app#1420
                     break;
             }
@@ -454,7 +457,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
                 return true;
             }
 
-            List<KeyboardShortcut> shortcuts = mActivity.getProperties().getSessionShortcuts();
+            List<KeyboardShortcut> shortcuts = mHost.getProperties().getSessionShortcuts();
             if (shortcuts != null && !shortcuts.isEmpty()) {
                 int codePointLowerCase = Character.toLowerCase(codePoint);
                 for (int i = shortcuts.size() - 1; i >= 0; i--) {
@@ -471,7 +474,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
                                 mTermuxTerminalSessionClient.switchToSession(false);
                                 return true;
                             case TermuxPropertyConstants.ACTION_SHORTCUT_RENAME_SESSION:
-                                mTermuxTerminalSessionClient.renameSession(mActivity.getCurrentSession());
+                                mTermuxTerminalSessionClient.renameSession(mHost.getCurrentSession());
                                 return true;
                         }
                     }
@@ -485,8 +488,8 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
 
     public void changeFontSize(boolean increase) {
-        mActivity.getPreferences().changeFontSize(increase);
-        mActivity.getTerminalView().setTextSize(mActivity.getPreferences().getFontSize());
+        mHost.getPreferences().changeFontSize(increase);
+        mHost.getTerminalView().setTextSize(mHost.getPreferences().getFontSize());
     }
 
 
@@ -497,34 +500,34 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
      */
     public void onToggleSoftKeyboardRequest() {
         // If soft keyboard toggle behaviour is enable/disabled
-        if (mActivity.getProperties().shouldEnableDisableSoftKeyboardOnToggle()) {
+        if (mHost.getProperties().shouldEnableDisableSoftKeyboardOnToggle()) {
             // If soft keyboard is visible
             if (!KeyboardUtils.areDisableSoftKeyboardFlagsSet(mActivity)) {
                 Logger.logVerbose(LOG_TAG, "Disabling soft keyboard on toggle");
-                mActivity.getPreferences().setSoftKeyboardEnabled(false);
-                KeyboardUtils.disableSoftKeyboard(mActivity, mActivity.getTerminalView());
+                mHost.getPreferences().setSoftKeyboardEnabled(false);
+                KeyboardUtils.disableSoftKeyboard(mActivity, mHost.getTerminalView());
             } else {
                 // Show with a delay, otherwise pressing keyboard toggle won't show the keyboard after
                 // switching back from another app if keyboard was previously disabled by user.
                 // Also request focus, since it wouldn't have been requested at startup by
                 // setSoftKeyboardState if keyboard was disabled. #2112
                 Logger.logVerbose(LOG_TAG, "Enabling soft keyboard on toggle");
-                mActivity.getPreferences().setSoftKeyboardEnabled(true);
+                mHost.getPreferences().setSoftKeyboardEnabled(true);
                 KeyboardUtils.clearDisableSoftKeyboardFlags(mActivity);
                 if(mShowSoftKeyboardWithDelayOnce) {
                     mShowSoftKeyboardWithDelayOnce = false;
-                    mActivity.getTerminalView().postDelayed(getShowSoftKeyboardRunnable(), 500);
-                    mActivity.getTerminalView().requestFocus();
+                    mHost.getTerminalView().postDelayed(getShowSoftKeyboardRunnable(), 500);
+                    mHost.getTerminalView().requestFocus();
                 } else
-                    KeyboardUtils.showSoftKeyboard(mActivity, mActivity.getTerminalView());
+                    KeyboardUtils.showSoftKeyboard(mActivity, mHost.getTerminalView());
             }
         }
         // If soft keyboard toggle behaviour is show/hide
         else {
             // If soft keyboard is disabled by user for Termux
-            if (!mActivity.getPreferences().isSoftKeyboardEnabled()) {
+            if (!mHost.getPreferences().isSoftKeyboardEnabled()) {
                 Logger.logVerbose(LOG_TAG, "Maintaining disabled soft keyboard on toggle");
-                KeyboardUtils.disableSoftKeyboard(mActivity, mActivity.getTerminalView());
+                KeyboardUtils.disableSoftKeyboard(mActivity, mHost.getTerminalView());
             } else {
                 Logger.logVerbose(LOG_TAG, "Showing/Hiding soft keyboard on toggle");
                 KeyboardUtils.clearDisableSoftKeyboardFlags(mActivity);
@@ -545,16 +548,16 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
         // If soft keyboard is disabled by user for Termux (check function docs for Termux behaviour info)
         if (KeyboardUtils.shouldSoftKeyboardBeDisabled(mActivity,
-            mActivity.getPreferences().isSoftKeyboardEnabled(),
-            mActivity.getPreferences().isSoftKeyboardEnabledOnlyIfNoHardware())) {
+            mHost.getPreferences().isSoftKeyboardEnabled(),
+            mHost.getPreferences().isSoftKeyboardEnabledOnlyIfNoHardware())) {
             Logger.logVerbose(LOG_TAG, "Maintaining disabled soft keyboard");
-            KeyboardUtils.disableSoftKeyboard(mActivity, mActivity.getTerminalView());
-            mActivity.getTerminalView().requestFocus();
+            KeyboardUtils.disableSoftKeyboard(mActivity, mHost.getTerminalView());
+            mHost.getTerminalView().requestFocus();
             noShowKeyboard = true;
             // Delay is only required if onCreate() is called like when Termux app is exited with
             // double back press, not when Termux app is switched back from another app and keyboard
             // toggle is pressed to enable keyboard
-            if (isStartup && mActivity.isOnResumeAfterOnCreate())
+            if (isStartup && mHost.isOnResumeAfterOnCreate())
                 mShowSoftKeyboardWithDelayOnce = true;
         } else {
             // Set flag to automatically push up TerminalView when keyboard is opened instead of showing over it
@@ -564,20 +567,20 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
             KeyboardUtils.clearDisableSoftKeyboardFlags(mActivity);
 
             // If soft keyboard is to be hidden on startup
-            if (isStartup && mActivity.getProperties().shouldSoftKeyboardBeHiddenOnStartup()) {
+            if (isStartup && mHost.getProperties().shouldSoftKeyboardBeHiddenOnStartup()) {
                 Logger.logVerbose(LOG_TAG, "Hiding soft keyboard on startup");
                 // Required to keep keyboard hidden when Termux app is switched back from another app
                 KeyboardUtils.setSoftKeyboardAlwaysHiddenFlags(mActivity);
 
-                KeyboardUtils.hideSoftKeyboard(mActivity, mActivity.getTerminalView());
-                mActivity.getTerminalView().requestFocus();
+                KeyboardUtils.hideSoftKeyboard(mActivity, mHost.getTerminalView());
+                mHost.getTerminalView().requestFocus();
                 noShowKeyboard = true;
                 // Required to keep keyboard hidden on app startup
                 mShowSoftKeyboardIgnoreOnce = true;
             }
         }
 
-        mActivity.getTerminalView().setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        mHost.getTerminalView().setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
                 // Force show soft keyboard if TerminalView or toolbar text input view has
@@ -595,7 +598,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
                     Logger.logVerbose(LOG_TAG, "Hiding soft keyboard on focus change");
                 }
 
-                KeyboardUtils.setSoftKeyboardVisibility(getShowSoftKeyboardRunnable(), mActivity, mActivity.getTerminalView(), hasFocus || textInputViewHasFocus);
+                KeyboardUtils.setSoftKeyboardVisibility(getShowSoftKeyboardRunnable(), mActivity, mHost.getTerminalView(), hasFocus || textInputViewHasFocus);
             }
         });
 
@@ -608,15 +611,15 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
             // "Select URL" long press and returning to Termux app with back button. This
             // will also show keyboard even if it was closed before opening url. #2111
             Logger.logVerbose(LOG_TAG, "Requesting TerminalView focus and showing soft keyboard");
-            mActivity.getTerminalView().requestFocus();
-            mActivity.getTerminalView().postDelayed(getShowSoftKeyboardRunnable(), 300);
+            mHost.getTerminalView().requestFocus();
+            mHost.getTerminalView().postDelayed(getShowSoftKeyboardRunnable(), 300);
         }
     }
 
     private Runnable getShowSoftKeyboardRunnable() {
         if (mShowSoftKeyboardRunnable == null) {
             mShowSoftKeyboardRunnable = () -> {
-                KeyboardUtils.showSoftKeyboard(mActivity, mActivity.getTerminalView());
+                KeyboardUtils.showSoftKeyboard(mActivity, mHost.getTerminalView());
             };
         }
         return mShowSoftKeyboardRunnable;
@@ -627,20 +630,20 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
     public void setTerminalCursorBlinkerState(boolean start) {
         if (start) {
             // If set/update the cursor blinking rate is successful, then enable cursor blinker
-            if (mActivity.getTerminalView().setTerminalCursorBlinkerRate(mActivity.getProperties().getTerminalCursorBlinkRate()))
-                mActivity.getTerminalView().setTerminalCursorBlinkerState(true, true);
+            if (mHost.getTerminalView().setTerminalCursorBlinkerRate(mHost.getProperties().getTerminalCursorBlinkRate()))
+                mHost.getTerminalView().setTerminalCursorBlinkerState(true, true);
             else
                 Logger.logError(LOG_TAG,"Failed to start cursor blinker");
         } else {
             // Disable cursor blinker
-            mActivity.getTerminalView().setTerminalCursorBlinkerState(false, true);
+            mHost.getTerminalView().setTerminalCursorBlinkerState(false, true);
         }
     }
 
 
 
     public void shareSessionTranscript() {
-        TerminalSession session = mActivity.getCurrentSession();
+        TerminalSession session = mHost.getCurrentSession();
         if (session == null) return;
 
         String transcriptText = ShellUtils.getTerminalSessionTranscriptText(session, false, true);
@@ -653,14 +656,14 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
     }
 
     public void shareSelectedText() {
-        String selectedText = mActivity.getTerminalView().getStoredSelectedText();
+        String selectedText = mHost.getTerminalView().getStoredSelectedText();
         if (DataUtils.isNullOrEmpty(selectedText)) return;
         ShareUtils.shareText(mActivity, mActivity.getString(R.string.title_share_selected_text),
             selectedText, mActivity.getString(R.string.title_share_selected_text_with));
     }
 
     public void showUrlSelection() {
-        TerminalSession session = mActivity.getCurrentSession();
+        TerminalSession session = mHost.getCurrentSession();
         if (session == null) return;
 
         String text = ShellUtils.getTerminalSessionTranscriptText(session, true, true);
@@ -695,7 +698,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
     }
 
     public void reportIssueFromTranscript() {
-        TerminalSession session = mActivity.getCurrentSession();
+        TerminalSession session = mHost.getCurrentSession();
         if (session == null) return;
 
         final String transcriptText = ShellUtils.getTerminalSessionTranscriptText(session, false, true);
@@ -749,7 +752,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
     }
 
     public void doPaste() {
-        TerminalSession session = mActivity.getCurrentSession();
+        TerminalSession session = mHost.getCurrentSession();
         if (session == null) return;
         if (!session.isRunning()) return;
 

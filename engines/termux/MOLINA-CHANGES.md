@@ -32,3 +32,11 @@ tercatat sebagai commit terpisah.
 
 ## Kontrak host terminal (tahap 2a)
 - `app/.../TermuxHost.java` (baru): interface yang memuat metode TermuxActivity yang dipanggil klien terminal. `TermuxActivity` mengimplementasikannya dan menambah `getHostActivity()`. Perilaku tidak berubah; klien dipindahkan ke interface ini pada tahap 2b.
+
+## Tahap 2b: klien terminal memakai TermuxHost, bukan TermuxActivity
+- TermuxTerminalViewClient, TermuxTerminalSessionClient, TermuxSessionsListViewController: konstruktor menerima TermuxHost. Metode host lewat mHost, kebutuhan Context/Activity lewat mActivity (= host.getHostActivity()).
+- TermuxTerminalViewClient.getActivity() diganti getHost() (pemakai: TermuxTerminalExtraKeys).
+- TermuxActivityRootView.setActivity(TermuxActivity) diganti setHost(TermuxHost); TermuxActivity memanggil setHost(this).
+- FullScreenWorkAround.apply dan TerminalToolbarViewPager (PageAdapter, OnPageChangeListener) menerima TermuxHost.
+- TermuxHost: tambah getNavBarHeight() (metode ke-22).
+- Perilaku TermuxActivity tidak berubah; TermuxActivity tetap implementasi TermuxHost.
