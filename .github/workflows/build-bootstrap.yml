@@ -725,7 +725,8 @@ jobs:
             bash -n "$D/patched.sh" || { echo "GAGAL: pkg.in hasil patch tidak lolos bash -n"; exit 1; }
           fi
           { sed -n '/^select_mirror() {$/,/^    exit 1$/p' "$P"; echo '}'; echo 'select_mirror'; } > "$D/fn.sh"
-          out=$(bash "$D/fn.sh" 2>&1); rc=$?
+          rc=0
+          out=$(bash "$D/fn.sh" 2>&1) || rc=$?
           echo "keluaran penjaga (rc=$rc):"
           echo "$out"
           if [ "$rc" != 1 ] || ! echo "$out" | grep -qF 'molina: repo apt molina belum tersedia'; then
