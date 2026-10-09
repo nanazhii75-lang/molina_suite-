@@ -682,6 +682,93 @@ jobs:
           echo "OK: build.sh termux-tools ditambal"
           sed -n '/^termux_step_pre_configure() {$/,/^}/p' "$F"
 
+      - name: Tulis berkas penjaga pkg dan uji kering
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          F=tp/packages/termux-tools/build.sh
+          G=tp/packages/termux-tools/molina-pkg-guard.txt
+          [ -f "$F" ] || { echo "GAGAL: $F tidak ada"; exit 1; }
+          cat > "$G" << 'GEOF'
+              # molina: repo resmi Termux tidak kompatibel dengan prefix ini
+              echo "molina: repo apt molina belum tersedia." 1>&2
+              echo "Repo resmi Termux dibangun untuk prefix lain dan tidak dapat dipasang di sini." 1>&2
+              echo "Pasang paket lewat Debian PRoot." 1>&2
+              exit 1
+          GEOF
+          n_bd=$(grep -rl 'TERMUX_PKG_BUILDER_DIR' tp/scripts | wc -l)
+          if [ "$n_bd" -lt 1 ]; then echo "GAGAL: TERMUX_PKG_BUILDER_DIR tidak dikenal di tp/scripts"; exit 1; fi
+          url=$(bash -c 'set +u; source "$1" >/dev/null 2>&1; echo "$TERMUX_PKG_SRCURL"' _ "$F")
+          sha=$(bash -c 'set +u; source "$1" >/dev/null 2>&1; echo "$TERMUX_PKG_SHA256"' _ "$F")
+          if [ -z "$url" ] || [ -z "$sha" ]; then echo "GAGAL: SRCURL atau SHA256 kosong"; exit 1; fi
+          D=$(mktemp -d)
+          curl -fsSL --retry 3 "$url" -o "$D/src.tgz" || { echo "GAGAL: unduh sumber termux-tools"; exit 1; }
+          got=$(sha256sum "$D/src.tgz" | cut -d' ' -f1)
+          if [ "$got" != "$sha" ]; then echo "GAGAL: SHA256 beda ($got)"; exit 1; fi
+          mkdir "$D/s" && tar -xf "$D/src.tgz" -C "$D/s" --strip-components=1
+          P="$D/s/scripts/pkg.in"
+          [ -f "$P" ] || { echo "GAGAL: scripts/pkg.in tidak ada"; exit 1; }
+          if grep -q "$(printf '\r')" "$P"; then echo "GAGAL: pkg.in CRLF"; exit 1; fi
+          n_a=$(grep -c '^select_mirror() {$' "$P" || true)
+          if [ "$n_a" != 1 ]; then echo "GAGAL: anchor select_mirror=$n_a (harus 1)"; exit 1; fi
+          sed 's|@[A-Za-z_]*@|x|g' "$P" > "$D/base.sh"
+          if bash -n "$D/base.sh" 2>/dev/null; then
+            BASE_OK=1
+          else
+            BASE_OK=0
+            echo "PERINGATAN: pkg.in asli tidak lolos bash -n setelah placeholder diganti; cek sintaks dilewati"
+          fi
+          sed -i '/^select_mirror() {$/r '"$G" "$P"
+          n_g=$(grep -cF 'molina: repo resmi Termux' "$P" || true)
+          if [ "$n_g" != 1 ]; then echo "GAGAL: penjaga masuk $n_g kali (harus 1)"; exit 1; fi
+          if [ "$BASE_OK" = 1 ]; then
+            sed 's|@[A-Za-z_]*@|x|g' "$P" > "$D/patched.sh"
+            bash -n "$D/patched.sh" || { echo "GAGAL: pkg.in hasil patch tidak lolos bash -n"; exit 1; }
+          fi
+          { sed -n '/^select_mirror() {$/,/^    exit 1$/p' "$P"; echo '}'; echo 'select_mirror'; } > "$D/fn.sh"
+          out=$(bash "$D/fn.sh" 2>&1); rc=$?
+          echo "keluaran penjaga (rc=$rc):"
+          echo "$out"
+          if [ "$rc" != 1 ] || ! echo "$out" | grep -qF 'molina: repo apt molina belum tersedia'; then
+            echo "GAGAL: penjaga tidak berperilaku seperti yang diharapkan"
+            exit 1
+          fi
+          echo "OK: uji kering penjaga pkg lolos"
+
+      - name: Patch termux-tools (penjaga pkg: repo resmi Termux tidak dipakai)
+        if: inputs.build
+        run: |
+          F=tp/packages/termux-tools/build.sh
+          G=tp/packages/termux-tools/molina-pkg-guard.txt
+          SNIP=$(mktemp)
+          cat > "$SNIP" << 'SNIPEOF'
+            # molina: penjaga pkg (repo resmi Termux tidak kompatibel dengan prefix ini)
+            local _pf="$TERMUX_PKG_SRCDIR/scripts/pkg.in" _pg="$TERMUX_PKG_BUILDER_DIR/molina-pkg-guard.txt"
+            if [ "$(grep -c '^select_mirror() {$' "$_pf" || true)" != 1 ] || [ ! -f "$_pg" ] || grep -q "$(printf '\r')" "$_pf"; then
+              echo "GAGAL molina: anchor select_mirror tidak tepat 1, berkas penjaga hilang, atau pkg.in CRLF" 1>&2
+              exit 1
+            fi
+            sed -i '/^select_mirror() {$/r '"$_pg" "$_pf"
+            if [ "$(grep -cF 'molina: repo resmi Termux' "$_pf" || true)" != 1 ]; then
+              echo "GAGAL molina: penjaga pkg tidak masuk ke pkg.in" 1>&2
+              exit 1
+            fi
+          SNIPEOF
+          [ -f "$G" ] || { echo "GAGAL: $G tidak ada"; exit 1; }
+          if grep -q "$(printf '\r')" "$F"; then echo "GAGAL: build.sh CRLF"; exit 1; fi
+          n_fn=$(grep -c '^termux_step_pre_configure() {$' "$F" || true)
+          n_k=$(grep -c 'molina: komponen app' "$F" || true)
+          n_done=$(grep -c 'molina: penjaga pkg' "$F" || true)
+          if [ "$n_fn" != 1 ] || [ "$n_k" != 1 ] || [ "$n_done" != 0 ]; then
+            echo "GAGAL: fungsi=$n_fn (harus 1), patch komponen=$n_k (harus 1), penjaga=$n_done (harus 0)"
+            exit 1
+          fi
+          sed -i '/^termux_step_pre_configure() {$/r '"$SNIP" "$F"
+          n_done=$(grep -c 'molina: penjaga pkg' "$F" || true)
+          if [ "$n_done" != 1 ]; then echo "GAGAL: hasil patch tidak sesuai ($n_done)"; exit 1; fi
+          bash -n "$F"
+          echo "OK: build.sh termux-tools memuat penjaga pkg"
+          sed -n '/^termux_step_pre_configure() {$/,/^}/p' "$F"
+
       - name: Diagnosa rencana tambah paket dan sumber apt
         run: |
           [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
@@ -897,6 +984,21 @@ jobs:
           echo "=== paket bertanda selesai (seharusnya tanpa termux-tools) ==="
           docker exec termux-package-builder ls /data/data/.built-packages | head -60 || true
 
+      - name: Hapus penanda built apt dan ncurses (paksa bangun ulang)
+        if: ${{ inputs.build }}
+        run: |
+          for p in apt ncurses; do
+            docker exec termux-package-builder sudo rm -f /data/data/.built-packages/$p
+            docker exec termux-package-builder sudo rm -rf /home/builder/.termux-build/$p
+            if docker exec termux-package-builder test -e /data/data/.built-packages/$p; then
+              echo "GAGAL: penanda $p masih ada"
+              exit 1
+            fi
+            echo "OK: penanda dan direktori build $p dihapus"
+          done
+          echo "=== paket bertanda selesai (seharusnya tanpa termux-tools, apt, ncurses) ==="
+          docker exec termux-package-builder ls /data/data/.built-packages | head -60 || true
+
       - name: Build bootstrap aarch64
         if: ${{ inputs.build }}
         run: |
@@ -907,7 +1009,7 @@ jobs:
           if [ "${CACHE_RESTORED:-}" = "true" ]; then NOCLEAN="--no-clean"; fi
           echo "NOCLEAN='$NOCLEAN'"
           set +e
-          TERMUX_BUILDER_IMAGE_NAME=molina-package-builder:local ./scripts/run-docker.sh ./scripts/build-bootstraps.sh --architectures aarch64 --no-build-unneeded-subpackages $NOCLEAN &> ../build.log
+          TERMUX_BUILDER_IMAGE_NAME=molina-package-builder:local ./scripts/run-docker.sh ./scripts/build-bootstraps.sh --architectures aarch64 --no-build-unneeded-subpackages --packages-pre-additional ncurses-utils --packages-post-additional proot,libtalloc,proot-distro,file $NOCLEAN &> ../build.log
           rc=$?
           kill $HB 2>/dev/null
           if [ $rc -ne 0 ]; then
