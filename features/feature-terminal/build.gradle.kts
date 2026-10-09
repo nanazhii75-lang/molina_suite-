@@ -24,6 +24,7 @@ android {
 dependencies {
     implementation(project(":core:core-common"))
     implementation(project(":engines:termux:app"))
+    implementation(project(":engines:termux:termux-shared"))
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("com.google.android.material:material:1.12.0")
 }
