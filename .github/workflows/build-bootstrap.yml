@@ -707,6 +707,59 @@ jobs:
           echo "=== proot build.sh"
           grep -n -E 'DEPENDS|com\.termux|TERMUX_PREFIX|TERMUX_PKG_SRCURL|LOADER|configure' packages/proot/build.sh | head -30 || true
 
+      - name: Patch apt (nonaktifkan repo resmi Termux di sources.list)
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          F=packages/apt/build.sh
+          [ -f "$F" ] || { echo "GAGAL: $F tidak ada"; exit 1; }
+          python3 - <<'PYX'
+          import sys
+          from pathlib import Path
+          p = Path("packages/apt/build.sh")
+          t = p.read_text(encoding="utf-8")
+          rep = [
+              ('echo "deb https://packages-cf.termux.dev/apt/termux-main/ stable main"',
+               'echo "# [molina] Repo resmi Termux dinonaktifkan: paketnya dibangun untuk prefix bawaan Termux dan tidak dapat dipasang di prefix ini."'),
+              ('echo "# deb https://packages.termux.dev/apt/termux-main/ stable main"',
+               'echo "# [molina] Tambahkan repo apt molina di sini bila sudah tersedia."'),
+          ]
+          for old, new in rep:
+              n = t.count(old)
+              if n != 1:
+                  print("GAGAL: pola harus tepat 1 kali, ditemukan %d: %s" % (n, old))
+                  sys.exit(1)
+              t = t.replace(old, new)
+          p.write_text(t, encoding="utf-8")
+          print("OK: sources.list di apt build.sh dinetralkan")
+          PYX
+          bash -n "$F" && echo "OK: sintaks bash valid"
+          echo "=== hasil (baris 70-85)"
+          sed -n '70,85p' "$F"
+
+      - name: Diagnosa opsi tambah paket dan proot-distro
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          echo "=== usage build-bootstraps.sh (360-380)"
+          sed -n '360,380p' scripts/build-bootstraps.sh
+          echo "=== parsing opsi (486-520)"
+          sed -n '486,520p' scripts/build-bootstraps.sh
+          echo "=== kondisi paket inti (616-632)"
+          sed -n '616,632p' scripts/build-bootstraps.sh
+          echo "=== flag Android10"
+          grep -n 'BOOTSTRAP_ANDROID10_COMPATIBLE' scripts/build-bootstraps.sh || true
+          echo "=== proot-distro"
+          grep -n -E 'DEPENDS|SRCURL|com\.termux|TERMUX_PREFIX' packages/proot-distro/build.sh || true
+          echo "=== libtalloc"
+          grep -n -E 'DEPENDS|SRCURL' packages/libtalloc/build.sh || true
+          echo "=== berkas lain yang menyebut URL repo resmi"
+          grep -rIln -E 'packages-cf\.termux\.dev|packages\.termux\.dev' packages scripts | head -20 || true
+          echo "=== termux-tools dan termux-keyring"
+          grep -rIn -E 'termux-main|packages-cf|packages\.termux\.dev|chosen_mirrors' packages/termux-tools packages/termux-keyring | head -40 || true
+          echo "=== isi packages/termux-tools"
+          ls packages/termux-tools | head -30
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
