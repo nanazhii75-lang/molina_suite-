@@ -72,7 +72,7 @@ import androidx.viewpager.widget.ViewPager;
  * </ul>
  * about memory leaks.
  */
-public final class TermuxActivity extends Activity implements ServiceConnection {
+public final class TermuxActivity extends Activity implements ServiceConnection, TermuxHost {
 
     /**
      * The connection to the {@link TermuxService}. Requested in {@link #onCreate(Bundle)} with a call to
@@ -784,6 +784,11 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
     public boolean isVisible() {
         return mIsVisible;
+    }
+
+    @Override
+    public Activity getHostActivity() {
+        return this;
     }
 
     public boolean isOnResumeAfterOnCreate() {

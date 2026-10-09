@@ -29,3 +29,6 @@ tercatat sebagai commit terpisah.
 
 ## Notifikasi service
 - `app/.../TermuxService.java` dan `app/src/main/res/values/strings.xml`: judul notifikasi foreground service memakai string `notification_title` ("Molina Terminal"), bukan `TermuxConstants.TERMUX_APP_NAME`.
+
+## Kontrak host terminal (tahap 2a)
+- `app/.../TermuxHost.java` (baru): interface yang memuat metode TermuxActivity yang dipanggil klien terminal. `TermuxActivity` mengimplementasikannya dan menambah `getHostActivity()`. Perilaku tidak berubah; klien dipindahkan ke interface ini pada tahap 2b.
