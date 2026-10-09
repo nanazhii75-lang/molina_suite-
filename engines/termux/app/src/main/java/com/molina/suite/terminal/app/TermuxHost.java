@@ -65,6 +65,9 @@ public interface TermuxHost {
 
     int getNavBarHeight();
 
+    /** View milik tempat terminal ditampilkan (Activity atau fragment); null bila belum ada. */
+    <T extends View> T findViewById(int id);
+
     void toggleTerminalToolbar();
 
     void finishActivityIfNotFinishing();

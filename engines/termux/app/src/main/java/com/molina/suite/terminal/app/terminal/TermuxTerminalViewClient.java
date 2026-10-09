@@ -586,7 +586,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
                 // Force show soft keyboard if TerminalView or toolbar text input view has
                 // focus and close it if they don't
                 boolean textInputViewHasFocus = false;
-                final EditText textInputView =  mActivity.findViewById(R.id.terminal_toolbar_text_input);
+                final EditText textInputView =  mHost.findViewById(R.id.terminal_toolbar_text_input);
                 if (textInputView != null) textInputViewHasFocus = textInputView.hasFocus();
 
                 if (hasFocus || textInputViewHasFocus) {

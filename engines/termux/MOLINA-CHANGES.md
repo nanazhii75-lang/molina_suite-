@@ -40,3 +40,11 @@ tercatat sebagai commit terpisah.
 - FullScreenWorkAround.apply dan TerminalToolbarViewPager (PageAdapter, OnPageChangeListener) menerima TermuxHost.
 - TermuxHost: tambah getNavBarHeight() (metode ke-22).
 - Perilaku TermuxActivity tidak berubah; TermuxActivity tetap implementasi TermuxHost.
+
+## Tahap 3a: TermuxFragment (belum disambungkan ke shell)
+- Ditambahkan: TermuxFragment.java dan res/layout/fragment_termux.xml (salinan activity_termux.xml tanpa fitsSystemWindows). TermuxActivity tidak diubah dan tetap berfungsi.
+- Fragment tidak mengimplementasikan TermuxHost langsung (Fragment.isVisible() final); TermuxHost diberikan lewat kelas dalam FragmentHost.
+- TermuxHost: tambah findViewById(int) (metode ke-23). TermuxTerminalSessionClient dan TermuxTerminalViewClient memakai mHost.findViewById untuk view milik fragment.
+- Visibilitas dikendalikan lewat onResume, onStop, dan onHiddenChanged (shell memakai add/hide). Saat disembunyikan: flag disable-keyboard dihapus, softInputMode window dikembalikan, keyboard disembunyikan.
+- Sesi terakhir selesai: tidak menutup apa pun; sesi baru dibuat otomatis kecuali service sedang berhenti.
+- Belum dibawa: mode fullscreen, shortcut ACTION_RUN, tombol menu hardware, penerusan onContextMenuClosed (butuh kontrak di core-common).

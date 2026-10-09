@@ -432,7 +432,7 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
 
         final int indexOfSession = service.getIndexOfSession(session);
         if (indexOfSession < 0) return;
-        final ListView termuxSessionsListView = mActivity.findViewById(R.id.terminal_sessions_list);
+        final ListView termuxSessionsListView = mHost.findViewById(R.id.terminal_sessions_list);
         if (termuxSessionsListView == null) return;
 
         termuxSessionsListView.setItemChecked(indexOfSession, true);
