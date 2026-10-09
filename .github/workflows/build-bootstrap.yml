@@ -942,6 +942,9 @@ jobs:
           TAG="bootstrap-molina-$(date -u +%Y.%m.%d)-r${GITHUB_RUN_NUMBER}"
           gh release create "$TAG" bootstrap-aarch64.zip bootstrap-aarch64.zip.sha256 \
             --repo "$GITHUB_REPOSITORY" \
+            --prerelease \
             --title "Bootstrap $NEW_PKG ($TAG)" \
             --notes "Bootstrap aarch64 untuk prefix $NEW_PKG. Sumber: $TP_REPO @ $TP_COMMIT"
           echo "RELEASE_TAG=$TAG"
+          echo "URL=https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/bootstrap-aarch64.zip"
+          cat bootstrap-aarch64.zip.sha256
