@@ -2,7 +2,10 @@ package com.molina.suite
 
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.Menu
 import android.view.View
+import androidx.activity.OnBackPressedCallback
+import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -10,6 +13,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.molina.suite.core.common.DaemonId
 import com.molina.suite.core.common.EngineId
+import com.molina.suite.core.common.HostBackPressHandler
+import com.molina.suite.core.common.HostContextMenuListener
 import com.molina.suite.databinding.ActivityMainBinding
 import com.molina.suite.ui.EngineUnavailableFragment
 import com.molina.suite.ui.colorRes
@@ -32,6 +37,7 @@ class MainActivity : AppCompatActivity() {
             true
         }
         binding.bottomNav.setOnItemReselectedListener { }
+        installBackHandling()
 
         if (savedInstanceState == null) {
             binding.bottomNav.selectedItemId = R.id.nav_terminal
@@ -41,6 +47,27 @@ class MainActivity : AppCompatActivity() {
         bindDaemon(DaemonId.WEBDAV, binding.dotWebdav)
         bindDaemon(DaemonId.MPV, binding.dotMpv)
     }
+
+    /** Meneruskan tombol Back ke fragment tab yang sedang tampil sebelum perilaku default shell. */
+    private fun installBackHandling() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val handler = visibleFragment() as? HostBackPressHandler
+                if (handler?.onHostBackPressed() == true) return
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+                isEnabled = true
+            }
+        })
+    }
+
+    override fun onContextMenuClosed(menu: Menu) {
+        super.onContextMenuClosed(menu)
+        (visibleFragment() as? HostContextMenuListener)?.onHostContextMenuClosed(menu)
+    }
+
+    private fun visibleFragment(): Fragment? =
+        supportFragmentManager.fragments.firstOrNull { it.isAdded && !it.isHidden }
 
     private fun engineIdFor(menuId: Int): EngineId? = when (menuId) {
         R.id.nav_mpv -> EngineId.MPV

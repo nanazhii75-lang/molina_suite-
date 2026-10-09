@@ -17,5 +17,5 @@ class TerminalFeature : EngineFeature {
     private val mutableStatus = MutableStateFlow(EngineStatus.STOPPED)
     override val status: StateFlow<EngineStatus> = mutableStatus.asStateFlow()
 
-    override fun createFragment(): Fragment = TerminalLauncherFragment()
+    override fun createFragment(): Fragment = TerminalTabFragment()
 }
