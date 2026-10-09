@@ -121,8 +121,8 @@ clean {
 
 task downloadBootstraps() {
     doLast {
-        def version = "bootstrap-molina-2026.10.09-r40"
-        downloadBootstrap("aarch64", "887ced091751c8cc34425dfe4c4c9153bb0f4c359449bd39931e6e012ab96b7a", version)
+        def version = "bootstrap-molina-2026.10.09-r53"
+        downloadBootstrap("aarch64", "2d32914b3d330954a9aa40d84126f382c2a6084dfb0e738e688432003cdd5077", version)
         // Fase 1b: bootstrap molina baru tersedia untuk aarch64; arsitektur lain menyusul.
         // downloadBootstrap("arm",     "f3bb9d1b32552b34fff41861dbf193ec5ba2848d67d779ac1c7256da6640f85d", version)
         // downloadBootstrap("i686",    "36db3e1ac3547f9a174fd763bd9a484fa1a3449cdd81e1cf2408ff0454f839c6", version)
