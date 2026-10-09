@@ -127,14 +127,14 @@ EDITS = [
     # (path, jangkar, tambahan setelah jangkar, penanda sudah diterapkan)
     (
         "settings.gradle.kts",
-        'include(":core:core-common")\\n',
-        'include(":core:core-storage")\\n',
+        'include(":core:core-common")\n',
+        'include(":core:core-storage")\n',
         'include(":core:core-storage")',
     ),
     (
         "app/build.gradle.kts",
-        '    implementation(project(":core:core-common"))\\n',
-        '    implementation(project(":core:core-storage"))\\n',
+        '    implementation(project(":core:core-common"))\n',
+        '    implementation(project(":core:core-storage"))\n',
         'project(":core:core-storage")',
     ),
 ]
@@ -154,8 +154,8 @@ def main():
                 print("SUDAH: " + path)
                 continue
             die(path + " sudah ada dengan isi berbeda; periksa manual")
-        print("BARU: %s (%d baris)" % (path, content.count("\\n")))
-        pending.append((path, content, "\\n"))
+        print("BARU: %s (%d baris)" % (path, content.count("\n")))
+        pending.append((path, content, "\n"))
 
     for path, anchor, addition, marker in EDITS:
         if not os.path.exists(path):
@@ -172,7 +172,7 @@ def main():
             text.splitlines(), new.splitlines(),
             "sebelum/" + path, "sesudah/" + path, lineterm="", n=2,
         )
-        print("\\n".join(diff))
+        print("\n".join(diff))
         pending.append((path, new, eol))
 
     if not pending:

@@ -59,6 +59,7 @@ configurations.configureEach {
 
 dependencies {
     implementation(project(":core:core-common"))
+    implementation(project(":core:core-storage"))
     implementation(project(":features:feature-terminal"))
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
