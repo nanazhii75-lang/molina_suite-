@@ -682,6 +682,31 @@ jobs:
           echo "OK: build.sh termux-tools ditambal"
           sed -n '/^termux_step_pre_configure() {$/,/^}/p' "$F"
 
+      - name: Diagnosa rencana tambah paket dan sumber apt
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          echo "=== build-bootstraps.sh: opsi dan argumen"
+          grep -n -E '^[[:space:]]*(--[a-z-]+|-[a-z])[|)]|--add|getopt|PACKAGES|generate-bootstraps' scripts/build-bootstraps.sh | head -60 || true
+          echo "=== build-bootstraps.sh: 60 baris pertama"
+          sed -n '1,60p' scripts/build-bootstraps.sh
+          echo "=== generate-bootstraps.sh: daftar paket dan opsi"
+          grep -n -E 'PACKAGES|--add|--repository|--pm|REPO|sources\.list' scripts/generate-bootstraps.sh | head -80 || true
+          echo "=== sumber URL repo di skrip dan paket inti"
+          grep -rn -E 'packages-cf\.termux\.dev|packages\.termux\.dev|termux-main|TERMUX_REPO' scripts packages/apt packages/termux-tools packages/termux-keyring 2>/dev/null | grep -v '\.patch' | head -50 || true
+          echo "=== apt build.sh: penulisan sources.list"
+          grep -n -E 'sources\.list|termux-main|mirror' packages/apt/build.sh | head -30 || true
+          echo "=== ketersediaan paket kandidat"
+          for p in proot libtalloc proot-distro git openssh tmux; do
+            if [ -f "packages/$p/build.sh" ]; then
+              echo "ADA   $p: $(grep -m1 '^TERMUX_PKG_VERSION=' packages/$p/build.sh)"
+            else
+              echo "TIDAK $p"
+            fi
+          done
+          echo "=== proot build.sh"
+          grep -n -E 'DEPENDS|com\.termux|TERMUX_PREFIX|TERMUX_PKG_SRCURL|LOADER|configure' packages/proot/build.sh | head -30 || true
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
