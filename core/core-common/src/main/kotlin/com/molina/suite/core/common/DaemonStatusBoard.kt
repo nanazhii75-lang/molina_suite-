@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Papan status daemon. Layanan (terminal, WebDAV, Kodi) mempublikasikan status,
+ * Papan status daemon. Layanan (terminal, WebDAV, mpv) mempublikasikan status,
  * UI hanya mengamati. Tidak ada referensi langsung antar-modul.
  */
 class DaemonStatusBoard {

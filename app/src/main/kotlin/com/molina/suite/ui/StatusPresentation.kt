@@ -25,9 +25,9 @@ fun EngineStatus.labelRes(): Int = when (this) {
 
 @StringRes
 fun EngineId.labelRes(): Int = when (this) {
-    EngineId.KODI -> R.string.nav_kodi
+    EngineId.MPV -> R.string.nav_mpv
     EngineId.FILES -> R.string.nav_files
     EngineId.TERMINAL -> R.string.nav_terminal
-    EngineId.WEBDASH -> R.string.nav_webdash
+    EngineId.CODE -> R.string.nav_code
     EngineId.SETTINGS -> R.string.nav_settings
 }

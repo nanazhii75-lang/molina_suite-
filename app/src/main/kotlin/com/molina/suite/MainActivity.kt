@@ -39,14 +39,14 @@ class MainActivity : AppCompatActivity() {
 
         bindDaemon(DaemonId.TERMINAL, binding.dotTerminal)
         bindDaemon(DaemonId.WEBDAV, binding.dotWebdav)
-        bindDaemon(DaemonId.KODI, binding.dotKodi)
+        bindDaemon(DaemonId.MPV, binding.dotMpv)
     }
 
     private fun engineIdFor(menuId: Int): EngineId? = when (menuId) {
-        R.id.nav_kodi -> EngineId.KODI
+        R.id.nav_mpv -> EngineId.MPV
         R.id.nav_files -> EngineId.FILES
         R.id.nav_terminal -> EngineId.TERMINAL
-        R.id.nav_webdash -> EngineId.WEBDASH
+        R.id.nav_code -> EngineId.CODE
         R.id.nav_settings -> EngineId.SETTINGS
         else -> null
     }
