@@ -26,3 +26,6 @@ tercatat sebagai commit terpisah.
 
 ## Fase 1b: sumber bootstrap
 - `app/build.gradle`: bootstrap diunduh dari release repo molina_suite- (prefix com.molina.suite), bukan dari termux-packages. Baru aarch64; arsitektur lain di-comment dan `abiFilters` hanya `arm64-v8a` sampai bootstrap arm, i686, dan x86_64 tersedia.
+
+## Notifikasi service
+- `app/.../TermuxService.java` dan `app/src/main/res/values/strings.xml`: judul notifikasi foreground service memakai string `notification_title` ("Molina Terminal"), bukan `TermuxConstants.TERMUX_APP_NAME`.
