@@ -758,13 +758,13 @@ jobs:
           if grep -q "$(printf '\r')" "$F"; then echo "GAGAL: build.sh CRLF"; exit 1; fi
           n_fn=$(grep -c '^termux_step_pre_configure() {$' "$F" || true)
           n_k=$(grep -c 'molina: komponen app' "$F" || true)
-          n_done=$(grep -c 'molina: penjaga pkg' "$F" || true)
+          n_done=$(grep -c '# molina: penjaga pkg (' "$F" || true)
           if [ "$n_fn" != 1 ] || [ "$n_k" != 1 ] || [ "$n_done" != 0 ]; then
             echo "GAGAL: fungsi=$n_fn (harus 1), patch komponen=$n_k (harus 1), penjaga=$n_done (harus 0)"
             exit 1
           fi
           sed -i '/^termux_step_pre_configure() {$/r '"$SNIP" "$F"
-          n_done=$(grep -c 'molina: penjaga pkg' "$F" || true)
+          n_done=$(grep -c '# molina: penjaga pkg (' "$F" || true)
           if [ "$n_done" != 1 ]; then echo "GAGAL: hasil patch tidak sesuai ($n_done)"; exit 1; fi
           bash -n "$F"
           echo "OK: build.sh termux-tools memuat penjaga pkg"
