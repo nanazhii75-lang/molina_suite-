@@ -23,3 +23,6 @@ tercatat sebagai commit terpisah.
 ## Fase 1b: selaraskan engine dengan bootstrap berprefix com.molina.suite
 - `app/.../TermuxInstaller.java`: path second stage diganti ke `etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh` (chmod saat ekstraksi dan eksekusi), sesuai bootstrap hasil build termux-packages terbaru.
 - `termux-shared/.../shell/TermuxShellUtils.java`: environment shell mengekspor `TERMUX__USER_ID` (`Process.myUid() / 100000`), karena skrip termux-tools terbaru memakai `am --user "$TERMUX__USER_ID"`.
+
+## Fase 1b: sumber bootstrap
+- `app/build.gradle`: bootstrap diunduh dari release repo molina_suite- (prefix com.molina.suite), bukan dari termux-packages. Baru aarch64; arsitektur lain di-comment dan `abiFilters` hanya `arm64-v8a` sampai bootstrap arm, i686, dan x86_64 tersedia.
