@@ -1271,6 +1271,26 @@ jobs:
               sys.exit(1)
           print("OK penjaga paket tambahan")
           PYV
+          # [molina] penjaga pkg di bin/pkg
+          [ -f bin/pkg ] || { echo "GAGAL: bin/pkg tidak ada di zip"; exit 1; }
+          n_sm=$(grep -c '^select_mirror() {$' bin/pkg || true)
+          n_pg=$(grep -cF 'molina: repo resmi Termux tidak kompatibel' bin/pkg || true)
+          n_ph=$(grep -c '@TERMUX_[A-Z_]*@' bin/pkg || true)
+          echo "bin/pkg: select_mirror=$n_sm (harus 1), penjaga=$n_pg (harus 1), placeholder tersisa=$n_ph (info)"
+          if [ "$n_sm" != 1 ] || [ "$n_pg" != 1 ]; then
+            echo "GAGAL: bin/pkg tidak memuat penjaga molina tepat 1 kali"
+            grep -n 'select_mirror' bin/pkg | head -10 || true
+            exit 1
+          fi
+          nextline=$(sed -n '/^select_mirror() {$/{n;p;}' bin/pkg)
+          case "$nextline" in
+            *"molina: repo resmi Termux tidak kompatibel"*) ;;
+            *) echo "GAGAL: penjaga bukan baris pertama select_mirror: $nextline"; exit 1 ;;
+          esac
+          bash -n bin/pkg || { echo "GAGAL: bin/pkg tidak lolos bash -n"; exit 1; }
+          echo "OK: bin/pkg memuat penjaga molina"
+          sed -n '/^select_mirror() {$/,+6p' bin/pkg
+          grep -n 'com.molina.suite' bin/pkg | head -5 || true
 
       - name: Unggah log build
         if: ${{ always() && inputs.build }}
