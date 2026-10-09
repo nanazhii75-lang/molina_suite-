@@ -48,6 +48,8 @@ def code_lines(text):
     for i, line in enumerate(text.splitlines(), 1):
         if line.strip().startswith(('*', '/*', '//')):
             continue
+        line = re.sub(r'"(?:\\.|[^"\\])*"', '""', line)
+        line = re.sub(r'//.*$', '', line)
         yield i, line
 
 
