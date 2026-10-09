@@ -813,6 +813,28 @@ jobs:
             fi
           fi
 
+      - name: Probe URL sumber paket tambahan
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          for p in proot libtalloc proot-distro file; do
+            f="packages/$p/build.sh"
+            echo "=== $p"
+            [ -f "$f" ] || { echo "TIDAK ADA: $f"; continue; }
+            url=$(bash -c 'set +u; source "$1" >/dev/null 2>&1; echo "$TERMUX_PKG_SRCURL"' _ "$f")
+            sha=$(bash -c 'set +u; source "$1" >/dev/null 2>&1; echo "$TERMUX_PKG_SHA256"' _ "$f")
+            echo "SRCURL=$url"
+            echo "SHA256 di build.sh=$sha"
+            if [ -z "$url" ]; then echo "SRCURL kosong"; continue; fi
+            rm -f /tmp/probe.src
+            if curl -fsSL --retry 2 --max-time 180 "$url" -o /tmp/probe.src; then
+              got=$(sha256sum /tmp/probe.src | cut -d' ' -f1)
+              if [ "$got" = "$sha" ]; then echo "UNDUH OK, SHA256 COCOK"; else echo "UNDUH OK, SHA256 BEDA: unduhan=$got"; fi
+            else
+              echo "UNDUH GAGAL (kode curl $?)"
+            fi
+          done
+
       - name: Bangun image builder dari commit terpin
         if: ${{ inputs.build }}
         run: |
@@ -1047,6 +1069,105 @@ jobs:
           mkdir x && cd x && unzip -q ../bootstrap-aarch64.zip
           echo "Berkas yang masih memuat com.termux (jumlah): $(grep -rlaF 'com.termux' . | wc -l)"
           grep -rlaF 'com.termux' . | head -20 || true
+          # [molina] penjaga paket tambahan
+          python3 - <<'PYV'
+          import glob
+          import re
+          import sys
+          from pathlib import Path
+
+          REQUIRED = ["proot", "libtalloc", "proot-distro", "file", "ncurses-utils"]
+          problems = []
+
+
+          def paragraphs(text):
+              for block in re.split(r"\n\s*\n", text):
+                  fields = {}
+                  key = None
+                  for line in block.splitlines():
+                      if line[:1] in (" ", "\t") and key:
+                          fields[key] += "\n" + line.strip()
+                      elif ":" in line:
+                          key, _, val = line.partition(":")
+                          key = key.strip()
+                          fields[key] = val.strip()
+                  if fields.get("Package"):
+                      yield fields
+
+
+          def dep_groups(field):
+              for group in field.split(","):
+                  alts = []
+                  for alt in group.split("|"):
+                      name = re.sub(r"\(.*?\)", "", alt).strip()
+                      if name:
+                          alts.append(name.split()[0].split(":")[0])
+                  if alts:
+                      yield alts
+
+
+          status_path = Path("var/lib/dpkg/status")
+          if not status_path.is_file():
+              print("GAGAL: var/lib/dpkg/status tidak ada di zip")
+              sys.exit(1)
+
+          pkgs = {}
+          provides = set()
+          for f in paragraphs(status_path.read_text(encoding="utf-8", errors="replace")):
+              st = f.get("Status", "").split()
+              if st and st[-1] == "installed":
+                  pkgs[f["Package"]] = f
+                  for p in f.get("Provides", "").split(","):
+                      p = p.strip()
+                      if p:
+                          provides.add(p.split()[0])
+          print("Paket terpasang di status dpkg: %d" % len(pkgs))
+
+
+          def unmet(name):
+              out = []
+              for field in ("Pre-Depends", "Depends"):
+                  for alts in dep_groups(pkgs[name].get(field, "")):
+                      if not any(a in pkgs or a in provides for a in alts):
+                          out.append(" | ".join(alts))
+              return out
+
+
+          for r in REQUIRED:
+              if r not in pkgs:
+                  problems.append("paket %s tidak ada di status dpkg" % r)
+              else:
+                  for u in unmet(r):
+                      problems.append("dependensi %s dari %s tidak terpenuhi" % (u, r))
+
+          info = []
+          for name in sorted(pkgs):
+              if name in REQUIRED:
+                  continue
+              for u in unmet(name):
+                  info.append("%s membutuhkan %s" % (name, u))
+          print("Dependensi tidak terpenuhi pada paket lain (info saja): %d" % len(info))
+          for line in info[:40]:
+              print("  " + line)
+
+          sl = Path("etc/apt/sources.list")
+          if not sl.is_file():
+              problems.append("etc/apt/sources.list tidak ada")
+          else:
+              active = [l for l in sl.read_text(encoding="utf-8").splitlines() if re.match(r"\s*deb\s", l)]
+              if active:
+                  problems.append("sources.list masih punya baris deb aktif: %s" % active)
+
+          for pat in ("bin/proot", "bin/proot-distro", "bin/file", "lib/libtalloc.so*", "libexec/proot*"):
+              print(("ADA   " if glob.glob(pat) else "TIDAK ") + pat)
+
+          if problems:
+              print("GAGAL penjaga paket tambahan:")
+              for p in problems:
+                  print("  - " + p)
+              sys.exit(1)
+          print("OK penjaga paket tambahan")
+          PYV
 
       - name: Unggah log build
         if: ${{ always() && inputs.build }}
