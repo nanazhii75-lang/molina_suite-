@@ -9,8 +9,8 @@ import java.util.Locale
 import java.util.TimeZone
 
 /**
- * Mengubah keluaran `yt-dlp --dump-json` (satu objek JSON per baris) menjadi
- * [YoutubeResult]. Semua kolom opsional ditoleransi hilang atau null.
+ * Mengubah satu baris keluaran `yt-dlp --dump-json` (satu objek JSON per baris) menjadi
+ * [YoutubeResult]. Kolom opsional ditoleransi hilang atau null.
  */
 internal object YtdlpOutputParser {
 
@@ -19,35 +19,29 @@ internal object YtdlpOutputParser {
     private const val MAX_THUMB_WIDTH = 480
     private val VIDEO_ID = Regex("^[A-Za-z0-9_-]{11}$")
 
-    fun parse(output: String, limit: Int): List<YoutubeResult> {
-        val results = ArrayList<YoutubeResult>()
-        for (line in output.lineSequence()) {
-            val trimmed = line.trim()
-            if (!trimmed.startsWith("{")) continue
-            val item = try {
-                parseObject(JSONObject(trimmed))
-            } catch (e: JSONException) {
-                null
-            }
-            if (item != null) results.add(item)
+    /** Mengembalikan null untuk baris yang bukan JSON video yang valid. */
+    fun parseLine(line: String): YoutubeResult? {
+        val trimmed = line.trim()
+        if (!trimmed.startsWith("{")) return null
+        return try {
+            parseObject(JSONObject(trimmed))
+        } catch (e: JSONException) {
+            null
         }
-        val unique = results.distinctBy { it.id }
-        // Urut ulang hanya bila setiap hasil punya waktu unggah; selain itu pertahankan
-        // urutan dari yt-dlp (urutan relevansi).
-        val ordered = if (unique.all { it.publishedAtMillis != null }) {
-            unique.sortedByDescending { it.publishedAtMillis }
-        } else {
-            unique
-        }
-        return ordered.take(limit)
     }
+
+    /** Menghapus duplikat, mengurutkan terbaru ke terlama (tanpa waktu di bawah), lalu memotong. */
+    fun finish(results: List<YoutubeResult>, limit: Int): List<YoutubeResult> =
+        results.distinctBy { it.id }
+            .sortedByDescending { it.publishedAtMillis ?: Long.MIN_VALUE }
+            .take(limit)
 
     private fun parseObject(o: JSONObject): YoutubeResult? {
         val id = o.str("id") ?: return null
         if (!VIDEO_ID.matches(id)) return null // buang playlist/kanal
         val title = o.str("title") ?: return null
-        val url = o.str("url")
-        val published = o.long("timestamp")?.times(1000L) ?: uploadDateMillis(o.str("upload_date"))
+        val seconds = o.long("timestamp") ?: o.long("release_timestamp")
+        val published = seconds?.times(1000L) ?: uploadDateMillis(o.str("upload_date"))
         return YoutubeResult(
             id = id,
             title = title,
@@ -56,7 +50,8 @@ internal object YtdlpOutputParser {
             durationSeconds = o.long("duration"),
             publishedAtMillis = published,
             thumbnailUrl = pickThumbnail(o, id),
-            watchUrl = if (url != null && url.startsWith("https://")) url else WATCH_BASE + id
+            // Field "url" di mode penuh adalah tautan media yang kedaluwarsa: jangan dipakai.
+            watchUrl = WATCH_BASE + id
         )
     }
 
@@ -76,9 +71,7 @@ internal object YtdlpOutputParser {
                 }
             }
         }
-        return bestUrl
-            ?: o.str("thumbnail")?.takeIf { it.startsWith("https://") }
-            ?: (THUMB_BASE + id + "/mqdefault.jpg")
+        return bestUrl ?: (THUMB_BASE + id + "/mqdefault.jpg")
     }
 
     private fun uploadDateMillis(raw: String?): Long? {
