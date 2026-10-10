@@ -14,6 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.molina.suite.core.common.DaemonId
 import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.HostBackPressHandler
+import com.molina.suite.core.common.HostChromeController
 import com.molina.suite.core.common.HostContextMenuListener
 import com.molina.suite.databinding.ActivityMainBinding
 import com.molina.suite.ui.EngineUnavailableFragment
@@ -21,7 +22,7 @@ import com.molina.suite.ui.colorRes
 import com.molina.suite.ui.labelRes
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), HostChromeController {
 
     private lateinit var binding: ActivityMainBinding
     private val molina get() = application as MolinaApplication
@@ -64,6 +65,13 @@ class MainActivity : AppCompatActivity() {
     override fun onContextMenuClosed(menu: Menu) {
         super.onContextMenuClosed(menu)
         (visibleFragment() as? HostContextMenuListener)?.onHostContextMenuClosed(menu)
+    }
+
+    /** Mode ringkas: sembunyikan header dan navigasi bawah agar area kerja fragment lebih luas. */
+    override fun setChromeCompact(compact: Boolean) {
+        val visibility = if (compact) View.GONE else View.VISIBLE
+        binding.header.visibility = visibility
+        binding.bottomNav.visibility = visibility
     }
 
     private fun visibleFragment(): Fragment? =

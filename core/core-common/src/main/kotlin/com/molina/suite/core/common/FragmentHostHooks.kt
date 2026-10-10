@@ -14,3 +14,11 @@ interface HostBackPressHandler {
 interface HostContextMenuListener {
     fun onHostContextMenuClosed(menu: Menu)
 }
+
+/**
+ * Kontrak opsional untuk shell: fragment tab meminta mode ringkas (header dan
+ * navigasi bawah disembunyikan) agar area kerja lebih luas, misalnya saat keyboard tampil.
+ */
+interface HostChromeController {
+    fun setChromeCompact(compact: Boolean)
+}

@@ -19,4 +19,23 @@
     <string name="code_action_start">Jalankan code-server</string>
     <string name="code_action_start_again">Jalankan lagi</string>
     <string name="code_action_stop">Hentikan code-server</string>
+    <string name="code_action_open">Buka editor</string>
+    <string name="code_workspace_control">Kontrol</string>
+    <string name="code_workspace_reload">Muat ulang</string>
+    <string name="code_workspace_error">Gagal memuat editor:\n%1$s</string>
+    <string name="code_workspace_no_password">Kata sandi code-server tidak ditemukan. Hentikan lalu jalankan ulang code-server.</string>
+    <string name="code_key_keyboard" translatable="false">⌨</string>
+    <string name="code_key_esc" translatable="false">Esc</string>
+    <string name="code_key_tab" translatable="false">Tab</string>
+    <string name="code_key_left" translatable="false">←</string>
+    <string name="code_key_up" translatable="false">↑</string>
+    <string name="code_key_down" translatable="false">↓</string>
+    <string name="code_key_right" translatable="false">→</string>
+    <string name="code_key_undo" translatable="false">Undo</string>
+    <string name="code_key_redo" translatable="false">Redo</string>
+    <string name="code_key_find">Cari</string>
+    <string name="code_key_save">Simpan</string>
+    <string name="code_key_palette">Palet</string>
+    <string name="code_key_quick_open">Berkas</string>
+    <string name="code_key_terminal">Terminal</string>
 </resources>
