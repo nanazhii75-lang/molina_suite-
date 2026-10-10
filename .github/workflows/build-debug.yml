@@ -65,6 +65,13 @@ jobs:
           grep -q "Stored" /tmp/debian-entry.txt
           ls -l "$APK"
 
+      - name: Tanda tangan APK (sidik jari sertifikat)
+        run: |
+          set -euo pipefail
+          APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          APKSIGNER=$(ls "${ANDROID_HOME:-$ANDROID_SDK_ROOT}"/build-tools/*/apksigner | sort -V | tail -1)
+          "$APKSIGNER" verify --print-certs "$APK" | grep -E "certificate (DN|SHA-256)"
+
       - uses: actions/upload-artifact@v4
         with:
           name: molina-suite-debug

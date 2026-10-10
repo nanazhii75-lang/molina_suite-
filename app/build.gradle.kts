@@ -26,6 +26,16 @@ android {
         manifestPlaceholders["TERMUX_WIDGET_APP_NAME"] = "Termux:Widget"
     }
 
+    signingConfigs {
+        // Keystore debug tetap (bukan rahasia) agar APK tiap build bisa menimpa yang terpasang.
+        getByName("debug") {
+            storeFile = file("molina-debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
