@@ -59,13 +59,13 @@
 
                     <ImageButton
                         android:id="@+id/new_session_top_button"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
                         android:layout_marginStart="8dp"
                         android:layout_gravity="center_vertical"
                         android:background="@drawable/bg_sessions_drawer_button"
                         android:contentDescription="@string/action_new_session"
-                        android:padding="8dp"
+                        android:padding="6dp"
                         android:src="@drawable/ic_molina_add_session" />
                 </LinearLayout>
 
@@ -106,8 +106,8 @@
 
         <ImageButton
             android:id="@+id/sessions_drawer_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:layout_marginTop="8dp"
@@ -116,7 +116,7 @@
             android:background="@drawable/bg_sessions_drawer_button"
             android:contentDescription="@string/action_open_sessions"
             android:focusable="false"
-            android:padding="8dp"
+            android:padding="6dp"
             android:src="@drawable/ic_sessions_drawer" />
 
         <androidx.viewpager.widget.ViewPager
