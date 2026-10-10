@@ -17,19 +17,26 @@ import java.io.File
 import java.util.regex.PatternSyntaxException
 
 /**
- * Sesi penyuntingan seumur proses: memegang dokumen (selalu ada; awalnya
- * "Tidak berjudul") dan menghubungkannya ke [CodeEditor] yang sedang terpasang.
- * View boleh dibuat ulang (rotasi, pindah tab); teks dipulihkan dari snapshot.
+ * Sesi penyuntingan seumur proses: memegang daftar tab dokumen (selalu ada minimal
+ * satu; awalnya "Tidak berjudul") dan menghubungkan tab aktif ke [CodeEditor] yang
+ * sedang terpasang. View boleh dibuat ulang (rotasi, pindah tab aplikasi); teks dan
+ * kursor tiap tab dipulihkan dari salinan terakhirnya. Selama editor terpasang,
+ * editor adalah acuan untuk teks dan kursor tab aktif.
  * Semua metode dipanggil dari thread utama.
  */
 internal class CodeEditorSession(
     private val files: CodeFileRepository,
     private val textMate: CodeTextMate
 ) {
-    private class Snapshot(val text: String, val line: Int, val column: Int)
+    private val tabs = CodeTabs()
 
-    private val mutableDocument = MutableStateFlow(CodeDocument.untitled())
+    private val mutableDocument = MutableStateFlow(tabs.active.document)
+
+    /** Dokumen pada tab yang sedang aktif. */
     val document: StateFlow<CodeDocument> = mutableDocument.asStateFlow()
+
+    private val mutableTabBar = MutableStateFlow(tabs.barState())
+    val tabBar: StateFlow<CodeTabBarState> = mutableTabBar.asStateFlow()
 
     private val mutableOptions = MutableStateFlow(CodeViewOptions())
     val options: StateFlow<CodeViewOptions> = mutableOptions.asStateFlow()
@@ -38,11 +45,12 @@ internal class CodeEditorSession(
     val search: StateFlow<CodeSearchState> = mutableSearch.asStateFlow()
 
     private var editor: CodeEditor? = null
-    private var snapshot = Snapshot("", 0, 0)
     private var applyingText = false
-    private var revision = 0
 
-    /** Pasang editor baru dan pulihkan dokumen yang sedang terbuka. */
+    fun tabLimitMessage(): String =
+        "Terlalu banyak tab terbuka (maksimal ${tabs.limit}); tutup salah satu dulu"
+
+    /** Pasang editor baru dan pulihkan tab yang sedang aktif. */
     suspend fun attach(target: CodeEditor) {
         editor = target
         target.subscribeEvent(
@@ -65,65 +73,110 @@ internal class CodeEditorSession(
         target.setWordwrap(current.wordwrap)
         target.setEditable(!current.readOnly)
         target.searcher.setCyclicJumping(true)
-        val saved = snapshot
-        applyText(target, saved.text, saved.line, saved.column)
-        applyHighlighting(target, mutableDocument.value.file)
+        showActive(target)
     }
 
-    /** Lepas editor; teks disimpan sebagai snapshot untuk editor berikutnya. */
+    /** Lepas editor; teks dan kursor tab aktif disimpan untuk editor berikutnya. */
     fun detach(target: CodeEditor) {
         if (editor !== target) return
-        val cursor = target.cursor
-        snapshot = Snapshot(target.text.toString(), cursor.leftLine, cursor.leftColumn)
+        captureActive(target)
         mutableSearch.value = CodeSearchState.NONE
         editor = null
     }
 
-    /** Buka [file]; bila [keepCursor], posisi kursor dipertahankan (dipakai untuk muat ulang). */
-    suspend fun open(file: File, keepCursor: Boolean = false): CodeFileLoad {
+    /**
+     * Buka [file] di tab baru, atau pindah ke tabnya bila sudah terbuka. Null berarti berkas
+     * sudah terbuka dan tabnya diaktifkan tanpa membaca ulang dari penyimpanan.
+     */
+    suspend fun open(file: File): CodeFileLoad? {
+        tabs.findByFile(file)?.let {
+            activateTab(it.id)
+            return null
+        }
+        if (!tabs.canPlace()) return CodeFileLoad.Failed(tabLimitMessage())
+        val result = files.load(file)
+        if (result !is CodeFileLoad.Loaded) return result
+        tabs.findByFile(file)?.let {
+            activateTab(it.id)
+            return null
+        }
+        editor?.let { captureActive(it) }
+        val document = CodeDocument(file, result.charset, result.hasBom, dirty = false)
+        if (tabs.place(document, result.text) == null) return CodeFileLoad.Failed(tabLimitMessage())
+        stopSearch()
+        publish()
+        editor?.let { showActive(it) }
+        return result
+    }
+
+    /** Muat ulang isi berkas pada tab aktif dari penyimpanan dan buang perubahan di editor. */
+    suspend fun reload(): CodeFileLoad {
+        val tab = tabs.active
+        val file = tab.document.file
+            ?: return CodeFileLoad.Failed("Dokumen belum disimpan, jadi tidak ada berkas untuk dimuat ulang")
         val result = files.load(file)
         if (result !is CodeFileLoad.Loaded) return result
         val target = editor
-        val line = if (keepCursor && target != null) target.cursor.leftLine else 0
-        val column = if (keepCursor && target != null) target.cursor.leftColumn else 0
-        revision++
-        mutableDocument.value = CodeDocument(file, result.charset, result.hasBom, dirty = false)
-        snapshot = Snapshot(result.text, line, column)
-        stopSearch()
-        if (target != null) {
+        val stillActive = tabs.activeId == tab.id
+        val line = if (stillActive && target != null) target.cursor.leftLine else tab.line
+        val column = if (stillActive && target != null) target.cursor.leftColumn else tab.column
+        val document = CodeDocument(file, result.charset, result.hasBom, dirty = false)
+        if (!tabs.reload(tab.id, document, result.text, line, column)) return result
+        if (stillActive) stopSearch()
+        publish()
+        if (stillActive && target != null) {
             applyText(target, result.text, line, column)
-            applyHighlighting(target, file)
+            applyHighlighting(target)
         }
         return result
     }
 
-    /** Muat ulang isi berkas dari penyimpanan dan buang perubahan di editor. */
-    suspend fun reload(): CodeFileLoad {
-        val file = mutableDocument.value.file
-            ?: return CodeFileLoad.Failed("Dokumen belum disimpan, jadi tidak ada berkas untuk dimuat ulang")
-        return open(file, keepCursor = true)
+    /** Buat tab "Tidak berjudul" baru; false bila daftar tab penuh. */
+    suspend fun newDocument(): Boolean {
+        if (tabs.isPristine(tabs.active)) return true
+        editor?.let { captureActive(it) }
+        if (tabs.addUntitled() == null) return false
+        stopSearch()
+        publish()
+        editor?.let { showActive(it) }
+        return true
     }
 
-    /** Ganti dokumen dengan dokumen kosong "Tidak berjudul". */
-    suspend fun newDocument() {
-        revision++
-        mutableDocument.value = CodeDocument.untitled()
-        snapshot = Snapshot("", 0, 0)
+    /** Pindah ke tab [id]; teks dan kursor tab yang ditinggalkan disimpan dulu. */
+    suspend fun activateTab(id: Long) {
+        if (id == tabs.activeId || tabs.find(id) == null) return
+        editor?.let { captureActive(it) }
+        tabs.activate(id)
         stopSearch()
-        editor?.let {
-            applyText(it, "", 0, 0)
-            applyHighlighting(it, null)
-        }
+        publish()
+        editor?.let { showActive(it) }
+    }
+
+    /** Tutup tab [id]. Pemanggil bertanggung jawab menanyakan perubahan yang belum disimpan. */
+    suspend fun closeTab(id: Long) {
+        if (tabs.find(id) == null) return
+        val wasActive = id == tabs.activeId
+        tabs.close(id)
+        if (wasActive) stopSearch()
+        publish()
+        if (wasActive) editor?.let { showActive(it) }
     }
 
     suspend fun save(): CodeFileSave {
-        val current = mutableDocument.value
-        val file = current.file
+        val tab = tabs.active
+        val file = tab.document.file
             ?: return CodeFileSave.Failed("Dokumen belum punya nama berkas")
-        return write(current, file)
+        return write(tab, file)
     }
 
-    suspend fun saveAs(file: File): CodeFileSave = write(mutableDocument.value, file)
+    suspend fun saveAs(file: File): CodeFileSave {
+        val tab = tabs.active
+        val other = tabs.findByFile(file)
+        if (other != null && other.id != tab.id) {
+            return CodeFileSave.Failed("Berkas itu sedang terbuka di tab lain; tutup tab tersebut dulu")
+        }
+        return write(tab, file)
+    }
 
     fun undo() {
         editor?.let { if (it.canUndo()) it.undo() }
@@ -157,13 +210,13 @@ internal class CodeEditorSession(
 
     fun lineCount(): Int = editor?.text?.lineCount ?: 1
 
-    /** Teks editor saat ini; memakai salinan terakhir bila view belum terpasang. */
-    fun currentText(): String = editor?.text?.toString() ?: snapshot.text
+    /** Teks tab aktif saat ini; memakai salinan terakhir bila view belum terpasang. */
+    fun currentText(): String = editor?.text?.toString() ?: tabs.active.text
 
     /** Daftar nama bahasa TextMate yang tersedia untuk pilihan Syntax. */
     fun syntaxNames(): List<String> = textMate.languageNames()
 
-    /** Ganti bahasa penyorotan; null berarti teks polos. False bila bahasa gagal dimuat. */
+    /** Ganti bahasa penyorotan tab aktif; null berarti teks polos. False bila bahasa gagal dimuat. */
     fun setSyntax(name: String?): Boolean {
         val target = editor ?: return false
         val language: io.github.rosemoe.sora.lang.Language = if (name == null) {
@@ -172,6 +225,7 @@ internal class CodeEditorSession(
             textMate.prepareByName(name) ?: return false
         }
         target.setEditorLanguage(language)
+        tabs.setSyntax(tabs.activeId, name ?: CodeTabs.SYNTAX_PLAIN)
         return true
     }
 
@@ -183,7 +237,8 @@ internal class CodeEditorSession(
         val current = mutableDocument.value
         if (current.charset == charset && current.hasBom == bom) return true
         if (!charset.newEncoder().canEncode(currentText())) return false
-        mutableDocument.value = current.copy(charset = charset, hasBom = bom, dirty = true)
+        tabs.updateDocument(tabs.activeId) { it.copy(charset = charset, hasBom = bom, dirty = true) }
+        publish()
         return true
     }
 
@@ -207,7 +262,7 @@ internal class CodeEditorSession(
     suspend fun statistics(): CodeTextStats {
         val doc = mutableDocument.value
         val target = editor
-        val text = target?.text?.toString() ?: snapshot.text
+        val text = target?.text?.toString() ?: tabs.active.text
         val selected = target?.cursor?.let { if (it.isSelected) it.right - it.left else 0 } ?: 0
         return withContext(Dispatchers.Default) {
             CodeTextStatistics.compute(text, doc.charset, doc.hasBom, selected)
@@ -265,22 +320,27 @@ internal class CodeEditorSession(
         mutableSearch.value = CodeSearchState.NONE
     }
 
-    private suspend fun write(current: CodeDocument, target: File): CodeFileSave {
-        val text = editor?.text?.toString() ?: snapshot.text
-        val savedRevision = revision
-        val result = files.save(target, text, current.charset, current.hasBom)
+    private suspend fun write(tab: CodeTab, target: File): CodeFileSave {
+        val text = editor?.text?.toString() ?: tab.text
+        val savedRevision = tab.revision
+        val result = files.save(target, text, tab.document.charset, tab.document.hasBom)
         if (result is CodeFileSave.Saved) {
-            val renamed = current.file != target
-            mutableDocument.update { doc ->
-                if (doc.file != current.file) {
-                    doc
-                } else {
-                    doc.copy(file = target, dirty = doc.dirty && revision != savedRevision)
+            val latest = tabs.find(tab.id)
+            if (latest != null && latest.document.file == tab.document.file) {
+                val stillDirty = latest.document.dirty && latest.revision != savedRevision
+                tabs.updateDocument(tab.id) { it.copy(file = target, dirty = stillDirty) }
+                publish()
+                if (tab.document.file != target && tabs.activeId == tab.id) {
+                    editor?.let { applyHighlighting(it) }
                 }
             }
-            if (renamed) editor?.let { applyHighlighting(it, target) }
         }
         return result
+    }
+
+    private fun publish() {
+        mutableDocument.value = tabs.active.document
+        mutableTabBar.value = tabs.barState()
     }
 
     private fun publishSearch(target: CodeEditor) {
@@ -292,8 +352,21 @@ internal class CodeEditorSession(
     }
 
     private fun onContentEdited() {
-        revision++
-        mutableDocument.update { if (!it.dirty) it.copy(dirty = true) else it }
+        val tab = tabs.active
+        val wasDirty = tab.document.dirty
+        tabs.markEdited(tab.id)
+        if (!wasDirty) publish()
+    }
+
+    private fun captureActive(target: CodeEditor) {
+        val cursor = target.cursor
+        tabs.capture(target.text.toString(), cursor.leftLine, cursor.leftColumn)
+    }
+
+    private suspend fun showActive(target: CodeEditor) {
+        val tab = tabs.active
+        applyText(target, tab.text, tab.line, tab.column)
+        applyHighlighting(target)
     }
 
     private fun applyText(target: CodeEditor, text: String, line: Int, column: Int) {
@@ -313,12 +386,20 @@ internal class CodeEditorSession(
         }
     }
 
-    private suspend fun applyHighlighting(target: CodeEditor, file: File?) {
+    private suspend fun applyHighlighting(target: CodeEditor) {
+        val tabId = tabs.activeId
         withContext(Dispatchers.Default) { textMate.warmUp() }
-        if (target !== editor) return
-        val highlighting = textMate.prepare(file?.name)
+        if (target !== editor || tabs.activeId != tabId) return
+        val tab = tabs.find(tabId) ?: return
+        val choice = tab.syntax
+        val highlighting = textMate.prepare(if (choice == null) tab.document.file?.name else null)
         highlighting.scheme?.let { target.setColorScheme(it) }
-        target.setEditorLanguage(highlighting.language)
+        val language = if (choice == null || choice == CodeTabs.SYNTAX_PLAIN) {
+            highlighting.language
+        } else {
+            textMate.prepareByName(choice) ?: highlighting.language
+        }
+        target.setEditorLanguage(language)
     }
 
     private companion object {

@@ -46,6 +46,7 @@ class CodeTabFragment : Fragment() {
     private var titleView: TextView? = null
     private var pathView: TextView? = null
     private var searchBar: CodeSearchBar? = null
+    private var tabBar: CodeTabBar? = null
     private var keyboardWatcher: CodeKeyboardWatcher? = null
     private var afterPermission: (() -> Unit)? = null
 
@@ -115,6 +116,11 @@ class CodeTabFragment : Fragment() {
             override fun onClosed() = session.stopSearch()
         })
         val actions = buildActionBar(context)
+        val tabs = CodeTabBar(context, object : CodeTabBar.Callbacks {
+            override fun onSelect(id: Long) = selectTab(id)
+            override fun onClose(id: Long) = requestCloseTab(id)
+        })
+        tabBar = tabs
 
         titleView = title
         pathView = path
@@ -125,6 +131,7 @@ class CodeTabFragment : Fragment() {
             setBackgroundColor(CodePalette.BACKGROUND)
             layoutParams = ViewGroup.LayoutParams(MATCH, MATCH)
             addView(headerView, LinearLayout.LayoutParams(MATCH, WRAP))
+            addView(tabs.view, LinearLayout.LayoutParams(MATCH, WRAP))
             addView(editorView, LinearLayout.LayoutParams(MATCH, 0, 1f))
             addView(bar.view, LinearLayout.LayoutParams(MATCH, WRAP))
             addView(actions, LinearLayout.LayoutParams(MATCH, WRAP))
@@ -137,12 +144,14 @@ class CodeTabFragment : Fragment() {
             (activity as? HostChromeController)?.setChromeCompact(visible)
         }
         renderDocument(session.document.value)
+        tabBar?.render(session.tabBar.value)
         val target = requireNotNull(editor)
         viewLifecycleOwner.lifecycleScope.launch { session.attach(target) }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { session.document.collect { renderDocument(it) } }
                 launch { session.search.collect { searchBar?.render(it) } }
+                launch { session.tabBar.collect { tabBar?.render(it) } }
             }
         }
     }
@@ -175,6 +184,7 @@ class CodeTabFragment : Fragment() {
         titleView = null
         pathView = null
         searchBar = null
+        tabBar = null
         super.onDestroyView()
     }
 
@@ -262,16 +272,41 @@ class CodeTabFragment : Fragment() {
     }
 
     private fun requestNew() {
-        confirmDiscardIfDirty {
-            closeSearch()
-            viewLifecycleOwner.lifecycleScope.launch { session.newDocument() }
+        closeSearch()
+        viewLifecycleOwner.lifecycleScope.launch {
+            if (!session.newDocument()) toast(session.tabLimitMessage())
         }
     }
 
-    private fun requestClose() = requestNew()
+    private fun requestClose() = requestCloseTab(session.tabBar.value.activeId)
+
+    private fun selectTab(id: Long) {
+        closeSearch()
+        viewLifecycleOwner.lifecycleScope.launch { session.activateTab(id) }
+    }
+
+    private fun requestCloseTab(id: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val item = session.tabBar.value.items.firstOrNull { it.id == id } ?: return@launch
+            if (!item.dirty) {
+                closeTab(id)
+                return@launch
+            }
+            if (session.tabBar.value.activeId != id) {
+                closeSearch()
+                session.activateTab(id)
+            }
+            confirmDiscardIfDirty { closeTab(id) }
+        }
+    }
+
+    private fun closeTab(id: Long) {
+        if (session.tabBar.value.activeId == id) closeSearch()
+        viewLifecycleOwner.lifecycleScope.launch { session.closeTab(id) }
+    }
 
     private fun requestOpen() {
-        confirmDiscardIfDirty { ensureStorage { showPicker(CodePickerMode.OPEN) { openFile(it) } } }
+        ensureStorage { showPicker(CodePickerMode.OPEN) { openFile(it) } }
     }
 
     private fun requestSaveAs(afterSaved: (() -> Unit)? = null) {
@@ -323,8 +358,9 @@ class CodeTabFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch { reportLoad(session.open(file), file) }
     }
 
-    private fun reportLoad(result: CodeFileLoad, file: File) {
+    private fun reportLoad(result: CodeFileLoad?, file: File) {
         when (result) {
+            null -> Unit
             is CodeFileLoad.Loaded -> Unit
             is CodeFileLoad.TooLarge -> toast(
                 getString(R.string.code_file_too_large, formatSize(result.sizeBytes), formatSize(result.limitBytes))
