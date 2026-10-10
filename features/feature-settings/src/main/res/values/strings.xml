@@ -22,4 +22,22 @@
     <string name="library_error_no_switcher">Shell tidak mendukung pindah tab</string>
     <string name="library_load_failed">Gagal memuat Library: %1$s</string>
     <string name="library_run_failed">Gagal menjalankan: %1$s</string>
+
+    <string name="settings_debian_title">Debian</string>
+    <string name="settings_debian_subtitle">Install, update, dan panduan login/logout</string>
+    <string name="debian_status_checking">Memeriksa status…</string>
+    <string name="debian_status_installed">Terpasang</string>
+    <string name="debian_status_missing">Belum terpasang</string>
+    <string name="debian_refresh">Segarkan</string>
+    <string name="debian_copy">Salin</string>
+    <string name="debian_copied">Perintah disalin</string>
+    <string name="debian_copy_failed">Papan klip tidak tersedia</string>
+    <string name="debian_install_title">Install Debian</string>
+    <string name="debian_install_desc">Mengunduh dan memasang rootfs Debian. Butuh internet; ketuk Segarkan setelah selesai.</string>
+    <string name="debian_update_title">Update Debian</string>
+    <string name="debian_update_desc">Memperbarui daftar paket dan paket terpasang di dalam Debian.</string>
+    <string name="debian_login_title">Masuk ke Debian</string>
+    <string name="debian_login_desc">Membuka shell Debian di sesi Terminal aktif. Prompt berubah menjadi root@localhost.</string>
+    <string name="debian_logout_title">Keluar dari Debian</string>
+    <string name="debian_logout_desc">Saat berada di dalam Debian, ketik exit untuk kembali ke shell biasa. Jangan ketik exit di shell biasa karena sesi akan tertutup.</string>
 </resources>

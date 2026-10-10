@@ -5,6 +5,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.molina.suite.core.common.HostBackPressHandler
+import com.molina.suite.feature.settings.debian.DebianFragment
 import com.molina.suite.feature.settings.library.LibraryFragment
 
 /** Layar utama Settings: daftar submenu. Submenu dibuka sebagai child fragment. */
@@ -26,6 +27,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         backStackListener = listener
 
         view.findViewById<View>(R.id.settings_row_library).setOnClickListener { openLibrary() }
+        view.findViewById<View>(R.id.settings_row_debian).setOnClickListener { openDebian() }
         sync()
     }
 
@@ -35,6 +37,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
             .setReorderingAllowed(true)
             .replace(R.id.settings_child_container, LibraryFragment())
             .addToBackStack(BACKSTACK_LIBRARY)
+            .commit()
+    }
+
+    private fun openDebian() {
+        if (childFragmentManager.backStackEntryCount > 0) return
+        childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.settings_child_container, DebianFragment())
+            .addToBackStack(BACKSTACK_DEBIAN)
             .commit()
     }
 
