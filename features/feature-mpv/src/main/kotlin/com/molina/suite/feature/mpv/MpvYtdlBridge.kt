@@ -17,11 +17,15 @@ internal object MpvYtdlBridge {
     private const val WRAPPER = "molina-ytdlp"
 
     fun install(application: Application) {
-        val target = File(application.filesDir, "usr/bin/$WRAPPER")
+        val target = wrapperFile(application)
         MolinaMpvOptions.set("ytdl", "yes")
         MolinaMpvOptions.set("script-opts", "ytdl_hook-ytdl_path=" + target.absolutePath)
         Thread({ writeWrapper(application, target) }, "mpv-ytdl-bridge").start()
     }
+
+    /** Lokasi pembungkus molina-ytdlp di prefix aplikasi. */
+    fun wrapperFile(application: Application): File =
+        File(application.filesDir, "usr/bin/$WRAPPER")
 
     private fun writeWrapper(application: Application, target: File) {
         try {
