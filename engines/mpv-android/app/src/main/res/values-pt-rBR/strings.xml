@@ -71,7 +71,7 @@
     <string name="pref_save_position_summary">Lembrar a posição atual de reprodução ao sair. Quando o mesmo arquivo for reproduzido novamente, retome da posição anterior.</string>
 
     <string name="pref_auto_rotation_title">Orientação da tela</string>
-    <string name="pref_auto_rotation_summary">Decida em qual orientação o mpv irá reproduzir vídeos, paisagem ou retrato</string>
+    <string name="pref_auto_rotation_summary">Decida em qual orientação o Molina mpv irá reproduzir vídeos, paisagem ou retrato</string>
 
 
     <string name="pref_header_gestures">Gestos de toque</string>

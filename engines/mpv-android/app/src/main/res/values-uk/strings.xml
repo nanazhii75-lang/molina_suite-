@@ -4,7 +4,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- Simple strings. -->
     <string name="mpv_activity">Molina mpv</string>
-    <string name="label_share_intent">Відтворити з mpv</string>
+    <string name="label_share_intent">Відтворити з Molina mpv</string>
     <string name="title_activity_settings">Налаштування</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Скасувати</string>
@@ -93,10 +93,10 @@
     <string name="pref_background_play_summary">Визначає, чи потрібно продовжувати відтворення на фоні.</string>
 
     <string name="pref_save_position_title">Зберігати позицію при виході</string>
-    <string name="pref_save_position_summary">Запамʼятати поточну позицію відтворення при виході. Коли той самий файл буде відкрито повторно, mpv повернеться до попереднього часу відтворення.</string>
+    <string name="pref_save_position_summary">Запамʼятати поточну позицію відтворення при виході. Коли той самий файл буде відкрито повторно, Molina mpv повернеться до попереднього часу відтворення.</string>
 
     <string name="pref_auto_rotation_title">Орієнтація екрана</string>
-    <string name="pref_auto_rotation_summary">Визначає, в якій орієнтації mpv буде відтворювати ландшафтні чи портретні відео.</string>
+    <string name="pref_auto_rotation_summary">Визначає, в якій орієнтації Molina mpv буде відтворювати ландшафтні чи портретні відео.</string>
 
     <string name="pref_display_media_title_title">Показувати заголовки (для відео)</string>
     <string name="pref_display_media_title_summary">Показувати заголовок чи назву відеофайлу над елементами керування. Для аудіофайлів завжди будуть виводитись їхні метадані.</string>

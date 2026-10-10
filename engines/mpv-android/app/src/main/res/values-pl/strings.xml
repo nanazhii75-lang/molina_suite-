@@ -4,7 +4,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Simple strings. -->
     <string name="mpv_activity">Molina mpv</string>
-    <string name="label_share_intent">Odtwarzaj w mpv</string>
+    <string name="label_share_intent">Odtwarzaj w Molina mpv</string>
     <string name="title_activity_settings">Ustawienia</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Anuluj</string>
@@ -93,10 +93,10 @@
     <string name="pref_background_play_summary">Decyduj, kiedy odtwarzanie w tle ma zostać automatycznie wznowione</string>
 
     <string name="pref_save_position_title">Zapisz pozycję po wyjściu</string>
-    <string name="pref_save_position_summary">Zapamiętaj bieżącą pozycję odtwarzania przy wyjściu. Kiedy ten sam plik zostanie odtworzony ponownie, mpv przejdzie do poprzedniej pozycji.</string>
+    <string name="pref_save_position_summary">Zapamiętaj bieżącą pozycję odtwarzania przy wyjściu. Kiedy ten sam plik zostanie odtworzony ponownie, Molina mpv przejdzie do poprzedniej pozycji.</string>
 
     <string name="pref_auto_rotation_title">Orientacja ekranu</string>
-    <string name="pref_auto_rotation_summary">Zdecyduj, w jakiej orientacji mpv będą odtwarzane filmy w orientacji poziomej czy pionowej.</string>
+    <string name="pref_auto_rotation_summary">Zdecyduj, w jakiej orientacji Molina mpv będą odtwarzane filmy w orientacji poziomej czy pionowej.</string>
 
     <string name="pref_display_media_title_title">Wyświetl tytuł multimediów (wideo)</string>
     <string name="pref_display_media_title_summary">Wyświetlaj tytuł lub nazwę pliku wideo nad elementami sterującymi. Pliki dźwiękowe zawsze będą wyświetlać swoje metadane.</string>

@@ -4,7 +4,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- Simple strings. -->
     <string name="mpv_activity">Molina mpv</string>
-    <string name="label_share_intent">Guarda con mpv</string>
+    <string name="label_share_intent">Guarda con Molina mpv</string>
     <string name="title_activity_settings">Impostazioni</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Annulla</string>
@@ -92,10 +92,10 @@
     <string name="pref_background_play_summary">Seleziona quando la riproduzione deve essere ripresa automaticamente in sottofondo</string>
 
     <string name="pref_save_position_title">Salva posizione all\'uscita</string>
-    <string name="pref_save_position_summary">Ricorda la posizione di riproduzione all\'uscita. Quando verrà avviato lo stesso file, mpv passerà alla posizione precedente.</string>
+    <string name="pref_save_position_summary">Ricorda la posizione di riproduzione all\'uscita. Quando verrà avviato lo stesso file, Molina mpv passerà alla posizione precedente.</string>
 
     <string name="pref_auto_rotation_title">Orientamento schermo</string>
-    <string name="pref_auto_rotation_summary">Decidi quale orientamento mpv userà per riprodurre i video</string>
+    <string name="pref_auto_rotation_summary">Decidi quale orientamento Molina mpv userà per riprodurre i video</string>
 
     <string name="pref_display_media_title_title">Mostra titolo del file (video)</string>
     <string name="pref_display_media_title_summary">Mostra il titolo o il nome del file dei video sopra i controlli. I file audio mostreranno sempre i loro metadati.</string>

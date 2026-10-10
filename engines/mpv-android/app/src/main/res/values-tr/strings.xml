@@ -86,10 +86,10 @@
     <string name="pref_background_play_summary">Oynatmanın arka planda otomatik olarak ne zaman devam ettirileceğini seçin</string>
 
     <string name="pref_save_position_title">Çıkışta konumu kaydet</string>
-    <string name="pref_save_position_summary">Çıkışta geçerli oynatma konumunu hatırla. Aynı dosya tekrar oynatıldığında mpv önceki konumda başlayacaktır.</string>
+    <string name="pref_save_position_summary">Çıkışta geçerli oynatma konumunu hatırla. Aynı dosya tekrar oynatıldığında Molina mpv önceki konumda başlayacaktır.</string>
 
     <string name="pref_auto_rotation_title">Ekran yönü</string>
-    <string name="pref_auto_rotation_summary">Yatay veya dikey videoları mpv\'nin hangi yönde oynatacağına karar verin</string>
+    <string name="pref_auto_rotation_summary">Yatay veya dikey videoları Molina mpv\'nin hangi yönde oynatacağına karar verin</string>
 
     <string name="pref_display_media_title_title">Medya başlığını göster (videolar)</string>
     <string name="pref_display_media_title_summary">Videoların medya başlığı veya dosya adı denetimlerin üzerinde görüntülenir. Ses dosyalarının üst verileri her zaman gösterilir.</string>
