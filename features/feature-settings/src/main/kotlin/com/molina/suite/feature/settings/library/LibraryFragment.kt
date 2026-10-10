@@ -145,7 +145,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
             }
             layout.addView(
                 input,
-                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             )
             column.addView(
                 layout,
