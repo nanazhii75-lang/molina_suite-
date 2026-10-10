@@ -271,6 +271,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     private var playbackHasStarted = false
     private var onloadCommands = mutableListOf<Array<String>>()
 
+    // Perintah pelengkap playlist hasil pencarian; dijalankan sekali saat file mulai dimuat.
+    @Volatile
+    private var pendingPlaylist: List<Array<String>>? = null
+
     // Activity lifetime
 
     override fun onCreate(icicle: Bundle?) {
@@ -324,6 +328,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             return
         }
 
+        pendingPlaylist = com.molina.suite.mpv.search.MolinaPlaylist.read(intent, filepath)
         player.addObserver(this)
         player.initialize(filesDir.path, cacheDir.path)
         player.playFile(filepath)
@@ -414,6 +419,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             showToast(getString(R.string.notice_file_appended))
             moveTaskToBack(true)
         } else {
+            pendingPlaylist = com.molina.suite.mpv.search.MolinaPlaylist.read(intent, filepath)
             MPVLib.command(arrayOf("loadfile", filepath))
         }
     }
@@ -1831,6 +1837,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 MPVLib.command(arrayOf("script-binding", "stats/display-page-${this.statsLuaMode}-toggle"))
             }
 
+            pendingPlaylist?.let { commands ->
+                pendingPlaylist = null
+                for (c in commands) MPVLib.command(c)
+            }
             playbackHasStarted = true
         }
 

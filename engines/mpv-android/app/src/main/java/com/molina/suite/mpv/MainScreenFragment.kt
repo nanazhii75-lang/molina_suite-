@@ -23,6 +23,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.molina.suite.mpv.search.YoutubeResultsPanel
+import com.molina.suite.mpv.search.MolinaPlaylist
+import com.molina.suite.mpv.search.SearchState
+import com.molina.suite.mpv.search.YoutubeResult
 import com.molina.suite.mpv.search.YoutubeSearchController
 
 class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
@@ -99,7 +102,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         }
         binding.ytBtn.setOnClickListener { showYoutubeSearchDialog() }
         resultsPanel = YoutubeResultsPanel(binding.resultsPanel, binding.ytBtn) { result ->
-            playFile(result.watchUrl)
+            playResults(result)
         }.also { it.attach() }
         // Ikon tanpa teks: tekan lama menampilkan labelnya.
         listOf(binding.urlBtn, binding.ytBtn, binding.docBtn, binding.settingsBtn).forEach {
@@ -232,6 +235,24 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return
         YoutubeSearchController.search(trimmed)
+    }
+
+    /**
+     * Memutar [selected] dan menyerahkan seluruh daftar hasil ke pemutar sebagai playlist,
+     * sehingga Next/Previous mengikuti urutan hasil pencarian.
+     */
+    private fun playResults(selected: YoutubeResult) {
+        val items = (YoutubeSearchController.state as? SearchState.Results)?.items
+        val index = items?.indexOfFirst { it.id == selected.id } ?: -1
+        if (items == null || index < 0) {
+            playFile(selected.watchUrl)
+            return
+        }
+        val intent = Intent()
+        intent.putExtra("filepath", items[index].watchUrl)
+        MolinaPlaylist.put(intent, items.map { it.watchUrl }, index)
+        intent.setClass(requireContext(), MPVActivity::class.java)
+        playerLauncher.launch(intent)
     }
 
     private fun playFile(filepath: String) {
