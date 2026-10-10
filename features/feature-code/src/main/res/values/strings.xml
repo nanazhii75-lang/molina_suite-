@@ -12,4 +12,11 @@
     <string name="code_phase_finish">Menyelesaikan pemasangan…</string>
     <string name="code_action_install">Unduh dan pasang</string>
     <string name="code_action_retry">Coba lagi</string>
+    <string name="code_state_starting">Menjalankan code-server… Pertama kali bisa butuh beberapa detik.</string>
+    <string name="code_state_stopping">Menghentikan code-server…</string>
+    <string name="code_state_running">code-server berjalan di %1$s</string>
+    <string name="code_state_server_failed">code-server berhenti:\n%1$s</string>
+    <string name="code_action_start">Jalankan code-server</string>
+    <string name="code_action_start_again">Jalankan lagi</string>
+    <string name="code_action_stop">Hentikan code-server</string>
 </resources>

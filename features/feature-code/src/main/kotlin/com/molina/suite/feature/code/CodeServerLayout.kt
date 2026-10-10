@@ -21,6 +21,11 @@ internal class CodeServerLayout(application: Application) {
     val installLog = File(molinaDir, "install.log")
     val downloadFile = File(molinaDir, "download/code-server.tar.gz")
 
+    val runScript = File(molinaDir, "code-run.sh")
+    val pidFile = File(molinaDir, "server.pid")
+    val serverLog = File(molinaDir, "server.log")
+    val passwordFile = File(molinaDir, "server.password")
+
     private val codeServerDir = File(rootfsDir, "opt/code-server")
     private val codeServerBinary = File(codeServerDir, "bin/code-server")
     private val versionMarker = File(codeServerDir, ".molina-version")
@@ -46,6 +51,22 @@ internal class CodeServerLayout(application: Application) {
             ""
         }
 
+    /** Pid yang ditulis skrip start; null bila berkas belum ada atau tidak valid. */
+    fun readServerPid(): Int? =
+        try {
+            pidFile.readText().trim().toIntOrNull()?.takeIf { it > 1 }
+        } catch (e: IOException) {
+            null
+        }
+
+    /** Beberapa baris terakhir log server, tanpa baris kosong. */
+    fun readServerLogTail(maxLines: Int): String =
+        try {
+            serverLog.readLines().filter { it.isNotBlank() }.takeLast(maxLines).joinToString("\n")
+        } catch (e: IOException) {
+            ""
+        }
+
     private fun readVersionMarker(): String? =
         try {
             versionMarker.readText().trim()
@@ -55,6 +76,7 @@ internal class CodeServerLayout(application: Application) {
 
     companion object {
         const val GUEST_INSTALL_SCRIPT = "/opt/molina/code-install.sh"
+        const val GUEST_RUN_SCRIPT = "/opt/molina/code-run.sh"
 
         const val PHASE_PREPARE = "prepare"
         const val PHASE_DOWNLOAD = "download"
