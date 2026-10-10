@@ -185,6 +185,7 @@ public class TermuxFragment extends Fragment {
         setTerminalToolbarView(savedInstanceState);
         setSettingsButtonView();
         setNewSessionButtonView();
+        setSessionsDrawerButtonView();
         setToggleKeyboardView();
 
         registerForContextMenu(mTerminalView);
@@ -529,6 +530,18 @@ public class TermuxFragment extends Fragment {
     private void setSettingsButtonView() {
         ImageButton settingsButton = mFragmentView.findViewById(R.id.settings_button);
         settingsButton.setOnClickListener(v -> startActivity(new Intent(requireContext(), SettingsActivity.class)));
+    }
+
+    /** Tombol eksplisit pembuka drawer sesi, agar tidak bergantung pada swipe tepi layar. */
+    private void setSessionsDrawerButtonView() {
+        View button = mFragmentView.findViewById(R.id.sessions_drawer_button);
+        if (button == null) return;
+        button.setOnClickListener(v -> {
+            DrawerLayout drawer = findDrawer();
+            if (drawer == null) return;
+            if (drawer.isDrawerOpen(Gravity.LEFT)) drawer.closeDrawers();
+            else drawer.openDrawer(Gravity.LEFT);
+        });
     }
 
     private void setNewSessionButtonView() {
