@@ -67,7 +67,7 @@
     <string name="action_playlist">Playlist</string>
     <string name="action_open_url">Open URL</string>
     <string name="action_open_doc">Open Document</string>
-    <string name="action_open_doc_tree">Open Document Tree</string>
+    <string name="action_open_doc_tree">Open Local</string>
     <string name="action_pick_file">Pick File</string>
     <string name="action_pick_file_old">Pick File (legacy)</string>
     <string name="action_external_storage">External storage</string>

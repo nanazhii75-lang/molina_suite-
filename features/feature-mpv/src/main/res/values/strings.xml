@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_native_unavailable">mpv player is unavailable: the native libraries are not bundled in this build.</string>
+</resources>

@@ -58,7 +58,7 @@
     <string name="action_settings">Ayarlar</string>
     <string name="action_playlist">Oynatma Listesi</string>
     <string name="action_open_url">URL Aç</string>
-    <string name="action_open_doc_tree">Belge Ağacı Aç</string>
+    <string name="action_open_doc_tree">Open Local</string>
     <string name="action_pick_file">Dosya Seç</string>
     <string name="action_external_storage">Harici Depolama</string>
     <string name="action_toggle_filter">Filtreyi Aç/Kapat</string>

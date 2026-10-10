@@ -8,6 +8,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
@@ -71,7 +72,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
 
         binding.docBtn.setOnClickListener {
             try {
-                documentTreeOpener.launch(null)
+                documentTreeOpener.launch(LOCAL_ROOT_URI)
             } catch (e: ActivityNotFoundException) {
                 // Android TV doesn't come with a document picker and certain versions just throw
                 // instead of handling this gracefully
@@ -204,6 +205,11 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
 
     companion object {
         private const val TAG = "mpv"
+
+        // Folder awal picker "Open Local": akar penyimpanan internal (/sdcard).
+        private val LOCAL_ROOT_URI: Uri = DocumentsContract.buildDocumentUri(
+            "com.android.externalstorage.documents", "primary:"
+        )
 
         // list of debug or testing activities that can be launched
         private val DEBUG_ACTIVITIES = arrayOf(

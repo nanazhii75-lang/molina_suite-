@@ -6,6 +6,7 @@ import com.molina.suite.core.common.DaemonStatusBoard
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.ShellCommandRunner
 import com.molina.suite.feature.code.CodeEngineModule
+import com.molina.suite.feature.mpv.MpvEngineModule
 import com.molina.suite.feature.terminal.TerminalEngineModule
 import com.molina.suite.feature.terminal.TermuxBackgroundKeepAlive
 
@@ -23,5 +24,6 @@ class MolinaApplication : Application() {
         super.onCreate()
         TerminalEngineModule.install(this, engines)
         CodeEngineModule.install(this, engines)
+        MpvEngineModule.install(engines)
     }
 }

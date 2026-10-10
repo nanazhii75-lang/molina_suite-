@@ -63,7 +63,7 @@
     <string name="action_playlist">Scaletta</string>
     <string name="action_open_url">Apri URL</string>
     <string name="action_open_doc">Apri documento</string>
-    <string name="action_open_doc_tree">Apri albero documenti</string>
+    <string name="action_open_doc_tree">Open Local</string>
     <string name="action_pick_file">Scegli file</string>
     <string name="action_pick_file_old">Scegli file (obsoleto)</string>
     <string name="action_external_storage">Archiviazione esterna</string>

@@ -64,7 +64,7 @@
     <string name="action_playlist">Список відтворення</string>
     <string name="action_open_url">Відкрити адресу</string>
     <string name="action_open_doc">Відкрити документ</string>
-    <string name="action_open_doc_tree">Відкрити дерево документів</string>
+    <string name="action_open_doc_tree">Open Local</string>
     <string name="action_pick_file">Вибір файлів</string>
     <string name="action_pick_file_old">Вибір файлів (застарілий)</string>
     <string name="action_external_storage">Зовнішнє сховище</string>
