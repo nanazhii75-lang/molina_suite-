@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="molina_results_title_idle">Pencarian YouTube</string>
+    <string name="molina_results_header">Hasil: %1$s</string>
+    <string name="molina_results_order">Terbaru → Terlama</string>
+    <string name="molina_results_empty_hint">Ketuk ikon pencarian di bawah untuk mencari video di YouTube.</string>
+    <string name="molina_results_loading_start">Mencari di YouTube…</string>
+    <string name="molina_results_loading">Mengambil %1$d dari %2$d…</string>
+    <string name="molina_results_loading_note">Ini bisa memakan waktu hingga satu menit.</string>
+    <string name="molina_results_none">Tidak ada hasil untuk %1$s.</string>
+    <string name="molina_results_retry">Coba lagi</string>
+    <string name="molina_results_error_unavailable">yt-dlp belum siap. Pastikan Debian di tab Terminal sudah terpasang.</string>
+    <string name="molina_results_error_timeout">Pencarian terlalu lama. Periksa koneksi lalu coba lagi.</string>
+    <string name="molina_results_error_failed">Pencarian gagal: %1$s</string>
+    <string name="molina_views">%1$s x ditonton</string>
+    <string name="molina_live">LIVE</string>
+    <string name="molina_time_now">Baru saja</string>
+    <string name="molina_time_minutes">%1$d menit yang lalu</string>
+    <string name="molina_time_hours">%1$d jam yang lalu</string>
+    <string name="molina_time_days">%1$d hari yang lalu</string>
+    <string name="molina_time_weeks">%1$d minggu yang lalu</string>
+    <string name="molina_time_months">%1$d bulan yang lalu</string>
+    <string name="molina_time_years">%1$d tahun yang lalu</string>
+</resources>

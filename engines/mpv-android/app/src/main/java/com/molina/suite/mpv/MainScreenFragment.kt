@@ -22,6 +22,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.molina.suite.mpv.search.YoutubeResultsPanel
+import com.molina.suite.mpv.search.YoutubeSearchController
 
 class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
     private lateinit var binding: FragmentMainScreenBinding
@@ -36,6 +38,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
     private var prev = ""
     private var prevData: String? = null
     private var lastPath = ""
+    private var resultsPanel: YoutubeResultsPanel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,6 +98,9 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             }
         }
         binding.ytBtn.setOnClickListener { showYoutubeSearchDialog() }
+        resultsPanel = YoutubeResultsPanel(binding.resultsPanel, binding.ytBtn) { result ->
+            playFile(result.watchUrl)
+        }.also { it.attach() }
         // Ikon tanpa teks: tekan lama menampilkan labelnya.
         listOf(binding.urlBtn, binding.ytBtn, binding.docBtn, binding.settingsBtn).forEach {
             TooltipCompat.setTooltipText(it, it.contentDescription)
@@ -109,6 +115,12 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         }
 
         onConfigurationChanged(view.resources.configuration)
+    }
+
+    override fun onDestroyView() {
+        resultsPanel?.detach()
+        resultsPanel = null
+        super.onDestroyView()
     }
 
     private fun showDebugMenu() {
@@ -215,11 +227,11 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         dialog.show()
     }
 
-    /** Memutar hasil pencarian pertama lewat ytdl_hook (yt-dlp di Debian). */
+    /** Memulai pencarian YouTube; hasilnya tampil di panel hasil. */
     private fun searchYoutube(query: String) {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return
-        playFile("ytdl://ytsearch:" + trimmed)
+        YoutubeSearchController.search(trimmed)
     }
 
     private fun playFile(filepath: String) {

@@ -3,22 +3,165 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
+    android:background="@color/molina_bg"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="12dp">
 
-    <ImageView
-        android:id="@+id/logo"
+    <LinearLayout
+        android:id="@+id/resultsPanel"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:contentDescription="@string/mpv_activity"
-        app:srcCompat="@drawable/mpv_logo" />
+        android:background="@drawable/molina_frame"
+        android:clipToOutline="true"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:id="@+id/resultsHeader"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="@color/molina_text_muted"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/resultsOrder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/molina_cap_active"
+                android:paddingStart="9dp"
+                android:paddingTop="3dp"
+                android:paddingEnd="9dp"
+                android:paddingBottom="3dp"
+                android:text="@string/molina_results_order"
+                android:textColor="@color/molina_youtube"
+                android:textSize="11sp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/molina_frame_border" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/resultsList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:overScrollMode="ifContentScrolls"
+                android:paddingBottom="8dp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/resultsEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <ImageView
+                    android:id="@+id/logo"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:alpha="0.7"
+                    android:contentDescription="@string/mpv_activity"
+                    app:srcCompat="@drawable/mpv_logo" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:text="@string/molina_results_empty_hint"
+                    android:textColor="@color/molina_text_muted"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/resultsLoading"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:indeterminateTint="@color/molina_youtube" />
+
+                <TextView
+                    android:id="@+id/resultsLoadingText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/molina_text"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center"
+                    android:text="@string/molina_results_loading_note"
+                    android:textColor="@color/molina_text_muted"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/resultsError"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/resultsErrorText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/molina_text"
+                    android:textSize="13sp" />
+
+                <Button
+                    android:id="@+id/resultsRetry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/molina_results_retry" />
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
         android:gravity="center"
         android:orientation="horizontal">
 
@@ -33,7 +176,7 @@
             android:padding="12dp"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/ic_link_48dp"
-            app:tint="@android:color/primary_text_dark" />
+            app:tint="@color/molina_link" />
 
         <ImageButton
             android:id="@+id/ytBtn"
@@ -46,7 +189,7 @@
             android:padding="12dp"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/ic_search_24dp"
-            app:tint="@android:color/primary_text_dark" />
+            app:tint="@color/molina_youtube" />
 
         <ImageButton
             android:id="@+id/docBtn"
@@ -59,7 +202,7 @@
             android:padding="12dp"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/ic_file_open_48dp"
-            app:tint="@android:color/primary_text_dark" />
+            app:tint="@color/molina_folder" />
 
         <ImageButton
             android:id="@+id/settingsBtn"
@@ -72,16 +215,18 @@
             android:padding="12dp"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/ic_settings_black_48dp"
-            app:tint="@android:color/primary_text_dark" />
+            app:tint="@color/molina_settings" />
     </LinearLayout>
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switch1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="8dp"
         android:padding="8dp"
         android:text="@string/option_remember_choice"
+        android:textColor="@color/molina_text_muted"
         android:textSize="12sp"
         app:showText="false" />
 
