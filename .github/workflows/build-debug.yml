@@ -28,8 +28,42 @@ jobs:
         with:
           gradle-version: "8.9"
 
+      - name: Cache rootfs Debian
+        id: debian-cache
+        uses: actions/cache@v4
+        with:
+          path: app/src/main/assets/molina-debian
+          key: molina-debian-rootfs-v4.17.3-bookworm-aarch64
+
+      - name: Unduh rootfs Debian (proot-distro v4.17.3)
+        if: steps.debian-cache.outputs.cache-hit != 'true'
+        env:
+          DEBIAN_ROOTFS_NAME: debian-bookworm-aarch64-pd-v4.17.3.tar.xz
+          DEBIAN_ROOTFS_URL: https://github.com/termux/proot-distro/releases/download/v4.17.3/debian-bookworm-aarch64-pd-v4.17.3.tar.xz
+        run: |
+          set -euo pipefail
+          mkdir -p app/src/main/assets/molina-debian
+          curl -fsSL --retry 3 -o "app/src/main/assets/molina-debian/$DEBIAN_ROOTFS_NAME" "$DEBIAN_ROOTFS_URL"
+
+      - name: Verifikasi SHA-256 rootfs Debian
+        env:
+          DEBIAN_ROOTFS_NAME: debian-bookworm-aarch64-pd-v4.17.3.tar.xz
+          DEBIAN_ROOTFS_SHA256: 3a841a794ae5999b33e33b329582ed0379d4f54ca62c6ce5a8eb9cff5ef8900b
+        run: |
+          set -euo pipefail
+          echo "$DEBIAN_ROOTFS_SHA256  app/src/main/assets/molina-debian/$DEBIAN_ROOTFS_NAME" | sha256sum -c -
+          ls -l app/src/main/assets/molina-debian/
+
       - name: Build APK debug
         run: gradle :app:assembleDebug --stacktrace
+
+      - name: Verifikasi rootfs Debian ada di APK tanpa kompresi
+        run: |
+          set -euo pipefail
+          APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          unzip -v "$APK" | grep "assets/molina-debian/" | tee /tmp/debian-entry.txt
+          grep -q "Stored" /tmp/debian-entry.txt
+          ls -l "$APK"
 
       - uses: actions/upload-artifact@v4
         with:
