@@ -63,5 +63,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
 
     private companion object {
         const val BACKSTACK_LIBRARY = "library"
+        const val BACKSTACK_DEBIAN = "debian"
     }
 }
