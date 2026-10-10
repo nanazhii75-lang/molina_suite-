@@ -7,6 +7,10 @@ BS="$(cd "$(dirname "${BASH_SOURCE[0]}")/../engines/mpv-android/buildscripts" &&
 cd "$BS"
 export IN_CI=1
 
+# Penyimpanan bersama Termux tidak menyimpan bit executable, jadi git mencatat
+# skrip upstream sebagai 100644. Pulihkan di sini agar buildall.sh bisa memanggilnya.
+find "$BS" -type f -name '*.sh' -exec chmod +x {} +
+
 pin_sources() {
   : "${MPV_PIN_DATE:?MPV_PIN_DATE belum diset}"
   local d rev
