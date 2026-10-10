@@ -11,7 +11,7 @@
         android:orientation="horizontal"
         android:paddingStart="16dp"
         android:paddingTop="8dp"
-        android:paddingEnd="16dp"
+        android:paddingEnd="8dp"
         android:paddingBottom="8dp">
 
         <TextView
@@ -21,6 +21,13 @@
             android:text="@string/settings_library_title"
             android:textSize="20sp"
             android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/library_restore"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/library_restore" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/library_add"

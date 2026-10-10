@@ -2,35 +2,39 @@ package com.molina.suite.feature.settings.library
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.text.InputType
 import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.molina.suite.core.common.EngineId
-import com.molina.suite.core.common.HostTabSwitcher
-import com.molina.suite.core.common.TerminalInputResult
+import com.molina.suite.core.storage.MolinaStorage
+import com.molina.suite.feature.settings.PlaceholderTemplate
 import com.molina.suite.feature.settings.R
 import com.molina.suite.feature.settings.SettingsDependencies
+import com.molina.suite.feature.settings.ShellLine
+import com.molina.suite.feature.settings.TerminalCommandRunner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Daftar entri Library: tambah, ubah, hapus, dan jalankan (▶) di tab Terminal. */
+/** Daftar entri Library: tambah, ubah, hapus, pulihkan bawaan, dan jalankan (▶) di tab Terminal. */
 class LibraryFragment : Fragment(R.layout.fragment_library) {
 
     private class Views(val list: RecyclerView, val empty: TextView, val error: TextView)
 
     private var views: Views? = null
     private var runJob: Job? = null
-    private val adapter = LibraryAdapter(onRun = { runEntry(it) }, onEdit = { showEditor(it) })
+    private val adapter = LibraryAdapter(onRun = { prepareRun(it) }, onEdit = { showEditor(it) })
 
     private val repository: LibraryRepository
         get() = SettingsDependencies.libraryRepository()
@@ -45,7 +49,8 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
             view.findViewById(R.id.library_error)
         )
         view.findViewById<View>(R.id.library_add).setOnClickListener { showEditor(null) }
-        reload()
+        view.findViewById<View>(R.id.library_restore).setOnClickListener { restoreBuiltins() }
+        load()
     }
 
     override fun onDestroyView() {
@@ -54,9 +59,16 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
         super.onDestroyView()
     }
 
-    private fun reload() {
+    /** Memuat daftar; saat pertama kali (berkas belum ada) menyemai entri bawaan lebih dulu. */
+    private fun load() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) { repository.list() }
+            val result = withContext<LibraryResult<List<LibraryEntry>>>(Dispatchers.IO) {
+                if (!repository.isInitialized()) {
+                    val seeded = repository.addMissing(BuiltinLibrary.entries)
+                    if (seeded is LibraryResult.Failure) return@withContext seeded
+                }
+                repository.list()
+            }
             render(result)
         }
     }
@@ -78,32 +90,107 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
         }
     }
 
-    /** Mengetik isi entri ke sesi Terminal aktif lalu Enter; menunggu sesi siap bila tab baru dibuka. */
-    private fun runEntry(entry: LibraryEntry) {
+    private fun restoreBuiltins() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            when (val r = withContext(Dispatchers.IO) { repository.addMissing(BuiltinLibrary.entries) }) {
+                is LibraryResult.Ok -> {
+                    toast(
+                        if (r.value == 0) getString(R.string.library_restore_none)
+                        else getString(R.string.library_restore_done, r.value)
+                    )
+                    load()
+                }
+                is LibraryResult.Failure -> toast(r.reason)
+            }
+        }
+    }
+
+    /** Menanyakan nilai placeholder bila ada, lalu menjalankan entri. */
+    private fun prepareRun(entry: LibraryEntry) {
+        val names = PlaceholderTemplate.names(entry.content)
+        if (names.isEmpty()) {
+            execute(entry, emptyMap())
+        } else {
+            askValues(entry, names) { values -> execute(entry, values) }
+        }
+    }
+
+    private fun execute(entry: LibraryEntry, values: Map<String, String>) {
         if (runJob?.isActive == true) return
-        if (entry.content.any { it == '\n' || it == '\r' }) {
-            toast(getString(R.string.library_run_failed, getString(R.string.library_error_multiline)))
-            return
-        }
-        val switcher = activity as? HostTabSwitcher
-        if (switcher == null) {
-            toast(getString(R.string.library_run_failed, getString(R.string.library_error_no_switcher)))
-            return
-        }
-        val sender = SettingsDependencies.terminalInput()
+        val host = activity ?: return
+        val line = ShellLine.build(entry, values)
         runJob = viewLifecycleOwner.lifecycleScope.launch {
-            var result = sender.sendLine(entry.content)
-            switcher.showEngine(EngineId.TERMINAL)
-            var attempts = 0
-            while (result is TerminalInputResult.Rejected && attempts < MAX_ATTEMPTS) {
-                delay(RETRY_DELAY_MS)
-                result = sender.sendLine(entry.content)
-                attempts++
+            val reason = TerminalCommandRunner.run(host, line)
+            if (reason != null) toast(getString(R.string.library_run_failed, reason))
+        }
+    }
+
+    private fun askValues(entry: LibraryEntry, names: List<String>, onDone: (Map<String, String>) -> Unit) {
+        val ctx = requireContext()
+        val pad = (24 * resources.displayMetrics.density).toInt()
+        val column = LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(pad, pad / 3, pad, 0)
+        }
+        val fields = LinkedHashMap<String, Pair<TextInputLayout, TextInputEditText>>()
+        for (name in names) {
+            val layout = TextInputLayout(ctx).apply { hint = placeholderLabel(name) }
+            val input = TextInputEditText(layout.context).apply {
+                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                maxLines = 1
+                defaultValue(name)?.let {
+                    setText(it)
+                    setSelection(it.length)
+                }
             }
-            if (result is TerminalInputResult.Rejected) {
-                toast(getString(R.string.library_run_failed, result.reason))
+            layout.addView(
+                input,
+                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            )
+            column.addView(
+                layout,
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            )
+            fields[name] = layout to input
+        }
+
+        val dialog = MaterialAlertDialogBuilder(ctx)
+            .setTitle(entry.name)
+            .setView(column)
+            .setPositiveButton(R.string.library_run_action, null)
+            .setNegativeButton(R.string.library_cancel, null)
+            .create()
+        dialog.setOnShowListener {
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                val values = LinkedHashMap<String, String>()
+                var valid = true
+                for ((name, pair) in fields) {
+                    val value = pair.second.text?.toString().orEmpty().trim()
+                    pair.first.error = when {
+                        value.isEmpty() -> getString(R.string.library_error_value)
+                        value.any { c -> c == '\n' || c == '\r' } -> getString(R.string.library_error_multiline)
+                        else -> null
+                    }
+                    if (pair.first.error != null) valid = false else values[name] = value
+                }
+                if (!valid) return@setOnClickListener
+                dialog.dismiss()
+                onDone(values)
             }
         }
+        dialog.show()
+    }
+
+    private fun placeholderLabel(name: String): String = when (name) {
+        "URL" -> getString(R.string.placeholder_url)
+        "FILE" -> getString(R.string.placeholder_file)
+        "OUT" -> getString(R.string.placeholder_out)
+        else -> getString(R.string.placeholder_generic, name)
+    }
+
+    private fun defaultValue(name: String): String? = when (name) {
+        "FILE", "OUT" -> "/sdcard/${MolinaStorage.SHARED_DIR_NAME}/${MolinaStorage.DOWNLOADS_DIR_NAME}/"
+        else -> null
     }
 
     private fun showEditor(entry: LibraryEntry?) {
@@ -113,10 +200,12 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
         val nameInput = dialogView.findViewById<TextInputEditText>(R.id.library_input_name)
         val contentInput = dialogView.findViewById<TextInputEditText>(R.id.library_input_content)
         val noteInput = dialogView.findViewById<TextInputEditText>(R.id.library_input_note)
+        val debianCheck = dialogView.findViewById<MaterialCheckBox>(R.id.library_input_debian)
         if (entry != null) {
             nameInput.setText(entry.name)
             contentInput.setText(entry.content)
             noteInput.setText(entry.note)
+            debianCheck.isChecked = entry.runIn == RunMode.DEBIAN
         }
 
         val builder = MaterialAlertDialogBuilder(requireContext())
@@ -139,10 +228,11 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
                     else -> null
                 }
                 if (nameLayout.error != null || contentLayout.error != null) return@setOnClickListener
+                val runIn = if (debianCheck.isChecked) RunMode.DEBIAN else RunMode.HOST
                 val saved = if (entry == null) {
-                    LibraryEntry.create(name, content, note)
+                    LibraryEntry.create(name, content, note, runIn)
                 } else {
-                    LibraryEntry(entry.id, name, content, note)
+                    entry.copy(name = name, content = content, note = note, runIn = runIn)
                 }
                 save(saved) { dialog.dismiss() }
             }
@@ -163,7 +253,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
                     when (val r = withContext(Dispatchers.IO) { repository.remove(entry.id) }) {
                         is LibraryResult.Ok -> {
                             onDeleted()
-                            reload()
+                            load()
                         }
                         is LibraryResult.Failure -> toast(r.reason)
                     }
@@ -178,7 +268,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
             when (val r = withContext(Dispatchers.IO) { repository.upsert(entry) }) {
                 is LibraryResult.Ok -> {
                     onSaved()
-                    reload()
+                    load()
                 }
                 is LibraryResult.Failure -> toast(r.reason)
             }
@@ -188,11 +278,5 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
     private fun toast(message: String) {
         val ctx = context ?: return
         Toast.makeText(ctx.applicationContext, message, Toast.LENGTH_LONG).show()
-    }
-
-    private companion object {
-        // Sesi pertama bisa butuh waktu (bind service dan bootstrap): tunggu sampai 10 detik.
-        const val MAX_ATTEMPTS = 20
-        const val RETRY_DELAY_MS = 500L
     }
 }

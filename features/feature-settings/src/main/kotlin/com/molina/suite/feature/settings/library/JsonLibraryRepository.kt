@@ -17,6 +17,8 @@ class JsonLibraryRepository(private val file: File) : LibraryRepository {
 
     private val lock = Any()
 
+    override fun isInitialized(): Boolean = file.exists()
+
     override fun list(): LibraryResult<List<LibraryEntry>> = synchronized(lock) { read() }
 
     override fun upsert(entry: LibraryEntry): LibraryResult<Unit> = synchronized(lock) {
@@ -52,6 +54,21 @@ class JsonLibraryRepository(private val file: File) : LibraryRepository {
         }
     }
 
+    override fun addMissing(entries: List<LibraryEntry>): LibraryResult<Int> = synchronized(lock) {
+        when (val current = read()) {
+            is LibraryResult.Failure -> current
+            is LibraryResult.Ok -> {
+                val known = current.value.map { it.id }.toHashSet()
+                val additions = entries.filter { known.add(it.id) }
+                if (additions.isEmpty()) return@synchronized LibraryResult.Ok(0)
+                when (val written = write(current.value + additions)) {
+                    is LibraryResult.Failure -> written
+                    is LibraryResult.Ok -> LibraryResult.Ok(additions.size)
+                }
+            }
+        }
+    }
+
     private fun validate(entry: LibraryEntry): String? = when {
         entry.id.isBlank() -> "ID entri tidak boleh kosong"
         entry.name.isEmpty() -> "Nama entri tidak boleh kosong"
@@ -73,7 +90,9 @@ class JsonLibraryRepository(private val file: File) : LibraryRepository {
                         id = item.getString(KEY_ID),
                         name = item.getString(KEY_NAME),
                         content = item.getString(KEY_CONTENT),
-                        note = item.optString(KEY_NOTE, "")
+                        note = item.optString(KEY_NOTE, ""),
+                        runIn = RunMode.fromKey(item.optString(KEY_RUN_IN, RunMode.HOST.key)),
+                        builtin = item.optBoolean(KEY_BUILTIN, false)
                     )
                 )
             }
@@ -104,6 +123,8 @@ class JsonLibraryRepository(private val file: File) : LibraryRepository {
                         .put(KEY_NAME, entry.name)
                         .put(KEY_CONTENT, entry.content)
                         .put(KEY_NOTE, entry.note)
+                        .put(KEY_RUN_IN, entry.runIn.key)
+                        .put(KEY_BUILTIN, entry.builtin)
                 )
             }
             val root = JSONObject().put(KEY_VERSION, SCHEMA_VERSION).put(KEY_ENTRIES, array)
@@ -135,6 +156,8 @@ class JsonLibraryRepository(private val file: File) : LibraryRepository {
         private const val KEY_NAME = "name"
         private const val KEY_CONTENT = "content"
         private const val KEY_NOTE = "note"
+        private const val KEY_RUN_IN = "runIn"
+        private const val KEY_BUILTIN = "builtin"
 
         /** Lokasi standar: library.json di folder bersama molina-suite. */
         fun createDefault(): JsonLibraryRepository =

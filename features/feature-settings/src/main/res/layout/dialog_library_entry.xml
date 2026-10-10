@@ -37,11 +37,18 @@
             android:inputType="text|textNoSuggestions" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/library_input_debian"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/library_field_debian" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/library_layout_note"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:hint="@string/library_field_note">
 
         <com.google.android.material.textfield.TextInputEditText

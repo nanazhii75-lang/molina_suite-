@@ -40,4 +40,15 @@
     <string name="debian_login_desc">Membuka shell Debian di sesi Terminal aktif. Prompt berubah menjadi root@localhost.</string>
     <string name="debian_logout_title">Keluar dari Debian</string>
     <string name="debian_logout_desc">Saat berada di dalam Debian, ketik exit untuk kembali ke shell biasa. Jangan ketik exit di shell biasa karena sesi akan tertutup.</string>
+
+    <string name="library_restore">Pulihkan</string>
+    <string name="library_restore_done">%1$d entri bawaan dipulihkan</string>
+    <string name="library_restore_none">Semua entri bawaan sudah ada</string>
+    <string name="library_run_action">Jalankan</string>
+    <string name="library_error_value">Wajib diisi</string>
+    <string name="library_field_debian">Jalankan di dalam Debian (otomatis lewat proot bila perlu)</string>
+    <string name="placeholder_url">URL</string>
+    <string name="placeholder_file">Path file (mis. /sdcard/Molina/Downloads/a.mp4)</string>
+    <string name="placeholder_out">Path hasil</string>
+    <string name="placeholder_generic">Nilai untuk %1$s</string>
 </resources>
