@@ -29,3 +29,7 @@ dari upstream ditandai pada riwayat commit repositori ini.
 - Pada sumber upstream di engines/sora-editor, pemanggilan `Collection.toArray(X[]::new)` (Java 11, tidak ada di Android 8) diganti `Collection.toArray(new X[0])`. Perilakunya sama.
 - `Stream.toList()` (Java 16) diganti `collect(Collectors.toList())`; hasilnya kini bisa diubah.
 - Header lisensi dan hak cipta asli pada tiap berkas tidak diubah.
+
+## Grammar TextMate (microsoft/vscode)
+
+Grammar penyorotan sintaks di features/feature-code/src/main/assets/textmate (json, yaml, shell, css, c, cpp, sql, typescript, ini, go, rust) diambil dari https://github.com/microsoft/vscode tag 1.90.0, lisensi MIT. Teks lisensi ada di assets/textmate/LICENSE-vscode-grammars.txt.
