@@ -79,7 +79,6 @@ class MainActivity : AppCompatActivity(), HostChromeController {
 
     private fun engineIdFor(menuId: Int): EngineId? = when (menuId) {
         R.id.nav_mpv -> EngineId.MPV
-        R.id.nav_files -> EngineId.FILES
         R.id.nav_terminal -> EngineId.TERMINAL
         R.id.nav_code -> EngineId.CODE
         R.id.nav_settings -> EngineId.SETTINGS

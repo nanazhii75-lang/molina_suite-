@@ -4,7 +4,6 @@
     <string name="header_title">🌟 molina</string>
 
     <string name="nav_mpv">mpv</string>
-    <string name="nav_files">Material</string>
     <string name="nav_terminal">Terminal</string>
     <string name="nav_code">Code</string>
     <string name="nav_settings">Settings</string>
