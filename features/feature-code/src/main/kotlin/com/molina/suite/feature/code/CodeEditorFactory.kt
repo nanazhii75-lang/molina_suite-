@@ -9,6 +9,7 @@ internal object CodeEditorFactory {
 
     fun create(context: Context): CodeEditor {
         val appearance = CodeAppearanceStore(context).load()
+        CodeThemeState.name = appearance.theme
         return CodeEditor(context).apply {
             setTypefaceText(Typeface.MONOSPACE)
             setTextSize(appearance.textSizeSp.toFloat())

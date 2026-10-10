@@ -47,6 +47,7 @@ internal class CodeTextMate(private val assets: AssetManager) {
     /** Buat skema dan bahasa baru untuk satu editor; panggil dari thread utama. */
     fun prepare(fileName: String?): CodeHighlighting {
         if (!ensureReady()) return CodeHighlighting(null, null)
+        applyTheme()
         val scheme = try {
             TextMateColorScheme.create(ThemeRegistry.getInstance())
         } catch (e: Exception) {
@@ -86,16 +87,40 @@ internal class CodeTextMate(private val assets: AssetManager) {
     }
 
     private fun loadTheme() {
-        val path = "$ASSET_DIR/$THEME_NAME.json"
+        loadThemeAsset(THEME_NAME, required = true)
+        loadThemeAsset(CodeAppearance.THEME_OBSIDIAN, required = false)
+        ThemeRegistry.getInstance().setTheme(THEME_NAME)
+    }
+
+    private fun loadThemeAsset(name: String, required: Boolean) {
+        val path = "$ASSET_DIR/$name.json"
         val stream = FileProviderRegistry.getInstance().tryGetInputStream(path)
-            ?: throw IOException("Aset tema tidak ditemukan: $path")
-        val registry = ThemeRegistry.getInstance()
-        registry.loadTheme(
-            ThemeModel(IThemeSource.fromInputStream(stream, path, null), THEME_NAME).apply {
+        if (stream == null) {
+            if (required) throw IOException("Aset tema tidak ditemukan: $path")
+            Log.w(TAG, "Aset tema opsional tidak ditemukan: $path")
+            return
+        }
+        ThemeRegistry.getInstance().loadTheme(
+            ThemeModel(IThemeSource.fromInputStream(stream, path, null), name).apply {
                 isDark = true
             }
         )
-        registry.setTheme(THEME_NAME)
+    }
+
+    /** Pakai tema pilihan Gaya Visual; kembali ke tema bawaan bila gagal. Panggil dari thread utama. */
+    fun applyTheme() {
+        if (!ensureReady()) return
+        val registry = ThemeRegistry.getInstance()
+        try {
+            registry.setTheme(CodeThemeState.name)
+        } catch (e: Exception) {
+            Log.w(TAG, "Tema ${CodeThemeState.name} gagal dipakai", e)
+            try {
+                registry.setTheme(THEME_NAME)
+            } catch (fallback: Exception) {
+                Log.w(TAG, "Tema bawaan gagal dipakai", fallback)
+            }
+        }
     }
 
     private fun readScopeNames(): Map<String, String> {
@@ -191,7 +216,12 @@ internal class CodeTextMate(private val assets: AssetManager) {
             "properties" to "ini",
             "cfg" to "ini",
             "go" to "go",
-            "rs" to "rust"
+            "rs" to "rust",
+            "toml" to "ini",
+            "editorconfig" to "ini",
+            "gitconfig" to "ini",
+            "conf" to "ini",
+            "jsonc" to "json"
         )
     }
 }

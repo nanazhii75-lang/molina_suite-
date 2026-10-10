@@ -118,4 +118,8 @@
     <string name="code_appearance_size">Ukuran font: %1$d sp</string>
     <string name="code_appearance_line_numbers">Tampilkan nomor baris</string>
     <string name="code_appearance_apply">Terapkan</string>
+
+    <string name="code_appearance_theme">Tema warna</string>
+    <string name="code_theme_darcula">Bawaan (Darcula)</string>
+    <string name="code_theme_obsidian">Obsidian</string>
 </resources>

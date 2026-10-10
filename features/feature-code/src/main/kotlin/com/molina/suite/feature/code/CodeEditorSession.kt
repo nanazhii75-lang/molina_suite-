@@ -192,6 +192,8 @@ internal class CodeEditorSession(
         val target = editor ?: return
         target.setTextSize(appearance.textSizeSp.toFloat())
         target.setLineNumberEnabled(appearance.lineNumbers)
+        CodeThemeState.name = appearance.theme
+        textMate.applyTheme()
     }
 
     /** Pindah ke awal baris [line] (berbasis satu); false bila di luar jangkauan. */
