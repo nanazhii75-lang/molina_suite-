@@ -75,6 +75,7 @@ dependencies {
     implementation(project(":features:feature-terminal"))
     implementation(project(":features:feature-code"))
     implementation(project(":features:feature-mpv"))
+    implementation(project(":features:feature-settings"))
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
