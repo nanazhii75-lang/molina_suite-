@@ -61,7 +61,7 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
             setOnClickListener { onClick() }
         }
 
-    private val findInput = field(R.string.code_search_find_hint).apply {
+    private val findInput: EditText = field(R.string.code_search_find_hint).apply {
         imeOptions = EditorInfo.IME_ACTION_SEARCH
         setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -80,15 +80,15 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         })
     }
 
-    private val replaceInput = field(R.string.code_search_replace_hint).apply {
+    private val replaceInput: EditText = field(R.string.code_search_replace_hint).apply {
         imeOptions = EditorInfo.IME_ACTION_DONE
     }
 
-    private val caseBox = check(R.string.code_search_case, false)
-    private val regexBox = check(R.string.code_search_regex, false)
-    private val wrapBox = check(R.string.code_search_wrap, true)
+    private val caseBox: CheckBox = check(R.string.code_search_case, false)
+    private val regexBox: CheckBox = check(R.string.code_search_regex, false)
+    private val wrapBox: CheckBox = check(R.string.code_search_wrap, true)
 
-    private val counter = TextView(context).apply {
+    private val counter: TextView = TextView(context).apply {
         setTextColor(CodePalette.TEXT_MUTED)
         textSize = 12f
         gravity = Gravity.END or Gravity.CENTER_VERTICAL
@@ -150,10 +150,10 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
 
     val isShowing: Boolean get() = view.visibility == View.VISIBLE
 
-    private fun matchWidth() =
+    private fun matchWidth(): LinearLayout.LayoutParams =
         LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-    private fun request() = CodeSearchRequest(
+    private fun request(): CodeSearchRequest = CodeSearchRequest(
         query = findInput.text.toString(),
         caseSensitive = caseBox.isChecked,
         regex = regexBox.isChecked,
