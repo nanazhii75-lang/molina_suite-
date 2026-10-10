@@ -115,6 +115,24 @@ internal class CodeTextMate(private val assets: AssetManager) {
         return result
     }
 
+    /** Nama bahasa yang tersedia; kosong bila TextMate gagal diinisialisasi. */
+    fun languageNames(): List<String> {
+        if (!ensureReady()) return emptyList()
+        return scopes.keys.sorted()
+    }
+
+    /** Buat bahasa berdasarkan nama; panggil dari thread utama. Null bila gagal. */
+    fun prepareByName(name: String): Language? {
+        if (!ensureReady()) return null
+        val scope = scopes[name] ?: return null
+        return try {
+            TextMateLanguage.create(scope, false)
+        } catch (e: Exception) {
+            Log.w(TAG, "Bahasa $scope gagal dimuat", e)
+            null
+        }
+    }
+
     private fun scopeFor(fileName: String): String? {
         val extension = fileName.substringAfterLast('.', "").lowercase(Locale.ROOT)
         val language = EXTENSION_LANGUAGE[extension] ?: return null

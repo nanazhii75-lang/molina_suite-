@@ -243,6 +243,10 @@ class CodeTabFragment : Fragment() {
             override fun onSearch() = openSearch()
             override fun onGoToLine() = promptGoToLine()
             override fun onStatistics() = showStatistics()
+            override fun onShare() = shareText()
+            override fun onSyntax() = chooseSyntax()
+            override fun onEncoding() = chooseEncoding()
+            override fun onAppearance() = showAppearance()
             override fun onWordwrapChanged(enabled: Boolean) = session.setWordwrap(enabled)
             override fun onReadOnlyChanged(readOnly: Boolean) = session.setReadOnly(readOnly)
         })
@@ -373,6 +377,50 @@ class CodeTabFragment : Fragment() {
             .setNegativeButton(R.string.code_unsaved_discard) { _, _ -> proceed() }
             .setNeutralButton(android.R.string.cancel, null)
             .show()
+    }
+
+    private fun shareText() {
+        val subject = session.document.value.file?.name ?: getString(R.string.code_untitled)
+        when (CodeShare.send(requireContext(), subject, session.currentText())) {
+            CodeShare.Result.SENT -> Unit
+            CodeShare.Result.TOO_LARGE -> toast(getString(R.string.code_share_too_large))
+            CodeShare.Result.NO_APP -> toast(getString(R.string.code_share_failed))
+        }
+    }
+
+    private fun chooseSyntax() {
+        val names = session.syntaxNames()
+        if (names.isEmpty()) {
+            toast(getString(R.string.code_syntax_failed))
+            return
+        }
+        val items = listOf(getString(R.string.code_syntax_plain)) + names
+        CodeChoiceDialog.show(requireContext(), R.string.code_syntax_title, items, -1) { index ->
+            val name = if (index == 0) null else names[index - 1]
+            if (!session.setSyntax(name)) toast(getString(R.string.code_syntax_failed))
+        }
+    }
+
+    private fun chooseEncoding() {
+        val doc = session.document.value
+        val options = CodeEncoding.values()
+        val checked = options.indexOfFirst { it.charset == doc.charset && it.bom == doc.hasBom }
+        CodeChoiceDialog.show(requireContext(), R.string.code_encoding_title, options.map { it.label }, checked) { index ->
+            val choice = options[index]
+            if (session.changeEncoding(choice.charset, choice.bom)) {
+                toast(getString(R.string.code_encoding_changed, choice.label))
+            } else {
+                toast(getString(R.string.code_encoding_unsupported, choice.label))
+            }
+        }
+    }
+
+    private fun showAppearance() {
+        val store = CodeAppearanceStore(requireContext())
+        CodeAppearanceDialog.show(requireContext(), store.load()) { value ->
+            store.save(value)
+            session.applyAppearance(value)
+        }
     }
 
     private fun promptGoToLine() {

@@ -157,6 +157,43 @@ internal class CodeEditorSession(
 
     fun lineCount(): Int = editor?.text?.lineCount ?: 1
 
+    /** Teks editor saat ini; memakai salinan terakhir bila view belum terpasang. */
+    fun currentText(): String = editor?.text?.toString() ?: snapshot.text
+
+    /** Daftar nama bahasa TextMate yang tersedia untuk pilihan Syntax. */
+    fun syntaxNames(): List<String> = textMate.languageNames()
+
+    /** Ganti bahasa penyorotan; null berarti teks polos. False bila bahasa gagal dimuat. */
+    fun setSyntax(name: String?): Boolean {
+        val target = editor ?: return false
+        val language: io.github.rosemoe.sora.lang.Language = if (name == null) {
+            io.github.rosemoe.sora.lang.EmptyLanguage()
+        } else {
+            textMate.prepareByName(name) ?: return false
+        }
+        target.setEditorLanguage(language)
+        return true
+    }
+
+    /**
+     * Atur enkode yang dipakai saat menyimpan. False bila teks memuat karakter
+     * yang tidak bisa dikodekan, supaya tidak ada data yang diam-diam rusak.
+     */
+    fun changeEncoding(charset: java.nio.charset.Charset, bom: Boolean): Boolean {
+        val current = mutableDocument.value
+        if (current.charset == charset && current.hasBom == bom) return true
+        if (!charset.newEncoder().canEncode(currentText())) return false
+        mutableDocument.value = current.copy(charset = charset, hasBom = bom, dirty = true)
+        return true
+    }
+
+    /** Terapkan ukuran font dan nomor baris ke editor yang sedang terpasang. */
+    fun applyAppearance(appearance: CodeAppearance) {
+        val target = editor ?: return
+        target.setTextSize(appearance.textSizeSp.toFloat())
+        target.setLineNumberEnabled(appearance.lineNumbers)
+    }
+
     /** Pindah ke awal baris [line] (berbasis satu); false bila di luar jangkauan. */
     fun goToLine(line: Int): Boolean {
         val target = editor ?: return false

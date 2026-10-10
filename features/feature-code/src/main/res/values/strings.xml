@@ -97,4 +97,25 @@
     <string name="code_reload_message">Perubahan di %1$s yang belum disimpan akan dibuang.</string>
     <string name="code_reload_confirm">Muat ulang</string>
     <string name="code_reload_untitled">Dokumen belum disimpan, jadi tidak ada berkas untuk dimuat ulang.</string>
+
+    <string name="code_menu_share">Bagikan</string>
+    <string name="code_menu_syntax">Syntax</string>
+    <string name="code_menu_encoding">Enkode</string>
+    <string name="code_menu_appearance">Gaya Visual</string>
+
+    <string name="code_share_title">Bagikan teks lewat</string>
+    <string name="code_share_too_large">Teks terlalu besar untuk dibagikan langsung. Simpan berkas lalu bagikan dari pengelola file.</string>
+    <string name="code_share_failed">Tidak ada aplikasi yang bisa menerima teks ini.</string>
+
+    <string name="code_syntax_title">Syntax</string>
+    <string name="code_syntax_plain">Teks polos</string>
+    <string name="code_syntax_failed">Bahasa ini tidak bisa dimuat.</string>
+
+    <string name="code_encoding_title">Enkode untuk penyimpanan</string>
+    <string name="code_encoding_changed">Enkode diatur ke %1$s. Simpan berkas untuk menerapkannya.</string>
+    <string name="code_encoding_unsupported">Teks berisi karakter yang tidak bisa dikodekan dengan %1$s.</string>
+
+    <string name="code_appearance_size">Ukuran font: %1$d sp</string>
+    <string name="code_appearance_line_numbers">Tampilkan nomor baris</string>
+    <string name="code_appearance_apply">Terapkan</string>
 </resources>

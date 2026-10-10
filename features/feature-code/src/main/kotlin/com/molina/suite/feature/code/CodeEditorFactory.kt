@@ -7,12 +7,13 @@ import io.github.rosemoe.sora.widget.CodeEditor
 /** Pembuat [CodeEditor] dengan pengaturan dasar tab Code. */
 internal object CodeEditorFactory {
 
-    private const val TEXT_SIZE_SP = 14f
-
-    fun create(context: Context): CodeEditor = CodeEditor(context).apply {
-        setTypefaceText(Typeface.MONOSPACE)
-        setTextSize(TEXT_SIZE_SP)
-        setLineNumberEnabled(true)
-        setWordwrap(true)
+    fun create(context: Context): CodeEditor {
+        val appearance = CodeAppearanceStore(context).load()
+        return CodeEditor(context).apply {
+            setTypefaceText(Typeface.MONOSPACE)
+            setTextSize(appearance.textSizeSp.toFloat())
+            setLineNumberEnabled(appearance.lineNumbers)
+            setWordwrap(true)
+        }
     }
 }

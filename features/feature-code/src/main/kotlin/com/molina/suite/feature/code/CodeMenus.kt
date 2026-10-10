@@ -18,7 +18,11 @@ internal interface CodeFileMenuListener {
 
 internal interface CodeActionMenuListener {
     fun onSearch()
+    fun onShare()
     fun onGoToLine()
+    fun onSyntax()
+    fun onEncoding()
+    fun onAppearance()
     fun onStatistics()
     fun onWordwrapChanged(enabled: Boolean)
     fun onReadOnlyChanged(readOnly: Boolean)
@@ -39,6 +43,10 @@ internal object CodeMenus {
     private const val ID_STATS = 13
     private const val ID_WRAP = 14
     private const val ID_READONLY = 15
+    private const val ID_SYNTAX = 16
+    private const val ID_ENCODING = 17
+    private const val ID_APPEARANCE = 18
+    private const val ID_SHARE = 19
 
     fun showFileMenu(
         context: Context,
@@ -79,14 +87,22 @@ internal object CodeMenus {
         val popup = PopupMenu(context, anchor, Gravity.END)
         val menu = popup.menu
         menu.add(Menu.NONE, ID_SEARCH, 0, R.string.code_menu_search)
-        menu.add(Menu.NONE, ID_GOTO, 1, R.string.code_menu_goto)
-        menu.add(Menu.NONE, ID_STATS, 2, R.string.code_menu_stats)
-        checkable(menu.add(Menu.NONE, ID_WRAP, 3, R.string.code_menu_wordwrap), options.wordwrap)
-        checkable(menu.add(Menu.NONE, ID_READONLY, 4, R.string.code_menu_readonly), options.readOnly)
+        menu.add(Menu.NONE, ID_SHARE, 1, R.string.code_menu_share)
+        menu.add(Menu.NONE, ID_GOTO, 2, R.string.code_menu_goto)
+        menu.add(Menu.NONE, ID_SYNTAX, 3, R.string.code_menu_syntax)
+        menu.add(Menu.NONE, ID_ENCODING, 4, R.string.code_menu_encoding)
+        menu.add(Menu.NONE, ID_APPEARANCE, 5, R.string.code_menu_appearance)
+        menu.add(Menu.NONE, ID_STATS, 6, R.string.code_menu_stats)
+        checkable(menu.add(Menu.NONE, ID_WRAP, 7, R.string.code_menu_wordwrap), options.wordwrap)
+        checkable(menu.add(Menu.NONE, ID_READONLY, 8, R.string.code_menu_readonly), options.readOnly)
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 ID_SEARCH -> listener.onSearch()
+                ID_SHARE -> listener.onShare()
                 ID_GOTO -> listener.onGoToLine()
+                ID_SYNTAX -> listener.onSyntax()
+                ID_ENCODING -> listener.onEncoding()
+                ID_APPEARANCE -> listener.onAppearance()
                 ID_STATS -> listener.onStatistics()
                 ID_WRAP -> listener.onWordwrapChanged(!item.isChecked)
                 ID_READONLY -> listener.onReadOnlyChanged(!item.isChecked)
