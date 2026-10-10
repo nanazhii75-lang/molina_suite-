@@ -19,6 +19,13 @@ android {
         buildConfig = true
     }
 
+    sourceSets {
+        getByName("main") {
+            // Hasil ndk-build buildscripts mpv-android ada di src/main/libs.
+            jniLibs.srcDir("src/main/libs")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
