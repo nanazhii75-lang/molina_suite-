@@ -25,5 +25,6 @@ class MolinaApplication : Application() {
         TerminalEngineModule.install(this, engines)
         CodeEngineModule.install(this, engines)
         MpvEngineModule.install(engines)
+        DaemonStatusBridge.start(engines, daemons)
     }
 }

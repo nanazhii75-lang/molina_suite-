@@ -10,20 +10,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Implementasi kontrak [EngineFeature] untuk tab mpv. Layar utama bawaan mpv
- * dipakai apa adanya; bila library native belum tersedia, tab menampilkan
- * [MpvUnavailableFragment] agar aplikasi tidak crash saat pemutar dibuka.
+ * Implementasi kontrak [EngineFeature] untuk tab mpv. Library native diperiksa
+ * di thread latar saat startup: RUNNING bila siap, UNAVAILABLE bila tidak ter-bundel.
  */
 internal class MpvFeature : EngineFeature {
 
     override val id: EngineId = EngineId.MPV
 
-    private val mutableStatus = MutableStateFlow(EngineStatus.STOPPED)
+    private val mutableStatus = MutableStateFlow(EngineStatus.STARTING)
     override val status: StateFlow<EngineStatus> = mutableStatus.asStateFlow()
 
-    override fun createFragment(): Fragment {
-        val ready = MpvNativeProbe.isReady()
-        mutableStatus.value = if (ready) EngineStatus.RUNNING else EngineStatus.UNAVAILABLE
-        return if (ready) MainScreenFragment() else MpvUnavailableFragment()
+    init {
+        Thread({
+            mutableStatus.value =
+                if (MpvNativeProbe.isReady()) EngineStatus.RUNNING else EngineStatus.UNAVAILABLE
+        }, "mpv-native-probe").start()
     }
+
+    override fun createFragment(): Fragment =
+        if (MpvNativeProbe.isReady()) MainScreenFragment() else MpvUnavailableFragment()
 }

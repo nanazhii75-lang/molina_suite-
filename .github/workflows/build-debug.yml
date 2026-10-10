@@ -6,38 +6,84 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  MPV_PIN_DATE: "2024-11-17 23:59:59 +0000"
+
 jobs:
-  build:
+  mpv-native:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+      - name: Install alat build native
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf pkg-config libtool ninja-build meson unzip wget
+      - name: Cache prefix native arm64
+        id: prefix-cache
+        uses: actions/cache@v4
+        with:
+          path: engines/mpv-android/buildscripts/prefix/arm64
+          key: mpv-prefix-arm64-${{ env.MPV_PIN_DATE }}-${{ hashFiles('engines/mpv-android/buildscripts/include/depinfo.sh', 'engines/mpv-android/buildscripts/scripts/*.sh', 'tools/ci-mpv-native.sh') }}
+      - name: Unduh SDK dan NDK r27c
+        run: bash tools/ci-mpv-native.sh sdk
+      - name: Unduh dan kunci sumber dependensi
+        if: steps.prefix-cache.outputs.cache-hit != 'true'
+        run: bash tools/ci-mpv-native.sh deps
+      - name: Build dependensi dan libmpv (arm64)
+        if: steps.prefix-cache.outputs.cache-hit != 'true'
+        run: bash tools/ci-mpv-native.sh build
+      - name: Verifikasi prefix
+        run: bash tools/ci-mpv-native.sh verify
+      - name: Build libplayer (ndk-build)
+        run: bash tools/ci-mpv-native.sh jni
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mpv-native-arm64
+          path: engines/mpv-android/app/src/main/libs
+          if-no-files-found: error
 
+  build:
+    needs: mpv-native
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
       - name: Install NDK 22.1.7171670 (dibutuhkan engine terminal)
         run: |
           SDKMANAGER="${ANDROID_HOME:-$ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKMANAGER" --licenses > /dev/null || true
           "$SDKMANAGER" --install "ndk;22.1.7171670"
-
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
-
+      - uses: actions/download-artifact@v4
+        with:
+          name: mpv-native-arm64
+          path: engines/mpv-android/app/src/main/libs
       - name: Build APK debug
         run: gradle :app:assembleDebug --stacktrace
-
+      - name: Verifikasi library mpv ada di APK
+        run: |
+          set -eo pipefail
+          APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          for lib in libmpv libplayer libavcodec; do
+            unzip -l "$APK" | grep -q "lib/arm64-v8a/$lib.so" || { echo "Hilang di APK: $lib.so"; exit 1; }
+          done
       - name: Tanda tangan APK (sidik jari sertifikat)
         run: |
           set -euo pipefail
           APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
           APKSIGNER=$(ls "${ANDROID_HOME:-$ANDROID_SDK_ROOT}"/build-tools/*/apksigner | sort -V | tail -1)
           "$APKSIGNER" verify --print-certs "$APK" | grep -E "certificate (DN|SHA-256)"
-
       - uses: actions/upload-artifact@v4
         with:
           name: molina-suite-debug
