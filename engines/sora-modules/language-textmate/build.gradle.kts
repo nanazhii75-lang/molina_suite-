@@ -1,5 +1,5 @@
 // Modul tipis milik molina: membangun language-textmate Sora Editor dari
-// sumber upstream di engines/sora-editor (tag 0.23.4). File upstream tidak diubah.
+// sumber upstream di engines/sora-editor (tag 0.23.4). Ada tambalan kompatibilitas Android 8 pada upstream (lihat docs/ATTRIBUTION.md).
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")

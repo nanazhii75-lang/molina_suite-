@@ -24,3 +24,8 @@ dari upstream ditandai pada riwayat commit repositori ini.
 ## Grammar dan tema TextMate (feature-code/src/main/assets/textmate)
 - Disalin apa adanya dari engines/sora-editor/app/src/main/assets/textmate (Sora Editor 0.23.4) untuk penyorotan sintaks.
 - Tiap grammar dan tema berasal dari proyek aslinya dan tunduk pada lisensi masing-masing; berkas lisensi yang menyertainya di dalam folder tersebut dipertahankan.
+
+## Modifikasi kompatibilitas Android 8 (Sora Editor dan tm4e)
+- Pada sumber upstream di engines/sora-editor, pemanggilan `Collection.toArray(X[]::new)` (Java 11, tidak ada di Android 8) diganti `Collection.toArray(new X[0])`. Perilakunya sama.
+- `Stream.toList()` (Java 16) diganti `collect(Collectors.toList())`; hasilnya kini bisa diubah.
+- Header lisensi dan hak cipta asli pada tiap berkas tidak diubah.

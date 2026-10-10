@@ -110,7 +110,7 @@ public final class MoreCollections {
 	 * @return a new list without null elements
 	 */
 	public static <T> List<T> noNulls(final @Nullable List<T> coll) {
-		return coll == null || coll.isEmpty() ? Collections.emptyList() : coll.stream().filter(Objects::nonNull).toList();
+		return coll == null || coll.isEmpty() ? Collections.emptyList() : coll.stream().filter(Objects::nonNull).collect(java.util.stream.Collectors.toList());
 	}
 
 	private MoreCollections() {

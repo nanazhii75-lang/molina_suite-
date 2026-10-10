@@ -50,7 +50,7 @@ public final class CharacterPairSupport {
 			if (!brackets.isEmpty()) {
 				this.autoClosingPairs = brackets.stream()
 						.map(el -> new AutoClosingPairConditional(el.open, el.close, Collections.emptyList()))
-						.toList();
+						.collect(java.util.stream.Collectors.toList());
 			} else {
 				this.autoClosingPairs = Collections.emptyList();
 			}
