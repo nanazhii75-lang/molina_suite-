@@ -5,7 +5,6 @@
     <string name="code_default_file_name">tanpa-judul.txt</string>
 
     <string name="code_header_menu">Menu berkas</string>
-    <string name="code_header_edit">Mode sunting</string>
     <string name="code_header_more">Aksi lainnya</string>
 
     <string name="code_key_open">Buka</string>
@@ -29,9 +28,18 @@
     <string name="code_menu_wordwrap">Pembungkus kata</string>
     <string name="code_menu_readonly">Hanya baca</string>
 
-    <string name="code_search_hint">Cari</string>
-    <string name="code_search_previous">Sebelumnya</string>
-    <string name="code_search_next">Berikutnya</string>
+    <string name="code_search_title">Cari</string>
+    <string name="code_search_find_hint">Cari teks</string>
+    <string name="code_search_replace_hint">Ganti dengan</string>
+    <string name="code_search_case">Kasus sensitif</string>
+    <string name="code_search_regex">Persamaan reguler</string>
+    <string name="code_search_wrap">Membungkus di sekitar</string>
+    <string name="code_search_find">Cari</string>
+    <string name="code_search_replace">Ganti</string>
+    <string name="code_search_replace_all">Ganti semua</string>
+    <string name="code_search_invalid">Regex salah</string>
+    <string name="code_search_readonly">Mode hanya baca aktif, penggantian tidak bisa dilakukan.</string>
+    <string name="code_search_no_match">Tidak ada pencarian aktif atau kecocokan untuk diganti.</string>
     <string name="code_search_close">Tutup pencarian</string>
 
     <string name="code_goto_hint">1 sampai %1$d</string>

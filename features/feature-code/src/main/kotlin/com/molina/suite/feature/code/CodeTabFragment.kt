@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.InputType
@@ -19,7 +18,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -47,7 +45,6 @@ class CodeTabFragment : Fragment() {
     private var editor: CodeEditor? = null
     private var titleView: TextView? = null
     private var pathView: TextView? = null
-    private var editButton: ImageButton? = null
     private var searchBar: CodeSearchBar? = null
     private var keyboardWatcher: CodeKeyboardWatcher? = null
     private var afterPermission: (() -> Unit)? = null
@@ -89,13 +86,6 @@ class CodeTabFragment : Fragment() {
         }
         val menuButton = CodeUi.iconButton(context, R.drawable.ic_code_menu, R.string.code_header_menu) { }
         menuButton.setOnClickListener { showFileMenu(it) }
-        val folderButton = CodeUi.iconButton(context, R.drawable.ic_code_folder, R.string.code_key_open) {
-            requestOpen()
-        }
-        val pencil = CodeUi.iconButton(context, R.drawable.ic_code_edit, R.string.code_header_edit) {
-            val readOnly = session.options.value.readOnly
-            session.setReadOnly(!readOnly)
-        }
         val moreButton = CodeUi.iconButton(context, R.drawable.ic_code_more, R.string.code_header_more) { }
         moreButton.setOnClickListener { showActionMenu(it) }
 
@@ -110,22 +100,24 @@ class CodeTabFragment : Fragment() {
                 LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
                     .apply { marginStart = CodeUi.dp(context, 4) }
             )
-            for (button in listOf(folderButton, pencil, moreButton)) {
-                addView(button, LinearLayout.LayoutParams(CodeUi.dp(context, 44), CodeUi.dp(context, 48)))
-            }
+            addView(moreButton, LinearLayout.LayoutParams(CodeUi.dp(context, 44), CodeUi.dp(context, 48)))
         }
 
         val bar = CodeSearchBar(context, object : CodeSearchBar.Callbacks {
-            override fun onQueryChanged(query: String) = session.search(query)
-            override fun onNext() = session.searchNext()
-            override fun onPrevious() = session.searchPrevious()
+            override fun onRequestChanged(request: CodeSearchRequest) = session.search(request)
+            override fun onFind() = session.searchNext()
+            override fun onReplace(replacement: String) {
+                if (!session.replaceCurrent(replacement)) notifyReplaceUnavailable()
+            }
+            override fun onReplaceAll(replacement: String) {
+                if (!session.replaceAll(replacement)) notifyReplaceUnavailable()
+            }
             override fun onClosed() = session.stopSearch()
         })
         val actions = buildActionBar(context)
 
         titleView = title
         pathView = path
-        editButton = pencil
         searchBar = bar
 
         return LinearLayout(context).apply {
@@ -145,13 +137,11 @@ class CodeTabFragment : Fragment() {
             (activity as? HostChromeController)?.setChromeCompact(visible)
         }
         renderDocument(session.document.value)
-        renderOptions(session.options.value)
         val target = requireNotNull(editor)
         viewLifecycleOwner.lifecycleScope.launch { session.attach(target) }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { session.document.collect { renderDocument(it) } }
-                launch { session.options.collect { renderOptions(it) } }
                 launch { session.search.collect { searchBar?.render(it) } }
             }
         }
@@ -184,7 +174,6 @@ class CodeTabFragment : Fragment() {
         editor = null
         titleView = null
         pathView = null
-        editButton = null
         searchBar = null
         super.onDestroyView()
     }
@@ -215,9 +204,12 @@ class CodeTabFragment : Fragment() {
         pathView?.text = doc.file?.parent ?: MolinaStorage.sharedRoot().path
     }
 
-    private fun renderOptions(options: CodeViewOptions) {
-        editButton?.imageTintList =
-            ColorStateList.valueOf(if (options.readOnly) CodePalette.TEXT_MUTED else CodePalette.ACCENT)
+    private fun notifyReplaceUnavailable() {
+        toast(
+            getString(
+                if (session.options.value.readOnly) R.string.code_search_readonly else R.string.code_search_no_match
+            )
+        )
     }
 
     private fun buildActionBar(context: Context): View = CodeActionBar.build(

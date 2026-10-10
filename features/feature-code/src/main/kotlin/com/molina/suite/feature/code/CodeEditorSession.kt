@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.regex.PatternSyntaxException
 
 /**
  * Sesi penyuntingan seumur proses: memegang dokumen (selalu ada; awalnya
@@ -175,16 +176,27 @@ internal class CodeEditorSession(
     }
 
     /** Mulai atau perbarui pencarian; kueri kosong menghentikan pencarian. */
-    fun search(query: String) {
+    fun search(request: CodeSearchRequest) {
         val target = editor ?: return
-        if (query.isEmpty()) {
+        if (request.query.isEmpty()) {
             stopSearch()
             return
         }
-        mutableSearch.value = CodeSearchState(query, 0, 0)
-        target.searcher.search(query, EditorSearcher.SearchOptions(true, false))
+        val searcher = target.searcher
+        searcher.setCyclicJumping(request.wrapAround)
+        try {
+            searcher.search(
+                request.query,
+                EditorSearcher.SearchOptions(!request.caseSensitive, request.regex)
+            )
+            mutableSearch.value = CodeSearchState(request.query, 0, 0)
+        } catch (e: PatternSyntaxException) {
+            if (searcher.hasQuery()) searcher.stopSearch()
+            mutableSearch.value = CodeSearchState(request.query, 0, 0, invalidPattern = true)
+        }
     }
 
+    /** Lompat ke kecocokan berikutnya dari posisi kursor. */
     fun searchNext() {
         val target = editor ?: return
         if (!target.searcher.hasQuery()) return
@@ -192,11 +204,21 @@ internal class CodeEditorSession(
         publishSearch(target)
     }
 
-    fun searchPrevious() {
-        val target = editor ?: return
-        if (!target.searcher.hasQuery()) return
-        target.searcher.gotoPrevious()
+    /** Ganti kecocokan yang sedang dipilih; false bila editor hanya-baca atau belum ada pencarian aktif. */
+    fun replaceCurrent(replacement: String): Boolean {
+        val target = editor ?: return false
+        if (!target.isEditable || !target.searcher.hasQuery()) return false
+        target.searcher.replaceThis(replacement)
         publishSearch(target)
+        return true
+    }
+
+    /** Ganti semua kecocokan; false bila editor hanya-baca atau belum ada pencarian aktif. */
+    fun replaceAll(replacement: String): Boolean {
+        val target = editor ?: return false
+        if (!target.isEditable || !target.searcher.hasQuery()) return false
+        target.searcher.replaceAll(replacement)
+        return true
     }
 
     fun stopSearch() {
