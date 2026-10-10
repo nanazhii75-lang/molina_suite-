@@ -4,8 +4,9 @@ package com.molina.suite.mpv.search
 interface YoutubeSearchSource {
 
     /**
-     * Mencari video dan mengembalikan paling banyak [limit] hasil, diurutkan dari
-     * terbaru ke terlama. Memblokir thread pemanggil: panggil dari thread latar.
+     * Mencari video dan mengembalikan paling banyak [limit] hasil. Urutan terbaru ke
+     * terlama hanya bila waktu unggah tersedia; selain itu urutan relevansi.
+     * Memblokir thread pemanggil: panggil dari thread latar.
      */
     @Throws(YoutubeSearchException::class)
     fun search(query: String, limit: Int): List<YoutubeResult>

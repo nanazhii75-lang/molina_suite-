@@ -32,7 +32,7 @@ internal class YtdlpSearchSource(private val wrapper: File) : YoutubeSearchSourc
             "--dump-json",
             "--no-warnings",
             "--ignore-errors",
-            "ytsearchdate$count:$cleaned"
+            "ytsearch${count + EXTRA_FETCH}:$cleaned"
         )
         val process = try {
             ProcessBuilder(command).also { it.environment().clear() }.start()
@@ -101,5 +101,7 @@ internal class YtdlpSearchSource(private val wrapper: File) : YoutubeSearchSourc
         const val JOIN_MILLIS = 2000L
         const val MAX_RESULTS = 20
         const val MAX_CHARS = 4_000_000
+        // Cadangan untuk entri non-video (mis. Mix) yang dibuang parser.
+        const val EXTRA_FETCH = 5
     }
 }

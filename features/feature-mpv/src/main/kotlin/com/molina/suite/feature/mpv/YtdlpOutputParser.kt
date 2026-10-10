@@ -33,7 +33,7 @@ internal object YtdlpOutputParser {
         }
         val unique = results.distinctBy { it.id }
         // Urut ulang hanya bila setiap hasil punya waktu unggah; selain itu pertahankan
-        // urutan dari yt-dlp (ytsearchdate sudah terbaru ke terlama).
+        // urutan dari yt-dlp (urutan relevansi).
         val ordered = if (unique.all { it.publishedAtMillis != null }) {
             unique.sortedByDescending { it.publishedAtMillis }
         } else {
