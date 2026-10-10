@@ -33,3 +33,8 @@ dari upstream ditandai pada riwayat commit repositori ini.
 ## Grammar TextMate (microsoft/vscode)
 
 Grammar penyorotan sintaks di features/feature-code/src/main/assets/textmate (json, yaml, shell, css, c, cpp, sql, typescript, ini, go, rust) diambil dari https://github.com/microsoft/vscode tag 1.90.0, lisensi MIT. Teks lisensi ada di assets/textmate/LICENSE-vscode-grammars.txt.
+
+## mpv-android
+- Sumber: https://github.com/mpv-android/mpv-android, tag 2024-11-16 (commit 4258ae5)
+- Lisensi: lihat engines/mpv-android/LICENSE (tidak diubah); header lisensi dan nama author asli di berkas sumber dipertahankan
+- Perubahan Molina: paket is.xyz.mpv dan is.xyz.filepicker diganti menjadi com.molina.suite.mpv
