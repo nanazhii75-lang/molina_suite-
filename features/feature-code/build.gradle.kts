@@ -22,6 +22,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":engines:sora-core"))
+    implementation(project(":engines:sora-textmate"))
     implementation(project(":core:core-common"))
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.fragment:fragment:1.5.4")
