@@ -22,6 +22,6 @@ class MolinaApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         TerminalEngineModule.install(this, engines)
-        CodeEngineModule.install(this, engines, shell, daemons, keepAlive)
+        CodeEngineModule.install(this, engines)
     }
 }

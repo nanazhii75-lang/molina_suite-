@@ -1,0 +1,147 @@
+package com.molina.suite.feature.code
+
+import android.content.res.AssetManager
+import android.util.Log
+import io.github.rosemoe.sora.lang.Language
+import io.github.rosemoe.sora.langs.textmate.TextMateColorScheme
+import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
+import io.github.rosemoe.sora.langs.textmate.registry.FileProviderRegistry
+import io.github.rosemoe.sora.langs.textmate.registry.GrammarRegistry
+import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry
+import io.github.rosemoe.sora.langs.textmate.registry.model.ThemeModel
+import io.github.rosemoe.sora.langs.textmate.registry.provider.AssetsFileResolver
+import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
+import org.eclipse.tm4e.core.registry.IThemeSource
+import org.json.JSONArray
+import org.json.JSONObject
+import org.json.JSONTokener
+import java.io.IOException
+import java.util.Locale
+
+/** Skema warna dan bahasa untuk satu editor; null berarti teks polos. */
+internal class CodeHighlighting(val scheme: EditorColorScheme?, val language: Language?)
+
+/**
+ * Inisialisasi TextMate sekali per proses (grammar dan tema dari assets/textmate)
+ * dan pemetaan ekstensi berkas ke bahasa. Bila inisialisasi gagal, editor tetap
+ * jalan sebagai teks polos.
+ */
+internal class CodeTextMate(private val assets: AssetManager) {
+
+    private val lock = Any()
+
+    @Volatile
+    private var initialized = false
+
+    @Volatile
+    private var failure: Throwable? = null
+
+    @Volatile
+    private var scopes: Map<String, String> = emptyMap()
+
+    /** Boleh dipanggil dari thread latar belakang. */
+    fun warmUp() {
+        ensureReady()
+    }
+
+    /** Buat skema dan bahasa baru untuk satu editor; panggil dari thread utama. */
+    fun prepare(fileName: String?): CodeHighlighting {
+        if (!ensureReady()) return CodeHighlighting(null, null)
+        val scheme = try {
+            TextMateColorScheme.create(ThemeRegistry.getInstance())
+        } catch (e: Exception) {
+            Log.w(TAG, "Skema warna TextMate gagal dibuat", e)
+            return CodeHighlighting(null, null)
+        }
+        val scope = fileName?.let { scopeFor(it) }
+        val language = scope?.let {
+            try {
+                TextMateLanguage.create(it, false)
+            } catch (e: Exception) {
+                Log.w(TAG, "Bahasa $it gagal dimuat", e)
+                null
+            }
+        }
+        return CodeHighlighting(scheme, language)
+    }
+
+    private fun ensureReady(): Boolean {
+        if (initialized) return true
+        if (failure != null) return false
+        synchronized(lock) {
+            if (initialized) return true
+            if (failure != null) return false
+            try {
+                FileProviderRegistry.getInstance().addFileProvider(AssetsFileResolver(assets))
+                GrammarRegistry.getInstance().loadGrammars(LANGUAGES_ASSET)
+                loadTheme()
+                scopes = readScopeNames()
+                initialized = true
+            } catch (e: Exception) {
+                failure = e
+                Log.e(TAG, "Inisialisasi TextMate gagal; editor tanpa penyorotan sintaks", e)
+            }
+            return initialized
+        }
+    }
+
+    private fun loadTheme() {
+        val path = "$ASSET_DIR/$THEME_NAME.json"
+        val stream = FileProviderRegistry.getInstance().tryGetInputStream(path)
+            ?: throw IOException("Aset tema tidak ditemukan: $path")
+        val registry = ThemeRegistry.getInstance()
+        registry.loadTheme(
+            ThemeModel(IThemeSource.fromInputStream(stream, path, null), THEME_NAME).apply {
+                isDark = true
+            }
+        )
+        registry.setTheme(THEME_NAME)
+    }
+
+    private fun readScopeNames(): Map<String, String> {
+        val raw = assets.open(LANGUAGES_ASSET).bufferedReader(Charsets.UTF_8).use { it.readText() }
+        val array: JSONArray = when (val root = JSONTokener(raw).nextValue()) {
+            is JSONArray -> root
+            is JSONObject -> root.optJSONArray("languages")
+            else -> null
+        } ?: throw IOException("Format $LANGUAGES_ASSET tidak dikenali")
+        val result = HashMap<String, String>()
+        for (i in 0 until array.length()) {
+            val entry = array.optJSONObject(i) ?: continue
+            val name = entry.optString("name")
+            val scope = entry.optString("scopeName")
+            if (name.isNotEmpty() && scope.isNotEmpty()) result[name] = scope
+        }
+        return result
+    }
+
+    private fun scopeFor(fileName: String): String? {
+        val extension = fileName.substringAfterLast('.', "").lowercase(Locale.ROOT)
+        val language = EXTENSION_LANGUAGE[extension] ?: return null
+        return scopes[language]
+    }
+
+    private companion object {
+        const val TAG = "CodeTextMate"
+        const val ASSET_DIR = "textmate"
+        const val LANGUAGES_ASSET = "textmate/languages.json"
+        const val THEME_NAME = "darcula"
+
+        val EXTENSION_LANGUAGE = mapOf(
+            "java" to "java",
+            "kt" to "kotlin",
+            "kts" to "kotlin",
+            "py" to "python",
+            "js" to "javascript",
+            "mjs" to "javascript",
+            "cjs" to "javascript",
+            "html" to "html",
+            "htm" to "html",
+            "xml" to "xml",
+            "svg" to "xml",
+            "md" to "markdown",
+            "markdown" to "markdown",
+            "lua" to "lua"
+        )
+    }
+}

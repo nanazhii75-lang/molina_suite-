@@ -20,3 +20,7 @@ dari upstream ditandai pada riwayat commit repositori ini.
 - Copyright (C) 2020-2024 Rosemoe
 - Dipakai oleh modul feature-code sebagai library editor teks. Paket asli io.github.rosemoe.sora tidak diganti dan tidak ada file upstream yang diubah; build memakai modul tipis di engines/sora-modules/.
 - Sumber di engines/sora-editor dapat diganti dengan versi modifikasi lalu aplikasi dibangun ulang.
+
+## Grammar dan tema TextMate (feature-code/src/main/assets/textmate)
+- Disalin apa adanya dari engines/sora-editor/app/src/main/assets/textmate (Sora Editor 0.23.4) untuk penyorotan sintaks.
+- Tiap grammar dan tema berasal dari proyek aslinya dan tunduk pada lisensi masing-masing; berkas lisensi yang menyertainya di dalam folder tersebut dipertahankan.

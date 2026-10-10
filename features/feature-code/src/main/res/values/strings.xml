@@ -1,41 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="code_title">Molina Code</string>
-    <string name="code_state_rootfs_missing">Debian belum terpasang. Pasang Debian lewat tab Terminal terlebih dahulu.</string>
-    <string name="code_state_not_installed">code-server belum terpasang. Unduhan sekitar %1$s dan membutuhkan koneksi internet.</string>
-    <string name="code_state_downloading">Mengunduh code-server: %1$s dari %2$s</string>
-    <string name="code_state_installed">code-server %1$s terpasang.</string>
-    <string name="code_state_failed">Pemasangan gagal:\n%1$s</string>
-    <string name="code_phase_prepare">Menyiapkan pemasangan…</string>
-    <string name="code_phase_verify">Memverifikasi berkas unduhan…</string>
-    <string name="code_phase_extract">Mengekstrak code-server…</string>
-    <string name="code_phase_finish">Menyelesaikan pemasangan…</string>
-    <string name="code_action_install">Unduh dan pasang</string>
-    <string name="code_action_retry">Coba lagi</string>
-    <string name="code_state_starting">Menjalankan code-server… Pertama kali bisa butuh beberapa detik.</string>
-    <string name="code_state_stopping">Menghentikan code-server…</string>
-    <string name="code_state_running">code-server berjalan di %1$s</string>
-    <string name="code_state_server_failed">code-server berhenti:\n%1$s</string>
-    <string name="code_action_start">Jalankan code-server</string>
-    <string name="code_action_start_again">Jalankan lagi</string>
-    <string name="code_action_stop">Hentikan code-server</string>
-    <string name="code_action_open">Buka editor</string>
-    <string name="code_workspace_control">Kontrol</string>
-    <string name="code_workspace_reload">Muat ulang</string>
-    <string name="code_workspace_error">Gagal memuat editor:\n%1$s</string>
-    <string name="code_workspace_no_password">Kata sandi code-server tidak ditemukan. Hentikan lalu jalankan ulang code-server.</string>
-    <string name="code_key_keyboard" translatable="false">⌨</string>
-    <string name="code_key_esc" translatable="false">Esc</string>
-    <string name="code_key_tab" translatable="false">Tab</string>
-    <string name="code_key_left" translatable="false">←</string>
-    <string name="code_key_up" translatable="false">↑</string>
-    <string name="code_key_down" translatable="false">↓</string>
-    <string name="code_key_right" translatable="false">→</string>
+    <string name="code_empty_title">Belum ada berkas dibuka</string>
+    <string name="code_empty_hint">Pilih berkas dari /sdcard/Molina untuk mulai menyunting.</string>
+    <string name="code_action_open">Buka berkas</string>
+    <string name="code_key_open">Berkas</string>
+    <string name="code_key_paste">Tempel</string>
     <string name="code_key_undo" translatable="false">Undo</string>
     <string name="code_key_redo" translatable="false">Redo</string>
-    <string name="code_key_find">Cari</string>
+    <string name="code_key_left" translatable="false">←</string>
+    <string name="code_key_right" translatable="false">→</string>
     <string name="code_key_save">Simpan</string>
-    <string name="code_key_palette">Palet</string>
-    <string name="code_key_quick_open">Berkas</string>
-    <string name="code_key_terminal">Terminal</string>
+    <string name="code_key_close">Tutup</string>
+    <string name="code_picker_title">Pilih berkas</string>
+    <string name="code_picker_empty">Folder kosong</string>
+    <string name="code_picker_unreadable">Folder tidak bisa dibaca</string>
+    <string name="code_picker_error">Folder bersama tidak bisa disiapkan:\n%1$s</string>
+    <string name="code_permission_denied">Izin penyimpanan diperlukan untuk membuka dan menyimpan berkas.</string>
+    <string name="code_open_failed">Gagal membuka %1$s:\n%2$s</string>
+    <string name="code_file_too_large">Berkas terlalu besar (%1$s). Batasnya %2$s.</string>
+    <string name="code_file_binary">Berkas ini tampaknya biner dan tidak bisa disunting sebagai teks.</string>
+    <string name="code_save_ok">Tersimpan: %1$s</string>
+    <string name="code_save_failed">Gagal menyimpan:\n%1$s</string>
+    <string name="code_unsaved_title">Perubahan belum disimpan</string>
+    <string name="code_unsaved_message">%1$s memiliki perubahan yang belum disimpan.</string>
+    <string name="code_unsaved_save">Simpan</string>
+    <string name="code_unsaved_discard">Buang</string>
 </resources>
