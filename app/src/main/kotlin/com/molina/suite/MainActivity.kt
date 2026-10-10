@@ -16,13 +16,14 @@ import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.HostBackPressHandler
 import com.molina.suite.core.common.HostChromeController
 import com.molina.suite.core.common.HostContextMenuListener
+import com.molina.suite.core.common.HostTabSwitcher
 import com.molina.suite.databinding.ActivityMainBinding
 import com.molina.suite.ui.EngineUnavailableFragment
 import com.molina.suite.ui.colorRes
 import com.molina.suite.ui.labelRes
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity(), HostChromeController {
+class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher {
 
     private lateinit var binding: ActivityMainBinding
     private val molina get() = application as MolinaApplication
@@ -76,6 +77,16 @@ class MainActivity : AppCompatActivity(), HostChromeController {
 
     private fun visibleFragment(): Fragment? =
         supportFragmentManager.fragments.firstOrNull { it.isAdded && !it.isHidden }
+
+    /** Dipakai fragment tab (lewat [HostTabSwitcher]) untuk berpindah tab. */
+    override fun showEngine(id: EngineId) {
+        binding.bottomNav.selectedItemId = when (id) {
+            EngineId.MPV -> R.id.nav_mpv
+            EngineId.TERMINAL -> R.id.nav_terminal
+            EngineId.CODE -> R.id.nav_code
+            EngineId.SETTINGS -> R.id.nav_settings
+        }
+    }
 
     private fun engineIdFor(menuId: Int): EngineId? = when (menuId) {
         R.id.nav_mpv -> EngineId.MPV

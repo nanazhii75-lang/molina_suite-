@@ -138,6 +138,21 @@ public class TermuxFragment extends Fragment {
 
     // ------------------------------------------------------------------ lifecycle
 
+    /**
+     * Mengetik [line] lalu Enter ke sesi terminal yang sedang aktif. Hanya dipanggil dari
+     * main thread. Mengembalikan null bila berhasil, atau alasan kegagalan.
+     */
+    @Nullable
+    public String writeLineToActiveSession(@NonNull String line) {
+        if (mTerminalView == null) return "Tampilan terminal belum siap";
+        TerminalSession session = mTerminalView.getCurrentSession();
+        if (session == null) return "Belum ada sesi terminal aktif";
+        if (!session.isRunning()) return "Sesi terminal aktif sudah berhenti";
+        byte[] data = (line + "\r").getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        session.write(data, 0, data.length);
+        return null;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_menu_title">Pengaturan</string>
+    <string name="settings_library_title">Library</string>
+    <string name="settings_library_subtitle">Tautan dan perintah tersimpan, dijalankan di Terminal</string>
+
+    <string name="library_add">Tambah</string>
+    <string name="library_empty">Belum ada entri. Ketuk Tambah untuk menyimpan tautan atau perintah.</string>
+    <string name="library_run">Jalankan di Terminal</string>
+    <string name="library_add_title">Entri baru</string>
+    <string name="library_edit_title">Ubah entri</string>
+    <string name="library_field_name">Nama</string>
+    <string name="library_field_content">Isi (tautan atau perintah, satu baris)</string>
+    <string name="library_field_note">Catatan (opsional)</string>
+    <string name="library_save">Simpan</string>
+    <string name="library_cancel">Batal</string>
+    <string name="library_delete">Hapus</string>
+    <string name="library_delete_confirm">Hapus entri %1$s?</string>
+    <string name="library_error_name">Nama wajib diisi</string>
+    <string name="library_error_content">Isi wajib diisi</string>
+    <string name="library_error_multiline">Isi harus satu baris</string>
+    <string name="library_error_no_switcher">Shell tidak mendukung pindah tab</string>
+    <string name="library_load_failed">Gagal memuat Library: %1$s</string>
+    <string name="library_run_failed">Gagal menjalankan: %1$s</string>
+</resources>
