@@ -56,6 +56,17 @@
                         android:src="@drawable/ic_settings"
                         android:background="@null"
                         android:contentDescription="@string/action_open_settings" />
+
+                    <ImageButton
+                        android:id="@+id/new_session_top_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/bg_sessions_drawer_button"
+                        android:contentDescription="@string/action_new_session"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_molina_add_session" />
                 </LinearLayout>
 
                 <ListView
