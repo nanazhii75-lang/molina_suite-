@@ -54,6 +54,14 @@ object YoutubeSearchController {
         }
     }
 
+    /** Membatalkan pencarian yang berjalan dan mengembalikan panel ke keadaan awal. */
+    fun reset() {
+        worker?.interrupt()
+        worker = null
+        generation += 1 // hasil dari pencarian yang dibatalkan akan diabaikan
+        publish(SearchState.Idle)
+    }
+
     private fun runSearch(source: YoutubeSearchSource, query: String, gen: Int) {
         val outcome: SearchState = try {
             val items = source.search(query, RESULT_LIMIT) { done ->

@@ -101,11 +101,11 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             }
         }
         binding.ytBtn.setOnClickListener { showYoutubeSearchDialog() }
-        resultsPanel = YoutubeResultsPanel(binding.resultsPanel, binding.ytBtn) { result ->
+        resultsPanel = YoutubeResultsPanel(binding.resultsPanel, binding.ytBtn, binding.resetBtn) { result ->
             playResults(result)
         }.also { it.attach() }
         // Ikon tanpa teks: tekan lama menampilkan labelnya.
-        listOf(binding.urlBtn, binding.ytBtn, binding.docBtn, binding.settingsBtn).forEach {
+        listOf(binding.urlBtn, binding.ytBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
             TooltipCompat.setTooltipText(it, it.contentDescription)
         }
         binding.settingsBtn.setOnClickListener {

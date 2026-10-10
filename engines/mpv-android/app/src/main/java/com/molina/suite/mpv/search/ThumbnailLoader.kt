@@ -52,6 +52,11 @@ internal object ThumbnailLoader {
         }
     }
 
+    /** Mengosongkan cache thumbnail (dipakai saat hasil pencarian direset). */
+    fun clear() {
+        cache.evictAll()
+    }
+
     private fun download(url: String): Bitmap? {
         var connection: HttpURLConnection? = null
         return try {

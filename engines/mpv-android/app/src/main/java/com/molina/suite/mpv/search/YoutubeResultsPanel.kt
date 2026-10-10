@@ -15,6 +15,7 @@ import com.molina.suite.mpv.R
 internal class YoutubeResultsPanel(
     root: View,
     private val highlight: View,
+    private val resetButton: View,
     onPlay: (YoutubeResult) -> Unit
 ) {
     private val context: Context = root.context
@@ -37,6 +38,7 @@ internal class YoutubeResultsPanel(
         list.layoutManager = LinearLayoutManager(context)
         list.adapter = adapter
         retry.setOnClickListener { YoutubeSearchController.search(lastQuery) }
+        resetButton.setOnClickListener { YoutubeSearchController.reset() }
         YoutubeSearchController.observe(observer)
     }
 
@@ -44,9 +46,14 @@ internal class YoutubeResultsPanel(
         YoutubeSearchController.removeObserver(observer)
         list.adapter = null
         retry.setOnClickListener(null)
+        resetButton.setOnClickListener(null)
     }
 
     private fun render(state: SearchState) {
+        val active = state !is SearchState.Idle
+        resetButton.isEnabled = active
+        resetButton.alpha = if (active) 1f else 0.35f
+
         if (state is SearchState.Idle) {
             highlight.background = idleBackground
         } else {
@@ -56,6 +63,8 @@ internal class YoutubeResultsPanel(
         when (state) {
             is SearchState.Idle -> {
                 header.setText(R.string.molina_results_title_idle)
+                adapter.submit(emptyList())
+                ThumbnailLoader.clear()
                 order.visibility = View.GONE
                 showOnly(emptyView)
             }
