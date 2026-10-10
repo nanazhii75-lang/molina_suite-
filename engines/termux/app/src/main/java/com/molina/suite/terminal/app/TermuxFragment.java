@@ -404,7 +404,7 @@ public class TermuxFragment extends Fragment {
         if (mFirstSessionRequested) return;
         mFirstSessionRequested = true;
 
-        TermuxInstaller.setupBootstrapIfNeeded(requireActivity(), () -> onBootstrapReady(() -> {
+        TermuxInstaller.setupBootstrapIfNeeded(requireActivity(), () -> {
             if (mTermuxService == null || mTermuxTerminalSessionClient == null) return; // view sudah dihancurkan
             try {
                 Bundle args = getArguments();
@@ -414,16 +414,7 @@ public class TermuxFragment extends Fragment {
             } catch (WindowManager.BadTokenException e) {
                 // Activity ditutup saat dialog bootstrap - abaikan.
             }
-        }));
-    }
-
-    /**
-     * Titik ekstensi: dipanggil di thread UI setelah bootstrap siap dan sebelum sesi pertama dibuat.
-     * Subclass boleh menunda {@code proceed} (misalnya menyiapkan rootfs) tetapi wajib
-     * memanggilnya tepat sekali agar sesi pertama dibuat.
-     */
-    protected void onBootstrapReady(@NonNull Runnable proceed) {
-        proceed.run();
+        });
     }
 
     /**
