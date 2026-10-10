@@ -3,7 +3,7 @@
      them to be changed based on the locale and options. -->
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- Simple strings. -->
-    <string name="mpv_activity">mpv</string>
+    <string name="mpv_activity">Molina mpv</string>
     <string name="label_share_intent">Reproducir en mpv</string>
     <string name="title_activity_settings">Ajustes</string>
     <string name="dialog_ok">Aceptar</string>
@@ -153,7 +153,7 @@
     <string name="pref_edit_mpv_conf_message">Puede editar directamente la configuración de mpv aquí.</string>
 
     <string name="pref_edit_input_conf">Editar input.conf</string>
-    <string name="pref_edit_input_conf_message">Puede editar input.conf aquí, esto es principalmente útil para controles remotos de TV y teclados.\n\nImportante: mpv-android tiene algunas teclas codificadas que no se pueden redefinir aquí, por ejemplo \'j\' para alternar los subtítulos.</string>
+    <string name="pref_edit_input_conf_message">Puede editar input.conf aquí, esto es principalmente útil para controles remotos de TV y teclados.\n\nImportante: Molina mpv tiene algunas teclas codificadas que no se pueden redefinir aquí, por ejemplo \'j\' para alternar los subtítulos.</string>
 
     <!-- Strings used in Settings dialog preferences -->
     <string name="scaler_param1">Parámetro 1:</string>

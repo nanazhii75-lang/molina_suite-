@@ -108,7 +108,8 @@ internal class MPVView(context: Context, attrs: AttributeSet) : BaseMPVView(cont
         MPVLib.setOptionString("demuxer-max-bytes", "${cacheMegs * 1024 * 1024}")
         MPVLib.setOptionString("demuxer-max-back-bytes", "${cacheMegs * 1024 * 1024}")
         //
-        val screenshotDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        // Folder bersama molina-suite (sejalan dengan MolinaStorage: /sdcard/Molina).
+        val screenshotDir = java.io.File(Environment.getExternalStorageDirectory(), "Molina/Screenshots")
         screenshotDir.mkdirs()
         MPVLib.setOptionString("screenshot-directory", screenshotDir.path)
         // workaround for <https://github.com/mpv-player/mpv/issues/14651>

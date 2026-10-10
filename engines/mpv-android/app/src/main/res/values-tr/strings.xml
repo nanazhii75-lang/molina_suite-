@@ -3,7 +3,7 @@
      them to be changed based on the locale and options. -->
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- Simple strings. -->
-    <string name="mpv_activity">mpv</string>
+    <string name="mpv_activity">Molina mpv</string>
     <string name="title_activity_settings">Ayarlar</string>
     <string name="dialog_ok">Tamam</string>
     <string name="dialog_cancel">İptal</string>
@@ -146,7 +146,7 @@
     <string name="pref_edit_mpv_conf_message">mpv yapılandırmasını burada doğrudan düzenleyebilirsiniz.</string>
 
     <string name="pref_edit_input_conf">input.conf dosyasını düzenle</string>
-    <string name="pref_edit_input_conf_message">input.conf dosyasını burada düzenleyebilirsiniz, bu özellikle TV kumandaları ve klavyeler için kullanışlıdır.\n\nÖnemli: mpv-android, burada yeniden tanımlanamayan bazı sabit kodlanmış tuşlara sahiptir, örneğin alt yazıları döndürmek için \'j\'.</string>
+    <string name="pref_edit_input_conf_message">input.conf dosyasını burada düzenleyebilirsiniz, bu özellikle TV kumandaları ve klavyeler için kullanışlıdır.\n\nÖnemli: Molina mpv, burada yeniden tanımlanamayan bazı sabit kodlanmış tuşlara sahiptir, örneğin alt yazıları döndürmek için \'j\'.</string>
 
     <!-- Strings used in Settings dialog preferences -->
     <string name="scaler_param1">Param 1:</string>

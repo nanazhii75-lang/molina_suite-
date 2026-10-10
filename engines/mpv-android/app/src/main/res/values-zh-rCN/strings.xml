@@ -3,7 +3,7 @@
      them to be changed based on the locale and options. -->
 <resources>
     <!-- Simple strings. -->
-    <string name="mpv_activity">mpv</string>
+    <string name="mpv_activity">Molina mpv</string>
     <string name="label_share_intent">在 mpv 中播放</string>
     <string name="title_activity_settings">设置</string>
     <string name="dialog_ok">确定</string>
@@ -160,7 +160,7 @@
     <string name="pref_edit_mpv_conf_message">您可以在这里直接编辑 mpv 的配置。</string>
 
     <string name="pref_edit_input_conf">编辑 input.conf</string>
-    <string name="pref_edit_input_conf_message">您可以在这里编辑 input.conf，主要在自定义电视遥控和键盘控制方面很有用。\n\n重要：mpv-android 有些硬编码的键盘处理程序不能在这里重新定义，例如 \'j\' 用于循环字幕。</string>
+    <string name="pref_edit_input_conf_message">您可以在这里编辑 input.conf，主要在自定义电视遥控和键盘控制方面很有用。\n\n重要：Molina mpv 有些硬编码的键盘处理程序不能在这里重新定义，例如 \'j\' 用于循环字幕。</string>
 
     <!-- Strings used in Settings dialog preferences -->
     <string name="scaler_param1">参数 1：</string>

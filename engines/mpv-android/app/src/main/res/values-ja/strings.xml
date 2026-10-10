@@ -3,7 +3,7 @@
      them to be changed based on the locale and options. -->
 <resources>
     <!-- Simple strings. -->
-    <string name="mpv_activity">mpv</string>
+    <string name="mpv_activity">Molina mpv</string>
     <string name="label_share_intent">mpvで再生</string>
     <string name="title_activity_settings">設定</string>
     <string name="dialog_ok">OK</string>
@@ -127,7 +127,7 @@
     <string name="pref_edit_mpv_conf_message">mpvの設定ファイルを直接編集できます</string>
 
     <string name="pref_edit_input_conf">input.confを編集</string>
-    <string name="pref_edit_input_conf_message">input.confを編集できます。これは主にAndroidTVやキーボード接続用です。\n\n重要:mpv-androidではいくつかキーがハードコードされていて変更できません。例:\"j\"(次の字幕)</string>
+    <string name="pref_edit_input_conf_message">input.confを編集できます。これは主にAndroidTVやキーボード接続用です。\n\n重要:Molina mpvではいくつかキーがハードコードされていて変更できません。例:\"j\"(次の字幕)</string>
 
     <!-- Strings used in Settings dialog preferences -->
     <string name="scaler_param1">パラメータ1:</string>

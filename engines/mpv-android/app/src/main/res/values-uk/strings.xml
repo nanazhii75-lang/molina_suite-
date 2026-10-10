@@ -3,7 +3,7 @@
      them to be changed based on the locale and options. -->
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- Simple strings. -->
-    <string name="mpv_activity">mpv</string>
+    <string name="mpv_activity">Molina mpv</string>
     <string name="label_share_intent">Відтворити з mpv</string>
     <string name="title_activity_settings">Налаштування</string>
     <string name="dialog_ok">OK</string>
@@ -159,7 +159,7 @@
     <string name="pref_edit_mpv_conf_message">Ви можете відредагувати конфігурацію mpv безпосередньо тут.</string>
 
     <string name="pref_edit_input_conf">Редагувати input.conf</string>
-    <string name="pref_edit_input_conf_message">Тут ви можете відредагувати input.conf, здебільшого це корисно для пультів дистанційного керування телевізором та клавіатур.\n\nВажливо: в mpv-android є деякі жорстко прописані в коді клавіші, які не можна тут перепризначити, напр., \'j\' для гортання субтитрів.</string>
+    <string name="pref_edit_input_conf_message">Тут ви можете відредагувати input.conf, здебільшого це корисно для пультів дистанційного керування телевізором та клавіатур.\n\nВажливо: в Molina mpv є деякі жорстко прописані в коді клавіші, які не можна тут перепризначити, напр., \'j\' для гортання субтитрів.</string>
 
     <!-- Strings used in Settings dialog preferences -->
     <string name="scaler_param1">Параметр 1:</string>
