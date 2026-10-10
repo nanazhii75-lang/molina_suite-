@@ -46,11 +46,6 @@ android {
         viewBinding = true
     }
 
-    androidResources {
-        // Rootfs Debian (.xz) sudah terkompres: simpan apa adanya di APK.
-        noCompress += "xz"
-    }
-
     packaging {
         jniLibs {
             useLegacyPackaging = true

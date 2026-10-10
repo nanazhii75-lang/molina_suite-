@@ -15,8 +15,5 @@ captures/
 # zip bootstrap diunduh saat build
 engines/termux/app/src/main/cpp/bootstrap-*.zip
 
-# rootfs Debian diunduh saat build CI
-app/src/main/assets/molina-debian/
-
 # keystore debug tetap (bukan rahasia), pengecualian dari *.keystore
 !app/molina-debug.keystore
