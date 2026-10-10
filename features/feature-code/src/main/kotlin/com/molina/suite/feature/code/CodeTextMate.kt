@@ -50,15 +50,16 @@ internal class CodeTextMate(private val assets: AssetManager) {
         applyTheme()
         val scheme = try {
             TextMateColorScheme.create(ThemeRegistry.getInstance())
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.w(TAG, "Skema warna TextMate gagal dibuat", e)
             return CodeHighlighting(null, null)
         }
         val scope = fileName?.let { scopeFor(it) }
+        Log.i(TAG, "prepare file=$fileName scope=$scope")
         val language = scope?.let {
             try {
                 TextMateLanguage.create(it, false)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Log.w(TAG, "Bahasa $it gagal dimuat", e)
                 null
             }
@@ -77,8 +78,9 @@ internal class CodeTextMate(private val assets: AssetManager) {
                 GrammarRegistry.getInstance().loadGrammars(LANGUAGES_ASSET)
                 loadTheme()
                 scopes = readScopeNames()
+                Log.i(TAG, "TextMate siap: ${scopes.size} bahasa")
                 initialized = true
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 failure = e
                 Log.e(TAG, "Inisialisasi TextMate gagal; editor tanpa penyorotan sintaks", e)
             }
@@ -113,11 +115,11 @@ internal class CodeTextMate(private val assets: AssetManager) {
         val registry = ThemeRegistry.getInstance()
         try {
             registry.setTheme(CodeThemeState.name)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.w(TAG, "Tema ${CodeThemeState.name} gagal dipakai", e)
             try {
                 registry.setTheme(THEME_NAME)
-            } catch (fallback: Exception) {
+            } catch (fallback: Throwable) {
                 Log.w(TAG, "Tema bawaan gagal dipakai", fallback)
             }
         }
@@ -152,7 +154,7 @@ internal class CodeTextMate(private val assets: AssetManager) {
         val scope = scopes[name] ?: return null
         return try {
             TextMateLanguage.create(scope, false)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.w(TAG, "Bahasa $scope gagal dimuat", e)
             null
         }
