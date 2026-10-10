@@ -203,6 +203,8 @@ public class TextMateAnalyzer extends AsyncIncrementalAnalyzeManager<MyState, Sp
         getManagedStyles().setIndentCountMode(true);
     }
 
+    private static int moliDebugTokens = 80;
+
     @Override
     @SuppressLint("NewApi")
     public synchronized LineTokenizeResult<MyState, Span> tokenizeLine(CharSequence lineC, MyState state, int lineIndex) {
@@ -219,6 +221,7 @@ public class TextMateAnalyzer extends AsyncIncrementalAnalyzeManager<MyState, Sp
             }
             int metadata = lineTokens.getTokens()[2 * i + 1];
             int foreground = EncodedTokenAttributes.getForeground(metadata);
+            if (moliDebugTokens > 0) { moliDebugTokens--; android.util.Log.i("MolinaTM", "tok line=" + lineIndex + " i=" + i + " start=" + startIndex + " fg=" + foreground + " color=" + (theme == null ? "THEME_NULL" : theme.getColor(foreground))); }
             int fontStyle = EncodedTokenAttributes.getFontStyle(metadata);
             var tokenType = EncodedTokenAttributes.getTokenType(metadata);
             if (language.createIdentifiers) {

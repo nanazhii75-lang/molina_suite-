@@ -250,6 +250,7 @@ public class GrammarRegistry {
     }
 
     public synchronized void setTheme(ThemeModel themeModel) throws Exception {
+        android.util.Log.i("MolinaTM", "GrammarRegistry.setTheme " + themeModel.getName() + " loaded=" + themeModel.isLoaded());
         if (!themeModel.isLoaded()) {
             themeModel.load(registry.getColorMap());
         }

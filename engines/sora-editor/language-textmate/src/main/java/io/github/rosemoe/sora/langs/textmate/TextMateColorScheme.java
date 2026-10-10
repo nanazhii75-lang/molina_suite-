@@ -291,14 +291,18 @@ public class TextMateColorScheme extends EditorColorScheme implements ThemeRegis
         setColor(BLOCK_LINE_CURRENT, blockLineColorCur);
     }
 
+    private static int moliDebugColors = 60;
+
     @Override
     public int getColor(int type) {
         if (type >= 255) {
             // Cache colors in super class
             var superColor = super.getColor(type);
             if (superColor == 0) {
+                if (moliDebugColors > 0) { moliDebugColors--; android.util.Log.i("MolinaTM", "scheme miss type=" + type + " themeNull=" + (theme == null)); }
                 if (theme != null) {
                     String color = theme.getColor(type - 255);
+                    if (moliDebugColors > 0) { moliDebugColors--; android.util.Log.i("MolinaTM", "scheme idx=" + (type - 255) + " color=" + color); }
                     var newColor = color != null ? Color.parseColor(color) : super.getColor(TEXT_NORMAL);
                     super.colors.put(type, newColor);
                     return newColor;
