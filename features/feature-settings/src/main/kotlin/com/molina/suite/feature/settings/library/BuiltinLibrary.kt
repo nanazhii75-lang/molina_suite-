@@ -80,6 +80,38 @@ internal object BuiltinLibrary {
             "builtin-apt-clean", "Bersihkan cache apt",
             "apt-get clean && apt-get autoremove -y",
             "Membebaskan ruang dari paket yang tidak terpakai.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-install-media", "Install ffmpeg + aria2",
+            "apt update && apt install -y ffmpeg aria2",
+            "Dibutuhkan untuk konversi, info media, dan unduh cepat. Unduhan cukup besar.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-install-python", "Install Python",
+            "apt update && apt install -y python3 python3-pip python3-venv",
+            "Python 3 beserta pip dan venv.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-install-jdk17", "Install JDK 17",
+            "apt update && apt install -y openjdk-17-jdk-headless",
+            "OpenJDK 17 resmi Debian 12, tanpa komponen GUI.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-install-tools", "Install alat bantu",
+            "apt update && apt install -y git curl wget unzip p7zip-full nano rsync jq mediainfo",
+            "git, curl, wget, unzip, p7zip, nano, rsync, jq, dan mediainfo.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-install-ytdlp", "Install yt-dlp + curl_cffi",
+            "apt update && apt install -y python3 python3-venv && python3 -m venv /opt/ytdlp && " +
+                "/opt/ytdlp/bin/pip install -U 'yt-dlp[default,curl-cffi]' && " +
+                "ln -sf /opt/ytdlp/bin/yt-dlp /usr/local/bin/yt-dlp",
+            "Wajib untuk TikTok. Menggantikan yt-dlp lama di /usr/local/bin.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-apt-upgrade", "Update + upgrade Debian",
+            "apt update && apt upgrade -y",
+            "Memperbarui daftar paket dan semua paket terpasang.", RunMode.DEBIAN
         )
     )
 
