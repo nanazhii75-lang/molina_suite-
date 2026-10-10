@@ -11,75 +11,78 @@
         android:id="@+id/logo"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3"
+        android:layout_weight="1"
         android:contentDescription="@string/mpv_activity"
         app:srcCompat="@drawable/mpv_logo" />
 
-    <!-- FIXME this could look better -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:gravity="center"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/docBtn"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:drawableTop="@drawable/ic_file_open_48dp"
-            android:text="@string/action_open_doc_tree"
-            android:textColor="@android:color/primary_text_dark" />
-
-        <Button
+        <ImageButton
             android:id="@+id/urlBtn"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:drawableTop="@drawable/ic_link_48dp"
-            android:text="@string/action_open_url"
-            android:textColor="@android:color/primary_text_dark" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/action_open_url"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_link_48dp"
+            app:tint="@android:color/primary_text_dark" />
 
-    </LinearLayout>
+        <ImageButton
+            android:id="@+id/ytBtn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/action_search_youtube"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_search_24dp"
+            app:tint="@android:color/primary_text_dark" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:gravity="center"
-        android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/docBtn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/action_open_doc_tree"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_file_open_48dp"
+            app:tint="@android:color/primary_text_dark" />
 
-        <Button
-            android:id="@+id/filepickerBtn"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:drawableTop="@drawable/ic_folder_white_48dp"
-            android:text="@string/file_picker_old"
-            android:textColor="@android:color/primary_text_dark" />
-
-        <Button
+        <ImageButton
             android:id="@+id/settingsBtn"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:drawableTop="@drawable/ic_settings_black_48dp"
-            android:text="@string/action_settings"
-            android:textColor="@android:color/primary_text_dark" />
-
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/action_settings"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_settings_black_48dp"
+            app:tint="@android:color/primary_text_dark" />
     </LinearLayout>
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switch1"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:layout_marginTop="8dp"
+        android:padding="8dp"
         android:text="@string/option_remember_choice"
+        android:textSize="12sp"
         app:showText="false" />
 
 </LinearLayout>

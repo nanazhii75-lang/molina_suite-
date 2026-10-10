@@ -186,4 +186,6 @@
     <!-- File picker -->
     <string name="nnf_name">Name</string>
     <string name="nnf_permission_external_write_denied">Permission to access file system denied</string>
+    <string name="action_search_youtube">Search YouTube</string>
+    <string name="search_youtube_hint">Search on YouTube</string>
 </resources>

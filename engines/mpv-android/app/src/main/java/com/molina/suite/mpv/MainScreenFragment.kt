@@ -12,6 +12,10 @@ import android.provider.DocumentsContract
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
+import android.text.InputType
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
+import androidx.appcompat.widget.TooltipCompat
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -90,13 +94,10 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
                 create().show()
             }
         }
-        binding.filepickerBtn.setOnClickListener {
-            saveChoice("file")
-            val i = Intent(context, FilePickerActivity::class.java)
-            i.putExtra("skip", FilePickerActivity.FILE_PICKER)
-            if (lastPath != "")
-                i.putExtra("default_path", lastPath)
-            filePickerLauncher.launch(i)
+        binding.ytBtn.setOnClickListener { showYoutubeSearchDialog() }
+        // Ikon tanpa teks: tekan lama menampilkan labelnya.
+        listOf(binding.urlBtn, binding.ytBtn, binding.docBtn, binding.settingsBtn).forEach {
+            TooltipCompat.setTooltipText(it, it.contentDescription)
         }
         binding.settingsBtn.setOnClickListener {
             saveChoice("") // will reset
@@ -187,8 +188,38 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
                 filePickerLauncher.launch(i)
             }
             "url" -> binding.urlBtn.callOnClick()
-            "file" -> binding.filepickerBtn.callOnClick()
         }
+    }
+
+    private fun showYoutubeSearchDialog() {
+        val input = EditText(requireContext()).apply {
+            inputType = InputType.TYPE_CLASS_TEXT
+            imeOptions = EditorInfo.IME_ACTION_SEARCH
+            setSingleLine()
+            setHint(R.string.search_youtube_hint)
+        }
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle(R.string.action_search_youtube)
+            .setView(input)
+            .setPositiveButton(R.string.dialog_ok) { _, _ -> searchYoutube(input.text.toString()) }
+            .setNegativeButton(R.string.dialog_cancel) { d, _ -> d.cancel() }
+            .create()
+        input.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
+                true
+            } else {
+                false
+            }
+        }
+        dialog.show()
+    }
+
+    /** Memutar hasil pencarian pertama lewat ytdl_hook (yt-dlp di Debian). */
+    private fun searchYoutube(query: String) {
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) return
+        playFile("ytdl://ytsearch:" + trimmed)
     }
 
     private fun playFile(filepath: String) {
