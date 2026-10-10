@@ -7,6 +7,8 @@ internal object BuiltinLibrary {
 
     private val downloads = "/sdcard/${MolinaStorage.SHARED_DIR_NAME}/${MolinaStorage.DOWNLOADS_DIR_NAME}"
     private const val MPV_PACKAGE = "com.molina.suite"
+    private const val ENSURE_CURL = "command -v curl >/dev/null 2>&1 || { apt update && apt install -y curl; }; "
+    private const val SPEED_URL = "https://speed.cloudflare.com/__down?bytes=50000000"
 
     val entries: List<LibraryEntry> = listOf(
         entry(
@@ -112,6 +114,57 @@ internal object BuiltinLibrary {
             "builtin-apt-upgrade", "Update + upgrade Debian",
             "apt update && apt upgrade -y",
             "Memperbarui daftar paket dan semua paket terpasang.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-speedtest", "Tes kecepatan (speedtest-cli)",
+            "command -v speedtest-cli >/dev/null 2>&1 || { apt update && apt install -y speedtest-cli; }; " +
+                "speedtest-cli --simple",
+            "Ping, unduh, dan unggah. Memakai data beberapa puluh MB. Bila ditolak server, pakai tes curl.",
+            RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-speed-curl", "Tes kecepatan unduh (curl, 50 MB)",
+            ENSURE_CURL + "curl -L -o /dev/null " + SPEED_URL,
+            "Mengunduh 50 MB dari Cloudflare; kolom kecepatan rata-rata tampil di tabel curl.",
+            RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-public-ip", "IP publik",
+            ENSURE_CURL + "curl -s https://api.ipify.org; echo",
+            "Alamat IP yang terlihat dari internet.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-check", "Cek internet",
+            ENSURE_CURL + "curl -s -o /dev/null -w 'HTTP %{http_code} dalam %{time_total} detik\\n' " +
+                "https://www.google.com/generate_204",
+            "HTTP 204 berarti internet tersambung.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-timing", "Waktu respons situs",
+            ENSURE_CURL + "curl -s -o /dev/null -w 'DNS %{time_namelookup}s, konek %{time_connect}s, " +
+                "total %{time_total}s\\n' https://{HOST}",
+            "Isi nama host saja tanpa https://, mis. github.com.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-dns", "Cek DNS",
+            "getent hosts {HOST}",
+            "Menampilkan alamat IP dari nama host. Kosong berarti DNS gagal.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-headers", "Header HTTP situs",
+            ENSURE_CURL + "curl -sIL {URL}",
+            "Menampilkan status dan header, mengikuti pengalihan.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-resolv", "DNS yang dipakai Debian",
+            "cat /etc/resolv.conf",
+            "Daftar server DNS di dalam Debian.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-share", "Bagikan folder Downloads (HTTP)",
+            "python3 -m http.server 8080 --directory $downloads",
+            "Buka http://IP-HP:8080 dari perangkat lain di Wi-Fi yang sama. Hentikan dengan Ctrl+C.",
+            RunMode.DEBIAN
         )
     )
 
