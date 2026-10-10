@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="debian_preinstall_title">Menyiapkan Debian</string>
+    <string name="debian_preinstall_copying">Menyalin paket Debian bawaan…</string>
+    <string name="debian_preinstall_installing">Memasang Debian (beberapa menit)…</string>
+    <string name="debian_preinstall_failed_title">Debian gagal disiapkan</string>
+    <string name="debian_preinstall_failed_body">%1$s\n\nTerminal tetap bisa dipakai. Debian bisa dipasang nanti dengan perintah proot-distro install debian.</string>
+    <string name="debian_preinstall_retry">Coba lagi</string>
+    <string name="debian_preinstall_skip">Lewati</string>
+</resources>
