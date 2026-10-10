@@ -45,6 +45,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -58,6 +59,7 @@ configurations.configureEach {
 }
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation(project(":core:core-common"))
     implementation(project(":core:core-storage"))
     implementation(project(":features:feature-terminal"))
