@@ -4,8 +4,10 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.os.Bundle
+import android.text.InputType
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.TextUtils
@@ -16,8 +18,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
-import android.widget.FrameLayout
+import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -34,7 +36,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 /**
- * Tab Code: header berkas, editor Sora, dan toolbar. Hanya urusan tampilan;
+ * Tab Code: header, editor Sora, bar pencarian, dan toolbar. Hanya urusan tampilan;
  * dokumen dan logika berkas ada di [CodeEditorSession] dan [CodeFileRepository].
  */
 class CodeTabFragment : Fragment() {
@@ -43,11 +45,10 @@ class CodeTabFragment : Fragment() {
         get() = CodeEngineModule.requireEngine().session
 
     private var editor: CodeEditor? = null
-    private var header: View? = null
     private var titleView: TextView? = null
     private var pathView: TextView? = null
-    private var emptyView: View? = null
-    private var actionBar: View? = null
+    private var editButton: ImageButton? = null
+    private var searchBar: CodeSearchBar? = null
     private var keyboardWatcher: CodeKeyboardWatcher? = null
     private var afterPermission: (() -> Unit)? = null
 
@@ -65,9 +66,6 @@ class CodeTabFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val context = inflater.context
-        val density = context.resources.displayMetrics.density
-        fun dp(value: Int) = (value * density).toInt()
-
         val editorView = CodeEditorFactory.create(context)
         editor = editorView
 
@@ -84,33 +82,60 @@ class CodeTabFragment : Fragment() {
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.START
         }
-        val headerView = LinearLayout(context).apply {
+        val titleColumn = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(CodePalette.PANEL)
-            setPadding(dp(12), dp(8), dp(12), dp(8))
             addView(title)
             addView(path)
         }
-        val empty = buildEmptyState(context)
-        val bar = buildActionBar(context)
-        val content = FrameLayout(context).apply {
-            addView(editorView, FrameLayout.LayoutParams(MATCH, MATCH))
-            addView(empty, FrameLayout.LayoutParams(MATCH, MATCH))
+        val menuButton = CodeUi.iconButton(context, R.drawable.ic_code_menu, R.string.code_header_menu) { }
+        menuButton.setOnClickListener { showFileMenu(it) }
+        val folderButton = CodeUi.iconButton(context, R.drawable.ic_code_folder, R.string.code_key_open) {
+            requestOpen()
+        }
+        val pencil = CodeUi.iconButton(context, R.drawable.ic_code_edit, R.string.code_header_edit) {
+            val readOnly = session.options.value.readOnly
+            session.setReadOnly(!readOnly)
+        }
+        val moreButton = CodeUi.iconButton(context, R.drawable.ic_code_more, R.string.code_header_more) { }
+        moreButton.setOnClickListener { showActionMenu(it) }
+
+        val headerView = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setBackgroundColor(CodePalette.PANEL)
+            setPadding(CodeUi.dp(context, 4), CodeUi.dp(context, 4), CodeUi.dp(context, 4), CodeUi.dp(context, 4))
+            addView(menuButton, LinearLayout.LayoutParams(CodeUi.dp(context, 44), CodeUi.dp(context, 48)))
+            addView(
+                titleColumn,
+                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                    .apply { marginStart = CodeUi.dp(context, 4) }
+            )
+            for (button in listOf(folderButton, pencil, moreButton)) {
+                addView(button, LinearLayout.LayoutParams(CodeUi.dp(context, 44), CodeUi.dp(context, 48)))
+            }
         }
 
-        header = headerView
+        val bar = CodeSearchBar(context, object : CodeSearchBar.Callbacks {
+            override fun onQueryChanged(query: String) = session.search(query)
+            override fun onNext() = session.searchNext()
+            override fun onPrevious() = session.searchPrevious()
+            override fun onClosed() = session.stopSearch()
+        })
+        val actions = buildActionBar(context)
+
         titleView = title
         pathView = path
-        emptyView = empty
-        actionBar = bar
+        editButton = pencil
+        searchBar = bar
 
         return LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(CodePalette.BACKGROUND)
             layoutParams = ViewGroup.LayoutParams(MATCH, MATCH)
             addView(headerView, LinearLayout.LayoutParams(MATCH, WRAP))
-            addView(content, LinearLayout.LayoutParams(MATCH, 0, 1f))
-            addView(bar, LinearLayout.LayoutParams(MATCH, WRAP))
+            addView(editorView, LinearLayout.LayoutParams(MATCH, 0, 1f))
+            addView(bar.view, LinearLayout.LayoutParams(MATCH, WRAP))
+            addView(actions, LinearLayout.LayoutParams(MATCH, WRAP))
         }
     }
 
@@ -119,12 +144,15 @@ class CodeTabFragment : Fragment() {
         keyboardWatcher = CodeKeyboardWatcher(requireActivity().window, view) { visible ->
             (activity as? HostChromeController)?.setChromeCompact(visible)
         }
-        render(session.document.value)
+        renderDocument(session.document.value)
+        renderOptions(session.options.value)
         val target = requireNotNull(editor)
         viewLifecycleOwner.lifecycleScope.launch { session.attach(target) }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                session.document.collect { render(it) }
+                launch { session.document.collect { renderDocument(it) } }
+                launch { session.options.collect { renderOptions(it) } }
+                launch { session.search.collect { searchBar?.render(it) } }
             }
         }
     }
@@ -154,11 +182,10 @@ class CodeTabFragment : Fragment() {
             target.release()
         }
         editor = null
-        header = null
         titleView = null
         pathView = null
-        emptyView = null
-        actionBar = null
+        editButton = null
+        searchBar = null
         super.onDestroyView()
     }
 
@@ -171,14 +198,9 @@ class CodeTabFragment : Fragment() {
         }
     }
 
-    private fun render(doc: CodeDocument?) {
-        val hasDocument = doc != null
-        header?.visibility = if (hasDocument) View.VISIBLE else View.GONE
-        actionBar?.visibility = if (hasDocument) View.VISIBLE else View.GONE
-        editor?.visibility = if (hasDocument) View.VISIBLE else View.GONE
-        emptyView?.visibility = if (hasDocument) View.GONE else View.VISIBLE
-        if (doc == null) return
-        val title = SpannableStringBuilder(doc.file.name)
+    private fun renderDocument(doc: CodeDocument) {
+        val name = doc.file?.name ?: getString(R.string.code_untitled)
+        val title = SpannableStringBuilder(name)
         if (doc.dirty) {
             val start = title.length
             title.append(" \u25CF")
@@ -190,122 +212,217 @@ class CodeTabFragment : Fragment() {
             )
         }
         titleView?.text = title
-        pathView?.text = doc.file.parent.orEmpty()
+        pathView?.text = doc.file?.parent ?: MolinaStorage.sharedRoot().path
     }
 
-    private fun buildEmptyState(context: Context): View {
-        val density = context.resources.displayMetrics.density
-        fun dp(value: Int) = (value * density).toInt()
-        val title = TextView(context).apply {
-            setText(R.string.code_empty_title)
-            setTextColor(CodePalette.TEXT)
-            textSize = 18f
-            gravity = Gravity.CENTER
-        }
-        val hint = TextView(context).apply {
-            setText(R.string.code_empty_hint)
-            setTextColor(CodePalette.TEXT_MUTED)
-            textSize = 14f
-            gravity = Gravity.CENTER
-            setPadding(0, dp(8), 0, dp(16))
-        }
-        val open = Button(context).apply {
-            setText(R.string.code_action_open)
-            setOnClickListener { requestOpen() }
-        }
-        return LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setPadding(dp(24), dp(24), dp(24), dp(24))
-            addView(title, LinearLayout.LayoutParams(MATCH, WRAP))
-            addView(hint, LinearLayout.LayoutParams(MATCH, WRAP))
-            addView(open, LinearLayout.LayoutParams(WRAP, WRAP))
-        }
+    private fun renderOptions(options: CodeViewOptions) {
+        editButton?.imageTintList =
+            ColorStateList.valueOf(if (options.readOnly) CodePalette.TEXT_MUTED else CodePalette.ACCENT)
     }
 
     private fun buildActionBar(context: Context): View = CodeActionBar.build(
         context,
         listOf(
-            CodeAction(R.string.code_key_open) { requestOpen() },
-            CodeAction(R.string.code_key_paste) { session.paste() },
-            CodeAction(R.string.code_key_undo) { session.undo() },
-            CodeAction(R.string.code_key_redo) { session.redo() },
-            CodeAction(R.string.code_key_left) { session.moveCursorLeft() },
-            CodeAction(R.string.code_key_right) { session.moveCursorRight() },
-            CodeAction(R.string.code_key_save) { saveCurrent() },
-            CodeAction(R.string.code_key_close) { requestClose() }
+            CodeAction(R.drawable.ic_code_folder, R.string.code_key_open) { requestOpen() },
+            CodeAction(R.drawable.ic_code_paste, R.string.code_key_paste) { session.paste() },
+            CodeAction(R.drawable.ic_code_undo, R.string.code_key_undo) { session.undo() },
+            CodeAction(R.drawable.ic_code_redo, R.string.code_key_redo) { session.redo() },
+            CodeAction(R.drawable.ic_code_search, R.string.code_menu_search) { openSearch() },
+            CodeAction(R.drawable.ic_code_arrow_left, R.string.code_key_left) { session.moveCursorLeft() },
+            CodeAction(R.drawable.ic_code_arrow_right, R.string.code_key_right) { session.moveCursorRight() },
+            CodeAction(R.drawable.ic_code_save, R.string.code_key_save) { saveCurrent() },
+            CodeAction(R.drawable.ic_code_close, R.string.code_key_close) { requestClose() }
         )
     )
 
+    private fun showFileMenu(anchor: View) {
+        CodeMenus.showFileMenu(requireContext(), anchor, session.document.value, object : CodeFileMenuListener {
+            override fun onNew() = requestNew()
+            override fun onOpen() = requestOpen()
+            override fun onSave() = saveCurrent()
+            override fun onSaveAs() = requestSaveAs()
+            override fun onReload() = requestReload()
+            override fun onClose() = requestClose()
+        })
+    }
+
+    private fun showActionMenu(anchor: View) {
+        CodeMenus.showActionMenu(requireContext(), anchor, session.options.value, object : CodeActionMenuListener {
+            override fun onSearch() = openSearch()
+            override fun onGoToLine() = promptGoToLine()
+            override fun onStatistics() = showStatistics()
+            override fun onWordwrapChanged(enabled: Boolean) = session.setWordwrap(enabled)
+            override fun onReadOnlyChanged(readOnly: Boolean) = session.setReadOnly(readOnly)
+        })
+    }
+
+    private fun openSearch() {
+        searchBar?.show()
+    }
+
+    private fun closeSearch() {
+        searchBar?.dismissSilently()
+        session.stopSearch()
+    }
+
+    private fun requestNew() {
+        confirmDiscardIfDirty {
+            closeSearch()
+            viewLifecycleOwner.lifecycleScope.launch { session.newDocument() }
+        }
+    }
+
+    private fun requestClose() = requestNew()
+
     private fun requestOpen() {
-        confirmDiscardIfDirty { ensureStorage { showPicker() } }
+        confirmDiscardIfDirty { ensureStorage { showPicker(CodePickerMode.OPEN) { openFile(it) } } }
     }
 
-    private fun requestClose() {
-        confirmDiscardIfDirty { session.close() }
+    private fun requestSaveAs(afterSaved: (() -> Unit)? = null) {
+        ensureStorage {
+            showPicker(CodePickerMode.SAVE_AS) { file ->
+                viewLifecycleOwner.lifecycleScope.launch { if (saveAs(file)) afterSaved?.invoke() }
+            }
+        }
     }
 
-    private fun showPicker() {
+    private fun requestReload() {
+        val doc = session.document.value
+        val file = doc.file ?: run {
+            toast(getString(R.string.code_reload_untitled))
+            return
+        }
+        val reload = {
+            closeSearch()
+            viewLifecycleOwner.lifecycleScope.launch { reportLoad(session.reload(), file) }
+        }
+        if (!doc.dirty) {
+            reload()
+            return
+        }
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.code_reload_title)
+            .setMessage(getString(R.string.code_reload_message, file.name))
+            .setPositiveButton(R.string.code_reload_confirm) { _, _ -> reload() }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showPicker(mode: CodePickerMode, onPicked: (File) -> Unit) {
         val context = context ?: return
+        val doc = session.document.value
         when (val prepared = MolinaStorage.ensureDirectories()) {
-            is MolinaStorage.EnsureResult.Ready ->
-                CodeFilePicker(context, prepared.root) { openFile(it) }.show()
+            is MolinaStorage.EnsureResult.Ready -> {
+                val startDir = doc.file?.parentFile?.takeIf { it.isDirectory } ?: prepared.root
+                val suggested = doc.file?.name ?: getString(R.string.code_default_file_name)
+                CodeFilePicker(context, startDir, mode, suggested, onPicked).show()
+            }
             is MolinaStorage.EnsureResult.Failed ->
                 toast(getString(R.string.code_picker_error, prepared.reason))
         }
     }
 
     private fun openFile(file: File) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            when (val result = session.open(file)) {
-                is CodeFileLoad.Loaded -> Unit
-                is CodeFileLoad.TooLarge -> toast(
-                    getString(
-                        R.string.code_file_too_large,
-                        formatSize(result.sizeBytes),
-                        formatSize(result.limitBytes)
-                    )
-                )
-                CodeFileLoad.Binary -> toast(getString(R.string.code_file_binary))
-                is CodeFileLoad.Failed ->
-                    toast(getString(R.string.code_open_failed, file.name, result.reason))
-            }
+        closeSearch()
+        viewLifecycleOwner.lifecycleScope.launch { reportLoad(session.open(file), file) }
+    }
+
+    private fun reportLoad(result: CodeFileLoad, file: File) {
+        when (result) {
+            is CodeFileLoad.Loaded -> Unit
+            is CodeFileLoad.TooLarge -> toast(
+                getString(R.string.code_file_too_large, formatSize(result.sizeBytes), formatSize(result.limitBytes))
+            )
+            CodeFileLoad.Binary -> toast(getString(R.string.code_file_binary))
+            is CodeFileLoad.Failed -> toast(getString(R.string.code_open_failed, file.name, result.reason))
         }
     }
 
     private fun saveCurrent() {
-        viewLifecycleOwner.lifecycleScope.launch { save() }
+        if (session.document.value.file == null) {
+            requestSaveAs()
+        } else {
+            viewLifecycleOwner.lifecycleScope.launch { save() }
+        }
     }
 
-    private suspend fun save(): Boolean {
-        val name = session.document.value?.file?.name.orEmpty()
-        return when (val result = session.save()) {
-            CodeFileSave.Saved -> {
-                toast(getString(R.string.code_save_ok, name))
-                true
-            }
-            is CodeFileSave.Failed -> {
-                toast(getString(R.string.code_save_failed, result.reason))
-                false
-            }
+    private suspend fun save(): Boolean = report(session.save(), session.document.value.file)
+
+    private suspend fun saveAs(file: File): Boolean = report(session.saveAs(file), file)
+
+    private fun report(result: CodeFileSave, file: File?): Boolean = when (result) {
+        CodeFileSave.Saved -> {
+            toast(getString(R.string.code_save_ok, file?.name.orEmpty()))
+            true
+        }
+        is CodeFileSave.Failed -> {
+            toast(getString(R.string.code_save_failed, result.reason))
+            false
         }
     }
 
     private fun confirmDiscardIfDirty(proceed: () -> Unit) {
         val doc = session.document.value
-        if (doc == null || !doc.dirty) {
+        if (!doc.dirty) {
             proceed()
             return
         }
+        val name = doc.file?.name ?: getString(R.string.code_untitled)
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.code_unsaved_title)
-            .setMessage(getString(R.string.code_unsaved_message, doc.file.name))
+            .setMessage(getString(R.string.code_unsaved_message, name))
             .setPositiveButton(R.string.code_unsaved_save) { _, _ ->
-                viewLifecycleOwner.lifecycleScope.launch { if (save()) proceed() }
+                if (doc.file == null) {
+                    requestSaveAs(afterSaved = proceed)
+                } else {
+                    viewLifecycleOwner.lifecycleScope.launch { if (save()) proceed() }
+                }
             }
             .setNegativeButton(R.string.code_unsaved_discard) { _, _ -> proceed() }
             .setNeutralButton(android.R.string.cancel, null)
             .show()
+    }
+
+    private fun promptGoToLine() {
+        val total = session.lineCount()
+        val input = EditText(requireContext()).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setSingleLine(true)
+            setHint(getString(R.string.code_goto_hint, total))
+        }
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.code_menu_goto)
+            .setView(input)
+            .setPositiveButton(R.string.code_goto_confirm) { _, _ ->
+                val line = input.text.toString().trim().toIntOrNull()
+                if (line == null || !session.goToLine(line)) {
+                    toast(getString(R.string.code_goto_invalid, total))
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showStatistics() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val stats = session.statistics()
+            val doc = session.document.value
+            val message = StringBuilder()
+                .append(getString(R.string.code_stats_lines, stats.lines)).append('\n')
+                .append(getString(R.string.code_stats_words, stats.words)).append('\n')
+                .append(getString(R.string.code_stats_characters, stats.characters)).append('\n')
+                .append(getString(R.string.code_stats_size, formatSize(stats.bytes))).append('\n')
+                .append(getString(R.string.code_stats_encoding, doc.charset.name()))
+            if (stats.selectedCharacters > 0) {
+                message.append('\n').append(getString(R.string.code_stats_selected, stats.selectedCharacters))
+            }
+            if (!isAdded) return@launch
+            AlertDialog.Builder(requireContext())
+                .setTitle(R.string.code_menu_stats)
+                .setMessage(message.toString())
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+        }
     }
 
     private fun ensureStorage(then: () -> Unit) {

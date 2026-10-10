@@ -7,4 +7,6 @@ internal object CodePalette {
     val TEXT: Int = 0xFFA9B7C6.toInt()
     val TEXT_MUTED: Int = 0xFF808080.toInt()
     val ACCENT: Int = 0xFFFF9800.toInt()
+    val ACCENT_DARK: Int = 0xFF8D5A2B.toInt()
+    val FOLDER: Int = 0xFF7FB8E8.toInt()
 }

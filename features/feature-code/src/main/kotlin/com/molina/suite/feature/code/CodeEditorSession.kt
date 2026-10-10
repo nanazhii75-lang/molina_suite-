@@ -3,7 +3,9 @@ package com.molina.suite.feature.code
 import android.util.Log
 import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.EventReceiver
+import io.github.rosemoe.sora.event.PublishSearchResultEvent
 import io.github.rosemoe.sora.widget.CodeEditor
+import io.github.rosemoe.sora.widget.EditorSearcher
 import io.github.rosemoe.sora.widget.SelectionMovement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,10 +16,10 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * Sesi penyuntingan seumur proses: memegang dokumen yang terbuka dan
- * menghubungkannya ke [CodeEditor] yang sedang terpasang. View boleh dibuat
- * ulang (rotasi, pindah tab); teks dipulihkan dari snapshot. Semua metode
- * dipanggil dari thread utama.
+ * Sesi penyuntingan seumur proses: memegang dokumen (selalu ada; awalnya
+ * "Tidak berjudul") dan menghubungkannya ke [CodeEditor] yang sedang terpasang.
+ * View boleh dibuat ulang (rotasi, pindah tab); teks dipulihkan dari snapshot.
+ * Semua metode dipanggil dari thread utama.
  */
 internal class CodeEditorSession(
     private val files: CodeFileRepository,
@@ -25,15 +27,21 @@ internal class CodeEditorSession(
 ) {
     private class Snapshot(val text: String, val line: Int, val column: Int)
 
-    private val mutableDocument = MutableStateFlow<CodeDocument?>(null)
-    val document: StateFlow<CodeDocument?> = mutableDocument.asStateFlow()
+    private val mutableDocument = MutableStateFlow(CodeDocument.untitled())
+    val document: StateFlow<CodeDocument> = mutableDocument.asStateFlow()
+
+    private val mutableOptions = MutableStateFlow(CodeViewOptions())
+    val options: StateFlow<CodeViewOptions> = mutableOptions.asStateFlow()
+
+    private val mutableSearch = MutableStateFlow(CodeSearchState.NONE)
+    val search: StateFlow<CodeSearchState> = mutableSearch.asStateFlow()
 
     private var editor: CodeEditor? = null
-    private var snapshot: Snapshot? = null
+    private var snapshot = Snapshot("", 0, 0)
     private var applyingText = false
     private var revision = 0
 
-    /** Pasang editor baru; memulihkan dokumen yang sedang terbuka bila ada. */
+    /** Pasang editor baru dan pulihkan dokumen yang sedang terbuka. */
     suspend fun attach(target: CodeEditor) {
         editor = target
         target.subscribeEvent(
@@ -46,56 +54,75 @@ internal class CodeEditorSession(
                 }
             }
         )
-        val current = mutableDocument.value ?: return
-        snapshot?.let { applyText(target, it.text, it.line, it.column) }
-        applyHighlighting(target, current.file)
+        target.subscribeEvent(
+            PublishSearchResultEvent::class.java,
+            EventReceiver<PublishSearchResultEvent> { _, _ ->
+                if (target === editor) publishSearch(target)
+            }
+        )
+        val current = mutableOptions.value
+        target.setWordwrap(current.wordwrap)
+        target.setEditable(!current.readOnly)
+        target.searcher.setCyclicJumping(true)
+        val saved = snapshot
+        applyText(target, saved.text, saved.line, saved.column)
+        applyHighlighting(target, mutableDocument.value.file)
     }
 
     /** Lepas editor; teks disimpan sebagai snapshot untuk editor berikutnya. */
     fun detach(target: CodeEditor) {
         if (editor !== target) return
-        if (mutableDocument.value != null) {
-            val cursor = target.cursor
-            snapshot = Snapshot(target.text.toString(), cursor.leftLine, cursor.leftColumn)
-        }
+        val cursor = target.cursor
+        snapshot = Snapshot(target.text.toString(), cursor.leftLine, cursor.leftColumn)
+        mutableSearch.value = CodeSearchState.NONE
         editor = null
     }
 
-    suspend fun open(file: File): CodeFileLoad {
+    /** Buka [file]; bila [keepCursor], posisi kursor dipertahankan (dipakai untuk muat ulang). */
+    suspend fun open(file: File, keepCursor: Boolean = false): CodeFileLoad {
         val result = files.load(file)
         if (result !is CodeFileLoad.Loaded) return result
+        val target = editor
+        val line = if (keepCursor && target != null) target.cursor.leftLine else 0
+        val column = if (keepCursor && target != null) target.cursor.leftColumn else 0
         revision++
         mutableDocument.value = CodeDocument(file, result.charset, result.hasBom, dirty = false)
-        snapshot = Snapshot(result.text, 0, 0)
-        val target = editor
+        snapshot = Snapshot(result.text, line, column)
+        stopSearch()
         if (target != null) {
-            applyText(target, result.text, 0, 0)
+            applyText(target, result.text, line, column)
             applyHighlighting(target, file)
         }
         return result
     }
 
-    suspend fun save(): CodeFileSave {
-        val current = mutableDocument.value
-            ?: return CodeFileSave.Failed("Tidak ada berkas yang terbuka")
-        val text = editor?.text?.toString() ?: snapshot?.text
-            ?: return CodeFileSave.Failed("Isi editor tidak tersedia")
-        val savedRevision = revision
-        val result = files.save(current.file, text, current.charset, current.hasBom)
-        if (result is CodeFileSave.Saved && revision == savedRevision) {
-            mutableDocument.update {
-                if (it != null && it.file == current.file) it.copy(dirty = false) else it
-            }
-        }
-        return result
+    /** Muat ulang isi berkas dari penyimpanan dan buang perubahan di editor. */
+    suspend fun reload(): CodeFileLoad {
+        val file = mutableDocument.value.file
+            ?: return CodeFileLoad.Failed("Dokumen belum disimpan, jadi tidak ada berkas untuk dimuat ulang")
+        return open(file, keepCursor = true)
     }
 
-    fun close() {
+    /** Ganti dokumen dengan dokumen kosong "Tidak berjudul". */
+    suspend fun newDocument() {
         revision++
-        mutableDocument.value = null
-        snapshot = null
-        editor?.let { applyText(it, "", 0, 0) }
+        mutableDocument.value = CodeDocument.untitled()
+        snapshot = Snapshot("", 0, 0)
+        stopSearch()
+        editor?.let {
+            applyText(it, "", 0, 0)
+            applyHighlighting(it, null)
+        }
     }
+
+    suspend fun save(): CodeFileSave {
+        val current = mutableDocument.value
+        val file = current.file
+            ?: return CodeFileSave.Failed("Dokumen belum punya nama berkas")
+        return write(current, file)
+    }
+
+    suspend fun saveAs(file: File): CodeFileSave = write(mutableDocument.value, file)
 
     fun undo() {
         editor?.let { if (it.canUndo()) it.undo() }
@@ -117,9 +144,95 @@ internal class CodeEditorSession(
         editor?.pasteText()
     }
 
+    fun setWordwrap(enabled: Boolean) {
+        mutableOptions.update { it.copy(wordwrap = enabled) }
+        editor?.setWordwrap(enabled)
+    }
+
+    fun setReadOnly(readOnly: Boolean) {
+        mutableOptions.update { it.copy(readOnly = readOnly) }
+        editor?.setEditable(!readOnly)
+    }
+
+    fun lineCount(): Int = editor?.text?.lineCount ?: 1
+
+    /** Pindah ke awal baris [line] (berbasis satu); false bila di luar jangkauan. */
+    fun goToLine(line: Int): Boolean {
+        val target = editor ?: return false
+        if (line < 1 || line > target.text.lineCount) return false
+        target.jumpToLine(line - 1)
+        return true
+    }
+
+    suspend fun statistics(): CodeTextStats {
+        val doc = mutableDocument.value
+        val target = editor
+        val text = target?.text?.toString() ?: snapshot.text
+        val selected = target?.cursor?.let { if (it.isSelected) it.right - it.left else 0 } ?: 0
+        return withContext(Dispatchers.Default) {
+            CodeTextStatistics.compute(text, doc.charset, doc.hasBom, selected)
+        }
+    }
+
+    /** Mulai atau perbarui pencarian; kueri kosong menghentikan pencarian. */
+    fun search(query: String) {
+        val target = editor ?: return
+        if (query.isEmpty()) {
+            stopSearch()
+            return
+        }
+        mutableSearch.value = CodeSearchState(query, 0, 0)
+        target.searcher.search(query, EditorSearcher.SearchOptions(true, false))
+    }
+
+    fun searchNext() {
+        val target = editor ?: return
+        if (!target.searcher.hasQuery()) return
+        target.searcher.gotoNext()
+        publishSearch(target)
+    }
+
+    fun searchPrevious() {
+        val target = editor ?: return
+        if (!target.searcher.hasQuery()) return
+        target.searcher.gotoPrevious()
+        publishSearch(target)
+    }
+
+    fun stopSearch() {
+        editor?.let { if (it.searcher.hasQuery()) it.searcher.stopSearch() }
+        mutableSearch.value = CodeSearchState.NONE
+    }
+
+    private suspend fun write(current: CodeDocument, target: File): CodeFileSave {
+        val text = editor?.text?.toString() ?: snapshot.text
+        val savedRevision = revision
+        val result = files.save(target, text, current.charset, current.hasBom)
+        if (result is CodeFileSave.Saved) {
+            val renamed = current.file != target
+            mutableDocument.update { doc ->
+                if (doc.file != current.file) {
+                    doc
+                } else {
+                    doc.copy(file = target, dirty = doc.dirty && revision != savedRevision)
+                }
+            }
+            if (renamed) editor?.let { applyHighlighting(it, target) }
+        }
+        return result
+    }
+
+    private fun publishSearch(target: CodeEditor) {
+        val searcher = target.searcher
+        if (!searcher.hasQuery()) return
+        val total = searcher.matchedPositionCount
+        val current = if (searcher.isMatchedPositionSelected) searcher.currentMatchedPositionIndex + 1 else 0
+        mutableSearch.update { it.copy(total = total, current = current) }
+    }
+
     private fun onContentEdited() {
         revision++
-        mutableDocument.update { if (it != null && !it.dirty) it.copy(dirty = true) else it }
+        mutableDocument.update { if (!it.dirty) it.copy(dirty = true) else it }
     }
 
     private fun applyText(target: CodeEditor, text: String, line: Int, column: Int) {
@@ -139,10 +252,10 @@ internal class CodeEditorSession(
         }
     }
 
-    private suspend fun applyHighlighting(target: CodeEditor, file: File) {
+    private suspend fun applyHighlighting(target: CodeEditor, file: File?) {
         withContext(Dispatchers.Default) { textMate.warmUp() }
         if (target !== editor) return
-        val highlighting = textMate.prepare(file.name)
+        val highlighting = textMate.prepare(file?.name)
         highlighting.scheme?.let { target.setColorScheme(it) }
         target.setEditorLanguage(highlighting.language)
     }

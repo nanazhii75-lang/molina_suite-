@@ -1,21 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="code_title">Molina Code</string>
-    <string name="code_empty_title">Belum ada berkas dibuka</string>
-    <string name="code_empty_hint">Pilih berkas dari /sdcard/Molina untuk mulai menyunting.</string>
-    <string name="code_action_open">Buka berkas</string>
-    <string name="code_key_open">Berkas</string>
+    <string name="code_untitled">Tidak berjudul</string>
+    <string name="code_default_file_name">tanpa-judul.txt</string>
+
+    <string name="code_header_menu">Menu berkas</string>
+    <string name="code_header_edit">Mode sunting</string>
+    <string name="code_header_more">Aksi lainnya</string>
+
+    <string name="code_key_open">Buka</string>
     <string name="code_key_paste">Tempel</string>
-    <string name="code_key_undo" translatable="false">Undo</string>
-    <string name="code_key_redo" translatable="false">Redo</string>
-    <string name="code_key_left" translatable="false">←</string>
-    <string name="code_key_right" translatable="false">→</string>
+    <string name="code_key_undo">Urungkan</string>
+    <string name="code_key_redo">Ulangi</string>
+    <string name="code_key_left">Kursor ke kiri</string>
+    <string name="code_key_right">Kursor ke kanan</string>
     <string name="code_key_save">Simpan</string>
     <string name="code_key_close">Tutup</string>
-    <string name="code_picker_title">Pilih berkas</string>
+
+    <string name="code_menu_new">Baru</string>
+    <string name="code_menu_open">Buka</string>
+    <string name="code_menu_save">Simpan</string>
+    <string name="code_menu_save_as">Simpan sebagai</string>
+    <string name="code_menu_reload">Muat ulang</string>
+    <string name="code_menu_close">Tutup</string>
+    <string name="code_menu_search">Cari</string>
+    <string name="code_menu_goto">Pergi ke baris</string>
+    <string name="code_menu_stats">Statistik</string>
+    <string name="code_menu_wordwrap">Pembungkus kata</string>
+    <string name="code_menu_readonly">Hanya baca</string>
+
+    <string name="code_search_hint">Cari</string>
+    <string name="code_search_previous">Sebelumnya</string>
+    <string name="code_search_next">Berikutnya</string>
+    <string name="code_search_close">Tutup pencarian</string>
+
+    <string name="code_goto_hint">1 sampai %1$d</string>
+    <string name="code_goto_confirm">Pergi</string>
+    <string name="code_goto_invalid">Masukkan nomor baris antara 1 dan %1$d.</string>
+
+    <string name="code_stats_lines">Baris: %1$d</string>
+    <string name="code_stats_words">Kata: %1$d</string>
+    <string name="code_stats_characters">Karakter: %1$d</string>
+    <string name="code_stats_size">Ukuran: %1$s</string>
+    <string name="code_stats_encoding">Enkode: %1$s</string>
+    <string name="code_stats_selected">Karakter terpilih: %1$d</string>
+
+    <string name="code_picker_title_open">Buka berkas</string>
+    <string name="code_picker_title_save">Simpan sebagai</string>
+    <string name="code_picker_up">Naik satu folder</string>
+    <string name="code_picker_sort">Urutkan</string>
+    <string name="code_picker_sort_name">Nama</string>
+    <string name="code_picker_sort_date">Tanggal diubah</string>
+    <string name="code_picker_sort_size">Ukuran</string>
+    <string name="code_picker_favorites">Favorit</string>
+    <string name="code_picker_favorite_add">Tambah folder ini ke favorit</string>
+    <string name="code_picker_favorite_remove">Hapus folder ini dari favorit</string>
+    <string name="code_picker_favorite_missing">Folder favorit tidak ditemukan dan dihapus dari daftar:\n%1$s</string>
+    <string name="code_picker_filter">Filter</string>
+    <string name="code_picker_show_hidden">Tampilkan berkas tersembunyi</string>
+    <string name="code_picker_filter_name">Filter nama</string>
+    <string name="code_picker_filter_hint">Bagian dari nama berkas</string>
+    <string name="code_picker_new_folder">Folder baru</string>
+    <string name="code_picker_folder_hint">Nama folder</string>
+    <string name="code_picker_folder_failed">Gagal membuat folder %1$s.</string>
+    <string name="code_picker_save_here">Simpan sebagai</string>
+    <string name="code_picker_cancel">Batal</string>
+    <string name="code_picker_name_hint">Nama berkas</string>
+    <string name="code_picker_name_invalid">Nama tidak valid. Isi nama tanpa tanda / dan bukan . atau ..</string>
+    <string name="code_picker_name_is_folder">%1$s adalah folder, bukan berkas.</string>
+    <string name="code_picker_overwrite_title">Timpa berkas?</string>
+    <string name="code_picker_overwrite_message">%1$s sudah ada dan isinya akan diganti.</string>
+    <string name="code_picker_overwrite_yes">Timpa</string>
     <string name="code_picker_empty">Folder kosong</string>
     <string name="code_picker_unreadable">Folder tidak bisa dibaca</string>
     <string name="code_picker_error">Folder bersama tidak bisa disiapkan:\n%1$s</string>
+
     <string name="code_permission_denied">Izin penyimpanan diperlukan untuk membuka dan menyimpan berkas.</string>
     <string name="code_open_failed">Gagal membuka %1$s:\n%2$s</string>
     <string name="code_file_too_large">Berkas terlalu besar (%1$s). Batasnya %2$s.</string>
@@ -26,4 +85,8 @@
     <string name="code_unsaved_message">%1$s memiliki perubahan yang belum disimpan.</string>
     <string name="code_unsaved_save">Simpan</string>
     <string name="code_unsaved_discard">Buang</string>
+    <string name="code_reload_title">Muat ulang berkas?</string>
+    <string name="code_reload_message">Perubahan di %1$s yang belum disimpan akan dibuang.</string>
+    <string name="code_reload_confirm">Muat ulang</string>
+    <string name="code_reload_untitled">Dokumen belum disimpan, jadi tidak ada berkas untuk dimuat ulang.</string>
 </resources>
