@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.text.Editable
 import android.text.InputType
+import android.text.TextWatcher
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -313,6 +315,18 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
             debianCheck.isChecked = entry.runIn == RunMode.DEBIAN
         }
 
+        val updateCounter = {
+            val lines = LibraryLimits.lineCount(contentInput.text?.toString().orEmpty())
+            contentLayout.helperText =
+                getString(R.string.library_line_counter, lines, LibraryLimits.MAX_SCRIPT_LINES)
+        }
+        contentInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) = updateCounter()
+        })
+        updateCounter()
+
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle(if (entry == null) R.string.library_add_title else R.string.library_edit_title)
             .setView(dialogView)
@@ -327,8 +341,12 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
                 val content = contentInput.text?.toString().orEmpty().trim()
                 val note = noteInput.text?.toString().orEmpty().trim()
                 nameLayout.error = if (name.isEmpty()) getString(R.string.library_error_name) else null
-                contentLayout.error =
-                    if (content.isEmpty()) getString(R.string.library_error_content) else null
+                contentLayout.error = when {
+                    content.isEmpty() -> getString(R.string.library_error_content)
+                    LibraryLimits.lineCount(content) > LibraryLimits.MAX_SCRIPT_LINES ->
+                        getString(R.string.library_error_too_long, LibraryLimits.MAX_SCRIPT_LINES)
+                    else -> null
+                }
                 if (nameLayout.error != null || contentLayout.error != null) return@setOnClickListener
                 val runIn = when {
                     debianCheck.isChecked -> RunMode.DEBIAN

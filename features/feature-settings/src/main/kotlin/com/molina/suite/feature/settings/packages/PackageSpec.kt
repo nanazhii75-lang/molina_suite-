@@ -86,9 +86,48 @@ internal object PackageCatalog {
             PackageKind.APT, listOf("openjdk-17-jdk-headless")
         ),
         PackageSpec(
-            "tools", R.string.pkg_tools_title, R.string.pkg_tools_desc,
-            PackageKind.APT,
-            listOf("git", "curl", "wget", "unzip", "p7zip-full", "nano", "rsync", "jq", "mediainfo")
+            "git", R.string.pkg_git_title, R.string.pkg_git_desc,
+            PackageKind.APT, listOf("git")
+        ),
+        PackageSpec(
+            "curl", R.string.pkg_curl_title, R.string.pkg_curl_desc,
+            PackageKind.APT, listOf("curl")
+        ),
+        PackageSpec(
+            "wget", R.string.pkg_wget_title, R.string.pkg_wget_desc,
+            PackageKind.APT, listOf("wget")
+        ),
+        PackageSpec(
+            "unzip", R.string.pkg_unzip_title, R.string.pkg_unzip_desc,
+            PackageKind.APT, listOf("unzip")
+        ),
+        PackageSpec(
+            "p7zip", R.string.pkg_p7zip_title, R.string.pkg_p7zip_desc,
+            PackageKind.APT, listOf("p7zip-full")
+        ),
+        PackageSpec(
+            "nano", R.string.pkg_nano_title, R.string.pkg_nano_desc,
+            PackageKind.APT, listOf("nano")
+        ),
+        PackageSpec(
+            "rsync", R.string.pkg_rsync_title, R.string.pkg_rsync_desc,
+            PackageKind.APT, listOf("rsync")
+        ),
+        PackageSpec(
+            "jq", R.string.pkg_jq_title, R.string.pkg_jq_desc,
+            PackageKind.APT, listOf("jq")
+        ),
+        PackageSpec(
+            "mediainfo", R.string.pkg_mediainfo_title, R.string.pkg_mediainfo_desc,
+            PackageKind.APT, listOf("mediainfo")
+        ),
+        PackageSpec(
+            "tmux", R.string.pkg_tmux_title, R.string.pkg_tmux_desc,
+            PackageKind.APT, listOf("tmux")
+        ),
+        PackageSpec(
+            "ssh", R.string.pkg_ssh_title, R.string.pkg_ssh_desc,
+            PackageKind.APT, listOf("openssh-client")
         )
     )
 

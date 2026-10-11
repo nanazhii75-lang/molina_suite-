@@ -73,6 +73,8 @@ class JsonLibraryRepository(private val file: File) : LibraryRepository {
         entry.id.isBlank() -> "ID entri tidak boleh kosong"
         entry.name.isEmpty() -> "Nama entri tidak boleh kosong"
         entry.content.isEmpty() -> "Isi entri tidak boleh kosong"
+        LibraryLimits.lineCount(entry.content) > LibraryLimits.MAX_SCRIPT_LINES ->
+            "Isi entri melebihi ${LibraryLimits.MAX_SCRIPT_LINES} baris (${LibraryLimits.lineCount(entry.content)} baris)"
         else -> null
     }
 

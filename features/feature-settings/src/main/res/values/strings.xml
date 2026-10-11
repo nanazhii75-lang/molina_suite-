@@ -10,7 +10,7 @@
     <string name="library_add_title">Entri baru</string>
     <string name="library_edit_title">Ubah entri</string>
     <string name="library_field_name">Nama</string>
-    <string name="library_field_content">Isi (tautan, perintah, atau skrip beberapa baris)</string>
+    <string name="library_field_content">Isi (tautan, perintah, atau skrip, maks. 3000 baris)</string>
     <string name="library_field_note">Catatan (opsional)</string>
     <string name="library_save">Simpan</string>
     <string name="library_cancel">Batal</string>
@@ -76,8 +76,6 @@
     <string name="pkg_aria2_desc">Pengunduh paralel aria2c.</string>
     <string name="pkg_jdk_title">JDK 17</string>
     <string name="pkg_jdk_desc">OpenJDK 17 headless dari repositori Debian 12.</string>
-    <string name="pkg_tools_title">Alat bantu</string>
-    <string name="pkg_tools_desc">git, curl, wget, unzip, p7zip, nano, rsync, jq, dan mediainfo.</string>
     <string name="library_permission_denied">Izin penyimpanan ditolak. Aktifkan di Pengaturan > Aplikasi > molina > Izin, lalu buka ulang tab ini.</string>
     <string name="library_requires">Butuh %1$s (belum terpasang)</string>
     <string name="library_requires_message">Entri ini butuh %1$s, tetapi belum terpasang di Debian.</string>
@@ -85,4 +83,7 @@
     <string name="library_run_anyway">Jalankan saja</string>
     <string name="debian_logout_confirm">Mengetik exit ke sesi Terminal aktif. Di dalam Debian, kamu kembali ke shell biasa. Di shell biasa, sesi akan tertutup.</string>
     <string name="debian_confirm_run">Lanjutkan</string>
+    <string name="library_line_counter">%1$d / %2$d baris</string>
+    <string name="library_error_too_long">Isi melebihi %1$d baris</string>
+    <string name="library_item_preview_more">%1$s …  (%2$d baris)</string>
 </resources>

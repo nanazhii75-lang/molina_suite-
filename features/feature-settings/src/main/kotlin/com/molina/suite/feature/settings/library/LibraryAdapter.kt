@@ -38,7 +38,14 @@ internal class LibraryAdapter(
     override fun onBindViewHolder(holder: Holder, position: Int) {
         val entry = getItem(position)
         holder.name.text = entry.name
-        holder.content.text = entry.content
+        val totalLines = LibraryLimits.lineCount(entry.content)
+        val preview = LibraryPreview.head(entry.content)
+        holder.content.text =
+            if (totalLines > LibraryPreview.PREVIEW_LINES) {
+                holder.itemView.context.getString(R.string.library_item_preview_more, preview, totalLines)
+            } else {
+                preview
+            }
         holder.note.text = entry.note
         holder.note.visibility = if (entry.note.isEmpty()) View.GONE else View.VISIBLE
         val missing = missingByEntry[entry.id]
