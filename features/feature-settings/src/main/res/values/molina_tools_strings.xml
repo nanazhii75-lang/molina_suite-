@@ -32,7 +32,7 @@
     <string name="tools_run_failed">Gagal menjalankan: %1$s</string>
 
     <string name="tools_convert_title">Konverter Media</string>
-    <string name="tools_convert_desc">Ubah file media ke MP3, M4A, Opus, MP4, MKV, atau WebM. Hasil disimpan di folder Downloads.</string>
+    <string name="tools_convert_desc">Ubah file media ke MP3, M4A, Opus, MP4, MKV, atau WebM. Progres tampil di layar khusus, detail teknis tetap ada di Terminal. Hasil disimpan di folder Downloads.</string>
     <string name="tools_convert_start">Konversi</string>
     <string name="tools_probe_title">Info video (ffprobe)</string>
     <string name="tools_probe_desc">Tampilkan durasi, resolusi, codec, dan audio sebuah file media di layar khusus. Detail teknis tetap ada di Terminal.</string>

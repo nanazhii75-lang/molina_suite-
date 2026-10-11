@@ -2,7 +2,6 @@ package com.molina.suite.feature.settings.tools
 
 import androidx.annotation.StringRes
 import com.molina.suite.feature.settings.R
-import com.molina.suite.feature.settings.ShellLine
 
 /** Format hasil konverter media. [extension] dipakai untuk nama file keluaran. */
 internal enum class ConvertTarget(@StringRes val label: Int, val extension: String, val isVideo: Boolean) {
@@ -20,15 +19,15 @@ internal enum class ConvertMode(@StringRes val label: Int) {
     REENCODE(R.string.tools_mode_reencode)
 }
 
-/** Menyusun satu baris perintah ffmpeg; path di-quote untuk shell. */
+/** Menyusun argumen ffmpeg per format dan mode; skrip convert-media.sh yang menjalankannya. */
 internal object ConvertPlan {
 
     private const val H264 = "-c:v libx264 -preset veryfast -crf 23 -pix_fmt yuv420p"
     private const val VP9 = "-c:v libvpx-vp9 -crf 32 -b:v 0 -deadline good -cpu-used 4 -row-mt 1"
     private const val STREAMS = "-map 0:v:0? -map 0:a?"
 
-    fun command(input: String, output: String, target: ConvertTarget, mode: ConvertMode): String =
-        "ffmpeg -hide_banner -n -i ${ShellLine.quote(input)} ${args(target, mode)} ${ShellLine.quote(output)}"
+    /** Argumen di antara "-i <sumber>" dan "<hasil>"; konstan, dipisah per spasi oleh skrip. */
+    fun ffmpegArgs(target: ConvertTarget, mode: ConvertMode): String = args(target, mode)
 
     private fun args(target: ConvertTarget, mode: ConvertMode): String = when (target) {
         ConvertTarget.MP3 -> "-vn -c:a libmp3lame -b:a 320k"

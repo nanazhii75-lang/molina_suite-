@@ -251,11 +251,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
                 toolsToast(getString(R.string.tools_output_failed))
                 return@launch
             }
-            launcher.launch(
-                listOf("ffmpeg"),
-                ConvertPlan.command(source.terminalPath, output, target, mode),
-                R.string.tools_convert_title
-            )
+            startRun(RunKind.CONVERT, listOf(source.terminalPath, output, ConvertPlan.ffmpegArgs(target, mode)))
         }
     }
 
