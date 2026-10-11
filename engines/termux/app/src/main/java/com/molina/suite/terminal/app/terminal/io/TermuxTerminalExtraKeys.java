@@ -12,6 +12,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.molina.suite.terminal.R;
 import com.molina.suite.terminal.app.terminal.TermuxTerminalSessionClient;
 import com.molina.suite.terminal.app.terminal.TermuxTerminalViewClient;
+import com.molina.suite.terminal.shared.data.DataUtils;
 import com.molina.suite.terminal.shared.interact.ShareUtils;
 import com.molina.suite.terminal.shared.terminal.io.TerminalExtraKeys;
 import com.molina.suite.terminal.view.TerminalView;
@@ -48,7 +49,7 @@ public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
             if(mTermuxTerminalSessionClient != null)
                 mTermuxTerminalSessionClient.onPasteTextFromClipboard(null);
         } else if ("COPY".equals(key)) {
-            copyVisibleScreen(view);
+            copyFullTranscript(view);
         } else if ("CLEAR".equals(key)) {
             clearScreen();
         } else {
@@ -56,13 +57,16 @@ public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
         }
     }
 
-    /** Menyalin seluruh teks yang terlihat di layar terminal, termasuk baris prompt. */
-    private void copyVisibleScreen(View view) {
+    /** Menyalin seluruh isi terminal (riwayat scroll dan layar), termasuk baris prompt. */
+    private void copyFullTranscript(View view) {
         if (mTermuxTerminalViewClient == null) return;
         TerminalView terminalView = mTermuxTerminalViewClient.getHost().getTerminalView();
         if (terminalView == null) return;
         Context context = view.getContext();
-        String text = terminalView.getVisibleScreenText();
+        // Panjang teks dibatasi agar clipboard tidak kena TransactionTooLargeException. Bila terlalu
+        // panjang, yang dibuang baris terlama sehingga prompt terbaru tetap ikut tersalin.
+        String text = DataUtils.getTruncatedCommandOutput(terminalView.getFullTranscriptText(),
+            DataUtils.TRANSACTION_SIZE_LIMIT_IN_BYTES - 1, false, true, false);
         if (text.isEmpty()) {
             Toast.makeText(context, R.string.molina_extra_key_screen_empty, Toast.LENGTH_SHORT).show();
             return;

@@ -228,7 +228,7 @@
     <string name="donate_preference_title">Donate</string>
 
     <!-- Extra keys Molina -->
-    <string name="molina_extra_key_screen_copied">Teks layar disalin</string>
-    <string name="molina_extra_key_screen_empty">Layar kosong, tidak ada yang disalin</string>
+    <string name="molina_extra_key_screen_copied">Seluruh teks terminal disalin</string>
+    <string name="molina_extra_key_screen_empty">Terminal kosong, tidak ada yang disalin</string>
 
 </resources>

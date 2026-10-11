@@ -1007,16 +1007,13 @@ public final class TerminalView extends View {
     }
 
     /**
-     * Teks seluruh baris yang sedang terlihat di layar (termasuk baris prompt), mengikuti posisi
-     * scroll saat ini. Baris kosong di akhir dibuang. String kosong bila emulator belum siap.
+     * Seluruh teks terminal: riwayat scroll ditambah layar yang sedang terlihat, termasuk baris
+     * prompt. Baris yang terpotong otomatis (wrap) digabung kembali dan spasi di awal/akhir
+     * dibuang. String kosong bila emulator belum siap.
      */
-    public String getVisibleScreenText() {
+    public String getFullTranscriptText() {
         if (mEmulator == null) return "";
-        CharSequence text = getText();
-        if (text == null) return "";
-        int end = text.length();
-        while (end > 0 && Character.isWhitespace(text.charAt(end - 1))) end--;
-        return text.subSequence(0, end).toString();
+        return mEmulator.getScreen().getTranscriptText();
     }
 
     private CharSequence getText() {
