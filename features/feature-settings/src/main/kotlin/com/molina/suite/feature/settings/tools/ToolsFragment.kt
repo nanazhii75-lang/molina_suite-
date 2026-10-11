@@ -202,10 +202,10 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         val url = DownloaderPlan.normalizeUrl(v.url.text?.toString().orEmpty())
         v.urlLayout.error = if (url == null) getString(R.string.tools_url_invalid) else null
         if (url == null) return
-        launcher.launch(
-            DownloaderPlan.requiredPackages(engine),
-            DownloaderPlan.command(url, format, engine),
-            R.string.tools_downloader_title
+        startRun(
+            RunKind.DOWNLOAD,
+            DownloaderPlan.scriptArgs(url, format, engine),
+            DownloaderPlan.requiredPackages(engine)
         )
     }
 
@@ -269,10 +269,15 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
     }
 
     /**
-     * Menjalankan skrip [kind] di Terminal dan menampilkan layar progresnya. Skrip memasang
-     * alat yang kurang sendiri, jadi tidak ada pemeriksaan paket di sini.
+     * Menjalankan skrip [kind] di Terminal dan menampilkan layar progresnya. [requiredIds]
+     * adalah paket menu Paket yang diperiksa lebih dulu (dengan tawaran memasang); skrip yang
+     * memasang alatnya sendiri, seperti ffmpeg, cukup mengosongkannya.
      */
-    private fun startRun(kind: RunKind, args: List<String> = emptyList()) {
+    private fun startRun(
+        kind: RunKind,
+        args: List<String> = emptyList(),
+        requiredIds: List<String> = emptyList()
+    ) {
         if (view == null) return
         val appContext = context?.applicationContext ?: return
         viewLifecycleOwner.lifecycleScope.launch {
@@ -282,11 +287,12 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
                     val session = prepared.value
                     var screen: RunDialogFragment? = null
                     launcher.launch(
-                        emptyList(),
+                        requiredIds,
                         session.command,
                         kind.title,
                         onStart = { screen = RunDialogFragment.show(childFragmentManager, session) },
-                        onFailed = { screen?.dismissAllowingStateLoss() }
+                        onFailed = { screen?.dismissAllowingStateLoss() },
+                        installWrapper = session::withPreinstall
                     )
                 }
             }

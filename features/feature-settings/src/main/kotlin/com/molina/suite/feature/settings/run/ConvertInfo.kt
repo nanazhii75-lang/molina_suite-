@@ -13,8 +13,6 @@ internal data class ConvertInfo(
     val processed: InfoTile
 ) {
     companion object {
-        private const val SHARED_PREFIX = "/sdcard/"
-
         /**
          * [ended] true bila proses sudah selesai atau dianggap macet: kartu yang belum punya
          * nilai dianggap gagal, bukan "sedang berjalan".
@@ -54,12 +52,7 @@ internal data class ConvertInfo(
                     ?.let { InfoTile.Value(it, null) } ?: missing
             }
 
-            val folder = status.value("out_path")
-                ?.removePrefix(SHARED_PREFIX)
-                ?.substringBeforeLast('/', "")
-                ?.takeIf { it.isNotEmpty() }
-            val outputDetail = listOfNotNull(status.value("fmt"), folder)
-                .takeIf { it.isNotEmpty() }?.joinToString("  •  ")
+            val outputDetail = RunOutput.detail(status)
 
             return ConvertInfo(
                 status.value("src"),

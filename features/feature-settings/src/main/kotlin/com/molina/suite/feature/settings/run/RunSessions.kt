@@ -17,7 +17,14 @@ internal data class RunSession(
     val statusFile: File,
     val startedAt: Long,
     val command: String
-)
+) {
+    /**
+     * Perintah yang sama, tetapi skrip lebih dulu menjalankan [installCommand] sebagai tahap
+     * "install", jadi pemasangan tampil di layar progres dan tidak dihitung sebagai skrip macet.
+     */
+    fun withPreinstall(installCommand: String): String =
+        "MOLINA_PREINSTALL=${ShellLine.quote(installCommand)} $command"
+}
 
 internal object RunSessions {
 

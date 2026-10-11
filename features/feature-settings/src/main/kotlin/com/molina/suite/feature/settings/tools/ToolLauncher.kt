@@ -36,7 +36,8 @@ internal class ToolLauncher(private val fragment: Fragment) {
         command: String,
         @StringRes title: Int,
         onStart: (() -> Unit)? = null,
-        onFailed: (() -> Unit)? = null
+        onFailed: (() -> Unit)? = null,
+        installWrapper: ((String) -> String)? = null
     ) {
         val appContext = fragment.context?.applicationContext ?: return
         val required = requiredIds.mapNotNull { id -> PackageCatalog.all.firstOrNull { it.id == id } }
@@ -47,7 +48,11 @@ internal class ToolLauncher(private val fragment: Fragment) {
                 is PackageDetection.Failed -> send(command, onStart, onFailed)
                 is PackageDetection.Ok -> {
                     val gap = required.filter { detection.installed[it.id] == false }
-                    if (gap.isEmpty()) send(command, onStart, onFailed) else askInstall(command, gap, title, onStart, onFailed)
+                    if (gap.isEmpty()) {
+                        send(command, onStart, onFailed)
+                    } else {
+                        askInstall(command, gap, title, onStart, onFailed, installWrapper)
+                    }
                 }
             }
         }
@@ -58,7 +63,8 @@ internal class ToolLauncher(private val fragment: Fragment) {
         missing: List<PackageSpec>,
         @StringRes title: Int,
         onStart: (() -> Unit)?,
-        onFailed: (() -> Unit)?
+        onFailed: (() -> Unit)?,
+        installWrapper: ((String) -> String)?
     ) {
         val ctx = fragment.context ?: return
         val install = PackageCatalog.installAllCommand(missing) ?: return
@@ -68,7 +74,9 @@ internal class ToolLauncher(private val fragment: Fragment) {
             .setMessage(fragment.getString(R.string.tools_missing_message, names))
             .setNegativeButton(R.string.tools_cancel, null)
             .setNeutralButton(R.string.tools_run_anyway) { _, _ -> send(command, onStart, onFailed) }
-            .setPositiveButton(R.string.tools_install_and_run) { _, _ -> send("$install && $command", onStart, onFailed) }
+            .setPositiveButton(R.string.tools_install_and_run) { _, _ ->
+                send(installWrapper?.invoke(install) ?: "$install && $command", onStart, onFailed)
+            }
             .show()
     }
 

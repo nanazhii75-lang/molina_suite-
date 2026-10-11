@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="run_download_title">Quick Downloader</string>
+    <string name="run_download_done">Unduhan selesai</string>
+    <string name="run_download_note">Unduhan memakai yt-dlp. Keluaran lengkapnya ada di tab Terminal. Hasil disimpan di folder Downloads Molina. Bila gagal atau dibatalkan, jalankan lagi untuk melanjutkan unduhan.</string>
+
+    <string name="run_stage_install_tools">Memasang alat…</string>
+    <string name="run_stage_dl_media">Mengunduh…</string>
+    <string name="run_stage_process_media">Memproses hasil…</string>
+
+    <string name="run_info_title">JUDUL</string>
+    <string name="run_info_engine">MESIN</string>
+    <string name="run_info_stream">Aliran %1$d dari %2$d</string>
+</resources>
