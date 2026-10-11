@@ -35,7 +35,7 @@
     <string name="tools_convert_desc">Ubah file media ke MP3, M4A, Opus, MP4, MKV, atau WebM. Hasil disimpan di folder Downloads.</string>
     <string name="tools_convert_start">Konversi</string>
     <string name="tools_probe_title">Info video (ffprobe)</string>
-    <string name="tools_probe_desc">Tampilkan durasi, codec, resolusi, dan bitrate sebuah file media.</string>
+    <string name="tools_probe_desc">Tampilkan durasi, resolusi, codec, dan audio sebuah file media di layar khusus. Detail teknis tetap ada di Terminal.</string>
     <string name="tools_probe_start">Tampilkan info</string>
 
     <string name="tools_network_title">Cek Jaringan</string>

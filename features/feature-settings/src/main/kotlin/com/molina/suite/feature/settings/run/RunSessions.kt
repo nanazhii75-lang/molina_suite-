@@ -28,7 +28,7 @@ internal object RunSessions {
      * Menyiapkan skrip di folder bersama dan nama berkas status yang unik, lalu membersihkan
      * berkas status lama. Memblokir I/O: panggil dari Dispatchers.IO.
      */
-    fun prepare(context: Context, kind: RunKind): LibraryResult<RunSession> {
+    fun prepare(context: Context, kind: RunKind, args: List<String> = emptyList()): LibraryResult<RunSession> {
         val script = try {
             context.assets.open(kind.scriptAsset).bufferedReader(Charsets.UTF_8).use { it.readText() }
         } catch (e: IOException) {
@@ -50,7 +50,8 @@ internal object RunSessions {
         val startedAt = System.currentTimeMillis()
         val statusFile = File(dir, "${kind.prefix}-$startedAt.status")
         val terminalStatusPath = "/sdcard/${MolinaStorage.SHARED_DIR_NAME}/$RUN_DIR_NAME/${statusFile.name}"
-        val command = "bash ${ShellLine.quote(scriptPath)} ${ShellLine.quote(terminalStatusPath)}"
+        val extra = args.joinToString("") { " " + ShellLine.quote(it) }
+        val command = "bash ${ShellLine.quote(scriptPath)} ${ShellLine.quote(terminalStatusPath)}$extra"
         return LibraryResult.Ok(RunSession(kind, statusFile, startedAt, command))
     }
 

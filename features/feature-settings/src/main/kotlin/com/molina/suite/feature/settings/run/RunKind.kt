@@ -13,11 +13,13 @@ internal enum class RunKind(
     val scriptId: String,
     val prefix: String
 ) {
-    NETWORK(R.string.run_network_title, "molina-run/net-check.sh", "run-net-check", "net");
+    NETWORK(R.string.run_network_title, "molina-run/net-check.sh", "run-net-check", "net"),
+    PROBE(R.string.run_probe_title, "molina-run/probe-info.sh", "run-probe-info", "probe");
 
     val presenter: RunPresenter
         get() = when (this) {
             NETWORK -> NetworkRunPresenter
+            PROBE -> ProbeRunPresenter
         }
 }
 

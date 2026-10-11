@@ -118,7 +118,7 @@ internal class RunDialogFragment : DialogFragment(R.layout.dialog_run) {
                 color = if (ok) R.color.ms_status_on else R.color.ms_status_error
                 badgeText = if (ok) R.string.run_badge_done else R.string.run_badge_failed
                 messageText = if (ok) {
-                    getString(R.string.run_message_done)
+                    getString(presenter.doneMessage)
                 } else {
                     snapshot.status.error.ifEmpty { getString(R.string.run_message_failed) }
                 }

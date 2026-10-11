@@ -16,6 +16,10 @@ internal interface RunPresenter {
     @get:LayoutRes
     val layout: Int
 
+    /** Teks keberhasilan di bawah progress bar. */
+    @get:StringRes
+    val doneMessage: Int
+
     /** Isi layar dibuat sekali setelah [layout] di-inflate. */
     fun onInflated(root: View)
 
@@ -29,6 +33,8 @@ internal interface RunPresenter {
 internal object NetworkRunPresenter : RunPresenter {
 
     override val layout: Int = R.layout.run_content_network
+
+    override val doneMessage: Int = R.string.run_message_done
 
     override fun onInflated(root: View) {
         label(root, R.id.net_ping, R.string.run_metric_ping)

@@ -265,14 +265,22 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
             toolsToast(getString(R.string.tools_pick_first))
             return
         }
-        launcher.launch(listOf("ffmpeg"), MediaPlan.probe(source.terminalPath), R.string.tools_probe_title)
+        startRun(RunKind.PROBE, listOf(source.terminalPath))
     }
 
     private fun startNetworkCheck() {
+        startRun(RunKind.NETWORK)
+    }
+
+    /**
+     * Menjalankan skrip [kind] di Terminal dan menampilkan layar progresnya. Skrip memasang
+     * alat yang kurang sendiri, jadi tidak ada pemeriksaan paket di sini.
+     */
+    private fun startRun(kind: RunKind, args: List<String> = emptyList()) {
         if (view == null) return
         val appContext = context?.applicationContext ?: return
         viewLifecycleOwner.lifecycleScope.launch {
-            when (val prepared = withContext(Dispatchers.IO) { RunSessions.prepare(appContext, RunKind.NETWORK) }) {
+            when (val prepared = withContext(Dispatchers.IO) { RunSessions.prepare(appContext, kind, args) }) {
                 is LibraryResult.Failure -> toolsToast(getString(R.string.tools_run_failed, prepared.reason))
                 is LibraryResult.Ok -> {
                     val session = prepared.value
@@ -280,7 +288,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
                     launcher.launch(
                         emptyList(),
                         session.command,
-                        RunKind.NETWORK.title,
+                        kind.title,
                         onStart = { screen = RunDialogFragment.show(childFragmentManager, session) },
                         onFailed = { screen?.dismissAllowingStateLoss() }
                     )

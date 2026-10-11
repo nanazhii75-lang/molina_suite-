@@ -1,7 +1,6 @@
 package com.molina.suite.feature.settings.tools
 
 import com.molina.suite.core.storage.MolinaStorage
-import com.molina.suite.feature.settings.ShellLine
 import com.molina.suite.feature.settings.library.ScriptStager
 import java.io.File
 
@@ -73,11 +72,4 @@ internal object MediaFiles {
         }
         return "/sdcard/${MolinaStorage.SHARED_DIR_NAME}/${MolinaStorage.DOWNLOADS_DIR_NAME}/${candidate.name}"
     }
-}
-
-/** Perintah ffmpeg dan ffprobe satu baris; path di-quote untuk shell. */
-internal object MediaPlan {
-
-    fun probe(input: String): String =
-        "ffprobe -hide_banner -i ${ShellLine.quote(input)}"
 }

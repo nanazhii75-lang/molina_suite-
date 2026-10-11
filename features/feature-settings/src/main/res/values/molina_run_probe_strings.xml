@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="run_probe_title">Info Video</string>
+    <string name="run_probe_done">Info video berhasil dibaca</string>
+    <string name="run_probe_note">Info dibaca memakai ffprobe. Keluaran lengkapnya ada di tab Terminal.</string>
+
+    <string name="run_stage_install_ffmpeg">Memasang ffmpeg…</string>
+    <string name="run_stage_probe">Membaca info video…</string>
+
+    <string name="run_info_file">BERKAS</string>
+    <string name="run_info_duration">DURASI</string>
+    <string name="run_info_resolution">RESOLUSI</string>
+    <string name="run_info_video">VIDEO</string>
+    <string name="run_info_audio">AUDIO</string>
+    <string name="run_info_reading">Membaca</string>
+    <string name="run_info_unknown">Tidak diketahui</string>
+    <string name="run_info_no_video">Tanpa video</string>
+    <string name="run_info_no_audio">Tanpa audio</string>
+</resources>
