@@ -48,3 +48,10 @@ tercatat sebagai commit terpisah.
 - Visibilitas dikendalikan lewat onResume, onStop, dan onHiddenChanged (shell memakai add/hide). Saat disembunyikan: flag disable-keyboard dihapus, softInputMode window dikembalikan, keyboard disembunyikan.
 - Sesi terakhir selesai: tidak menutup apa pun; sesi baru dibuat otomatis kecuali service sedang berhenti.
 - Belum dibawa: mode fullscreen, shortcut ACTION_RUN, tombol menu hardware, penerusan onContextMenuClosed (butuh kontrak di core-common).
+
+## Penyesuaian MOTD dan Extra Keys
+- `TermuxInstaller.applyMolinaMotd()`: etc/motd ditimpa dengan "Welcome Molina Terminal" setiap aplikasi dimulai (bin/login mencetaknya tepat di atas prompt).
+- `TermuxPropertyConstants.DEFAULT_IVALUE_EXTRA_KEYS`: `/` -> DRAWER (tampil ☰), END -> CLEAR, PGUP -> COPY, PGDN -> PASTE.
+- `ExtraKeysConstants`: simbol ⎘ untuk PASTE dihapus; COPY, PASTE, CLEAR tampil sebagai teks.
+- `TermuxTerminalExtraKeys`: handler COPY (salin seluruh teks layar yang terlihat termasuk prompt) dan CLEAR (Ctrl+L). `TerminalView.getVisibleScreenText()` ditambahkan.
+- `strings.xml`: `molina_extra_key_screen_copied`, `molina_extra_key_screen_empty`.

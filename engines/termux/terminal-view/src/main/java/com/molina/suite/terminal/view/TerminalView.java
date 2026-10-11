@@ -1006,6 +1006,19 @@ public final class TerminalView extends View {
         return mTermSession;
     }
 
+    /**
+     * Teks seluruh baris yang sedang terlihat di layar (termasuk baris prompt), mengikuti posisi
+     * scroll saat ini. Baris kosong di akhir dibuang. String kosong bila emulator belum siap.
+     */
+    public String getVisibleScreenText() {
+        if (mEmulator == null) return "";
+        CharSequence text = getText();
+        if (text == null) return "";
+        int end = text.length();
+        while (end > 0 && Character.isWhitespace(text.charAt(end - 1))) end--;
+        return text.subSequence(0, end).toString();
+    }
+
     private CharSequence getText() {
         return mEmulator.getScreen().getSelectedText(0, mTopRow, mEmulator.mColumns, mTopRow + mEmulator.mRows);
     }

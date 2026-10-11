@@ -29,6 +29,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -102,6 +105,7 @@ final class TermuxInstaller {
             if(PREFIX_FILE_LIST == null || PREFIX_FILE_LIST.length == 0 || !new File(TERMUX_PREFIX_DIR_PATH, "bin/bash").isFile() || (PREFIX_FILE_LIST.length == 1 && TermuxConstants.TERMUX_TMP_PREFIX_DIR_PATH.equals(PREFIX_FILE_LIST[0].getAbsolutePath()))) {
                 Logger.logInfo(LOG_TAG, "The termux prefix directory \"" + TERMUX_PREFIX_DIR_PATH + "\" exists but is empty or only contains the tmp directory.");
             } else {
+                applyMolinaMotd();
                 whenDone.run();
                 return;
             }
@@ -241,6 +245,7 @@ final class TermuxInstaller {
                     }
 
                     Logger.logInfo(LOG_TAG, "Bootstrap packages installed successfully.");
+                    applyMolinaMotd();
                     activity.runOnUiThread(whenDone);
 
                 } catch (final Exception e) {
@@ -257,6 +262,32 @@ final class TermuxInstaller {
                 }
             }
         }.start();
+    }
+
+    /** Isi motd yang dicetak oleh bin/login tepat di atas prompt. */
+    private static final String MOLINA_MOTD = "Welcome Molina Terminal\n";
+
+    /**
+     * Menimpa etc/motd bawaan bootstrap dengan sapaan Molina. Dipanggil setiap aplikasi dimulai
+     * karena upgrade paket termux-tools mengembalikan motd bawaan. File hanya ditulis ulang bila
+     * isinya berbeda. Motd dinamis milik pengguna (~/.termux/motd.sh) tetap diutamakan oleh login.
+     */
+    static void applyMolinaMotd() {
+        try {
+            File motdFile = new File(TERMUX_PREFIX_DIR_PATH, "etc/motd");
+            File etcDir = motdFile.getParentFile();
+            if (etcDir == null || !etcDir.isDirectory()) return;
+            byte[] expected = MOLINA_MOTD.getBytes(StandardCharsets.UTF_8);
+            if (motdFile.isFile()) {
+                if (Arrays.equals(Files.readAllBytes(motdFile.toPath()), expected)) return;
+                motdFile.setWritable(true, true);
+            }
+            try (FileOutputStream out = new FileOutputStream(motdFile, false)) {
+                out.write(expected);
+            }
+        } catch (Exception e) {
+            Logger.logStackTraceWithMessage(LOG_TAG, "Gagal menulis motd Molina", e);
+        }
     }
 
     public static void showBootstrapErrorDialog(Activity activity, Runnable whenDone, String message) {
