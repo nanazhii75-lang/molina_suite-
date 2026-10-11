@@ -31,6 +31,9 @@ internal object MpvYtdlBridge {
         val target = wrapperFile(application)
         MolinaMpvOptions.set("ytdl", "yes")
         MolinaMpvOptions.set("ytdl-format", YTDL_FORMAT)
+        // Log mpv lengkap (termasuk ytdl_hook dan jaringan) agar kegagalan putar bisa dibaca dari
+        // Terminal molina; ditimpa setiap pemutar baru dibuat.
+        MolinaMpvOptions.set("log-file", File(application.filesDir, "mpv.log").absolutePath)
         MolinaMpvOptions.set("script-opts", "ytdl_hook-ytdl_path=" + target.absolutePath)
         Thread({ writeWrapperWhenPrefixReady(application, target) }, "mpv-ytdl-bridge")
             .apply { isDaemon = true }
