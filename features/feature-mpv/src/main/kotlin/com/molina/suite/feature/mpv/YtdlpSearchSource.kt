@@ -7,6 +7,7 @@ import com.molina.suite.mpv.search.YoutubeSearchException.Reason
 import com.molina.suite.mpv.search.YoutubeSearchSource
 import java.io.File
 import java.io.IOException
+import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
 /**
@@ -34,16 +35,19 @@ internal class YtdlpSearchSource(private val wrapper: File) : YoutubeSearchSourc
             throw YoutubeSearchException(Reason.UNAVAILABLE, "Pembungkus molina-ytdlp belum terpasang: " + wrapper.path)
         }
 
+        val encoded = URLEncoder.encode(cleaned, "UTF-8")
         val command = listOf(
             wrapper.absolutePath,
             "--dump-json",
             "--no-warnings",
             "--ignore-errors",
-            // ytsearchdate: YouTube sendiri mengurutkan menurut waktu unggah (terbaru dulu);
-            // --playlist-items hanya mengambil metadata penuh untuk halaman yang diminta.
+            // Kunci ytsearchdate sudah dihapus dari yt-dlp. URL hasil pencarian YouTube dengan
+            // parameter sp (urut tanggal unggah, hanya video) tetap didukung; YouTube sendiri
+            // mengurutkan terbaru dulu. --playlist-items hanya mengambil metadata penuh untuk
+            // halaman yang diminta.
             "--playlist-items",
             "${start + 1}-$end",
-            "ytsearchdate$end:$cleaned"
+            "https://www.youtube.com/results?search_query=$encoded&sp=$SORT_BY_DATE_VIDEOS"
         )
         val process = try {
             ProcessBuilder(command).also { it.environment().clear() }.start()
@@ -136,6 +140,7 @@ internal class YtdlpSearchSource(private val wrapper: File) : YoutubeSearchSourc
         const val JOIN_MILLIS = 2000L
         const val MAX_RESULTS = 20
         const val MAX_TOTAL = 60
+        const val SORT_BY_DATE_VIDEOS = "CAISAhAB"
         const val MAX_ERR_CHARS = 20_000
     }
 }
