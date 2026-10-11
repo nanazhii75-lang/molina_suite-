@@ -76,4 +76,5 @@
     <string name="pkg_jdk_desc">OpenJDK 17 headless dari repositori Debian 12.</string>
     <string name="pkg_tools_title">Alat bantu</string>
     <string name="pkg_tools_desc">git, curl, wget, unzip, p7zip, nano, rsync, jq, dan mediainfo.</string>
+    <string name="library_permission_denied">Izin penyimpanan ditolak. Aktifkan di Pengaturan > Aplikasi > molina > Izin, lalu buka ulang tab ini.</string>
 </resources>

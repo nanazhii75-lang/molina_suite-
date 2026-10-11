@@ -1,6 +1,8 @@
 package com.molina.suite.feature.settings.library
 
+import android.Manifest
 import android.content.DialogInterface
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.InputType
 import android.view.View
@@ -8,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,6 +38,15 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
 
     private var views: Views? = null
     private var runJob: Job? = null
+    private val storagePermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (views == null) return@registerForActivityResult
+            if (granted) {
+                load()
+            } else {
+                render(LibraryResult.Failure(getString(R.string.library_permission_denied)))
+            }
+        }
     private val adapter = LibraryAdapter(onRun = { prepareRun(it) }, onEdit = { showEditor(it) })
 
     private val repository: LibraryRepository
@@ -61,6 +74,10 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
 
     /** Memuat daftar; saat pertama kali (berkas belum ada) menyemai entri bawaan lebih dulu. */
     private fun load() {
+        if (!hasStoragePermission()) {
+            storagePermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            return
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             val result = withContext<LibraryResult<List<LibraryEntry>>>(Dispatchers.IO) {
                 if (!repository.isInitialized()) {
@@ -72,6 +89,12 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
             render(result)
         }
     }
+
+    private fun hasStoragePermission(): Boolean =
+        ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
 
     private fun render(result: LibraryResult<List<LibraryEntry>>) {
         val v = views ?: return
