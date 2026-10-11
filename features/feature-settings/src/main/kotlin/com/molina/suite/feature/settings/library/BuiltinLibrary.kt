@@ -96,6 +96,11 @@ internal object BuiltinLibrary {
             "Dibutuhkan untuk konversi, info media, dan unduh cepat. Unduhan cukup besar.", RunMode.DEBIAN
         ),
         entry(
+            "builtin-install-ffmpeg", "Install ffmpeg",
+            "apt update && apt install -y ffmpeg",
+            "ffmpeg dan ffprobe untuk konversi dan info media. Unduhan cukup besar.", RunMode.DEBIAN
+        ),
+        entry(
             "builtin-install-python", "Install Python",
             "apt update && apt install -y python3 python3-pip python3-venv",
             "Python 3 beserta pip dan venv.", RunMode.DEBIAN
