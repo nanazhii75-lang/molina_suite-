@@ -44,6 +44,7 @@
     <string name="tools_pick_label">Pilih file media</string>
     <string name="tools_pick_selected">File: %1$s</string>
     <string name="tools_pick_title">Pilih file</string>
+    <string name="tools_pick_meta">%1$s  •  %2$s  •  %3$s</string>
     <string name="tools_pick_first">Pilih file dulu</string>
     <string name="tools_no_media">Belum ada file media di folder Molina</string>
     <string name="tools_permission_denied">Izin penyimpanan dibutuhkan untuk melihat file</string>

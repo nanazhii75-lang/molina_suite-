@@ -5,11 +5,22 @@ import com.molina.suite.feature.settings.ShellLine
 import com.molina.suite.feature.settings.library.ScriptStager
 import java.io.File
 
+private val AUDIO_EXTENSIONS = setOf("mp3", "m4a", "aac", "ogg", "opus", "wav", "flac", "wma")
+
 /** Satu file media di folder bersama. [relativePath] relatif terhadap /sdcard/Molina. */
 internal data class MediaFile(val file: File, val relativePath: String) {
     /** Path yang sama dari shell host maupun dari dalam Debian. */
     val terminalPath: String get() = "/sdcard/${MolinaStorage.SHARED_DIR_NAME}/$relativePath"
     val baseName: String get() = file.nameWithoutExtension
+
+    /** Format untuk tampilan, mis. MP4. */
+    val formatLabel: String get() = file.extension.uppercase()
+
+    val isAudio: Boolean get() = file.extension.lowercase() in AUDIO_EXTENSIONS
+
+    /** Folder induk relatif terhadap /sdcard/Molina; "Molina" bila file ada di akar. */
+    val folderLabel: String
+        get() = relativePath.substringBeforeLast('/', "").ifEmpty { MolinaStorage.SHARED_DIR_NAME }
 }
 
 /** Mencari file media di folder bersama dan menyiapkan path keluaran. Memblokir I/O. */
