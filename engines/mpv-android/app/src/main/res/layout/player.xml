@@ -119,6 +119,9 @@
                 <ImageButton
                     android:id="@+id/cycleAudioBtn"
                     style="?buttonBarButtonStyle"
+                    android:minWidth="40dp"
+                    android:minHeight="48dp"
+                    android:padding="8dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:srcCompat="@drawable/ic_audiotrack_black_24dp"
@@ -127,6 +130,9 @@
                 <ImageButton
                     android:id="@+id/cycleSubsBtn"
                     style="?buttonBarButtonStyle"
+                    android:minWidth="40dp"
+                    android:minHeight="48dp"
+                    android:padding="8dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:srcCompat="@drawable/ic_subtitles_black_24dp"
@@ -137,14 +143,18 @@
                     style="?buttonBarButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:minWidth="48dp"
+                    android:minWidth="40dp"
                     android:minHeight="48dp"
+                    android:padding="8dp"
                     app:srcCompat="@drawable/ic_skip_previous_black_24dp"
                     app:tint="@color/tint_normal" />
 
                 <ImageButton
                     android:id="@+id/playBtn"
                     style="?buttonBarButtonStyle"
+                    android:minWidth="40dp"
+                    android:minHeight="48dp"
+                    android:padding="8dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@android:color/white"
@@ -156,14 +166,19 @@
                     style="?buttonBarButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:minWidth="48dp"
+                    android:minWidth="40dp"
                     android:minHeight="48dp"
+                    android:padding="8dp"
                     app:srcCompat="@drawable/ic_skip_next_black_24dp"
                     app:tint="@color/tint_normal" />
 
                 <Button
                     android:id="@+id/cycleDecoderBtn"
                     style="?buttonBarButtonStyle"
+                    android:minWidth="0dp"
+                    android:minHeight="48dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@android:color/white"
@@ -172,6 +187,10 @@
                 <Button
                     android:id="@+id/cycleSpeedBtn"
                     style="?buttonBarButtonStyle"
+                    android:minWidth="0dp"
+                    android:minHeight="48dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@android:color/white"

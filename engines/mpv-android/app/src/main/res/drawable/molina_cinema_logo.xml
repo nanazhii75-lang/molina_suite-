@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- bingkai film -->
+    <path
+        android:fillColor="#16161A"
+        android:strokeColor="#FFB300"
+        android:strokeWidth="3"
+        android:pathData="M26,8 H70 A18,18 0 0 1 88,26 V70 A18,18 0 0 1 70,88 H26 A18,18 0 0 1 8,70 V26 A18,18 0 0 1 26,8 Z" />
+    <!-- lubang sprocket kiri -->
+    <path
+        android:fillColor="#8CFFB300"
+        android:pathData="M14,16 h6 v8 h-6 z M14,30 h6 v8 h-6 z M14,44 h6 v8 h-6 z M14,58 h6 v8 h-6 z M14,72 h6 v8 h-6 z" />
+    <!-- lubang sprocket kanan -->
+    <path
+        android:fillColor="#8CFFB300"
+        android:pathData="M76,16 h6 v8 h-6 z M76,30 h6 v8 h-6 z M76,44 h6 v8 h-6 z M76,58 h6 v8 h-6 z M76,72 h6 v8 h-6 z" />
+    <!-- tombol play -->
+    <path
+        android:fillColor="#FFB300"
+        android:pathData="M39,31 L39,65 L67,48 Z" />
+</vector>
