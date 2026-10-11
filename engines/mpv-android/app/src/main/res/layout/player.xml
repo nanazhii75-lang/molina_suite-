@@ -80,16 +80,6 @@
                 android:orientation="horizontal"
                 android:weightSum="100">
 
-                <ImageButton
-                    android:id="@+id/prevBtn"
-                    style="?buttonBarButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
-                    app:srcCompat="@drawable/ic_skip_previous_black_24dp"
-                    app:tint="@color/tint_normal" />
-
                 <TextView
                     android:id="@+id/playbackPositionTxt"
                     android:layout_width="wrap_content"
@@ -117,16 +107,6 @@
                     android:textColor="@android:color/white"
                     tools:text="13:37" />
 
-                <ImageButton
-                    android:id="@+id/nextBtn"
-                    style="?buttonBarButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
-                    app:srcCompat="@drawable/ic_skip_next_black_24dp"
-                    app:tint="@color/tint_normal" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -153,6 +133,16 @@
                     app:tint="@color/tint_normal" />
 
                 <ImageButton
+                    android:id="@+id/prevBtn"
+                    style="?buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:srcCompat="@drawable/ic_skip_previous_black_24dp"
+                    app:tint="@color/tint_normal" />
+
+                <ImageButton
                     android:id="@+id/playBtn"
                     style="?buttonBarButtonStyle"
                     android:layout_width="wrap_content"
@@ -160,6 +150,16 @@
                     android:textColor="@android:color/white"
                     app:tint="@color/tint_normal"
                     tools:src="@drawable/ic_play_arrow_black_24dp" />
+
+                <ImageButton
+                    android:id="@+id/nextBtn"
+                    style="?buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    app:srcCompat="@drawable/ic_skip_next_black_24dp"
+                    app:tint="@color/tint_normal" />
 
                 <Button
                     android:id="@+id/cycleDecoderBtn"

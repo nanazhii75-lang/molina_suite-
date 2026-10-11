@@ -1483,10 +1483,11 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     }
 
     private fun updateAudioUI() {
-        val audioButtons = arrayOf(R.id.prevBtn, R.id.cycleAudioBtn, R.id.playBtn,
-                R.id.cycleSpeedBtn, R.id.nextBtn)
-        val videoButtons = arrayOf(R.id.cycleAudioBtn, R.id.cycleSubsBtn, R.id.playBtn,
-                R.id.cycleDecoderBtn, R.id.cycleSpeedBtn)
+        // prev/next selalu berada di grup tombol, mengapit play/pause
+        val audioButtons = arrayOf(R.id.cycleAudioBtn, R.id.prevBtn, R.id.playBtn,
+                R.id.nextBtn, R.id.cycleSpeedBtn)
+        val videoButtons = arrayOf(R.id.cycleAudioBtn, R.id.cycleSubsBtn, R.id.prevBtn,
+                R.id.playBtn, R.id.nextBtn, R.id.cycleDecoderBtn, R.id.cycleSpeedBtn)
 
         val shouldUseAudioUI = isPlayingAudioOnly()
         if (shouldUseAudioUI == useAudioUI)
@@ -1494,14 +1495,9 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         useAudioUI = shouldUseAudioUI
         Log.v(TAG, "Audio UI: $useAudioUI")
 
-        val seekbarGroup = binding.controlsSeekbarGroup
         val buttonGroup = binding.controlsButtonGroup
 
         if (useAudioUI) {
-            // Move prev/next file from seekbar group to buttons group
-            Utils.viewGroupMove(seekbarGroup, R.id.prevBtn, buttonGroup, 0)
-            Utils.viewGroupMove(seekbarGroup, R.id.nextBtn, buttonGroup, -1)
-
             // Change button layout of buttons group
             Utils.viewGroupReorder(buttonGroup, audioButtons)
 
@@ -1512,10 +1508,9 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
             showControls()
         } else {
-            Utils.viewGroupMove(buttonGroup, R.id.prevBtn, seekbarGroup, 0)
-            Utils.viewGroupMove(buttonGroup, R.id.nextBtn, seekbarGroup, -1)
-
             Utils.viewGroupReorder(buttonGroup, videoButtons)
+            // reorder membuat semua tombol VISIBLE; terapkan lagi aturan prev/next
+            updatePlaylistButtons()
 
             // Show title only depending on settings
             if (showMediaTitle) {
