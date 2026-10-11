@@ -67,9 +67,6 @@ internal object MediaFiles {
 /** Perintah ffmpeg dan ffprobe satu baris; path di-quote untuk shell. */
 internal object MediaPlan {
 
-    fun toMp3(input: String, output: String): String =
-        "ffmpeg -hide_banner -n -i ${ShellLine.quote(input)} -vn -c:a libmp3lame -b:a 320k ${ShellLine.quote(output)}"
-
     fun probe(input: String): String =
         "ffprobe -hide_banner -i ${ShellLine.quote(input)}"
 }

@@ -7,8 +7,8 @@ import com.molina.suite.feature.settings.ShellLine
 
 /** Pilihan format pada kartu Quick Downloader. [args] adalah argumen yt-dlp. */
 internal enum class DownloadFormat(@StringRes val label: Int, val args: String) {
-    MP4_1080(R.string.tools_format_mp4_1080, "-f 'bv*[height<=1080]+ba/b[height<=1080]' --merge-output-format mp4"),
-    MP4_720(R.string.tools_format_mp4_720, "-f 'bv*[height<=720]+ba/b[height<=720]' --merge-output-format mp4"),
+    MP4_1080(R.string.tools_format_mp4_1080, "-f 'bv*[height<=1080]+ba/b[height<=1080]/bv*+ba/b' --merge-output-format mp4"),
+    MP4_720(R.string.tools_format_mp4_720, "-f 'bv*[height<=720]+ba/b[height<=720]/bv*+ba/b' --merge-output-format mp4"),
     BEST(R.string.tools_format_best, ""),
     MP3(R.string.tools_format_mp3, "-x --audio-format mp3")
 }

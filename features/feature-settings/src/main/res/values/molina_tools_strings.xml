@@ -31,9 +31,9 @@
     <string name="tools_cancel">Batal</string>
     <string name="tools_run_failed">Gagal menjalankan: %1$s</string>
 
-    <string name="tools_convert_title">Konversi ke MP3</string>
-    <string name="tools_convert_desc">Ubah video atau audio menjadi MP3 320 kbps. Hasil disimpan di folder Downloads.</string>
-    <string name="tools_convert_start">Konversi ke MP3</string>
+    <string name="tools_convert_title">Konverter Media</string>
+    <string name="tools_convert_desc">Ubah file media ke MP3, MP4, MKV, atau WebM. Hasil disimpan di folder Downloads.</string>
+    <string name="tools_convert_start">Konversi</string>
     <string name="tools_probe_title">Info video (ffprobe)</string>
     <string name="tools_probe_desc">Tampilkan durasi, codec, resolusi, dan bitrate sebuah file media.</string>
     <string name="tools_probe_start">Tampilkan info</string>
@@ -44,4 +44,14 @@
     <string name="tools_no_media">Belum ada file media di folder Molina</string>
     <string name="tools_permission_denied">Izin penyimpanan dibutuhkan untuk melihat file</string>
     <string name="tools_output_failed">Gagal menyiapkan folder Downloads</string>
+
+    <string name="tools_convert_target_label">Hasil: %1$s</string>
+    <string name="tools_convert_target_title">Pilih format hasil</string>
+    <string name="tools_mode_title">Cara memproses video</string>
+    <string name="tools_target_mp3">MP3 (audio 320 kbps)</string>
+    <string name="tools_target_mp4">MP4 (H.264 + AAC)</string>
+    <string name="tools_target_mkv">MKV (H.264 + AAC)</string>
+    <string name="tools_target_webm">WebM (VP9 + Opus, lambat di HP)</string>
+    <string name="tools_mode_copy">Salin stream: cepat, kualitas tetap, gagal bila codec tidak cocok</string>
+    <string name="tools_mode_reencode">Re-encode: lambat, hasil selalu kompatibel</string>
 </resources>

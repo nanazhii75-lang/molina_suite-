@@ -127,6 +127,13 @@
                 android:maxLines="1" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/tools_convert_format"
+                style="@style/Molina.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_sm" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/tools_convert_start"
                 style="@style/Molina.Button.Outlined"
                 android:layout_width="match_parent"

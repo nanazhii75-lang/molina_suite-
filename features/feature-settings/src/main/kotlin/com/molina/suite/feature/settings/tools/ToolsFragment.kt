@@ -35,6 +35,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         val engine: MaterialButton,
         val requires: TextView,
         val convertPick: MaterialButton,
+        val convertFormat: MaterialButton,
         val probePick: MaterialButton
     )
 
@@ -44,6 +45,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
     private var format = DownloadFormat.MP4_1080
     private var engine = DownloadEngine.YTDLP
     private var convertSource: MediaFile? = null
+    private var convertTarget = ConvertTarget.MP3
     private var probeSource: MediaFile? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +53,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         if (savedInstanceState != null) {
             format = DownloadFormat.values().getOrElse(savedInstanceState.getInt(STATE_FORMAT, 0)) { format }
             engine = DownloadEngine.values().getOrElse(savedInstanceState.getInt(STATE_ENGINE, 0)) { engine }
+            convertTarget = ConvertTarget.values().getOrElse(savedInstanceState.getInt(STATE_CONVERT, 0)) { convertTarget }
         }
     }
 
@@ -58,6 +61,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         super.onSaveInstanceState(outState)
         outState.putInt(STATE_FORMAT, format.ordinal)
         outState.putInt(STATE_ENGINE, engine.ordinal)
+        outState.putInt(STATE_CONVERT, convertTarget.ordinal)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,6 +72,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
             view.findViewById(R.id.tools_engine),
             view.findViewById(R.id.tools_requires),
             view.findViewById(R.id.tools_convert_pick),
+            view.findViewById(R.id.tools_convert_format),
             view.findViewById(R.id.tools_probe_pick)
         )
         views = v
@@ -76,6 +81,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         v.format.setOnClickListener { pickFormat() }
         v.engine.setOnClickListener { pickEngine() }
         v.convertPick.setOnClickListener { picker.pick { convertSource = it; renderSelection() } }
+        v.convertFormat.setOnClickListener { pickConvertTarget() }
         v.probePick.setOnClickListener { picker.pick { probeSource = it; renderSelection() } }
         view.findViewById<View>(R.id.tools_convert_start).setOnClickListener { startConvert() }
         view.findViewById<View>(R.id.tools_probe_start).setOnClickListener { startProbe() }
@@ -102,6 +108,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         v.format.text = getString(R.string.tools_format_label, getString(format.label))
         v.engine.text = getString(R.string.tools_engine_label, getString(engine.label))
         v.convertPick.text = pickLabel(convertSource)
+        v.convertFormat.text = getString(R.string.tools_convert_target_label, getString(convertTarget.label))
         v.probePick.text = pickLabel(probeSource)
     }
 
@@ -194,21 +201,51 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         )
     }
 
+    private fun pickConvertTarget() {
+        val items = ConvertTarget.values()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.tools_convert_target_title)
+            .setSingleChoiceItems(Array(items.size) { getString(items[it].label) }, convertTarget.ordinal) { dialog, which ->
+                convertTarget = items[which]
+                dialog.dismiss()
+                renderSelection()
+            }
+            .setNegativeButton(R.string.tools_cancel, null)
+            .show()
+    }
+
     private fun startConvert() {
         val source = convertSource
         if (source == null) {
             toolsToast(getString(R.string.tools_pick_first))
             return
         }
+        val target = convertTarget
+        if (!target.isVideo) {
+            runConvert(source, target, ConvertMode.REENCODE)
+            return
+        }
+        val modes = ConvertMode.values()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.tools_mode_title)
+            .setItems(Array(modes.size) { getString(modes[it].label) }) { _, which ->
+                runConvert(source, target, modes[which])
+            }
+            .setNegativeButton(R.string.tools_cancel, null)
+            .show()
+    }
+
+    private fun runConvert(source: MediaFile, target: ConvertTarget, mode: ConvertMode) {
+        if (view == null) return
         viewLifecycleOwner.lifecycleScope.launch {
-            val output = withContext(Dispatchers.IO) { MediaFiles.prepareOutput(source.baseName, "mp3") }
+            val output = withContext(Dispatchers.IO) { MediaFiles.prepareOutput(source.baseName, target.extension) }
             if (output == null) {
                 toolsToast(getString(R.string.tools_output_failed))
                 return@launch
             }
             launcher.launch(
                 listOf("ffmpeg"),
-                MediaPlan.toMp3(source.terminalPath, output),
+                ConvertPlan.command(source.terminalPath, output, target, mode),
                 R.string.tools_convert_title
             )
         }
@@ -226,5 +263,6 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
     private companion object {
         const val STATE_FORMAT = "tools.format"
         const val STATE_ENGINE = "tools.engine"
+        const val STATE_CONVERT = "tools.convert"
     }
 }
