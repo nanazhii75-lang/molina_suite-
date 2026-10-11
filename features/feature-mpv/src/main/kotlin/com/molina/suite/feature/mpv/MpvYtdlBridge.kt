@@ -18,9 +18,19 @@ internal object MpvYtdlBridge {
     private const val PREFIX_WAIT_MS = 30L * 60L * 1000L
     private const val PREFIX_POLL_MS = 2000L
 
+    /**
+     * Target perangkat Android 8 (tanpa dekoder AV1 perangkat keras): hindari AV1 dan batasi
+     * 1080p. Format tanpa info codec/tinggi tetap boleh (tanda ? setelah operator), dan
+     * alternatif terakhir "best" menjaga situs lain tetap bisa diputar.
+     */
+    private const val YTDL_FORMAT =
+        "bestvideo[height<=?1080][vcodec!*=?av01]+bestaudio/" +
+            "best[height<=?1080][vcodec!*=?av01]/best"
+
     fun install(application: Application) {
         val target = wrapperFile(application)
         MolinaMpvOptions.set("ytdl", "yes")
+        MolinaMpvOptions.set("ytdl-format", YTDL_FORMAT)
         MolinaMpvOptions.set("script-opts", "ytdl_hook-ytdl_path=" + target.absolutePath)
         Thread({ writeWrapperWhenPrefixReady(application, target) }, "mpv-ytdl-bridge")
             .apply { isDaemon = true }
