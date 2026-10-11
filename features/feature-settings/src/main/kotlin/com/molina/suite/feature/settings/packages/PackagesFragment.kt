@@ -85,7 +85,7 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
             PackageDetection.NoDebian -> getString(R.string.packages_no_debian)
             is PackageDetection.Failed -> getString(R.string.packages_failed, current.reason)
             is PackageDetection.Ok ->
-                getString(R.string.packages_summary, current.installed.count { it.value }, current.installed.size)
+                getString(R.string.ms_packages_count, current.installed.count { it.value }, current.installed.size)
         }
         for (row in rows) {
             val installed = ok?.installed?.get(row.spec.id)
@@ -96,6 +96,7 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
                     null -> R.string.packages_unknown
                 }
             )
+            applyChip(row.status, installed)
             setEnabled(row.install, installed == false)
             setEnabled(row.update, installed == true)
         }
@@ -103,9 +104,17 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
         installAllButton?.isEnabled = hasMissing
     }
 
+    /** Chip status: hijau lembut bila terpasang, abu-abu netral bila belum ada atau belum diketahui. */
+    private fun applyChip(chip: TextView, installed: Boolean?) {
+        val on = installed == true
+        chip.setBackgroundResource(if (on) R.drawable.ms_bg_chip_on else R.drawable.ms_bg_chip_off)
+        chip.setTextColor(chip.context.getColor(if (on) R.color.ms_status_on else R.color.ms_status_off))
+    }
+
     private fun setEnabled(button: ImageButton, enabled: Boolean) {
         button.isEnabled = enabled
-        button.alpha = if (enabled) 1f else 0.35f
+        // Peredupan ikon ditangani selector tint ms_icon_tint, bukan alpha, agar tidak ganda.
+        button.alpha = 1f
     }
 
     private fun installAllMissing() {
