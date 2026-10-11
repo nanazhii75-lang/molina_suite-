@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/ms_bg_card"
+    android:orientation="vertical"
+    android:padding="@dimen/ms_space_md">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/metric_dot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/ms_bg_dot" />
+
+        <TextView
+            android:id="@+id/metric_label"
+            style="@style/Molina.Text.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/metric_value"
+        style="@style/Molina.Text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/ms_space_sm"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="32sp" />
+
+    <TextView
+        android:id="@+id/metric_unit"
+        style="@style/Molina.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/metric_detail"
+        style="@style/Molina.Text.Caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/ms_space_xs"
+        android:visibility="gone" />
+</LinearLayout>

@@ -31,23 +31,35 @@ internal class ToolLauncher(private val fragment: Fragment) {
 
     private var runJob: Job? = null
 
-    fun launch(requiredIds: List<String>, command: String, @StringRes title: Int) {
+    fun launch(
+        requiredIds: List<String>,
+        command: String,
+        @StringRes title: Int,
+        onStart: (() -> Unit)? = null,
+        onFailed: (() -> Unit)? = null
+    ) {
         val appContext = fragment.context?.applicationContext ?: return
         val required = requiredIds.mapNotNull { id -> PackageCatalog.all.firstOrNull { it.id == id } }
         fragment.viewLifecycleOwner.lifecycleScope.launch {
             when (val detection = withContext(Dispatchers.IO) { PackageDetector.detect(appContext) }) {
                 is PackageDetection.NoDebian -> fragment.toolsToast(fragment.getString(R.string.tools_no_debian))
                 // Status tidak terbaca: jalankan saja, terminal akan menampilkan galat sebenarnya.
-                is PackageDetection.Failed -> send(command)
+                is PackageDetection.Failed -> send(command, onStart, onFailed)
                 is PackageDetection.Ok -> {
                     val gap = required.filter { detection.installed[it.id] == false }
-                    if (gap.isEmpty()) send(command) else askInstall(command, gap, title)
+                    if (gap.isEmpty()) send(command, onStart, onFailed) else askInstall(command, gap, title, onStart, onFailed)
                 }
             }
         }
     }
 
-    private fun askInstall(command: String, missing: List<PackageSpec>, @StringRes title: Int) {
+    private fun askInstall(
+        command: String,
+        missing: List<PackageSpec>,
+        @StringRes title: Int,
+        onStart: (() -> Unit)?,
+        onFailed: (() -> Unit)?
+    ) {
         val ctx = fragment.context ?: return
         val install = PackageCatalog.installAllCommand(missing) ?: return
         val names = missing.joinToString(", ") { fragment.getString(it.title) }
@@ -55,19 +67,23 @@ internal class ToolLauncher(private val fragment: Fragment) {
             .setTitle(title)
             .setMessage(fragment.getString(R.string.tools_missing_message, names))
             .setNegativeButton(R.string.tools_cancel, null)
-            .setNeutralButton(R.string.tools_run_anyway) { _, _ -> send(command) }
-            .setPositiveButton(R.string.tools_install_and_run) { _, _ -> send("$install && $command") }
+            .setNeutralButton(R.string.tools_run_anyway) { _, _ -> send(command, onStart, onFailed) }
+            .setPositiveButton(R.string.tools_install_and_run) { _, _ -> send("$install && $command", onStart, onFailed) }
             .show()
     }
 
     /** Mengetik [inner] di dalam Debian pada sesi aktif tab Terminal. */
-    private fun send(inner: String) {
+    private fun send(inner: String, onStart: (() -> Unit)?, onFailed: (() -> Unit)?) {
         if (runJob?.isActive == true) return
         val host = fragment.activity ?: return
         val line = ShellLine.wrapForDebian(inner)
         runJob = fragment.viewLifecycleOwner.lifecycleScope.launch {
+            onStart?.invoke()
             val reason = TerminalCommandRunner.run(host, line)
-            if (reason != null) fragment.toolsToast(fragment.getString(R.string.tools_run_failed, reason))
+            if (reason != null) {
+                fragment.toolsToast(fragment.getString(R.string.tools_run_failed, reason))
+                onFailed?.invoke()
+            }
         }
     }
 }

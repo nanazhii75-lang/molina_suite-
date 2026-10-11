@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Molina.RunDialog" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@color/ms_bg</item>
+        <item name="android:statusBarColor">@color/ms_bg</item>
+        <item name="android:navigationBarColor">@color/ms_bg</item>
+    </style>
+</resources>

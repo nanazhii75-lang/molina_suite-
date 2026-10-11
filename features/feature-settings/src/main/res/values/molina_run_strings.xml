@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="run_network_title">Cek Jaringan</string>
+
+    <string name="run_badge_preparing">Menyiapkan</string>
+    <string name="run_badge_running">Berjalan</string>
+    <string name="run_badge_done">Selesai</string>
+    <string name="run_badge_failed">Gagal</string>
+    <string name="run_badge_timeout">Tidak merespons</string>
+
+    <string name="run_percent">%1$d%%</string>
+    <string name="run_message_waiting">Menunggu Terminal menjalankan perintah…</string>
+    <string name="run_message_working">Sedang memproses…</string>
+    <string name="run_message_done">Pengujian selesai</string>
+    <string name="run_message_failed">Proses gagal</string>
+    <string name="run_message_not_started">Terminal tidak menjalankan perintah. Buka Terminal untuk melihat penyebabnya.</string>
+    <string name="run_message_stalled">Proses tidak memberi kabar lebih dari satu menit. Buka Terminal untuk memeriksanya.</string>
+
+    <string name="run_exit">Keluar</string>
+    <string name="run_open_terminal">Buka Terminal</string>
+
+    <string name="run_stage_install">Memasang curl…</string>
+    <string name="run_stage_ping">Mengukur ping…</string>
+    <string name="run_stage_download">Mengukur kecepatan unduh…</string>
+    <string name="run_stage_upload">Mengukur kecepatan upload…</string>
+
+    <string name="run_metric_ping">PING</string>
+    <string name="run_metric_download">UNDUH</string>
+    <string name="run_metric_upload">UPLOAD</string>
+    <string name="run_metric_pending">Menunggu</string>
+    <string name="run_metric_measuring">Mengukur</string>
+    <string name="run_metric_failed">Gagal</string>
+    <string name="run_ping_detail">Min %1$s  •  Maks %2$s  •  Jitter %3$s ms</string>
+
+    <string name="run_verdict_good">Jaringan baik</string>
+    <string name="run_verdict_fair">Jaringan cukup</string>
+    <string name="run_verdict_poor">Jaringan lemah</string>
+    <string name="run_network_note">Ping diukur dari jabat tangan TCP ke Cloudflare. Detail teknis ada di tab Terminal.</string>
+</resources>

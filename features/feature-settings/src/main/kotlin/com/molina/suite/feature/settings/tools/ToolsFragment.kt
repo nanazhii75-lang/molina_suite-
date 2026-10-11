@@ -17,6 +17,11 @@ import com.molina.suite.feature.settings.packages.PackageCatalog
 import com.molina.suite.feature.settings.packages.PackageDetection
 import com.molina.suite.feature.settings.packages.PackageDetector
 import com.molina.suite.feature.settings.packages.PackageSpec
+import com.molina.suite.feature.settings.library.LibraryResult
+import com.molina.suite.feature.settings.run.NetworkRun
+import com.molina.suite.feature.settings.run.RunDialogFragment
+import com.molina.suite.feature.settings.run.RunKind
+import com.molina.suite.feature.settings.run.RunSessions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -86,7 +91,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         view.findViewById<View>(R.id.tools_convert_start).setOnClickListener { startConvert() }
         view.findViewById<View>(R.id.tools_probe_start).setOnClickListener { startProbe() }
         view.findViewById<TextView>(R.id.tools_network_desc).text =
-            getString(R.string.tools_network_desc, NetworkPlan.MAX_DATA_MB)
+            getString(R.string.tools_network_desc, NetworkRun.MAX_DATA_MB)
         view.findViewById<View>(R.id.tools_network_start).setOnClickListener { startNetworkCheck() }
         renderSelection()
         refreshRequirements()
@@ -264,7 +269,24 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
     }
 
     private fun startNetworkCheck() {
-        launcher.launch(NetworkPlan.requiredPackages, NetworkPlan.command, R.string.tools_network_title)
+        if (view == null) return
+        val appContext = context?.applicationContext ?: return
+        viewLifecycleOwner.lifecycleScope.launch {
+            when (val prepared = withContext(Dispatchers.IO) { RunSessions.prepare(appContext, RunKind.NETWORK) }) {
+                is LibraryResult.Failure -> toolsToast(getString(R.string.tools_run_failed, prepared.reason))
+                is LibraryResult.Ok -> {
+                    val session = prepared.value
+                    var screen: RunDialogFragment? = null
+                    launcher.launch(
+                        emptyList(),
+                        session.command,
+                        RunKind.NETWORK.title,
+                        onStart = { screen = RunDialogFragment.show(childFragmentManager, session) },
+                        onFailed = { screen?.dismissAllowingStateLoss() }
+                    )
+                }
+            }
+        }
     }
 
     private companion object {
