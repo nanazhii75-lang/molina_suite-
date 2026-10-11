@@ -2,6 +2,8 @@ package com.molina.suite.feature.settings.debian
 
 import androidx.annotation.StringRes
 import com.molina.suite.feature.settings.R
+import com.molina.suite.feature.settings.ShellLine
+import com.molina.suite.feature.settings.packages.PackageCatalog
 
 /** Kapan sebuah aksi Debian boleh dipakai. */
 internal enum class Availability { ALWAYS, WHEN_MISSING, WHEN_INSTALLED }
@@ -12,17 +14,27 @@ internal data class DebianAction(
     @StringRes val description: Int,
     val command: String,
     val runnable: Boolean,
-    val availability: Availability
+    val availability: Availability,
+    /** Teks ringkas di kartu bila perintah lengkap terlalu panjang; null berarti memakai [command]. */
+    val preview: String? = null,
+    /** Pesan konfirmasi sebelum dijalankan; null berarti langsung jalan. */
+    @StringRes val confirmMessage: Int? = null
 )
 
 internal object DebianActions {
+    /** Rootfs Debian lalu yt-dlp (venv + curl_cffi) dalam satu baris; yt-dlp memakai definisi menu Paket. */
+    private val INSTALL_COMMAND: String =
+        "proot-distro install debian && " +
+            ShellLine.wrapForDebian(PackageCatalog.all.first { it.id == "ytdlp" }.installCommand())
+
     val all: List<DebianAction> = listOf(
         DebianAction(
             title = R.string.debian_install_title,
             description = R.string.debian_install_desc,
-            command = "proot-distro install debian",
+            command = INSTALL_COMMAND,
             runnable = true,
-            availability = Availability.WHEN_MISSING
+            availability = Availability.WHEN_MISSING,
+            preview = "proot-distro install debian && install yt-dlp"
         ),
         DebianAction(
             title = R.string.debian_update_title,
@@ -42,8 +54,9 @@ internal object DebianActions {
             title = R.string.debian_logout_title,
             description = R.string.debian_logout_desc,
             command = "exit",
-            runnable = false,
-            availability = Availability.ALWAYS
+            runnable = true,
+            availability = Availability.ALWAYS,
+            confirmMessage = R.string.debian_logout_confirm
         )
     )
 }

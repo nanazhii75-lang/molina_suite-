@@ -33,13 +33,13 @@
     <string name="debian_copied">Perintah disalin</string>
     <string name="debian_copy_failed">Papan klip tidak tersedia</string>
     <string name="debian_install_title">Install Debian</string>
-    <string name="debian_install_desc">Mengunduh dan memasang rootfs Debian. Butuh internet; ketuk Segarkan setelah selesai.</string>
+    <string name="debian_install_desc">Mengunduh dan memasang rootfs Debian, lalu memasang yt-dlp (python, venv, curl_cffi). Butuh internet dan cukup lama; ketuk Segarkan setelah selesai.</string>
     <string name="debian_update_title">Update Debian</string>
     <string name="debian_update_desc">Memperbarui daftar paket dan paket terpasang di dalam Debian.</string>
     <string name="debian_login_title">Masuk ke Debian</string>
     <string name="debian_login_desc">Membuka shell Debian di sesi Terminal aktif. Prompt berubah menjadi root@localhost.</string>
     <string name="debian_logout_title">Keluar dari Debian</string>
-    <string name="debian_logout_desc">Saat berada di dalam Debian, ketik exit untuk kembali ke shell biasa. Jangan ketik exit di shell biasa karena sesi akan tertutup.</string>
+    <string name="debian_logout_desc">Mengetik exit ke Terminal untuk keluar dari Debian. Bila terminal sedang di shell biasa, sesi akan tertutup.</string>
 
     <string name="library_restore">Pulihkan</string>
     <string name="library_restore_done">%1$d entri bawaan dipulihkan</string>
@@ -81,4 +81,6 @@
     <string name="library_requires_message">Entri ini butuh %1$s, tetapi belum terpasang di Debian.</string>
     <string name="library_install_and_run">Install lalu jalankan</string>
     <string name="library_run_anyway">Jalankan saja</string>
+    <string name="debian_logout_confirm">Mengetik exit ke sesi Terminal aktif. Di dalam Debian, kamu kembali ke shell biasa. Di shell biasa, sesi akan tertutup.</string>
+    <string name="debian_confirm_run">Lanjutkan</string>
 </resources>

@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.molina.suite.feature.settings.R
 import com.molina.suite.feature.settings.Refreshable
 import com.molina.suite.feature.settings.TerminalCommandRunner
@@ -41,7 +42,7 @@ class DebianFragment : Fragment(R.layout.fragment_debian), Refreshable {
             val root = inflater.inflate(R.layout.item_debian_action, container, false)
             root.findViewById<TextView>(R.id.debian_item_title).setText(action.title)
             root.findViewById<TextView>(R.id.debian_item_desc).setText(action.description)
-            root.findViewById<TextView>(R.id.debian_item_command).text = action.command
+            root.findViewById<TextView>(R.id.debian_item_command).text = action.preview ?: action.command
             root.findViewById<MaterialButton>(R.id.debian_item_copy)
                 .setOnClickListener { copy(action.command) }
             val run = root.findViewById<ImageButton>(R.id.debian_item_run)
@@ -87,6 +88,21 @@ class DebianFragment : Fragment(R.layout.fragment_debian), Refreshable {
     }
 
     private fun runAction(action: DebianAction) {
+        val message = action.confirmMessage
+        val ctx = context
+        if (message != null && ctx != null) {
+            MaterialAlertDialogBuilder(ctx)
+                .setTitle(action.title)
+                .setMessage(message)
+                .setNegativeButton(R.string.library_cancel, null)
+                .setPositiveButton(R.string.debian_confirm_run) { _, _ -> execute(action) }
+                .show()
+            return
+        }
+        execute(action)
+    }
+
+    private fun execute(action: DebianAction) {
         if (runJob?.isActive == true) return
         val host = activity ?: return
         runJob = viewLifecycleOwner.lifecycleScope.launch {
