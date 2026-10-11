@@ -15,17 +15,43 @@ internal object MpvYtdlBridge {
 
     private const val TAG = "MpvYtdlBridge"
     private const val WRAPPER = "molina-ytdlp"
+    private const val PREFIX_WAIT_MS = 30L * 60L * 1000L
+    private const val PREFIX_POLL_MS = 2000L
 
     fun install(application: Application) {
         val target = wrapperFile(application)
         MolinaMpvOptions.set("ytdl", "yes")
         MolinaMpvOptions.set("script-opts", "ytdl_hook-ytdl_path=" + target.absolutePath)
-        Thread({ writeWrapper(application, target) }, "mpv-ytdl-bridge").start()
+        Thread({ writeWrapperWhenPrefixReady(application, target) }, "mpv-ytdl-bridge")
+            .apply { isDaemon = true }
+            .start()
     }
 
     /** Lokasi pembungkus molina-ytdlp di prefix aplikasi. */
     fun wrapperFile(application: Application): File =
         File(application.filesDir, "usr/bin/$WRAPPER")
+
+    /**
+     * Menunggu bootstrap selesai (usr/bin/bash ada) sebelum menulis pembungkus. Membuat
+     * usr/bin lebih dulu membuat prefix tampak sudah terpasang dan melewati pemasangan bootstrap.
+     */
+    private fun writeWrapperWhenPrefixReady(application: Application, target: File) {
+        val bash = File(application.filesDir, "usr/bin/bash")
+        val deadline = System.currentTimeMillis() + PREFIX_WAIT_MS
+        while (!bash.isFile) {
+            if (System.currentTimeMillis() >= deadline) {
+                Log.w(TAG, "Bootstrap belum selesai; pembungkus ytdl tidak ditulis")
+                return
+            }
+            try {
+                Thread.sleep(PREFIX_POLL_MS)
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+                return
+            }
+        }
+        writeWrapper(application, target)
+    }
 
     private fun writeWrapper(application: Application, target: File) {
         try {
