@@ -1,99 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- molina-settings-design-6a -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/ms_bg">
 
     <LinearLayout
         android:id="@+id/settings_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/ms_space_md">
 
         <TextView
+            style="@style/Molina.Text.Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/settings_menu_title"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:layout_marginBottom="@dimen/ms_space_md"
+            android:text="@string/settings_menu_title" />
 
         <LinearLayout
             android:id="@+id/settings_row_library"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
+            android:layout_marginBottom="@dimen/ms_card_gap"
+            android:background="@drawable/ms_bg_card_ripple"
             android:clickable="true"
             android:focusable="true"
-            android:minHeight="56dp"
+            android:minHeight="64dp"
             android:orientation="vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
+            android:padding="@dimen/ms_space_md">
 
             <TextView
+                style="@style/Molina.Text.Item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_library_title"
-                android:textSize="16sp" />
+                android:text="@string/settings_library_title" />
 
             <TextView
+                style="@style/Molina.Text.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:alpha="0.7"
-                android:text="@string/settings_library_subtitle"
-                android:textSize="13sp" />
+                android:layout_marginTop="@dimen/ms_space_xs"
+                android:text="@string/settings_library_subtitle" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/settings_row_debian"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
+            android:layout_marginBottom="@dimen/ms_card_gap"
+            android:background="@drawable/ms_bg_card_ripple"
             android:clickable="true"
             android:focusable="true"
-            android:minHeight="56dp"
+            android:minHeight="64dp"
             android:orientation="vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
+            android:padding="@dimen/ms_space_md">
 
             <TextView
+                style="@style/Molina.Text.Item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_debian_title"
-                android:textSize="16sp" />
+                android:text="@string/settings_debian_title" />
 
             <TextView
+                style="@style/Molina.Text.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:alpha="0.7"
-                android:text="@string/settings_debian_subtitle"
-                android:textSize="13sp" />
+                android:layout_marginTop="@dimen/ms_space_xs"
+                android:text="@string/settings_debian_subtitle" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/settings_row_packages"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
+            android:layout_marginBottom="@dimen/ms_card_gap"
+            android:background="@drawable/ms_bg_card_ripple"
             android:clickable="true"
             android:focusable="true"
-            android:minHeight="56dp"
+            android:minHeight="64dp"
             android:orientation="vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
+            android:padding="@dimen/ms_space_md">
 
             <TextView
+                style="@style/Molina.Text.Item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_packages_title"
-                android:textSize="16sp" />
+                android:text="@string/settings_packages_title" />
 
             <TextView
+                style="@style/Molina.Text.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:alpha="0.7"
-                android:text="@string/settings_packages_subtitle"
-                android:textSize="13sp" />
+                android:layout_marginTop="@dimen/ms_space_xs"
+                android:text="@string/settings_packages_subtitle" />
         </LinearLayout>
     </LinearLayout>
 
@@ -101,7 +102,7 @@
         android:id="@+id/settings_child_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?android:attr/colorBackground"
+        android:background="@color/ms_bg"
         android:clickable="true"
         android:focusable="true"
         android:visibility="gone" />

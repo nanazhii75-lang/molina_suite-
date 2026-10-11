@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-settings-design-6a -->
+<resources>
+    <color name="ms_bg">#000000</color>
+    <color name="ms_card">#141414</color>
+    <color name="ms_card_border">#3A3320</color>
+    <color name="ms_amber">#FFB300</color>
+    <color name="ms_ripple">#29FFB300</color>
+    <color name="ms_text_primary">#FFFFFF</color>
+    <color name="ms_text_secondary">#9E9E9E</color>
+    <color name="ms_status_on">#4CAF50</color>
+    <color name="ms_status_off">#9E9E9E</color>
+    <color name="ms_status_error">#E53935</color>
+    <color name="ms_chip_on_fill">#264CAF50</color>
+    <color name="ms_chip_off_fill">#1F9E9E9E</color>
+
+    <dimen name="ms_space_xs">4dp</dimen>
+    <dimen name="ms_space_sm">8dp</dimen>
+    <dimen name="ms_space_md">16dp</dimen>
+    <dimen name="ms_space_lg">24dp</dimen>
+    <dimen name="ms_card_gap">12dp</dimen>
+    <dimen name="ms_card_gap_half">6dp</dimen>
+    <dimen name="ms_card_radius">12dp</dimen>
+    <dimen name="ms_card_stroke">1dp</dimen>
+    <dimen name="ms_button_radius">12dp</dimen>
+</resources>
