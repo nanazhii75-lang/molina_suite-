@@ -68,6 +68,8 @@
     <string name="pkg_python_desc">python3, pip, dan venv.</string>
     <string name="pkg_ytdlp_title">yt-dlp + curl_cffi</string>
     <string name="pkg_ytdlp_desc">Pengunduh video lewat venv /opt/ytdlp; wajib untuk TikTok.</string>
+    <string name="pkg_node_title">Node.js</string>
+    <string name="pkg_node_desc">Node.js 24 resmi di /opt/node; dipakai yt-dlp untuk tantangan JavaScript YouTube.</string>
     <string name="pkg_ffmpeg_title">FFmpeg</string>
     <string name="pkg_ffmpeg_desc">ffmpeg dan ffprobe untuk konversi dan info media.</string>
     <string name="pkg_aria2_title">aria2</string>

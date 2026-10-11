@@ -43,6 +43,17 @@ internal object DownloaderPlan {
     private val downloadsDir =
         "/sdcard/${MolinaStorage.SHARED_DIR_NAME}/${MolinaStorage.DOWNLOADS_DIR_NAME}"
 
+    /** Berkas cookies opsional di folder bersama untuk konten yang butuh login. Path tanpa spasi. */
+    private val cookiesPath = "/sdcard/${MolinaStorage.SHARED_DIR_NAME}/cookies.txt"
+
+    /** Dievaluasi shell saat perintah jalan: kosong bila berkas cookies tidak ada. */
+    private val cookiesFlag = "$(test -f $cookiesPath && echo --cookies $cookiesPath)"
+
+    private const val NODE_BIN = "/opt/node/bin/node"
+
+    /** Runtime JavaScript untuk YouTube; dipasang hanya bila Node.js dari menu Paket sudah ada. */
+    private val jsRuntimeFlag = "$(test -x $NODE_BIN && echo --js-runtimes node:$NODE_BIN)"
+
     /** Tautan yang sudah dirapikan, atau null bila bukan http(s) satu baris tanpa spasi. */
     fun normalizeUrl(raw: String): String? {
         val text = raw.trim()
@@ -51,7 +62,7 @@ internal object DownloaderPlan {
 
     /** Id paket menu Paket yang harus terpasang. ffmpeg dipakai untuk menggabung dan mengonversi. */
     fun requiredPackages(engine: DownloadEngine): List<String> =
-        listOf("ytdlp", "ffmpeg") + engine.extraPackages
+        listOf("ytdlp", "ffmpeg", "node") + engine.extraPackages
 
     fun command(url: String, format: DownloadFormat, engine: DownloadEngine): String =
         listOf(
@@ -61,6 +72,8 @@ internal object DownloaderPlan {
             ShellLine.quote(downloadsDir),
             format.args,
             engine.args,
+            jsRuntimeFlag,
+            cookiesFlag,
             ShellLine.quote(url)
         ).filter { it.isNotEmpty() }.joinToString(" ")
 }

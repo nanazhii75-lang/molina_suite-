@@ -6,7 +6,7 @@
 
     <string name="tools_title">Pusat Kontrol</string>
     <string name="tools_downloader_title">Quick Downloader</string>
-    <string name="tools_downloader_desc">Tempel tautan video, pilih format, lalu unduh ke folder Downloads.</string>
+    <string name="tools_downloader_desc">Tempel tautan video, pilih format, lalu unduh ke folder Downloads. Konten yang butuh login: taruh cookies.txt di folder Molina.</string>
     <string name="tools_url_hint">Tautan video</string>
     <string name="tools_url_invalid">Tautan harus diawali http:// atau https://</string>
     <string name="tools_paste">Tempel</string>

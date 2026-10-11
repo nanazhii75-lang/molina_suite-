@@ -24,6 +24,7 @@ internal object PackageDetector {
 
     private const val DPKG_STATUS = "var/lib/dpkg/status"
     private const val YTDLP_VENV_BIN = "opt/ytdlp/bin/yt-dlp"
+    private const val NODE_BIN = "opt/node/bin/node"
     private const val PACKAGE_PREFIX = "Package: "
     private const val STATUS_INSTALLED = "Status: install ok installed"
 
@@ -38,11 +39,13 @@ internal object PackageDetector {
             }
             val aptInstalled = readInstalled(statusFile)
             val venvPresent = Files.exists(File(root, YTDLP_VENV_BIN).toPath(), LinkOption.NOFOLLOW_LINKS)
+            val nodePresent = Files.exists(File(root, NODE_BIN).toPath(), LinkOption.NOFOLLOW_LINKS)
             val result = LinkedHashMap<String, Boolean>()
             for (spec in PackageCatalog.all) {
                 result[spec.id] = when (spec.kind) {
                     PackageKind.APT -> aptInstalled.containsAll(spec.aptPackages)
                     PackageKind.YTDLP_VENV -> venvPresent
+                    PackageKind.NODE_RUNTIME -> nodePresent
                 }
             }
             PackageDetection.Ok(result)

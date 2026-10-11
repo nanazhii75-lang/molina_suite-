@@ -7,7 +7,22 @@ private const val YTDLP_PIP_UPGRADE = "/opt/ytdlp/bin/pip install -U 'yt-dlp[def
 private const val YTDLP_VENV_SETUP =
     "python3 -m venv /opt/ytdlp && $YTDLP_PIP_UPGRADE && ln -sf /opt/ytdlp/bin/yt-dlp /usr/local/bin/yt-dlp"
 
-internal enum class PackageKind { APT, YTDLP_VENV }
+private const val NODE_BASE = "https://nodejs.org/dist/latest-v24.x"
+
+/**
+ * Node.js 24 resmi dari nodejs.org ke /opt/node, diverifikasi dengan SHASUMS256.txt dari rilis
+ * yang sama. Unduhan dan verifikasi selesai dulu sebelum /opt/node lama dihapus. Dijalankan di
+ * subshell supaya direktori kerja perintah berikutnya tidak berubah.
+ */
+private const val NODE_RUNTIME_SETUP =
+    """(cd /tmp && curl -fsSL ${NODE_BASE}/SHASUMS256.txt | grep 'linux-arm64\.tar\.xz$' > node.sum && """ +
+        """curl -fsSL -o node.tar.xz ${NODE_BASE}/$(awk '{print $2}' node.sum) && """ +
+        """awk '{print $1"  node.tar.xz"}' node.sum | sha256sum -c - && """ +
+        """rm -rf /opt/node && mkdir -p /opt/node && """ +
+        """tar -xJf node.tar.xz -C /opt/node --strip-components=1 && """ +
+        """ln -sf /opt/node/bin/node /usr/local/bin/node && rm -f node.tar.xz node.sum)"""
+
+internal enum class PackageKind { APT, YTDLP_VENV, NODE_RUNTIME }
 
 /**
  * Satu baris pada menu Paket. Untuk [PackageKind.APT] semua [aptPackages] harus terpasang;
@@ -22,15 +37,24 @@ internal data class PackageSpec(
 ) {
     private val aptList: String get() = aptPackages.joinToString(" ")
 
+    /** Langkah setelah paket apt terpasang; null untuk paket apt murni. */
+    val setupCommand: String? get() = when (kind) {
+        PackageKind.APT -> null
+        PackageKind.YTDLP_VENV -> YTDLP_VENV_SETUP
+        PackageKind.NODE_RUNTIME -> NODE_RUNTIME_SETUP
+    }
+
     /** Perintah yang dijalankan di dalam Debian (satu baris). */
-    fun installCommand(): String = when (kind) {
-        PackageKind.APT -> "apt update && apt install -y $aptList"
-        PackageKind.YTDLP_VENV -> "apt update && apt install -y $aptList && $YTDLP_VENV_SETUP"
+    fun installCommand(): String {
+        val apt = "apt update && apt install -y $aptList"
+        val setup = setupCommand ?: return apt
+        return "$apt && $setup"
     }
 
     fun updateCommand(): String = when (kind) {
         PackageKind.APT -> "apt update && apt install -y --only-upgrade $aptList"
         PackageKind.YTDLP_VENV -> YTDLP_PIP_UPGRADE
+        PackageKind.NODE_RUNTIME -> NODE_RUNTIME_SETUP
     }
 }
 
@@ -44,6 +68,10 @@ internal object PackageCatalog {
         PackageSpec(
             "ytdlp", R.string.pkg_ytdlp_title, R.string.pkg_ytdlp_desc,
             PackageKind.YTDLP_VENV, listOf("python3", "python3-venv")
+        ),
+        PackageSpec(
+            "node", R.string.pkg_node_title, R.string.pkg_node_desc,
+            PackageKind.NODE_RUNTIME, listOf("curl", "ca-certificates", "xz-utils")
         ),
         PackageSpec(
             "ffmpeg", R.string.pkg_ffmpeg_title, R.string.pkg_ffmpeg_desc,
@@ -68,12 +96,12 @@ internal object PackageCatalog {
     fun installAllCommand(missing: List<PackageSpec>): String? {
         if (missing.isEmpty()) return null
         val apt = LinkedHashSet<String>()
-        var needsVenv = false
+        val setups = LinkedHashSet<String>()
         for (spec in missing) {
             apt.addAll(spec.aptPackages)
-            if (spec.kind == PackageKind.YTDLP_VENV) needsVenv = true
+            spec.setupCommand?.let { setups.add(it) }
         }
         val base = "apt update && apt install -y ${apt.joinToString(" ")}"
-        return if (needsVenv) "$base && $YTDLP_VENV_SETUP" else base
+        return setups.fold(base) { acc, step -> "$acc && $step" }
     }
 }
