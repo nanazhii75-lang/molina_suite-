@@ -24,45 +24,14 @@ internal object BuiltinLibrary {
 
     val entries: List<LibraryEntry> = listOf(
         entry(
-            "builtin-ytdlp-version", "Versi yt-dlp",
-            "yt-dlp --version",
-            "Memeriksa versi yt-dlp di Debian.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-ytdlp-video", "Unduh video (yt-dlp)",
-            "yt-dlp -P $downloads {URL}",
-            "Mengunduh video ke folder Downloads. TikTok butuh curl_cffi.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-ytdlp-mp3", "Unduh audio MP3 (yt-dlp)",
-            "yt-dlp -x --audio-format mp3 -P $downloads {URL}",
-            "Hanya audio, dikonversi ke MP3 (butuh ffmpeg).", RunMode.DEBIAN
-        ),
-        entry(
             "builtin-ytdlp-playlist", "Unduh playlist (yt-dlp)",
             "yt-dlp -P $downloads -o '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' {URL}",
             "Satu folder per playlist, file diberi nomor urut.", RunMode.DEBIAN
         ),
         entry(
-            "builtin-ytdlp-update", "Update yt-dlp",
-            "if [ -x /opt/ytdlp/bin/pip ]; then /opt/ytdlp/bin/pip install -U 'yt-dlp[default,curl-cffi]'; " +
-                "else yt-dlp -U; fi",
-            "Memakai pip bila yt-dlp dipasang di /opt/ytdlp, kalau tidak update mandiri.", RunMode.DEBIAN
-        ),
-        entry(
             "builtin-aria2-download", "Unduh cepat (aria2c)",
             "aria2c -d $downloads -x 8 -s 8 {URL}",
             "Unduh langsung dengan 8 koneksi paralel.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-ffprobe-info", "Info media (ffprobe)",
-            "ffprobe -hide_banner {FILE}",
-            "Menampilkan codec, durasi, dan resolusi.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-ffmpeg-mp3", "Konversi ke MP3 (ffmpeg)",
-            "ffmpeg -hide_banner -i {FILE} -vn -codec:a libmp3lame -q:a 2 {OUT}",
-            "Isi path hasil berakhiran .mp3. ffmpeg bertanya bila berkas sudah ada.", RunMode.DEBIAN
         ),
         entry(
             "builtin-mpv-url", "Putar URL di mpv",
@@ -100,6 +69,76 @@ internal object BuiltinLibrary {
             "builtin-apt-clean", "Bersihkan cache apt",
             "apt-get clean && apt-get autoremove -y",
             "Membebaskan ruang dari paket yang tidak terpakai.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-public-ip", "IP publik",
+            ENSURE_CURL + "curl -s https://api.ipify.org; echo",
+            "Alamat IP yang terlihat dari internet.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-timing", "Waktu respons situs",
+            ENSURE_CURL + "curl -s -o /dev/null -w 'DNS %{time_namelookup}s, konek %{time_connect}s, " +
+                "total %{time_total}s\\n' https://{HOST}",
+            "Isi nama host saja tanpa https://, mis. github.com.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-dns", "Cek DNS",
+            "getent hosts {HOST}",
+            "Menampilkan alamat IP dari nama host. Kosong berarti DNS gagal.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-headers", "Header HTTP situs",
+            ENSURE_CURL + "curl -sIL {URL}",
+            "Menampilkan status dan header, mengikuti pengalihan.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-resolv", "DNS yang dipakai Debian",
+            "cat /etc/resolv.conf",
+            "Daftar server DNS di dalam Debian.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-share", "Bagikan folder Downloads (HTTP)",
+            "python3 -m http.server 8080 --directory $downloads",
+            "Buka http://IP-HP:8080 dari perangkat lain di Wi-Fi yang sama. Hentikan dengan Ctrl+C.",
+            RunMode.DEBIAN
+        )
+    )
+
+    /**
+     * Entri bawaan lama yang fungsinya kini punya menu sendiri. Tidak lagi disemai atau dipulihkan;
+     * hanya dipakai BuiltinRetirer untuk menghapus salinan lama yang belum diubah pengguna.
+     */
+    val retiredEntries: List<LibraryEntry> = listOf(
+        entry(
+            "builtin-ytdlp-version", "Versi yt-dlp",
+            "yt-dlp --version",
+            "Memeriksa versi yt-dlp di Debian.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-ytdlp-video", "Unduh video (yt-dlp)",
+            "yt-dlp -P $downloads {URL}",
+            "Mengunduh video ke folder Downloads. TikTok butuh curl_cffi.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-ytdlp-mp3", "Unduh audio MP3 (yt-dlp)",
+            "yt-dlp -x --audio-format mp3 -P $downloads {URL}",
+            "Hanya audio, dikonversi ke MP3 (butuh ffmpeg).", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-ytdlp-update", "Update yt-dlp",
+            "if [ -x /opt/ytdlp/bin/pip ]; then /opt/ytdlp/bin/pip install -U 'yt-dlp[default,curl-cffi]'; " +
+                "else yt-dlp -U; fi",
+            "Memakai pip bila yt-dlp dipasang di /opt/ytdlp, kalau tidak update mandiri.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-ffprobe-info", "Info media (ffprobe)",
+            "ffprobe -hide_banner {FILE}",
+            "Menampilkan codec, durasi, dan resolusi.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-ffmpeg-mp3", "Konversi ke MP3 (ffmpeg)",
+            "ffmpeg -hide_banner -i {FILE} -vn -codec:a libmp3lame -q:a 2 {OUT}",
+            "Isi path hasil berakhiran .mp3. ffmpeg bertanya bila berkas sudah ada.", RunMode.DEBIAN
         ),
         entry(
             "builtin-install-media", "Install ffmpeg + aria2",
@@ -152,42 +191,10 @@ internal object BuiltinLibrary {
             RunMode.DEBIAN
         ),
         entry(
-            "builtin-net-public-ip", "IP publik",
-            ENSURE_CURL + "curl -s https://api.ipify.org; echo",
-            "Alamat IP yang terlihat dari internet.", RunMode.DEBIAN
-        ),
-        entry(
             "builtin-net-check", "Cek internet",
             ENSURE_CURL + "curl -s -o /dev/null -w 'HTTP %{http_code} dalam %{time_total} detik\\n' " +
                 "https://www.google.com/generate_204",
             "HTTP 204 berarti internet tersambung.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-net-timing", "Waktu respons situs",
-            ENSURE_CURL + "curl -s -o /dev/null -w 'DNS %{time_namelookup}s, konek %{time_connect}s, " +
-                "total %{time_total}s\\n' https://{HOST}",
-            "Isi nama host saja tanpa https://, mis. github.com.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-net-dns", "Cek DNS",
-            "getent hosts {HOST}",
-            "Menampilkan alamat IP dari nama host. Kosong berarti DNS gagal.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-net-headers", "Header HTTP situs",
-            ENSURE_CURL + "curl -sIL {URL}",
-            "Menampilkan status dan header, mengikuti pengalihan.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-net-resolv", "DNS yang dipakai Debian",
-            "cat /etc/resolv.conf",
-            "Daftar server DNS di dalam Debian.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-net-share", "Bagikan folder Downloads (HTTP)",
-            "python3 -m http.server 8080 --directory $downloads",
-            "Buka http://IP-HP:8080 dari perangkat lain di Wi-Fi yang sama. Hentikan dengan Ctrl+C.",
-            RunMode.DEBIAN
         )
     )
 

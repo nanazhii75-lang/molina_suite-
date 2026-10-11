@@ -11,10 +11,7 @@ import com.molina.suite.feature.settings.packages.PackageSpec
 internal object LibraryRequirements {
 
     private val requirements: Map<String, List<String>> = mapOf(
-        "builtin-ytdlp-mp3" to listOf("ffmpeg"),
-        "builtin-aria2-download" to listOf("aria2"),
-        "builtin-ffprobe-info" to listOf("ffmpeg"),
-        "builtin-ffmpeg-mp3" to listOf("ffmpeg")
+        "builtin-aria2-download" to listOf("aria2")
     )
 
     /** Id paket yang dibutuhkan entri; kosong bila tidak ada syarat. */
