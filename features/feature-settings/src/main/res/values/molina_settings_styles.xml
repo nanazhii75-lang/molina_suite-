@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- molina-settings-design-6a -->
 <resources>
-    <style name="Molina.Text">
+    <style name="Molina.Text" parent="">
         <item name="android:textColor">@color/ms_text_primary</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
