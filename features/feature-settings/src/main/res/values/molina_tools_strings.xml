@@ -37,6 +37,10 @@
     <string name="tools_probe_title">Info video (ffprobe)</string>
     <string name="tools_probe_desc">Tampilkan durasi, codec, resolusi, dan bitrate sebuah file media.</string>
     <string name="tools_probe_start">Tampilkan info</string>
+
+    <string name="tools_network_title">Cek Jaringan</string>
+    <string name="tools_network_desc">Ukur ping, kecepatan unduh, dan kecepatan upload lewat server Cloudflare. Hasil tampil di Terminal. Memakai data hingga %1$d MB.</string>
+    <string name="tools_network_start">Mulai cek</string>
     <string name="tools_pick_label">Pilih file media</string>
     <string name="tools_pick_selected">File: %1$s</string>
     <string name="tools_pick_title">Pilih file</string>

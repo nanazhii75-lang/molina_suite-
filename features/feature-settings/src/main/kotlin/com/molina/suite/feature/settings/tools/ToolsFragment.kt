@@ -85,6 +85,9 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         v.probePick.setOnClickListener { picker.pick { probeSource = it; renderSelection() } }
         view.findViewById<View>(R.id.tools_convert_start).setOnClickListener { startConvert() }
         view.findViewById<View>(R.id.tools_probe_start).setOnClickListener { startProbe() }
+        view.findViewById<TextView>(R.id.tools_network_desc).text =
+            getString(R.string.tools_network_desc, NetworkPlan.MAX_DATA_MB)
+        view.findViewById<View>(R.id.tools_network_start).setOnClickListener { startNetworkCheck() }
         renderSelection()
         refreshRequirements()
     }
@@ -258,6 +261,10 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
             return
         }
         launcher.launch(listOf("ffmpeg"), MediaPlan.probe(source.terminalPath), R.string.tools_probe_title)
+    }
+
+    private fun startNetworkCheck() {
+        launcher.launch(NetworkPlan.requiredPackages, NetworkPlan.command, R.string.tools_network_title)
     }
 
     private companion object {
