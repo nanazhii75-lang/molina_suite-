@@ -89,6 +89,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
                     val seeded = repository.addMissing(BuiltinLibrary.entries)
                     if (seeded is LibraryResult.Failure) return@withContext seeded
                 }
+                BuiltinUpgrader.apply(repository)
                 repository.list()
             }
             render(result)

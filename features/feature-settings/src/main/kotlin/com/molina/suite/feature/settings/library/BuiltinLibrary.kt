@@ -10,6 +10,18 @@ internal object BuiltinLibrary {
     private const val ENSURE_CURL = "command -v curl >/dev/null 2>&1 || { apt update && apt install -y curl; }; "
     private const val SPEED_URL = "https://speed.cloudflare.com/__down?bytes=50000000"
 
+    /**
+     * Satu baris: fungsi v mencetak nama, lalu baris pertama yang tidak kosong dari perintah versi
+     * (stderr ikut dibaca karena java menulis di sana), atau "belum terpasang" bila alatnya tidak ada.
+     */
+    private const val TOOL_VERSIONS_SCRIPT =
+        """v() { printf '%-12s' "$1"; shift; if command -v "$1" >/dev/null 2>&1; then "$@" 2>&1 | sed -n '/./{p;q}' | cut -c1-72; else echo 'belum terpasang'; fi; }; """ +
+            """v Debian cat /etc/debian_version; v Python python3 --version; v pip pip3 --version; v yt-dlp yt-dlp --version; """ +
+            """v Node.js node --version; v FFmpeg ffmpeg -version; v FFprobe ffprobe -version; v aria2 aria2c --version; """ +
+            """v Java java -version; v git git --version; v curl curl --version; v wget wget --version; v unzip unzip -v; """ +
+            """v jq jq --version; v rsync rsync --version; v nano nano --version; """ +
+            """printf '%-12s' mediainfo; command -v mediainfo >/dev/null 2>&1 && mediainfo --Version 2>&1 | sed -n '/v[0-9]/{p;q}' || echo 'belum terpasang'"""
+
     val entries: List<LibraryEntry> = listOf(
         entry(
             "builtin-ytdlp-version", "Versi yt-dlp",
@@ -81,9 +93,8 @@ internal object BuiltinLibrary {
         ),
         entry(
             "builtin-tool-versions", "Versi semua alat",
-            "python3 --version; ffmpeg -version | head -n 1; aria2c --version | head -n 1; " +
-                "yt-dlp --version; java -version 2>&1 | head -n 1",
-            "Alat yang belum terpasang menampilkan pesan not found.", RunMode.DEBIAN
+            TOOL_VERSIONS_SCRIPT,
+            "Satu klik menampilkan versi semua alat di Debian; yang belum ada tertulis belum terpasang.", RunMode.DEBIAN
         ),
         entry(
             "builtin-apt-clean", "Bersihkan cache apt",
