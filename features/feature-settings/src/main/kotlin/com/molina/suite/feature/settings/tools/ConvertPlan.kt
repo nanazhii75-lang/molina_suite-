@@ -9,7 +9,9 @@ internal enum class ConvertTarget(@StringRes val label: Int, val extension: Stri
     MP3(R.string.tools_target_mp3, "mp3", false),
     MP4(R.string.tools_target_mp4, "mp4", true),
     MKV(R.string.tools_target_mkv, "mkv", true),
-    WEBM(R.string.tools_target_webm, "webm", true)
+    WEBM(R.string.tools_target_webm, "webm", true),
+    M4A(R.string.tools_target_m4a, "m4a", false),
+    OPUS(R.string.tools_target_opus, "opus", false)
 }
 
 /** Cara memproses video: menyalin stream apa adanya, atau menyandikan ulang. */
@@ -30,6 +32,8 @@ internal object ConvertPlan {
 
     private fun args(target: ConvertTarget, mode: ConvertMode): String = when (target) {
         ConvertTarget.MP3 -> "-vn -c:a libmp3lame -b:a 320k"
+        ConvertTarget.M4A -> "-vn -c:a aac -b:a 256k -movflags +faststart"
+        ConvertTarget.OPUS -> "-vn -c:a libopus -b:a 160k"
         ConvertTarget.MP4 -> when (mode) {
             ConvertMode.COPY -> "$STREAMS -sn -c copy -movflags +faststart"
             ConvertMode.REENCODE -> "$STREAMS -sn $H264 -c:a aac -b:a 192k -movflags +faststart"

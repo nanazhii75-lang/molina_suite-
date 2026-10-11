@@ -17,7 +17,7 @@
     <string name="tools_engine_title">Pilih mesin unduh</string>
     <string name="tools_format_mp4_1080">MP4 1080p</string>
     <string name="tools_format_mp4_720">MP4 720p</string>
-    <string name="tools_format_best">Kualitas terbaik</string>
+    <string name="tools_format_best">Terbaik (H.264, kompatibel)</string>
     <string name="tools_format_mp3">Audio MP3</string>
     <string name="tools_engine_ytdlp">yt-dlp</string>
     <string name="tools_engine_aria2">yt-dlp + aria2</string>
@@ -32,7 +32,7 @@
     <string name="tools_run_failed">Gagal menjalankan: %1$s</string>
 
     <string name="tools_convert_title">Konverter Media</string>
-    <string name="tools_convert_desc">Ubah file media ke MP3, MP4, MKV, atau WebM. Hasil disimpan di folder Downloads.</string>
+    <string name="tools_convert_desc">Ubah file media ke MP3, M4A, Opus, MP4, MKV, atau WebM. Hasil disimpan di folder Downloads.</string>
     <string name="tools_convert_start">Konversi</string>
     <string name="tools_probe_title">Info video (ffprobe)</string>
     <string name="tools_probe_desc">Tampilkan durasi, codec, resolusi, dan bitrate sebuah file media.</string>
@@ -52,6 +52,8 @@
     <string name="tools_target_mp4">MP4 (H.264 + AAC)</string>
     <string name="tools_target_mkv">MKV (H.264 + AAC)</string>
     <string name="tools_target_webm">WebM (VP9 + Opus, lambat di HP)</string>
+    <string name="tools_target_m4a">M4A (audio AAC 256 kbps)</string>
+    <string name="tools_target_opus">Opus (audio 160 kbps, kecil)</string>
     <string name="tools_mode_copy">Salin stream: cepat, kualitas tetap, gagal bila codec tidak cocok</string>
     <string name="tools_mode_reencode">Re-encode: lambat, hasil selalu kompatibel</string>
 </resources>

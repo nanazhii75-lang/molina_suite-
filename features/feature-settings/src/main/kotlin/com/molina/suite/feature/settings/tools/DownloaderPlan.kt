@@ -5,11 +5,19 @@ import com.molina.suite.core.storage.MolinaStorage
 import com.molina.suite.feature.settings.R
 import com.molina.suite.feature.settings.ShellLine
 
+/**
+ * Pilih H.264 + AAC bila ada dan gabungkan ke MP4, supaya hasil bisa diputar di pemutar bawaan HP.
+ * Berkas tunggal berformat webm (VP9) tidak selalu tampil gambarnya, jadi dipindah ke MKV tanpa
+ * mengubah isinya.
+ */
+private const val COMPAT_ARGS =
+    "-S 'vcodec:h264,res,acodec:m4a' --merge-output-format mp4 --remux-video 'webm>mkv'"
+
 /** Pilihan format pada kartu Quick Downloader. [args] adalah argumen yt-dlp. */
 internal enum class DownloadFormat(@StringRes val label: Int, val args: String) {
-    MP4_1080(R.string.tools_format_mp4_1080, "-f 'bv*[height<=1080]+ba/b[height<=1080]/bv*+ba/b' --merge-output-format mp4"),
-    MP4_720(R.string.tools_format_mp4_720, "-f 'bv*[height<=720]+ba/b[height<=720]/bv*+ba/b' --merge-output-format mp4"),
-    BEST(R.string.tools_format_best, ""),
+    MP4_1080(R.string.tools_format_mp4_1080, "-f 'bv*[height<=1080]+ba/b[height<=1080]/bv*+ba/b' $COMPAT_ARGS"),
+    MP4_720(R.string.tools_format_mp4_720, "-f 'bv*[height<=720]+ba/b[height<=720]/bv*+ba/b' $COMPAT_ARGS"),
+    BEST(R.string.tools_format_best, COMPAT_ARGS),
     MP3(R.string.tools_format_mp3, "-x --audio-format mp3")
 }
 
