@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tools_gap_message">Alat berikut belum terpasang:\n%1$s</string>
+    <string name="tools_open_packages">Buka menu Paket</string>
+    <string name="tools_open_debian">Buka menu Debian</string>
+    <string name="tools_unregistered_message">Alat berikut belum terdaftar di menu Paket: %1$s. Ini kesalahan aplikasi, bukan sesuatu yang bisa dipasang. Mohon laporkan ke pengembang.</string>
+    <string name="tools_close">Tutup</string>
+    <string name="packages_highlight_hint">Paket yang dibutuhkan disorot. Pasang, lalu kembali ke alat tadi.</string>
+</resources>

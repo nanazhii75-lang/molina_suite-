@@ -5,17 +5,17 @@ import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.molina.suite.core.common.ToolReadiness
+import com.molina.suite.core.common.ToolRequirement
+import com.molina.suite.core.common.ToolSetupTarget
 import com.molina.suite.feature.settings.R
+import com.molina.suite.feature.settings.SettingsDependencies
 import com.molina.suite.feature.settings.ShellLine
 import com.molina.suite.feature.settings.TerminalCommandRunner
 import com.molina.suite.feature.settings.packages.PackageCatalog
-import com.molina.suite.feature.settings.packages.PackageDetection
-import com.molina.suite.feature.settings.packages.PackageDetector
-import com.molina.suite.feature.settings.packages.PackageSpec
-import kotlinx.coroutines.Dispatchers
+import com.molina.suite.feature.settings.packages.PackageToolReadinessChecker
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 internal fun Fragment.toolsToast(message: String) {
     val ctx = context ?: return
@@ -23,9 +23,10 @@ internal fun Fragment.toolsToast(message: String) {
 }
 
 /**
- * Menjalankan satu perintah alat di dalam Debian lewat tab Terminal: memeriksa paket yang
- * dibutuhkan, menawarkan install bila kurang, lalu mengetik perintah ke sesi aktif.
- * Panggil [launch] hanya saat view fragment hidup.
+ * Menjalankan satu perintah alat di dalam Debian lewat tab Terminal: memeriksa alat yang
+ * dibutuhkan lebih dulu. Bila ada yang kurang, pengguna bisa memasangnya lalu menjalankan, atau
+ * membuka menu Paket (paket yang kurang disorot). Debian yang belum ada dan alat yang tidak
+ * terdaftar di katalog punya dialog sendiri. Panggil [launch] hanya saat view fragment hidup.
  */
 internal class ToolLauncher(private val fragment: Fragment) {
 
@@ -40,44 +41,68 @@ internal class ToolLauncher(private val fragment: Fragment) {
         installWrapper: ((String) -> String)? = null
     ) {
         val appContext = fragment.context?.applicationContext ?: return
-        val required = requiredIds.mapNotNull { id -> PackageCatalog.all.firstOrNull { it.id == id } }
+        val checker = PackageToolReadinessChecker(appContext)
         fragment.viewLifecycleOwner.lifecycleScope.launch {
-            when (val detection = withContext(Dispatchers.IO) { PackageDetector.detect(appContext) }) {
-                is PackageDetection.NoDebian -> fragment.toolsToast(fragment.getString(R.string.tools_no_debian))
+            when (val readiness = checker.check(requiredIds)) {
                 // Status tidak terbaca: jalankan saja, terminal akan menampilkan galat sebenarnya.
-                is PackageDetection.Failed -> send(command, onStart, onFailed)
-                is PackageDetection.Ok -> {
-                    val gap = required.filter { detection.installed[it.id] == false }
-                    if (gap.isEmpty()) {
-                        send(command, onStart, onFailed)
-                    } else {
-                        askInstall(command, gap, title, onStart, onFailed, installWrapper)
-                    }
-                }
+                is ToolReadiness.Ready, is ToolReadiness.Unknown -> send(command, onStart, onFailed)
+                is ToolReadiness.NoDebian -> askOpenDebian(title)
+                is ToolReadiness.Missing ->
+                    askInstall(command, readiness.tools, title, onStart, onFailed, installWrapper)
+                is ToolReadiness.Unregistered -> showUnregistered(readiness.ids, title)
             }
         }
     }
 
     private fun askInstall(
         command: String,
-        missing: List<PackageSpec>,
+        missing: List<ToolRequirement>,
         @StringRes title: Int,
         onStart: (() -> Unit)?,
         onFailed: (() -> Unit)?,
         installWrapper: ((String) -> String)?
     ) {
         val ctx = fragment.context ?: return
-        val install = PackageCatalog.installAllCommand(missing) ?: return
-        val names = missing.joinToString(", ") { fragment.getString(it.title) }
+        val specs = missing.mapNotNull { tool -> PackageCatalog.all.firstOrNull { it.id == tool.id } }
+        val install = PackageCatalog.installAllCommand(specs) ?: return
+        val names = missing.joinToString("\n") { "• ${it.name}" }
         MaterialAlertDialogBuilder(ctx)
             .setTitle(title)
-            .setMessage(fragment.getString(R.string.tools_missing_message, names))
-            .setNegativeButton(R.string.tools_cancel, null)
-            .setNeutralButton(R.string.tools_run_anyway) { _, _ -> send(command, onStart, onFailed) }
+            .setMessage(fragment.getString(R.string.tools_gap_message, names))
             .setPositiveButton(R.string.tools_install_and_run) { _, _ ->
                 send(installWrapper?.invoke(install) ?: "$install && $command", onStart, onFailed)
             }
+            .setNeutralButton(R.string.tools_open_packages) { _, _ ->
+                openSetup(ToolSetupTarget.PACKAGES, missing.map { it.id })
+            }
+            .setNegativeButton(R.string.tools_cancel, null)
             .show()
+    }
+
+    private fun askOpenDebian(@StringRes title: Int) {
+        val ctx = fragment.context ?: return
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(title)
+            .setMessage(R.string.tools_no_debian)
+            .setPositiveButton(R.string.tools_open_debian) { _, _ ->
+                openSetup(ToolSetupTarget.DEBIAN, emptyList())
+            }
+            .setNegativeButton(R.string.tools_cancel, null)
+            .show()
+    }
+
+    private fun showUnregistered(ids: List<String>, @StringRes title: Int) {
+        val ctx = fragment.context ?: return
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(title)
+            .setMessage(fragment.getString(R.string.tools_unregistered_message, ids.joinToString(", ")))
+            .setPositiveButton(R.string.tools_close, null)
+            .show()
+    }
+
+    /** Meminta Settings membuka menu pemasangan; permintaan diproses SettingsFragment. */
+    private fun openSetup(target: ToolSetupTarget, ids: List<String>) {
+        SettingsDependencies.toolSetup().request(target, ids)
     }
 
     /** Mengetik [inner] di dalam Debian pada sesi aktif tab Terminal. */

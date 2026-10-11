@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gate_title">Putar dari tautan</string>
+    <string name="gate_missing_message">%1$s belum terpasang. Alat ini dibutuhkan untuk memutar tautan situs video seperti YouTube. Tautan langsung ke berkas video tetap bisa diputar.</string>
+    <string name="gate_no_debian_message">Debian belum terpasang, jadi tautan situs video seperti YouTube belum bisa diputar. Tautan langsung ke berkas video tetap bisa diputar.</string>
+    <string name="gate_unregistered_message">%1$s belum terdaftar di menu Paket. Ini kesalahan aplikasi. Tautan tetap bisa dicoba diputar.</string>
+    <string name="gate_open_packages">Buka menu Paket</string>
+    <string name="gate_open_debian">Buka menu Debian</string>
+    <string name="gate_play_anyway">Putar saja</string>
+    <string name="gate_cancel">Batal</string>
+</resources>

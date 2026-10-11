@@ -10,6 +10,7 @@
     android:paddingBottom="@dimen/ms_card_gap_half">
 
     <LinearLayout
+        android:id="@+id/package_item_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/ms_bg_card"

@@ -1,6 +1,7 @@
 package com.molina.suite.feature.settings
 
 import com.molina.suite.core.common.TerminalInputSender
+import com.molina.suite.core.common.ToolSetupBoard
 import com.molina.suite.feature.settings.library.LibraryRepository
 
 /**
@@ -11,10 +12,16 @@ import com.molina.suite.feature.settings.library.LibraryRepository
 internal object SettingsDependencies {
     @Volatile private var sender: TerminalInputSender? = null
     @Volatile private var repository: LibraryRepository? = null
+    @Volatile private var board: ToolSetupBoard? = null
 
-    fun install(terminalInput: TerminalInputSender, libraryRepository: LibraryRepository) {
+    fun install(
+        terminalInput: TerminalInputSender,
+        libraryRepository: LibraryRepository,
+        toolSetupBoard: ToolSetupBoard
+    ) {
         sender = terminalInput
         repository = libraryRepository
+        board = toolSetupBoard
     }
 
     fun terminalInput(): TerminalInputSender =
@@ -22,4 +29,7 @@ internal object SettingsDependencies {
 
     fun libraryRepository(): LibraryRepository =
         checkNotNull(repository) { "SettingsEngineModule.install belum dipanggil" }
+
+    fun toolSetup(): ToolSetupBoard =
+        checkNotNull(board) { "SettingsEngineModule.install belum dipanggil" }
 }

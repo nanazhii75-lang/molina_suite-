@@ -6,6 +6,8 @@ import com.molina.suite.core.common.DaemonStatusBoard
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.ShellCommandRunner
 import com.molina.suite.core.common.TerminalInputSender
+import com.molina.suite.core.common.ToolReadinessChecker
+import com.molina.suite.core.common.ToolSetupBoard
 import com.molina.suite.feature.code.CodeEngineModule
 import com.molina.suite.feature.mpv.MpvEngineModule
 import com.molina.suite.feature.settings.SettingsEngineModule
@@ -15,6 +17,12 @@ import com.molina.suite.feature.terminal.TermuxBackgroundKeepAlive
 class MolinaApplication : Application() {
     val engines = EngineRegistry()
     val daemons = DaemonStatusBoard()
+
+    /** Papan permintaan membuka menu pemasangan alat; fitur meminta, Settings yang menangani. */
+    val toolSetup = ToolSetupBoard()
+
+    /** Pemeriksa alat berbasis katalog menu Paket, dipakai modul mpv (Play by URL). */
+    val toolReadiness: ToolReadinessChecker by lazy { SettingsEngineModule.createToolReadinessChecker(this) }
 
     /** Pelaksana perintah shell untuk modul lain; dibuat saat pertama dipakai. */
     val shell: ShellCommandRunner by lazy { TerminalEngineModule.createShellRunner(this) }
@@ -29,8 +37,8 @@ class MolinaApplication : Application() {
         super.onCreate()
         TerminalEngineModule.install(this, engines)
         CodeEngineModule.install(this, engines)
-        MpvEngineModule.install(this, engines)
-        SettingsEngineModule.install(engines, terminalInput)
+        MpvEngineModule.install(this, engines, toolReadiness, toolSetup)
+        SettingsEngineModule.install(engines, terminalInput, toolSetup)
         DaemonStatusBridge.start(engines, daemons)
     }
 }

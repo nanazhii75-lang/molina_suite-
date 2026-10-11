@@ -2,6 +2,9 @@ package com.molina.suite.feature.mpv
 
 import android.app.Application
 import com.molina.suite.core.common.EngineRegistry
+import com.molina.suite.core.common.ToolReadinessChecker
+import com.molina.suite.core.common.ToolSetupBoard
+import com.molina.suite.mpv.UrlPlayback
 import com.molina.suite.mpv.search.YoutubeSearch
 
 /**
@@ -10,9 +13,15 @@ import com.molina.suite.mpv.search.YoutubeSearch
  */
 object MpvEngineModule {
 
-    fun install(application: Application, engines: EngineRegistry) {
+    fun install(
+        application: Application,
+        engines: EngineRegistry,
+        toolReadiness: ToolReadinessChecker,
+        toolSetup: ToolSetupBoard
+    ) {
         MpvYtdlBridge.install(application)
         YoutubeSearch.install(YtdlpSearchSource(MpvYtdlBridge.wrapperFile(application)))
+        UrlPlayback.install(MpvToolGate(toolReadiness, toolSetup))
         engines.register(MpvFeature())
     }
 }

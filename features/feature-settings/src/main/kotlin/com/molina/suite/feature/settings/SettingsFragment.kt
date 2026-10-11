@@ -4,11 +4,17 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.molina.suite.core.common.HostBackPressHandler
+import com.molina.suite.core.common.ToolSetupRequest
+import com.molina.suite.core.common.ToolSetupTarget
 import com.molina.suite.feature.settings.debian.DebianFragment
 import com.molina.suite.feature.settings.library.LibraryFragment
 import com.molina.suite.feature.settings.packages.PackagesFragment
 import com.molina.suite.feature.settings.tools.ToolsFragment
+import kotlinx.coroutines.launch
 
 /** Layar utama Settings: daftar submenu. Submenu dibuka sebagai child fragment. */
 class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHandler {
@@ -32,7 +38,43 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         view.findViewById<View>(R.id.settings_row_library).setOnClickListener { openLibrary() }
         view.findViewById<View>(R.id.settings_row_debian).setOnClickListener { openDebian() }
         view.findViewById<View>(R.id.settings_row_packages).setOnClickListener { openPackages() }
+        observeToolSetup()
         sync()
+    }
+
+    /**
+     * Menangani permintaan fitur lain (Quick Downloader, Play by URL di mpv) untuk membuka menu
+     * pemasangan. Permintaan yang datang sebelum fragment ini dibuat tetap tertangani, karena
+     * papan menyimpannya sampai dikonsumsi.
+     */
+    private fun observeToolSetup() {
+        val board = SettingsDependencies.toolSetup()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                board.pending.collect { request ->
+                    if (request != null) {
+                        openSetup(request)
+                        board.consume(request)
+                    }
+                }
+            }
+        }
+    }
+
+    /** Menutup submenu yang terbuka lalu membuka Paket (paket yang kurang disorot) atau Debian. */
+    private fun openSetup(request: ToolSetupRequest) {
+        val (fragment, tag) = when (request.target) {
+            ToolSetupTarget.PACKAGES ->
+                Pair<Fragment, String>(PackagesFragment.newInstance(request.toolIds), BACKSTACK_PACKAGES)
+            ToolSetupTarget.DEBIAN ->
+                Pair<Fragment, String>(DebianFragment(), BACKSTACK_DEBIAN)
+        }
+        childFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.settings_child_container, fragment)
+            .addToBackStack(tag)
+            .commit()
     }
 
     private fun openTools() {

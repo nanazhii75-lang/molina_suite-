@@ -1,5 +1,6 @@
 package com.molina.suite.feature.settings.packages
 
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +25,7 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
 
     private class Row(
         val spec: PackageSpec,
+        val root: View,
         val status: TextView,
         val install: ImageButton,
         val update: ImageButton
@@ -53,9 +55,27 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
             install.setOnClickListener { runInTerminal(spec.installCommand()) }
             update.setOnClickListener { runInTerminal(spec.updateCommand()) }
             container.addView(root)
-            Row(spec, root.findViewById(R.id.package_item_status), install, update)
+            Row(spec, root, root.findViewById(R.id.package_item_status), install, update)
         }
+        highlightRequested(announce = savedInstanceState == null)
         refresh()
+    }
+
+    /**
+     * Menyorot paket yang diminta fitur lain lewat argumen dan menggulir ke yang pertama. Petunjuk
+     * singkat hanya tampil saat layar dibuka, bukan saat dibuat ulang karena rotasi.
+     */
+    private fun highlightRequested(announce: Boolean) {
+        val ids = arguments?.getStringArray(ARG_HIGHLIGHT)?.toSet().orEmpty()
+        val marked = rows.filter { it.spec.id in ids }
+        if (marked.isEmpty()) return
+        for (row in marked) {
+            row.root.findViewById<View>(R.id.package_item_card)
+                .setBackgroundResource(R.drawable.ms_bg_card_highlight)
+        }
+        val first = marked.first().root
+        first.post { first.requestRectangleOnScreen(Rect(0, 0, first.width, first.height), false) }
+        if (announce) toast(getString(R.string.packages_highlight_hint))
     }
 
     override fun onDestroyView() {
@@ -137,5 +157,14 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
     private fun toast(message: String) {
         val ctx = context ?: return
         Toast.makeText(ctx.applicationContext, message, Toast.LENGTH_LONG).show()
+    }
+
+    companion object {
+        private const val ARG_HIGHLIGHT = "highlight_ids"
+
+        /** Membuka layar Paket dengan paket [highlightIds] disorot (id katalog). */
+        fun newInstance(highlightIds: List<String>): PackagesFragment = PackagesFragment().apply {
+            arguments = Bundle().apply { putStringArray(ARG_HIGHLIGHT, highlightIds.toTypedArray()) }
+        }
     }
 }
