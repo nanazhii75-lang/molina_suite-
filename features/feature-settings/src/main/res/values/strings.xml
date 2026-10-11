@@ -10,7 +10,7 @@
     <string name="library_add_title">Entri baru</string>
     <string name="library_edit_title">Ubah entri</string>
     <string name="library_field_name">Nama</string>
-    <string name="library_field_content">Isi (tautan atau perintah, satu baris)</string>
+    <string name="library_field_content">Isi (tautan, perintah, atau skrip beberapa baris)</string>
     <string name="library_field_note">Catatan (opsional)</string>
     <string name="library_save">Simpan</string>
     <string name="library_cancel">Batal</string>

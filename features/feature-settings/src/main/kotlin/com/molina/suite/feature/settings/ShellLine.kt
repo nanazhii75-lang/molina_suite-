@@ -37,12 +37,27 @@ internal object ShellLine {
             "else echo 'Perintah ini hanya jalan di shell biasa. Ketik exit untuk keluar dari Debian.'; fi"
 
     /** [values] diisikan ke placeholder dengan quote shell otomatis. */
-    fun build(entry: LibraryEntry, values: Map<String, String>): String {
-        val inner = PlaceholderTemplate.fill(entry.content, values.mapValues { quote(it.value) })
-        return when (entry.runIn) {
-            RunMode.DEBIAN -> wrapForDebian(inner)
-            RunMode.ANDROID -> guardAndroid(inner)
-            RunMode.HOST -> inner
-        }
+    fun build(entry: LibraryEntry, values: Map<String, String>): String =
+        wrap(entry.runIn, fillScript(entry, values))
+
+    /** True bila isi entri lebih dari satu baris, sehingga dijalankan sebagai berkas skrip. */
+    fun isScript(content: String): Boolean = content.any { it == '\n' || it == '\r' }
+
+    /** Isi entri dengan placeholder terisi (quote shell otomatis), tanpa pembungkus. */
+    fun fillScript(entry: LibraryEntry, values: Map<String, String>): String =
+        PlaceholderTemplate.fill(entry.content, values.mapValues { quote(it.value) })
+
+    /** Satu baris ketik yang menjalankan berkas skrip hasil [ScriptStager]. */
+    fun buildScriptRun(entry: LibraryEntry, scriptPath: String): String =
+        wrap(entry.runIn, "bash " + quote(scriptPath))
+
+    /** Menyisipkan perintah install sebelum isi entri; gagal install menghentikan jalannya. */
+    fun withInstall(content: String, install: String): String =
+        if (isScript(content)) "$install || exit 1\n$content" else "$install && $content"
+
+    private fun wrap(runIn: RunMode, inner: String): String = when (runIn) {
+        RunMode.DEBIAN -> wrapForDebian(inner)
+        RunMode.ANDROID -> guardAndroid(inner)
+        RunMode.HOST -> inner
     }
 }

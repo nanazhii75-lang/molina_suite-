@@ -189,7 +189,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
             val install = PackageCatalog.installAllCommand(missing)
             if (install != null) {
                 builder.setPositiveButton(R.string.library_install_and_run) { _, _ ->
-                    proceedRun(entry.copy(content = install + " && " + entry.content))
+                    proceedRun(entry.copy(content = ShellLine.withInstall(entry.content, install)))
                 }
             }
         }
@@ -208,8 +208,21 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
     private fun execute(entry: LibraryEntry, values: Map<String, String>) {
         if (runJob?.isActive == true) return
         val host = activity ?: return
-        val line = ShellLine.build(entry, values)
         runJob = viewLifecycleOwner.lifecycleScope.launch {
+            val line = if (ShellLine.isScript(entry.content)) {
+                val staged = withContext(Dispatchers.IO) {
+                    ScriptStager.stage(entry.id, ShellLine.fillScript(entry, values))
+                }
+                when (staged) {
+                    is LibraryResult.Ok -> ShellLine.buildScriptRun(entry, staged.value)
+                    is LibraryResult.Failure -> {
+                        toast(getString(R.string.library_run_failed, staged.reason))
+                        return@launch
+                    }
+                }
+            } else {
+                ShellLine.build(entry, values)
+            }
             val reason = TerminalCommandRunner.run(host, line)
             if (reason != null) toast(getString(R.string.library_run_failed, reason))
         }
@@ -312,11 +325,8 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
                 val content = contentInput.text?.toString().orEmpty().trim()
                 val note = noteInput.text?.toString().orEmpty().trim()
                 nameLayout.error = if (name.isEmpty()) getString(R.string.library_error_name) else null
-                contentLayout.error = when {
-                    content.isEmpty() -> getString(R.string.library_error_content)
-                    content.any { c -> c == '\n' || c == '\r' } -> getString(R.string.library_error_multiline)
-                    else -> null
-                }
+                contentLayout.error =
+                    if (content.isEmpty()) getString(R.string.library_error_content) else null
                 if (nameLayout.error != null || contentLayout.error != null) return@setOnClickListener
                 val runIn = when {
                     debianCheck.isChecked -> RunMode.DEBIAN

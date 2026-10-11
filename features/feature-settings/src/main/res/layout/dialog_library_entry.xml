@@ -34,7 +34,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="monospace"
-            android:inputType="text|textNoSuggestions" />
+            android:gravity="top|start"
+            android:inputType="text|textMultiLine|textNoSuggestions"
+            android:maxLines="12"
+            android:minLines="4"
+            android:scrollbars="vertical" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.checkbox.MaterialCheckBox
