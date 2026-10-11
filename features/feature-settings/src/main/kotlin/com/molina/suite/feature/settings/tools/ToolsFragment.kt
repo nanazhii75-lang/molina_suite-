@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
@@ -14,21 +13,18 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.molina.suite.feature.settings.R
 import com.molina.suite.feature.settings.Refreshable
-import com.molina.suite.feature.settings.ShellLine
-import com.molina.suite.feature.settings.TerminalCommandRunner
 import com.molina.suite.feature.settings.packages.PackageCatalog
 import com.molina.suite.feature.settings.packages.PackageDetection
 import com.molina.suite.feature.settings.packages.PackageDetector
 import com.molina.suite.feature.settings.packages.PackageSpec
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Pusat Kontrol: alat siap pakai berbentuk form. Saat ini kartu Quick Downloader.
- * Tombol mulai menyusun satu baris yt-dlp lalu mengetiknya ke tab Terminal, sama seperti
- * tombol jalankan di Library.
+ * Pusat Kontrol: alat siap pakai berbentuk form (Quick Downloader, Konversi MP3, Info video).
+ * Setiap tombol menyusun satu baris perintah lalu mengetiknya ke tab Terminal lewat
+ * [ToolLauncher], sama seperti tombol jalankan di Library.
  */
 class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
 
@@ -37,13 +33,18 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         val url: TextInputEditText,
         val format: MaterialButton,
         val engine: MaterialButton,
-        val requires: TextView
+        val requires: TextView,
+        val convertPick: MaterialButton,
+        val probePick: MaterialButton
     )
 
     private var views: Views? = null
+    private val launcher = ToolLauncher(this)
+    private val picker = MediaFilePicker(this)
     private var format = DownloadFormat.MP4_1080
     private var engine = DownloadEngine.YTDLP
-    private var runJob: Job? = null
+    private var convertSource: MediaFile? = null
+    private var probeSource: MediaFile? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,13 +66,19 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
             view.findViewById(R.id.tools_url),
             view.findViewById(R.id.tools_format),
             view.findViewById(R.id.tools_engine),
-            view.findViewById(R.id.tools_requires)
+            view.findViewById(R.id.tools_requires),
+            view.findViewById(R.id.tools_convert_pick),
+            view.findViewById(R.id.tools_probe_pick)
         )
         views = v
         view.findViewById<View>(R.id.tools_paste).setOnClickListener { pasteUrl() }
-        view.findViewById<View>(R.id.tools_start).setOnClickListener { start() }
+        view.findViewById<View>(R.id.tools_start).setOnClickListener { startDownload() }
         v.format.setOnClickListener { pickFormat() }
         v.engine.setOnClickListener { pickEngine() }
+        v.convertPick.setOnClickListener { picker.pick { convertSource = it; renderSelection() } }
+        v.probePick.setOnClickListener { picker.pick { probeSource = it; renderSelection() } }
+        view.findViewById<View>(R.id.tools_convert_start).setOnClickListener { startConvert() }
+        view.findViewById<View>(R.id.tools_probe_start).setOnClickListener { startProbe() }
         renderSelection()
         refreshRequirements()
     }
@@ -94,7 +101,13 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         val v = views ?: return
         v.format.text = getString(R.string.tools_format_label, getString(format.label))
         v.engine.text = getString(R.string.tools_engine_label, getString(engine.label))
+        v.convertPick.text = pickLabel(convertSource)
+        v.probePick.text = pickLabel(probeSource)
     }
+
+    private fun pickLabel(file: MediaFile?): String =
+        if (file == null) getString(R.string.tools_pick_label)
+        else getString(R.string.tools_pick_selected, file.relativePath)
 
     private fun pasteUrl() {
         val v = views ?: return
@@ -107,7 +120,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
             ""
         }
         if (text.isEmpty()) {
-            toast(getString(R.string.tools_paste_empty))
+            toolsToast(getString(R.string.tools_paste_empty))
             return
         }
         v.url.setText(text)
@@ -145,7 +158,7 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
     private fun specsOf(ids: List<String>): List<PackageSpec> =
         ids.mapNotNull { id -> PackageCatalog.all.firstOrNull { it.id == id } }
 
-    /** Menampilkan alat yang dibutuhkan beserta yang belum terpasang. */
+    /** Menampilkan alat yang dibutuhkan Quick Downloader beserta yang belum terpasang. */
     private fun refreshRequirements() {
         if (view == null) return
         val appContext = context?.applicationContext ?: return
@@ -169,54 +182,45 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         }
     }
 
-    private fun start() {
+    private fun startDownload() {
         val v = views ?: return
         val url = DownloaderPlan.normalizeUrl(v.url.text?.toString().orEmpty())
         v.urlLayout.error = if (url == null) getString(R.string.tools_url_invalid) else null
         if (url == null) return
-        val appContext = context?.applicationContext ?: return
-        val required = specsOf(DownloaderPlan.requiredPackages(engine))
-        val command = DownloaderPlan.command(url, format, engine)
+        launcher.launch(
+            DownloaderPlan.requiredPackages(engine),
+            DownloaderPlan.command(url, format, engine),
+            R.string.tools_downloader_title
+        )
+    }
+
+    private fun startConvert() {
+        val source = convertSource
+        if (source == null) {
+            toolsToast(getString(R.string.tools_pick_first))
+            return
+        }
         viewLifecycleOwner.lifecycleScope.launch {
-            when (val detection = withContext(Dispatchers.IO) { PackageDetector.detect(appContext) }) {
-                is PackageDetection.NoDebian -> toast(getString(R.string.tools_no_debian))
-                // Status tidak terbaca: jalankan saja, terminal akan menampilkan galat sebenarnya.
-                is PackageDetection.Failed -> send(command)
-                is PackageDetection.Ok -> {
-                    val gap = required.filter { detection.installed[it.id] == false }
-                    if (gap.isEmpty()) send(command) else askInstall(command, gap)
-                }
+            val output = withContext(Dispatchers.IO) { MediaFiles.prepareOutput(source.baseName, "mp3") }
+            if (output == null) {
+                toolsToast(getString(R.string.tools_output_failed))
+                return@launch
             }
+            launcher.launch(
+                listOf("ffmpeg"),
+                MediaPlan.toMp3(source.terminalPath, output),
+                R.string.tools_convert_title
+            )
         }
     }
 
-    private fun askInstall(command: String, missing: List<PackageSpec>) {
-        val ctx = context ?: return
-        val install = PackageCatalog.installAllCommand(missing) ?: return
-        val names = missing.joinToString(", ") { getString(it.title) }
-        MaterialAlertDialogBuilder(ctx)
-            .setTitle(R.string.tools_downloader_title)
-            .setMessage(getString(R.string.tools_missing_message, names))
-            .setNegativeButton(R.string.tools_cancel, null)
-            .setNeutralButton(R.string.tools_run_anyway) { _, _ -> send(command) }
-            .setPositiveButton(R.string.tools_install_and_run) { _, _ -> send("$install && $command") }
-            .show()
-    }
-
-    /** Mengetik [inner] di dalam Debian pada sesi aktif tab Terminal. */
-    private fun send(inner: String) {
-        if (runJob?.isActive == true) return
-        val host = activity ?: return
-        val line = ShellLine.wrapForDebian(inner)
-        runJob = viewLifecycleOwner.lifecycleScope.launch {
-            val reason = TerminalCommandRunner.run(host, line)
-            if (reason != null) toast(getString(R.string.tools_run_failed, reason))
+    private fun startProbe() {
+        val source = probeSource
+        if (source == null) {
+            toolsToast(getString(R.string.tools_pick_first))
+            return
         }
-    }
-
-    private fun toast(message: String) {
-        val ctx = context ?: return
-        Toast.makeText(ctx.applicationContext, message, Toast.LENGTH_LONG).show()
+        launcher.launch(listOf("ffmpeg"), MediaPlan.probe(source.terminalPath), R.string.tools_probe_title)
     }
 
     private companion object {

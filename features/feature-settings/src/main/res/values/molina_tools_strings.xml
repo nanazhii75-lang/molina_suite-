@@ -26,8 +26,22 @@
     <string name="tools_requires_missing">Belum terpasang: %1$s</string>
     <string name="tools_no_debian">Debian belum terpasang. Pasang lewat menu Debian dulu.</string>
     <string name="tools_missing_message">Alat berikut belum terpasang: %1$s</string>
-    <string name="tools_install_and_run">Install lalu unduh</string>
-    <string name="tools_run_anyway">Unduh saja</string>
+    <string name="tools_install_and_run">Install lalu jalankan</string>
+    <string name="tools_run_anyway">Jalankan saja</string>
     <string name="tools_cancel">Batal</string>
     <string name="tools_run_failed">Gagal menjalankan: %1$s</string>
+
+    <string name="tools_convert_title">Konversi ke MP3</string>
+    <string name="tools_convert_desc">Ubah video atau audio menjadi MP3 320 kbps. Hasil disimpan di folder Downloads.</string>
+    <string name="tools_convert_start">Konversi ke MP3</string>
+    <string name="tools_probe_title">Info video (ffprobe)</string>
+    <string name="tools_probe_desc">Tampilkan durasi, codec, resolusi, dan bitrate sebuah file media.</string>
+    <string name="tools_probe_start">Tampilkan info</string>
+    <string name="tools_pick_label">Pilih file media</string>
+    <string name="tools_pick_selected">File: %1$s</string>
+    <string name="tools_pick_title">Pilih file</string>
+    <string name="tools_pick_first">Pilih file dulu</string>
+    <string name="tools_no_media">Belum ada file media di folder Molina</string>
+    <string name="tools_permission_denied">Izin penyimpanan dibutuhkan untuk melihat file</string>
+    <string name="tools_output_failed">Gagal menyiapkan folder Downloads</string>
 </resources>
