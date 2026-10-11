@@ -1,6 +1,7 @@
 package com.molina.suite.terminal.app.terminal;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -51,14 +53,22 @@ public class TermuxSessionsListViewController extends ArrayAdapter<TermuxSession
         }
 
         TextView sessionTitleView = sessionRowView.findViewById(R.id.session_title);
+        ImageButton closeButton = sessionRowView.findViewById(R.id.session_close_button);
+
+        // Sesi pertama tidak bisa ditutup dari daftar; sesi ke-2 dan seterusnya punya tombol x.
+        closeButton.setVisibility(position > 0 ? View.VISIBLE : View.GONE);
 
         TerminalSession sessionAtRow = getItem(position).getTerminalSession();
         if (sessionAtRow == null) {
             sessionTitleView.setText("null session");
+            closeButton.setVisibility(View.GONE);
             return sessionRowView;
         }
 
         boolean isUsingBlackUI = mHost.getProperties().isUsingBlackUI();
+
+        closeButton.setColorFilter(isUsingBlackUI ? Color.WHITE : Color.BLACK);
+        closeButton.setOnClickListener(v -> confirmAndCloseSession(sessionAtRow));
 
         if (isUsingBlackUI) {
             sessionTitleView.setBackground(
@@ -91,6 +101,27 @@ public class TermuxSessionsListViewController extends ArrayAdapter<TermuxSession
         int color = sessionRunning || sessionAtRow.getExitStatus() == 0 ? defaultColor : Color.RED;
         sessionTitleView.setTextColor(color);
         return sessionRowView;
+    }
+
+    /**
+     * Menutup sesi dari tombol x. Sesi yang masih berjalan dikonfirmasi dulu karena prosesnya
+     * akan dihentikan; sesi yang sudah selesai langsung dihapus dari daftar.
+     */
+    private void confirmAndCloseSession(TerminalSession session) {
+        if (!session.isRunning()) {
+            mHost.getTermuxTerminalSessionClient().closeSession(session);
+            return;
+        }
+
+        new AlertDialog.Builder(mActivity)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setMessage(R.string.title_confirm_kill_process)
+            .setPositiveButton(android.R.string.yes, (dialog, id) -> {
+                dialog.dismiss();
+                mHost.getTermuxTerminalSessionClient().closeSession(session);
+            })
+            .setNegativeButton(android.R.string.no, null)
+            .show();
     }
 
     @Override

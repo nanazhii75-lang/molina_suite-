@@ -31,7 +31,9 @@ import com.molina.suite.terminal.terminal.TextStyle;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase {
 
@@ -45,6 +47,9 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
     private int mBellSoundId;
 
     private static final String LOG_TAG = "TermuxTerminalSessionClient";
+
+    /** Sesi yang sedang dihentikan atas permintaan pengguna (tombol x); dihapus dari daftar saat prosesnya berakhir. */
+    private final Set<TerminalSession> mSessionsClosingByUser = new HashSet<>();
 
     public TermuxTerminalSessionClient(TermuxHost host) {
         this.mHost = host;
@@ -139,6 +144,11 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
         if (service == null || service.wantsToStop()) {
             // The service wants to stop as soon as possible.
             mHost.finishActivityIfNotFinishing();
+            return;
+        }
+
+        if (mSessionsClosingByUser.remove(finishedSession)) {
+            removeSessionKeepingCurrent(finishedSession);
             return;
         }
 
@@ -398,6 +408,37 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
         if (service == null) return null;
 
         return service.getTerminalSessionForHandle(sessionHandle);
+    }
+
+    /**
+     * Menutup sesi atas permintaan pengguna (tombol x di daftar sesi). Sesi yang masih berjalan
+     * dihentikan dulu dan dihapus dari daftar saat prosesnya berakhir; sesi yang sudah selesai
+     * langsung dihapus.
+     */
+    public void closeSession(TerminalSession session) {
+        if (session == null) return;
+
+        if (session.isRunning()) {
+            mSessionsClosingByUser.add(session);
+            session.finishIfRunning();
+        } else {
+            removeSessionKeepingCurrent(session);
+        }
+    }
+
+    /**
+     * Menghapus sesi dari daftar tanpa memindahkan sesi yang sedang ditampilkan, kecuali sesi
+     * yang ditutup itu sendiri yang sedang ditampilkan.
+     */
+    private void removeSessionKeepingCurrent(TerminalSession session) {
+        TermuxService service = mHost.getTermuxService();
+        if (service == null) return;
+
+        TerminalSession current = mHost.getCurrentSession();
+        removeFinishedSession(session);
+
+        if (current != null && current != session && service.getIndexOfSession(current) >= 0)
+            setCurrentSession(current);
     }
 
     public void removeFinishedSession(TerminalSession finishedSession) {

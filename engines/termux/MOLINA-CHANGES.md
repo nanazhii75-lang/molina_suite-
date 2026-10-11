@@ -55,3 +55,9 @@ tercatat sebagai commit terpisah.
 - `ExtraKeysConstants`: simbol ⎘ untuk PASTE dihapus; COPY, PASTE, CLEAR tampil sebagai teks.
 - `TermuxTerminalExtraKeys`: handler COPY (salin seluruh isi terminal: riwayat scroll dan layar, termasuk prompt; dipotong ke 100KB terakhir bila lebih panjang) dan CLEAR (CSI 3 J ke emulator untuk menghapus riwayat scroll, lalu Ctrl+L untuk menggambar ulang prompt). `TerminalView.getFullTranscriptText()` ditambahkan.
 - `strings.xml`: `molina_extra_key_screen_copied`, `molina_extra_key_screen_empty`.
+
+## Tombol tutup sesi
+- `fragment_termux.xml`, `TermuxFragment`: tombol ☰ kanan atas (`sessions_drawer_button`) dihapus karena duplikat dengan tombol DRAWER di Extra Keys; drawable `ic_sessions_drawer` dan string `action_open_sessions` ikut dihapus.
+- `item_terminal_sessions_list.xml`: baris sesi dibungkus FrameLayout dengan tombol x kecil (`session_close_button`, ikon `ic_molina_close_session`) di pojok kanan atas.
+- `TermuxSessionsListViewController`: tombol x tampil untuk sesi ke-2 dan seterusnya; sesi yang masih berjalan dikonfirmasi dulu (`title_confirm_kill_process`).
+- `TermuxTerminalSessionClient.closeSession()`: sesi berjalan dihentikan lalu dihapus dari daftar saat `onSessionFinished`; sesi selesai langsung dihapus. Sesi yang sedang tampil tidak berpindah kecuali sesi itu sendiri yang ditutup.

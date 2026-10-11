@@ -1,9 +1,32 @@
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/session_title"
-    android:layout_width="fill_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
-    android:background="@drawable/session_background_selected"
-    android:ellipsize="marquee"
-    android:gravity="start|center_vertical"
-    android:padding="6dip"
-    android:textSize="14sp" />
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/session_title"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:background="@drawable/session_background_selected"
+        android:ellipsize="marquee"
+        android:gravity="start|center_vertical"
+        android:paddingStart="6dip"
+        android:paddingTop="6dip"
+        android:paddingEnd="30dip"
+        android:paddingBottom="6dip"
+        android:textSize="14sp" />
+
+    <ImageButton
+        android:id="@+id/session_close_button"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="2dp"
+        android:background="@null"
+        android:contentDescription="@string/action_close_session"
+        android:focusable="false"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_molina_close_session"
+        android:visibility="gone" />
+
+</FrameLayout>
