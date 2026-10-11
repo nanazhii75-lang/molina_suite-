@@ -22,6 +22,11 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.molina.suite.core.storage.MolinaStorage
 import com.molina.suite.feature.settings.PlaceholderTemplate
+import com.molina.suite.feature.settings.Refreshable
+import com.molina.suite.feature.settings.packages.PackageCatalog
+import com.molina.suite.feature.settings.packages.PackageDetection
+import com.molina.suite.feature.settings.packages.PackageDetector
+import com.molina.suite.feature.settings.packages.PackageSpec
 import com.molina.suite.feature.settings.R
 import com.molina.suite.feature.settings.SettingsDependencies
 import com.molina.suite.feature.settings.ShellLine
@@ -32,7 +37,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Daftar entri Library: tambah, ubah, hapus, pulihkan bawaan, dan jalankan (▶) di tab Terminal. */
-class LibraryFragment : Fragment(R.layout.fragment_library) {
+class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
 
     private class Views(val list: RecyclerView, val empty: TextView, val error: TextView)
 
@@ -87,6 +92,33 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
                 repository.list()
             }
             render(result)
+            refreshRequirements()
+        }
+    }
+
+    override fun refresh() {
+        if (view != null) refreshRequirements()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshRequirements()
+    }
+
+    /** Menandai entri yang butuh paket Debian yang belum terpasang. Tanpa Debian, tidak ada penanda. */
+    private fun refreshRequirements() {
+        if (view == null) return
+        val appContext = context?.applicationContext ?: return
+        viewLifecycleOwner.lifecycleScope.launch {
+            val detection = withContext(Dispatchers.IO) { PackageDetector.detect(appContext) }
+            val installed = (detection as? PackageDetection.Ok)?.installed
+            val labels = HashMap<String, String>()
+            if (installed != null) {
+                for ((id, specs) in LibraryRequirements.missingByEntry(installed)) {
+                    labels[id] = specs.joinToString(", ") { getString(it.title) }
+                }
+            }
+            adapter.submitMissing(labels)
         }
     }
 
@@ -130,6 +162,41 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
 
     /** Menanyakan nilai placeholder bila ada, lalu menjalankan entri. */
     private fun prepareRun(entry: LibraryEntry) {
+        if (LibraryRequirements.of(entry.id).isEmpty()) {
+            proceedRun(entry)
+            return
+        }
+        val appContext = context?.applicationContext ?: return
+        viewLifecycleOwner.lifecycleScope.launch {
+            val detection = withContext(Dispatchers.IO) { PackageDetector.detect(appContext) }
+            val installed = (detection as? PackageDetection.Ok)?.installed
+            val missing: List<PackageSpec> =
+                if (installed == null) emptyList() else LibraryRequirements.missing(entry.id, installed)
+            if (missing.isEmpty()) proceedRun(entry) else askInstall(entry, missing)
+        }
+    }
+
+    /** Alat yang dibutuhkan belum terpasang: tawarkan install dulu, jalankan saja, atau batal. */
+    private fun askInstall(entry: LibraryEntry, missing: List<PackageSpec>) {
+        val ctx = context ?: return
+        val names = missing.joinToString(", ") { getString(it.title) }
+        val builder = MaterialAlertDialogBuilder(ctx)
+            .setTitle(entry.name)
+            .setMessage(getString(R.string.library_requires_message, names))
+            .setNegativeButton(R.string.library_cancel, null)
+            .setNeutralButton(R.string.library_run_anyway) { _, _ -> proceedRun(entry) }
+        if (entry.runIn == RunMode.DEBIAN) {
+            val install = PackageCatalog.installAllCommand(missing)
+            if (install != null) {
+                builder.setPositiveButton(R.string.library_install_and_run) { _, _ ->
+                    proceedRun(entry.copy(content = install + " && " + entry.content))
+                }
+            }
+        }
+        builder.show()
+    }
+
+    private fun proceedRun(entry: LibraryEntry) {
         val names = PlaceholderTemplate.names(entry.content)
         if (names.isEmpty()) {
             execute(entry, emptyMap())

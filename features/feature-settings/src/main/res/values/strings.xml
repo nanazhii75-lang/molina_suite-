@@ -77,4 +77,8 @@
     <string name="pkg_tools_title">Alat bantu</string>
     <string name="pkg_tools_desc">git, curl, wget, unzip, p7zip, nano, rsync, jq, dan mediainfo.</string>
     <string name="library_permission_denied">Izin penyimpanan ditolak. Aktifkan di Pengaturan > Aplikasi > molina > Izin, lalu buka ulang tab ini.</string>
+    <string name="library_requires">Butuh %1$s (belum terpasang)</string>
+    <string name="library_requires_message">Entri ini butuh %1$s, tetapi belum terpasang di Debian.</string>
+    <string name="library_install_and_run">Install lalu jalankan</string>
+    <string name="library_run_anyway">Jalankan saja</string>
 </resources>
