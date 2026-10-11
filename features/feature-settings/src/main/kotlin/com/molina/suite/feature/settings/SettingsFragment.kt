@@ -8,6 +8,7 @@ import com.molina.suite.core.common.HostBackPressHandler
 import com.molina.suite.feature.settings.debian.DebianFragment
 import com.molina.suite.feature.settings.library.LibraryFragment
 import com.molina.suite.feature.settings.packages.PackagesFragment
+import com.molina.suite.feature.settings.tools.ToolsFragment
 
 /** Layar utama Settings: daftar submenu. Submenu dibuka sebagai child fragment. */
 class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHandler {
@@ -27,10 +28,20 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         childFragmentManager.addOnBackStackChangedListener(listener)
         backStackListener = listener
 
+        view.findViewById<View>(R.id.settings_row_tools).setOnClickListener { openTools() }
         view.findViewById<View>(R.id.settings_row_library).setOnClickListener { openLibrary() }
         view.findViewById<View>(R.id.settings_row_debian).setOnClickListener { openDebian() }
         view.findViewById<View>(R.id.settings_row_packages).setOnClickListener { openPackages() }
         sync()
+    }
+
+    private fun openTools() {
+        if (childFragmentManager.backStackEntryCount > 0) return
+        childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.settings_child_container, ToolsFragment())
+            .addToBackStack(BACKSTACK_TOOLS)
+            .commit()
     }
 
     private fun openLibrary() {
@@ -80,6 +91,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
     }
 
     private companion object {
+        const val BACKSTACK_TOOLS = "tools"
         const val BACKSTACK_LIBRARY = "library"
         const val BACKSTACK_DEBIAN = "debian"
         const val BACKSTACK_PACKAGES = "packages"

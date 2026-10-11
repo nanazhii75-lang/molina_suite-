@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-settings-design-7a -->
+<resources>
+    <string name="settings_tools_title">Pusat Kontrol</string>
+    <string name="settings_tools_subtitle">Alat siap pakai lewat form, tanpa mengetik perintah</string>
+
+    <string name="tools_title">Pusat Kontrol</string>
+    <string name="tools_downloader_title">Quick Downloader</string>
+    <string name="tools_downloader_desc">Tempel tautan video, pilih format, lalu unduh ke folder Downloads.</string>
+    <string name="tools_url_hint">Tautan video</string>
+    <string name="tools_url_invalid">Tautan harus diawali http:// atau https://</string>
+    <string name="tools_paste">Tempel</string>
+    <string name="tools_paste_empty">Papan klip kosong</string>
+    <string name="tools_format_label">Format: %1$s</string>
+    <string name="tools_engine_label">Mesin: %1$s</string>
+    <string name="tools_format_title">Pilih format</string>
+    <string name="tools_engine_title">Pilih mesin unduh</string>
+    <string name="tools_format_mp4_1080">MP4 1080p</string>
+    <string name="tools_format_mp4_720">MP4 720p</string>
+    <string name="tools_format_best">Kualitas terbaik</string>
+    <string name="tools_format_mp3">Audio MP3</string>
+    <string name="tools_engine_ytdlp">yt-dlp</string>
+    <string name="tools_engine_aria2">yt-dlp + aria2</string>
+    <string name="tools_start">Mulai unduh</string>
+    <string name="tools_requires">Butuh: %1$s</string>
+    <string name="tools_requires_missing">Belum terpasang: %1$s</string>
+    <string name="tools_no_debian">Debian belum terpasang. Pasang lewat menu Debian dulu.</string>
+    <string name="tools_missing_message">Alat berikut belum terpasang: %1$s</string>
+    <string name="tools_install_and_run">Install lalu unduh</string>
+    <string name="tools_run_anyway">Unduh saja</string>
+    <string name="tools_cancel">Batal</string>
+    <string name="tools_run_failed">Gagal menjalankan: %1$s</string>
+</resources>
