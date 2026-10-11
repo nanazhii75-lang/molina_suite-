@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentManager
 import com.molina.suite.core.common.HostBackPressHandler
 import com.molina.suite.feature.settings.debian.DebianFragment
 import com.molina.suite.feature.settings.library.LibraryFragment
+import com.molina.suite.feature.settings.packages.PackagesFragment
 
 /** Layar utama Settings: daftar submenu. Submenu dibuka sebagai child fragment. */
 class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHandler {
@@ -28,6 +29,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
 
         view.findViewById<View>(R.id.settings_row_library).setOnClickListener { openLibrary() }
         view.findViewById<View>(R.id.settings_row_debian).setOnClickListener { openDebian() }
+        view.findViewById<View>(R.id.settings_row_packages).setOnClickListener { openPackages() }
         sync()
     }
 
@@ -37,6 +39,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
             .setReorderingAllowed(true)
             .replace(R.id.settings_child_container, LibraryFragment())
             .addToBackStack(BACKSTACK_LIBRARY)
+            .commit()
+    }
+
+    private fun openPackages() {
+        if (childFragmentManager.backStackEntryCount > 0) return
+        childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.settings_child_container, PackagesFragment())
+            .addToBackStack(BACKSTACK_PACKAGES)
             .commit()
     }
 
@@ -55,6 +66,13 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         return true
     }
 
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden) {
+            (childFragmentManager.findFragmentById(R.id.settings_child_container) as? Refreshable)?.refresh()
+        }
+    }
+
     override fun onDestroyView() {
         backStackListener?.let { childFragmentManager.removeOnBackStackChangedListener(it) }
         backStackListener = null
@@ -64,5 +82,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
     private companion object {
         const val BACKSTACK_LIBRARY = "library"
         const val BACKSTACK_DEBIAN = "debian"
+        const val BACKSTACK_PACKAGES = "packages"
     }
 }

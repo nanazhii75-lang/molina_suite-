@@ -51,4 +51,29 @@
     <string name="placeholder_file">Path file (mis. /sdcard/Molina/Downloads/a.mp4)</string>
     <string name="placeholder_out">Path hasil</string>
     <string name="placeholder_generic">Nilai untuk %1$s</string>
+
+    <string name="settings_packages_title">Paket</string>
+    <string name="settings_packages_subtitle">Python, yt-dlp, FFmpeg, aria2, JDK, dan alat lain di Debian</string>
+    <string name="packages_install_all">Install semua yang belum terpasang</string>
+    <string name="packages_hint">Perintah berjalan di Terminal. Setelah selesai, ketuk Segarkan.</string>
+    <string name="packages_no_debian">Debian belum terpasang. Pasang lewat menu Debian.</string>
+    <string name="packages_failed">Gagal memeriksa paket: %1$s</string>
+    <string name="packages_summary">%1$d dari %2$d paket terpasang</string>
+    <string name="packages_installed">Terpasang</string>
+    <string name="packages_missing">Belum terpasang</string>
+    <string name="packages_unknown">Status belum diketahui</string>
+    <string name="packages_install">Install</string>
+    <string name="packages_update">Update</string>
+    <string name="pkg_python_title">Python</string>
+    <string name="pkg_python_desc">python3, pip, dan venv.</string>
+    <string name="pkg_ytdlp_title">yt-dlp + curl_cffi</string>
+    <string name="pkg_ytdlp_desc">Pengunduh video lewat venv /opt/ytdlp; wajib untuk TikTok.</string>
+    <string name="pkg_ffmpeg_title">FFmpeg</string>
+    <string name="pkg_ffmpeg_desc">ffmpeg dan ffprobe untuk konversi dan info media.</string>
+    <string name="pkg_aria2_title">aria2</string>
+    <string name="pkg_aria2_desc">Pengunduh paralel aria2c.</string>
+    <string name="pkg_jdk_title">JDK 17</string>
+    <string name="pkg_jdk_desc">OpenJDK 17 headless dari repositori Debian 12.</string>
+    <string name="pkg_tools_title">Alat bantu</string>
+    <string name="pkg_tools_desc">git, curl, wget, unzip, p7zip, nano, rsync, jq, dan mediainfo.</string>
 </resources>

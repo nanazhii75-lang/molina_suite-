@@ -55,12 +55,19 @@ internal object BuiltinLibrary {
         entry(
             "builtin-mpv-url", "Putar URL di mpv",
             "am start -a android.intent.action.VIEW -d {URL} -t 'video/*' -p $MPV_PACKAGE",
-            "Membuka tautan video atau audio langsung di tab mpv.", RunMode.HOST
+            "Membuka tautan video atau audio langsung di tab mpv.", RunMode.ANDROID
         ),
         entry(
             "builtin-mpv-file", "Putar file di mpv",
             "am start -a android.intent.action.VIEW -d file://{FILE} -t 'video/*' -p $MPV_PACKAGE",
-            "Isi path file di penyimpanan, mis. $downloads/video.mp4.", RunMode.HOST
+            "Isi path file di penyimpanan, mis. $downloads/video.mp4.", RunMode.ANDROID
+        ),
+        entry(
+            "builtin-mpv-stream", "Putar stream (IPTV, rtsp, rtmp, udp)",
+            "U={URL}; case \"\$U\" in http://*|https://*) " +
+                "am start -a android.intent.action.VIEW -d \"\$U\" -t 'video/*' -p $MPV_PACKAGE;; " +
+                "*) am start -a android.intent.action.VIEW -d \"\$U\" -p $MPV_PACKAGE;; esac",
+            "Tautan http(s) memakai tipe video; rtsp, rtmp, udp, dan sejenisnya tanpa tipe.", RunMode.ANDROID
         ),
         entry(
             "builtin-list-downloads", "Isi folder Downloads",

@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.molina.suite.feature.settings.R
+import com.molina.suite.feature.settings.Refreshable
 import com.molina.suite.feature.settings.TerminalCommandRunner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Layar Debian: status rootfs, install, update, dan panduan login/logout. */
-class DebianFragment : Fragment(R.layout.fragment_debian) {
+class DebianFragment : Fragment(R.layout.fragment_debian), Refreshable {
 
     private class Row(val action: DebianAction, val root: View, val run: ImageButton)
 
@@ -62,7 +63,7 @@ class DebianFragment : Fragment(R.layout.fragment_debian) {
         super.onDestroyView()
     }
 
-    private fun refresh() {
+    override fun refresh() {
         statusView?.setText(R.string.debian_status_checking)
         val appContext = requireContext().applicationContext
         viewLifecycleOwner.lifecycleScope.launch {

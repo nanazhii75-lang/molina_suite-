@@ -5,7 +5,10 @@ import java.util.UUID
 /** Tempat entri dijalankan: shell host terminal, atau di dalam Debian (proot). */
 enum class RunMode(val key: String) {
     HOST("host"),
-    DEBIAN("debian");
+    DEBIAN("debian"),
+
+    /** Perintah Android (am, pm): hanya ada di shell host, bukan di dalam Debian. */
+    ANDROID("android");
 
     companion object {
         fun fromKey(key: String?): RunMode = values().firstOrNull { it.key == key } ?: HOST

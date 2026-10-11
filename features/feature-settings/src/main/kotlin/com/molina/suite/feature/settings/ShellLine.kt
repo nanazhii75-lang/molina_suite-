@@ -31,9 +31,18 @@ internal object ShellLine {
             "proot-distro login debian -- bash -c $quoted; else bash -c $quoted; fi"
     }
 
+    /** Perintah Android (am, pm) hanya ada di shell host; di dalam Debian tampilkan petunjuk. */
+    fun guardAndroid(inner: String): String =
+        "if command -v proot-distro >/dev/null 2>&1; then $inner; " +
+            "else echo 'Perintah ini hanya jalan di shell biasa. Ketik exit untuk keluar dari Debian.'; fi"
+
     /** [values] diisikan ke placeholder dengan quote shell otomatis. */
     fun build(entry: LibraryEntry, values: Map<String, String>): String {
         val inner = PlaceholderTemplate.fill(entry.content, values.mapValues { quote(it.value) })
-        return if (entry.runIn == RunMode.DEBIAN) wrapForDebian(inner) else inner
+        return when (entry.runIn) {
+            RunMode.DEBIAN -> wrapForDebian(inner)
+            RunMode.ANDROID -> guardAndroid(inner)
+            RunMode.HOST -> inner
+        }
     }
 }

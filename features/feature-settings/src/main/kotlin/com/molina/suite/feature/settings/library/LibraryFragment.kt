@@ -228,7 +228,11 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
                     else -> null
                 }
                 if (nameLayout.error != null || contentLayout.error != null) return@setOnClickListener
-                val runIn = if (debianCheck.isChecked) RunMode.DEBIAN else RunMode.HOST
+                val runIn = when {
+                    debianCheck.isChecked -> RunMode.DEBIAN
+                    entry?.runIn == RunMode.ANDROID -> RunMode.ANDROID
+                    else -> RunMode.HOST
+                }
                 val saved = if (entry == null) {
                     LibraryEntry.create(name, content, note, runIn)
                 } else {

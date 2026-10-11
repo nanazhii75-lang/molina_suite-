@@ -1,0 +1,132 @@
+package com.molina.suite.feature.settings.packages
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.google.android.material.button.MaterialButton
+import com.molina.suite.feature.settings.R
+import com.molina.suite.feature.settings.Refreshable
+import com.molina.suite.feature.settings.ShellLine
+import com.molina.suite.feature.settings.TerminalCommandRunner
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+/** Layar Paket: status paket Debian, install, update, dan install semua yang belum terpasang. */
+class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
+
+    private class Row(
+        val spec: PackageSpec,
+        val status: TextView,
+        val install: ImageButton,
+        val update: ImageButton
+    )
+
+    private var statusView: TextView? = null
+    private var installAllButton: MaterialButton? = null
+    private var rows: List<Row> = emptyList()
+    private var detection: PackageDetection? = null
+    private var runJob: Job? = null
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        statusView = view.findViewById(R.id.packages_status)
+        val installAll = view.findViewById<MaterialButton>(R.id.packages_install_all)
+        installAll.setOnClickListener { installAllMissing() }
+        installAllButton = installAll
+        view.findViewById<View>(R.id.packages_refresh).setOnClickListener { refresh() }
+
+        val container = view.findViewById<LinearLayout>(R.id.packages_list)
+        val inflater = LayoutInflater.from(requireContext())
+        rows = PackageCatalog.all.map { spec ->
+            val root = inflater.inflate(R.layout.item_package, container, false)
+            root.findViewById<TextView>(R.id.package_item_title).setText(spec.title)
+            root.findViewById<TextView>(R.id.package_item_desc).setText(spec.description)
+            val install = root.findViewById<ImageButton>(R.id.package_item_install)
+            val update = root.findViewById<ImageButton>(R.id.package_item_update)
+            install.setOnClickListener { runInTerminal(spec.installCommand()) }
+            update.setOnClickListener { runInTerminal(spec.updateCommand()) }
+            container.addView(root)
+            Row(spec, root.findViewById(R.id.package_item_status), install, update)
+        }
+        refresh()
+    }
+
+    override fun onDestroyView() {
+        statusView = null
+        installAllButton = null
+        rows = emptyList()
+        super.onDestroyView()
+    }
+
+    override fun refresh() {
+        if (view == null) return
+        val appContext = context?.applicationContext ?: return
+        detection = null
+        render()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { PackageDetector.detect(appContext) }
+            detection = result
+            render()
+        }
+    }
+
+    private fun render() {
+        val current = detection
+        val ok = current as? PackageDetection.Ok
+        statusView?.text = when (current) {
+            null -> getString(R.string.debian_status_checking)
+            PackageDetection.NoDebian -> getString(R.string.packages_no_debian)
+            is PackageDetection.Failed -> getString(R.string.packages_failed, current.reason)
+            is PackageDetection.Ok ->
+                getString(R.string.packages_summary, current.installed.count { it.value }, current.installed.size)
+        }
+        for (row in rows) {
+            val installed = ok?.installed?.get(row.spec.id)
+            row.status.setText(
+                when (installed) {
+                    true -> R.string.packages_installed
+                    false -> R.string.packages_missing
+                    null -> R.string.packages_unknown
+                }
+            )
+            setEnabled(row.install, installed == false)
+            setEnabled(row.update, installed == true)
+        }
+        val hasMissing = ok?.installed?.any { !it.value } == true
+        installAllButton?.isEnabled = hasMissing
+    }
+
+    private fun setEnabled(button: ImageButton, enabled: Boolean) {
+        button.isEnabled = enabled
+        button.alpha = if (enabled) 1f else 0.35f
+    }
+
+    private fun installAllMissing() {
+        val ok = detection as? PackageDetection.Ok ?: return
+        val missing = PackageCatalog.all.filter { ok.installed[it.id] == false }
+        val command = PackageCatalog.installAllCommand(missing) ?: return
+        runInTerminal(command)
+    }
+
+    private fun runInTerminal(command: String) {
+        if (runJob?.isActive == true) return
+        val host = activity ?: return
+        val line = ShellLine.wrapForDebian(command)
+        runJob = viewLifecycleOwner.lifecycleScope.launch {
+            val reason = TerminalCommandRunner.run(host, line)
+            if (reason != null) toast(getString(R.string.library_run_failed, reason))
+        }
+    }
+
+    private fun toast(message: String) {
+        val ctx = context ?: return
+        Toast.makeText(ctx.applicationContext, message, Toast.LENGTH_LONG).show()
+    }
+}
