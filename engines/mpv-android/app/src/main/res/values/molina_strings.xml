@@ -21,4 +21,7 @@
     <string name="molina_time_weeks">%1$d minggu yang lalu</string>
     <string name="molina_time_months">%1$d bulan yang lalu</string>
     <string name="molina_time_years">%1$d tahun yang lalu</string>
+    <string name="molina_results_page">Halaman %1$d</string>
+    <string name="molina_results_prev">Halaman sebelumnya</string>
+    <string name="molina_results_next">Halaman berikutnya</string>
 </resources>

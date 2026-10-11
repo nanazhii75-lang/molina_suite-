@@ -164,6 +164,52 @@
                     android:text="@string/molina_results_retry" />
             </LinearLayout>
         </FrameLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/molina_frame_border" />
+
+        <LinearLayout
+            android:id="@+id/resultsPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/pagerPrev"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/molina_results_prev"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/ic_skip_previous_black_24dp"
+                app:tint="@color/molina_youtube" />
+
+            <TextView
+                android:id="@+id/pagerLabel"
+                android:layout_width="96dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/molina_text"
+                android:textSize="13sp" />
+
+            <ImageButton
+                android:id="@+id/pagerNext"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/molina_results_next"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/ic_skip_next_black_24dp"
+                app:tint="@color/molina_youtube" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout

@@ -28,16 +28,21 @@ internal class YoutubeResultsPanel(
     private val errorView: View = root.findViewById(R.id.resultsError)
     private val errorText: TextView = root.findViewById(R.id.resultsErrorText)
     private val retry: View = root.findViewById(R.id.resultsRetry)
+    private val pager: View = root.findViewById(R.id.resultsPager)
+    private val pagerPrev: View = root.findViewById(R.id.pagerPrev)
+    private val pagerNext: View = root.findViewById(R.id.pagerNext)
+    private val pagerLabel: TextView = root.findViewById(R.id.pagerLabel)
 
     private val adapter = YoutubeResultAdapter(onPlay)
     private val idleBackground: Drawable? = highlight.background
-    private var lastQuery = ""
     private val observer: (SearchState) -> Unit = { render(it) }
 
     fun attach() {
         list.layoutManager = LinearLayoutManager(context)
         list.adapter = adapter
-        retry.setOnClickListener { YoutubeSearchController.search(lastQuery) }
+        retry.setOnClickListener { YoutubeSearchController.retry() }
+        pagerPrev.setOnClickListener { YoutubeSearchController.prevPage() }
+        pagerNext.setOnClickListener { YoutubeSearchController.nextPage() }
         resetButton.setOnClickListener { YoutubeSearchController.reset() }
         YoutubeSearchController.observe(observer)
     }
@@ -46,6 +51,8 @@ internal class YoutubeResultsPanel(
         YoutubeSearchController.removeObserver(observer)
         list.adapter = null
         retry.setOnClickListener(null)
+        pagerPrev.setOnClickListener(null)
+        pagerNext.setOnClickListener(null)
         resetButton.setOnClickListener(null)
     }
 
@@ -60,6 +67,11 @@ internal class YoutubeResultsPanel(
             highlight.setBackgroundResource(R.drawable.molina_cap_active)
         }
 
+        // Pager hanya tampil pada halaman hasil; keadaan lain menyembunyikannya.
+        pager.visibility =
+            if (state is SearchState.Results && (state.items.isNotEmpty() || state.page > 1)) View.VISIBLE
+            else View.GONE
+
         when (state) {
             is SearchState.Idle -> {
                 header.setText(R.string.molina_results_title_idle)
@@ -69,7 +81,6 @@ internal class YoutubeResultsPanel(
                 showOnly(emptyView)
             }
             is SearchState.Loading -> {
-                lastQuery = state.query
                 header.text = context.getString(R.string.molina_results_header, state.query)
                 order.visibility = View.GONE
                 loadingText.text =
@@ -78,8 +89,8 @@ internal class YoutubeResultsPanel(
                 showOnly(loadingView)
             }
             is SearchState.Results -> {
-                lastQuery = state.query
                 header.text = context.getString(R.string.molina_results_header, state.query)
+                bindPager(state)
                 if (state.items.isEmpty()) {
                     errorText.text = context.getString(R.string.molina_results_none, state.query)
                     retry.visibility = View.GONE
@@ -93,7 +104,6 @@ internal class YoutubeResultsPanel(
                 }
             }
             is SearchState.Failed -> {
-                lastQuery = state.query
                 header.text = context.getString(R.string.molina_results_header, state.query)
                 errorText.text = errorMessage(state)
                 retry.visibility = View.VISIBLE
@@ -101,6 +111,15 @@ internal class YoutubeResultsPanel(
                 showOnly(errorView)
             }
         }
+    }
+
+    private fun bindPager(state: SearchState.Results) {
+        pagerLabel.text = context.getString(R.string.molina_results_page, state.page)
+        val hasPrev = state.page > 1
+        pagerPrev.isEnabled = hasPrev
+        pagerPrev.alpha = if (hasPrev) 1f else 0.35f
+        pagerNext.isEnabled = state.hasNext
+        pagerNext.alpha = if (state.hasNext) 1f else 0.35f
     }
 
     private fun errorMessage(state: SearchState.Failed): String = when (state.reason) {

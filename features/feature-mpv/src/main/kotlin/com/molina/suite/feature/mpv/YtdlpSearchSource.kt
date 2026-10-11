@@ -17,10 +17,18 @@ import java.util.concurrent.TimeUnit
  */
 internal class YtdlpSearchSource(private val wrapper: File) : YoutubeSearchSource {
 
-    override fun search(query: String, limit: Int, onProgress: (Int) -> Unit): List<YoutubeResult> {
+    override fun search(
+        query: String,
+        offset: Int,
+        limit: Int,
+        onProgress: (Int) -> Unit
+    ): List<YoutubeResult> {
         val cleaned = query.filter { !it.isISOControl() }.trim()
         if (cleaned.isEmpty()) return emptyList()
+        val start = offset.coerceAtLeast(0)
         val count = limit.coerceIn(1, MAX_RESULTS)
+        val end = (start + count).coerceAtMost(MAX_TOTAL)
+        if (end <= start) return emptyList()
 
         if (!wrapper.isFile || !wrapper.canExecute()) {
             throw YoutubeSearchException(Reason.UNAVAILABLE, "Pembungkus molina-ytdlp belum terpasang: " + wrapper.path)
@@ -31,7 +39,11 @@ internal class YtdlpSearchSource(private val wrapper: File) : YoutubeSearchSourc
             "--dump-json",
             "--no-warnings",
             "--ignore-errors",
-            "ytsearch$count:$cleaned"
+            // ytsearchdate: YouTube sendiri mengurutkan menurut waktu unggah (terbaru dulu);
+            // --playlist-items hanya mengambil metadata penuh untuk halaman yang diminta.
+            "--playlist-items",
+            "${start + 1}-$end",
+            "ytsearchdate$end:$cleaned"
         )
         val process = try {
             ProcessBuilder(command).also { it.environment().clear() }.start()
@@ -123,6 +135,7 @@ internal class YtdlpSearchSource(private val wrapper: File) : YoutubeSearchSourc
         const val TIMEOUT_SECONDS = 120L
         const val JOIN_MILLIS = 2000L
         const val MAX_RESULTS = 20
+        const val MAX_TOTAL = 60
         const val MAX_ERR_CHARS = 20_000
     }
 }

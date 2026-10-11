@@ -40,7 +40,8 @@ internal object YtdlpOutputParser {
         val id = o.str("id") ?: return null
         if (!VIDEO_ID.matches(id)) return null // buang playlist/kanal
         val title = o.str("title") ?: return null
-        val seconds = o.long("timestamp") ?: o.long("release_timestamp")
+        // release_timestamp (jadwal tayang perdana/siaran langsung) lebih tepat daripada timestamp
+        val seconds = o.long("release_timestamp") ?: o.long("timestamp")
         val published = seconds?.times(1000L) ?: uploadDateMillis(o.str("upload_date"))
         return YoutubeResult(
             id = id,

@@ -6,11 +6,24 @@ sealed class SearchState {
     /** Belum pernah mencari. */
     object Idle : SearchState()
 
-    /** Sedang mencari; [done] dari [total] hasil sudah diambil. */
-    data class Loading(val query: String, val done: Int, val total: Int) : SearchState()
+    /** Sedang mengambil halaman [page]; [done] dari [total] hasil halaman itu sudah diambil. */
+    data class Loading(
+        val query: String,
+        val done: Int,
+        val total: Int,
+        val page: Int = 1
+    ) : SearchState()
 
-    /** Pencarian selesai; [items] terurut terbaru ke terlama. */
-    data class Results(val query: String, val items: List<YoutubeResult>) : SearchState()
+    /**
+     * Satu halaman hasil ([page], mulai 1), terurut terbaru ke terlama. [hasNext] true bila
+     * halaman berikutnya mungkin tersedia; halaman sebelumnya ada bila [page] > 1.
+     */
+    data class Results(
+        val query: String,
+        val items: List<YoutubeResult>,
+        val page: Int = 1,
+        val hasNext: Boolean = false
+    ) : SearchState()
 
     /** Pencarian gagal; [detail] adalah ringkasan teknis untuk ditampilkan apa adanya. */
     data class Failed(
