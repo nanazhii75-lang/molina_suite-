@@ -53,5 +53,5 @@ tercatat sebagai commit terpisah.
 - `TermuxInstaller.applyMolinaMotd()`: etc/motd ditimpa dengan "Welcome Molina Terminal" setiap aplikasi dimulai (bin/login mencetaknya tepat di atas prompt).
 - `TermuxPropertyConstants.DEFAULT_IVALUE_EXTRA_KEYS`: `/` -> DRAWER (tampil ☰), END -> CLEAR, PGUP -> COPY, PGDN -> PASTE.
 - `ExtraKeysConstants`: simbol ⎘ untuk PASTE dihapus; COPY, PASTE, CLEAR tampil sebagai teks.
-- `TermuxTerminalExtraKeys`: handler COPY (salin seluruh teks layar yang terlihat termasuk prompt) dan CLEAR (Ctrl+L). `TerminalView.getVisibleScreenText()` ditambahkan.
+- `TermuxTerminalExtraKeys`: handler COPY (salin seluruh teks layar yang terlihat termasuk prompt) dan CLEAR (CSI 3 J ke emulator untuk menghapus riwayat scroll, lalu Ctrl+L untuk menggambar ulang prompt). `TerminalView.getVisibleScreenText()` ditambahkan.
 - `strings.xml`: `molina_extra_key_screen_copied`, `molina_extra_key_screen_empty`.

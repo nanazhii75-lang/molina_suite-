@@ -16,6 +16,8 @@ import com.molina.suite.terminal.shared.interact.ShareUtils;
 import com.molina.suite.terminal.shared.terminal.io.TerminalExtraKeys;
 import com.molina.suite.terminal.view.TerminalView;
 
+import java.nio.charset.StandardCharsets;
+
 public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
 
 
@@ -68,11 +70,20 @@ public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
         ShareUtils.copyTextToClipboard(context, text, context.getString(R.string.molina_extra_key_screen_copied));
     }
 
-    /** Mengosongkan layar terminal. Ctrl+L membuat shell membersihkan layar dan menggambar ulang prompt. */
+    /**
+     * Mengosongkan layar terminal beserta riwayat scroll. CSI 3 J dikirim langsung ke emulator
+     * karena Ctrl+L di bash hanya membersihkan layar yang tampak; setelah itu Ctrl+L membuat
+     * shell membersihkan layar dan menggambar ulang prompt.
+     */
     private void clearScreen() {
         if (mTermuxTerminalViewClient == null) return;
         TerminalView terminalView = mTermuxTerminalViewClient.getHost().getTerminalView();
         if (terminalView == null) return;
+        if (terminalView.mEmulator != null) {
+            byte[] eraseScrollback = "\033[3J".getBytes(StandardCharsets.UTF_8);
+            terminalView.mEmulator.append(eraseScrollback, eraseScrollback.length);
+            terminalView.onScreenUpdated();
+        }
         terminalView.inputCodePoint('l', true, false);
     }
 
