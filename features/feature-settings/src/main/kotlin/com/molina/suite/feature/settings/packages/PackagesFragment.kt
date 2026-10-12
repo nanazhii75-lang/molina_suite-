@@ -128,7 +128,7 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
             setEnabled(row.update, installed == true)
             setEnabled(row.remove, installed == true)
         }
-        val hasMissing = ok?.installed?.any { !it.value } == true
+        val hasMissing = ok != null && PackageCatalog.all.any { !it.optional && ok.installed[it.id] == false }
         installAllButton?.isEnabled = hasMissing
     }
 
@@ -183,7 +183,7 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
 
     private fun installAllMissing() {
         val ok = detection as? PackageDetection.Ok ?: return
-        val missing = PackageCatalog.all.filter { ok.installed[it.id] == false }
+        val missing = PackageCatalog.all.filter { !it.optional && ok.installed[it.id] == false }
         val command = PackageCatalog.installAllCommand(missing) ?: return
         runInTerminal(command)
     }

@@ -22,6 +22,28 @@ private const val NODE_RUNTIME_SETUP =
         """tar -xJf node.tar.xz -C /opt/node --strip-components=1 && """ +
         """ln -sf /opt/node/bin/node /usr/local/bin/node && rm -f node.tar.xz node.sum)"""
 
+/** Tanda dolar untuk perintah shell di dalam string Kotlin, supaya "$V" tidak dibaca sebagai templat. */
+private const val DOLLAR = "$"
+
+private const val KOTLIN_RELEASES = "https://github.com/JetBrains/kotlin/releases"
+
+/**
+ * Kompilator Kotlin resmi dari rilis stabil terbaru JetBrains/kotlin di GitHub ke /opt/kotlinc,
+ * diverifikasi dengan berkas .sha256 dari rilis yang sama. Versi terbaru dibaca dari pengalihan
+ * /releases/latest dan harus berbentuk X.Y.Z, jadi rilis uji coba ditolak. Unduhan dan verifikasi
+ * selesai dulu sebelum /opt/kotlinc lama dihapus. Dijalankan di subshell supaya direktori kerja
+ * perintah berikutnya tidak berubah.
+ */
+private const val KOTLIN_COMPILER_SETUP =
+    """(cd /tmp && V=${DOLLAR}(curl -fsSLI -o /dev/null -w '%{url_effective}' $KOTLIN_RELEASES/latest | sed 's|.*/tag/v||') && """ +
+        """echo "${DOLLAR}V" | grep -Eq '^[0-9]+[.][0-9]+[.][0-9]+${DOLLAR}' && """ +
+        """curl -fsSL -o kotlin.sha $KOTLIN_RELEASES/download/v${DOLLAR}V/kotlin-compiler-${DOLLAR}V.zip.sha256 && """ +
+        """curl -fsSL -o kotlin.zip $KOTLIN_RELEASES/download/v${DOLLAR}V/kotlin-compiler-${DOLLAR}V.zip && """ +
+        """awk '{print $1"  kotlin.zip"}' kotlin.sha | sha256sum -c - && """ +
+        """rm -rf /tmp/kotlinc && unzip -q kotlin.zip -d /tmp && rm -rf /opt/kotlinc && mv /tmp/kotlinc /opt/kotlinc && """ +
+        """ln -sf /opt/kotlinc/bin/kotlinc /usr/local/bin/kotlinc && ln -sf /opt/kotlinc/bin/kotlin /usr/local/bin/kotlin && """ +
+        """rm -f kotlin.zip kotlin.sha)"""
+
 /** Berkas tambahan yang ikut dihapus saat alat apt dibuang, di luar yang dibersihkan apt. */
 private val CLEAN_PATHS: Map<String, List<String>> = mapOf(
     "python" to listOf("/root/.cache/pip"),
@@ -30,7 +52,7 @@ private val CLEAN_PATHS: Map<String, List<String>> = mapOf(
     "git" to listOf("/root/.gitconfig", "/root/.git-credentials", "/root/.config/git")
 )
 
-internal enum class PackageKind { APT, YTDLP_VENV, NODE_RUNTIME }
+internal enum class PackageKind { APT, YTDLP_VENV, NODE_RUNTIME, KOTLIN_COMPILER }
 
 /**
  * Satu baris pada menu Paket. Untuk [PackageKind.APT] semua [aptPackages] harus terpasang;
@@ -41,7 +63,9 @@ internal data class PackageSpec(
     @StringRes val title: Int,
     @StringRes val description: Int,
     val kind: PackageKind,
-    val aptPackages: List<String>
+    val aptPackages: List<String>,
+    /** True bila tidak ikut "Install semua": alat besar yang dipasang manual satu per satu. */
+    val optional: Boolean = false
 ) {
     private val aptList: String get() = aptPackages.joinToString(" ")
 
@@ -50,6 +74,7 @@ internal data class PackageSpec(
         PackageKind.APT -> null
         PackageKind.YTDLP_VENV -> YTDLP_VENV_SETUP
         PackageKind.NODE_RUNTIME -> NODE_RUNTIME_SETUP
+        PackageKind.KOTLIN_COMPILER -> KOTLIN_COMPILER_SETUP
     }
 
     /** Perintah yang dijalankan di dalam Debian (satu baris). */
@@ -63,6 +88,7 @@ internal data class PackageSpec(
         PackageKind.APT -> "apt update && apt install -y --only-upgrade $aptList"
         PackageKind.YTDLP_VENV -> YTDLP_PIP_UPGRADE
         PackageKind.NODE_RUNTIME -> NODE_RUNTIME_SETUP
+        PackageKind.KOTLIN_COMPILER -> KOTLIN_COMPILER_SETUP
     }
 
     /** Paket apt yang versinya ditampilkan di menu; null untuk alat di luar apt. */
@@ -99,6 +125,8 @@ internal data class PackageSpec(
                 steps.add("rm -rf /opt/ytdlp /usr/local/bin/yt-dlp /root/.cache/yt-dlp /root/.config/yt-dlp")
             PackageKind.NODE_RUNTIME ->
                 steps.add("rm -rf /opt/node /usr/local/bin/node /root/.npm")
+            PackageKind.KOTLIN_COMPILER ->
+                steps.add("rm -rf /opt/kotlinc /usr/local/bin/kotlinc /usr/local/bin/kotlin /root/.kotlin")
         }
         CLEAN_PATHS[id]?.let { steps.add("rm -rf " + it.joinToString(" ")) }
         return steps.joinToString(" && ")
@@ -131,6 +159,36 @@ internal object PackageCatalog {
         PackageSpec(
             "jdk17", R.string.pkg_jdk_title, R.string.pkg_jdk_desc,
             PackageKind.APT, listOf("openjdk-17-jdk-headless")
+        ),
+        PackageSpec(
+            "kotlin", R.string.pkg_kotlin_title, R.string.pkg_kotlin_desc,
+            PackageKind.KOTLIN_COMPILER,
+            listOf("openjdk-17-jdk-headless", "curl", "ca-certificates", "unzip"),
+            optional = true
+        ),
+        PackageSpec(
+            "gcc", R.string.pkg_gcc_title, R.string.pkg_gcc_desc,
+            PackageKind.APT, listOf("gcc", "g++", "make"), optional = true
+        ),
+        PackageSpec(
+            "go", R.string.pkg_go_title, R.string.pkg_go_desc,
+            PackageKind.APT, listOf("golang-go"), optional = true
+        ),
+        PackageSpec(
+            "rust", R.string.pkg_rust_title, R.string.pkg_rust_desc,
+            PackageKind.APT, listOf("rustc", "cargo"), optional = true
+        ),
+        PackageSpec(
+            "php", R.string.pkg_php_title, R.string.pkg_php_desc,
+            PackageKind.APT, listOf("php-cli"), optional = true
+        ),
+        PackageSpec(
+            "ruby", R.string.pkg_ruby_title, R.string.pkg_ruby_desc,
+            PackageKind.APT, listOf("ruby"), optional = true
+        ),
+        PackageSpec(
+            "lua", R.string.pkg_lua_title, R.string.pkg_lua_desc,
+            PackageKind.APT, listOf("lua5.4"), optional = true
         ),
         PackageSpec(
             "git", R.string.pkg_git_title, R.string.pkg_git_desc,

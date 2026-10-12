@@ -34,12 +34,16 @@ internal object PackageDetector {
     private const val YTDLP_VENV_LIB = "opt/ytdlp/lib"
     private const val NODE_BIN = "opt/node/bin/node"
     private const val NODE_VERSION_HEADER = "opt/node/include/node/node_version.h"
+    private const val KOTLIN_BIN = "opt/kotlinc/bin/kotlinc"
+    private const val KOTLIN_BUILD = "opt/kotlinc/build.txt"
     private const val PACKAGE_PREFIX = "Package: "
     private const val VERSION_PREFIX = "Version: "
     private const val STATUS_INSTALLED = "Status: install ok installed"
     private const val YTDLP_DIST_PREFIX = "yt_dlp-"
     private const val DIST_INFO_SUFFIX = ".dist-info"
     private val NODE_VERSION_LINE = Regex("""^#define NODE_(MAJOR|MINOR|PATCH)_VERSION (\d+)""")
+
+    private val KOTLIN_VERSION = Regex("""^\d+\.\d+\.\d+""")
 
     private class Dpkg(val installed: Set<String>, val versions: Map<String, String>)
 
@@ -55,6 +59,7 @@ internal object PackageDetector {
             val dpkg = readDpkg(statusFile)
             val venvPresent = Files.exists(File(root, YTDLP_VENV_BIN).toPath(), LinkOption.NOFOLLOW_LINKS)
             val nodePresent = Files.exists(File(root, NODE_BIN).toPath(), LinkOption.NOFOLLOW_LINKS)
+            val kotlinPresent = Files.exists(File(root, KOTLIN_BIN).toPath(), LinkOption.NOFOLLOW_LINKS)
             val installed = LinkedHashMap<String, Boolean>()
             val versions = LinkedHashMap<String, String>()
             for (spec in PackageCatalog.all) {
@@ -62,6 +67,7 @@ internal object PackageDetector {
                     PackageKind.APT -> dpkg.installed.containsAll(spec.aptPackages)
                     PackageKind.YTDLP_VENV -> venvPresent
                     PackageKind.NODE_RUNTIME -> nodePresent
+                    PackageKind.KOTLIN_COMPILER -> kotlinPresent
                 }
                 installed[spec.id] = present
                 if (!present) continue
@@ -69,6 +75,7 @@ internal object PackageDetector {
                     PackageKind.APT -> spec.versionPackage?.let { dpkg.versions[it] }?.let { shortAptVersion(it) }
                     PackageKind.YTDLP_VENV -> ytdlpVersion(root)
                     PackageKind.NODE_RUNTIME -> nodeVersion(root)
+                    PackageKind.KOTLIN_COMPILER -> kotlinVersion(root)
                 }
                 if (version != null) versions[spec.id] = version
             }
@@ -80,9 +87,9 @@ internal object PackageDetector {
         }
     }
 
-    /** Membuang epoch dan revisi Debian: "7:5.1.6-0+deb12u1" menjadi "5.1.6". */
+    /** Membuang epoch, revisi, dan akhiran Debian: "7:5.1.6-0+deb12u1" menjadi "5.1.6", "2:1.19~1" menjadi "1.19". */
     private fun shortAptVersion(raw: String): String =
-        raw.substringAfter(':').substringBefore('-').ifEmpty { raw }
+        raw.substringAfter(':').substringBefore('-').substringBefore('~').substringBefore('+').ifEmpty { raw }
 
     private fun readDpkg(file: File): Dpkg {
         val installed = HashSet<String>()
@@ -127,6 +134,17 @@ internal object PackageDetector {
             ?.removeSuffix(DIST_INFO_SUFFIX)
     } catch (e: SecurityException) {
         null
+    }
+
+    /** Versi Kotlin dari baris pertama build.txt di folder kompilator; null bila tidak terbaca. */
+    private fun kotlinVersion(root: File): String? {
+        val file = File(root, KOTLIN_BUILD)
+        if (!file.isFile) return null
+        return try {
+            file.bufferedReader(Charsets.UTF_8).use { it.readLine() }?.let { KOTLIN_VERSION.find(it.trim())?.value }
+        } catch (e: IOException) {
+            null
+        }
     }
 
     /** Versi Node.js dari makro NODE_*_VERSION di header rilis resmi; null bila tidak lengkap. */
