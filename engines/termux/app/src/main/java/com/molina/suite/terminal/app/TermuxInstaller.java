@@ -107,6 +107,7 @@ final class TermuxInstaller {
             } else {
                 applyMolinaMotd();
                 applyMolinaBanner();
+                MolinaShellProfile.apply();
                 whenDone.run();
                 return;
             }
@@ -248,6 +249,7 @@ final class TermuxInstaller {
                     Logger.logInfo(LOG_TAG, "Bootstrap packages installed successfully.");
                     applyMolinaMotd();
                     applyMolinaBanner();
+                    MolinaShellProfile.apply();
                     activity.runOnUiThread(whenDone);
 
                 } catch (final Exception e) {

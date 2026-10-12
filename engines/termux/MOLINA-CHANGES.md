@@ -67,3 +67,8 @@ tercatat sebagai commit terpisah.
 - Tombol CLEAR di Extra Keys (CSI 3 J lalu Ctrl+L) ikut memunculkan banner. Dimatikan dengan `MOLINA_NO_BANNER_REDRAW=1` atau `~/.hushlogin`.
 - Warna brand: motd "Welcome Molina Terminal" tebal hijau muda (256-color 120, #87ff87), tetap sama di semua tema warna terminal.
 - Ukuran teks default terminal: 12 dp menjadi 8 dp (`TermuxAppSharedPreferences.getDefaultFontSizes`; mode float ikut). Ukuran yang sudah disimpan pengguna lewat zoom tidak berubah.
+
+## Pilihan login dan prompt Debian
+- `app/.../MolinaShellProfile.java` (baru): dipanggil dari `TermuxInstaller` bersama `applyMolinaBanner()`.
+- `etc/profile.d/03-molina-login.sh`: pada sesi bash interaktif pertama menanyakan login Debian sebagai `user@localhost` atau `root@localhost`, menyimpan pilihan di `~/.molina/login-mode`, lalu `proot-distro login debian` (user: `--user user`, dibuat otomatis dengan `useradd -m`). Rootfs belum terpasang: shell host tetap dipakai tanpa pertanyaan. Ganti pilihan dengan `molina-login [user|root]`; lewati dengan `MOLINA_NO_LOGIN_PROMPT=1`.
+- Prompt Debian: blok bertanda `molina-prompt` ditambahkan ke `~/.bashrc` root, user, dan `/etc/skel`. Format `root@localhost:path $` dan `user@localhost:path $`: nama hijau (SGR 32), path hijau muda (SGR 92), tanda akhir `$` untuk root maupun user. `clear` dan Ctrl+L di Debian mencetak ulang banner yang sama dengan host.
