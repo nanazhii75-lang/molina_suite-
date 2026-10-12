@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.molina.suite.feature.settings.R
 import com.molina.suite.feature.settings.Refreshable
 import com.molina.suite.feature.settings.ShellLine
@@ -28,7 +29,8 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
         val root: View,
         val status: TextView,
         val install: ImageButton,
-        val update: ImageButton
+        val update: ImageButton,
+        val remove: ImageButton
     )
 
     private var statusView: TextView? = null
@@ -52,10 +54,12 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
             root.findViewById<TextView>(R.id.package_item_desc).setText(spec.description)
             val install = root.findViewById<ImageButton>(R.id.package_item_install)
             val update = root.findViewById<ImageButton>(R.id.package_item_update)
+            val remove = root.findViewById<ImageButton>(R.id.package_item_remove)
             install.setOnClickListener { runInTerminal(spec.installCommand()) }
             update.setOnClickListener { runInTerminal(spec.updateCommand()) }
+            remove.setOnClickListener { confirmRemove(spec) }
             container.addView(root)
-            Row(spec, root, root.findViewById(R.id.package_item_status), install, update)
+            Row(spec, root, root.findViewById(R.id.package_item_status), install, update, remove)
         }
         highlightRequested(announce = savedInstanceState == null)
         refresh()
@@ -109,16 +113,20 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
         }
         for (row in rows) {
             val installed = ok?.installed?.get(row.spec.id)
-            row.status.setText(
-                when (installed) {
-                    true -> R.string.packages_installed
-                    false -> R.string.packages_missing
-                    null -> R.string.packages_unknown
+            val version = ok?.versions?.get(row.spec.id)
+            row.status.text = when (installed) {
+                true -> if (version != null) {
+                    getString(R.string.packages_installed_version, version)
+                } else {
+                    getString(R.string.packages_installed)
                 }
-            )
+                false -> getString(R.string.packages_missing)
+                null -> getString(R.string.packages_unknown)
+            }
             applyChip(row.status, installed)
             setEnabled(row.install, installed == false)
             setEnabled(row.update, installed == true)
+            setEnabled(row.remove, installed == true)
         }
         val hasMissing = ok?.installed?.any { !it.value } == true
         installAllButton?.isEnabled = hasMissing
@@ -135,6 +143,42 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
         button.isEnabled = enabled
         // Peredupan ikon ditangani selector tint ms_icon_tint, bukan alpha, agar tidak ganda.
         button.alpha = 1f
+    }
+
+    /** Paket apt milik alat lain yang masih terpasang; tidak boleh ikut terhapus. */
+    private fun protectedApt(spec: PackageSpec): Set<String> {
+        val ok = detection as? PackageDetection.Ok ?: return emptySet()
+        return PackageCatalog.all
+            .filter { it.id != spec.id && ok.installed[it.id] == true }
+            .flatMap { it.aptPackages }
+            .toSet()
+    }
+
+    /** Konfirmasi dulu, lalu hapus total lewat Terminal; paket yang dipakai alat lain dipertahankan. */
+    private fun confirmRemove(spec: PackageSpec) {
+        val ctx = context ?: return
+        val name = getString(spec.title)
+        val protectedApt = protectedApt(spec)
+        if (!spec.isRemovable(protectedApt)) {
+            toast(getString(R.string.packages_remove_in_use, name))
+            return
+        }
+        val kept = spec.keptPackages(protectedApt)
+        val message = buildString {
+            append(getString(R.string.packages_remove_message))
+            if (kept.isNotEmpty()) {
+                append("\n\n")
+                append(getString(R.string.packages_remove_kept, kept.joinToString(", ")))
+            }
+        }
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(getString(R.string.packages_remove_title, name))
+            .setMessage(message)
+            .setNegativeButton(R.string.library_cancel, null)
+            .setPositiveButton(R.string.packages_remove_confirm) { _, _ ->
+                runInTerminal(spec.removeCommand(protectedApt))
+            }
+            .show()
     }
 
     private fun installAllMissing() {

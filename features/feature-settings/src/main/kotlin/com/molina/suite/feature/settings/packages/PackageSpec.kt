@@ -22,6 +22,13 @@ private const val NODE_RUNTIME_SETUP =
         """tar -xJf node.tar.xz -C /opt/node --strip-components=1 && """ +
         """ln -sf /opt/node/bin/node /usr/local/bin/node && rm -f node.tar.xz node.sum)"""
 
+/** Berkas tambahan yang ikut dihapus saat alat apt dibuang, di luar yang dibersihkan apt. */
+private val CLEAN_PATHS: Map<String, List<String>> = mapOf(
+    "python" to listOf("/root/.cache/pip"),
+    "jdk17" to listOf("/root/.java"),
+    "aria2" to listOf("/root/.aria2", "/root/.cache/aria2")
+)
+
 internal enum class PackageKind { APT, YTDLP_VENV, NODE_RUNTIME }
 
 /**
@@ -55,6 +62,45 @@ internal data class PackageSpec(
         PackageKind.APT -> "apt update && apt install -y --only-upgrade $aptList"
         PackageKind.YTDLP_VENV -> YTDLP_PIP_UPGRADE
         PackageKind.NODE_RUNTIME -> NODE_RUNTIME_SETUP
+    }
+
+    /** Paket apt yang versinya ditampilkan di menu; null untuk alat di luar apt. */
+    val versionPackage: String? get() =
+        if (kind == PackageKind.APT) aptPackages.firstOrNull() else null
+
+    /** Paket apt yang benar-benar dihapus: [aptPackages] dikurangi yang masih dipakai alat lain. */
+    fun purgeTargets(protectedApt: Set<String>): List<String> =
+        if (kind == PackageKind.APT) aptPackages.filter { it !in protectedApt } else emptyList()
+
+    /** Paket apt yang dipertahankan karena dipakai alat lain yang masih terpasang. */
+    fun keptPackages(protectedApt: Set<String>): List<String> =
+        if (kind == PackageKind.APT) aptPackages.filter { it in protectedApt } else emptyList()
+
+    /** False bila seluruh paket alat apt ini masih dipakai alat lain yang terpasang. */
+    fun isRemovable(protectedApt: Set<String>): Boolean =
+        kind != PackageKind.APT || purgeTargets(protectedApt).isNotEmpty()
+
+    /**
+     * Satu baris di dalam Debian yang membuang alat sampai bersih: paket beserta konfigurasi
+     * sistemnya (purge), sisa dependensi yang tak terpakai (autoremove), cache apt, dan berkas
+     * tambahan alat. Berkas pribadi di home dan /sdcard/Molina tidak disentuh.
+     */
+    fun removeCommand(protectedApt: Set<String>): String {
+        val steps = ArrayList<String>()
+        when (kind) {
+            PackageKind.APT -> {
+                val targets = purgeTargets(protectedApt)
+                steps.add("DEBIAN_FRONTEND=noninteractive apt-get purge -y ${targets.joinToString(" ")}")
+                steps.add("DEBIAN_FRONTEND=noninteractive apt-get autoremove -y --purge")
+                steps.add("apt-get clean")
+            }
+            PackageKind.YTDLP_VENV ->
+                steps.add("rm -rf /opt/ytdlp /usr/local/bin/yt-dlp /root/.cache/yt-dlp /root/.config/yt-dlp")
+            PackageKind.NODE_RUNTIME ->
+                steps.add("rm -rf /opt/node /usr/local/bin/node /root/.npm")
+        }
+        CLEAN_PATHS[id]?.let { steps.add("rm -rf " + it.joinToString(" ")) }
+        return steps.joinToString(" && ")
     }
 }
 

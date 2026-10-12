@@ -65,5 +65,14 @@
             android:contentDescription="@string/packages_update"
             android:src="@drawable/ic_package_update"
             android:tint="@color/ms_icon_tint" />
+
+        <ImageButton
+            android:id="@+id/package_item_remove"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/packages_remove"
+            android:src="@drawable/ic_package_remove"
+            android:tint="@color/ms_icon_tint" />
     </LinearLayout>
 </LinearLayout>
