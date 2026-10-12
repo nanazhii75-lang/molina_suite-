@@ -326,6 +326,9 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
             contentInput.setText(entry.content)
             noteInput.setText(entry.note)
             debianCheck.isChecked = entry.runIn == RunMode.DEBIAN
+        } else {
+            // Alat Library (python3, git, apt, ffmpeg) hanya ada di Debian; shell host minimal.
+            debianCheck.isChecked = true
         }
 
         val updateCounter = {
