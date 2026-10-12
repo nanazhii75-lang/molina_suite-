@@ -292,7 +292,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
     private fun buildActionBar(context: Context): View = CodeActionBar.build(
         context,
         listOf(
-            CodeAction(R.drawable.ic_code_save, R.string.code_key_save) { saveCurrent() },
+            CodeAction(R.drawable.ic_code_save, R.string.code_key_save) { showSaveChoice() },
             CodeAction(R.drawable.ic_code_paste, R.string.code_key_paste) { session.paste() },
             CodeAction(R.drawable.ic_code_undo, R.string.code_key_undo) { session.undo() },
             CodeAction(R.drawable.ic_code_redo, R.string.code_key_redo) { session.redo() },
@@ -527,6 +527,17 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             CodeEditorSession.CopyAllResult.NO_EDITOR -> R.string.code_copy_all_empty
         }
         toast(getString(message))
+    }
+
+    /** Ikon Simpan di toolbar: pilih Simpan atau Simpan sebagai. */
+    private fun showSaveChoice() {
+        val choices = listOf(
+            getString(R.string.code_menu_save),
+            getString(R.string.code_menu_save_as)
+        )
+        CodeChoiceDialog.show(requireContext(), R.string.code_key_save, choices, -1) { index ->
+            if (index == 0) saveCurrent() else requestSaveAs()
+        }
     }
 
     private fun saveCurrent() {
