@@ -156,4 +156,12 @@
     <string name="code_theme_darcula">Bawaan (Darcula)</string>
     <string name="code_theme_obsidian">Obsidian</string>
     <string name="code_open_kept_unsaved">%1$s punya perubahan yang belum disimpan, jadi isinya tidak dimuat ulang.</string>
+    <string name="code_preview_title">Tinjauan</string>
+    <string name="code_preview_back">Kembali</string>
+    <string name="code_preview_unavailable">Tinjauan tidak bisa dibuka.</string>
+    <string name="code_preview_failed">Gagal menyiapkan Tinjauan: %1$s</string>
+    <string name="code_preview_too_large">Berkas terlalu besar untuk ditinjau (maksimal 8 MB).</string>
+    <string name="code_preview_blocked">Tautan di Tinjauan tidak dibuka.</string>
+    <string name="code_preview_renderer_gone">Tinjauan berhenti karena WebView bermasalah.</string>
+    <string name="code_preview_cache_failed">Gagal menyiapkan berkas Tinjauan.</string>
 </resources>

@@ -30,4 +30,7 @@ dependencies {
     implementation("androidx.fragment:fragment:1.5.4")
     implementation("androidx.drawerlayout:drawerlayout:1.2.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+    implementation("org.commonmark:commonmark:0.22.0")
+    implementation("org.commonmark:commonmark-ext-gfm-tables:0.22.0")
+    implementation("org.commonmark:commonmark-ext-gfm-strikethrough:0.22.0")
 }

@@ -481,18 +481,36 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         }
     }
 
-    /** Jalankan: simpan dulu bila perlu, lalu jalankan di Debian lewat tab Terminal. */
+    /**
+     * Jalankan: berkas md, html, dan svg dibuka di Tinjauan (isi editor, tanpa menyimpan); selain
+     * itu simpan dulu bila perlu, lalu jalankan di Debian lewat tab Terminal.
+     */
     private fun runCurrent() {
         val doc = session.document.value
         val file = doc.file
         when {
             file == null -> requestSaveAs {
-                session.document.value.file?.let { runFile(it, ScriptRunTarget.DEBIAN) }
+                session.document.value.file?.let { dispatchRun(it) }
             }
+            CodePreviewKind.of(file.name) != null -> openPreview(file)
             doc.dirty -> viewLifecycleOwner.lifecycleScope.launch {
                 if (save()) runFile(file, ScriptRunTarget.DEBIAN)
             }
             else -> runFile(file, ScriptRunTarget.DEBIAN)
+        }
+    }
+
+    private fun dispatchRun(file: File) {
+        if (CodePreviewKind.of(file.name) != null) openPreview(file) else runFile(file, ScriptRunTarget.DEBIAN)
+    }
+
+    private fun openPreview(file: File) {
+        val kind = CodePreviewKind.of(file.name) ?: return
+        val context = requireContext()
+        val text = session.currentText()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val intent = withContext(Dispatchers.IO) { CodePreviewLauncher.prepare(context, kind, file, text) }
+            if (intent == null) toast(getString(R.string.code_preview_cache_failed)) else startActivity(intent)
         }
     }
 
