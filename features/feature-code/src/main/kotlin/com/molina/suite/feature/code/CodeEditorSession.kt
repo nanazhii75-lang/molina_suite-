@@ -264,19 +264,6 @@ internal class CodeEditorSession(
         return true
     }
 
-    /**
-     * Atur enkode yang dipakai saat menyimpan. False bila teks memuat karakter
-     * yang tidak bisa dikodekan, supaya tidak ada data yang diam-diam rusak.
-     */
-    fun changeEncoding(charset: java.nio.charset.Charset, bom: Boolean): Boolean {
-        val current = mutableDocument.value
-        if (current.charset == charset && current.hasBom == bom) return true
-        if (!charset.newEncoder().canEncode(currentText())) return false
-        tabs.updateDocument(tabs.activeId) { it.copy(charset = charset, hasBom = bom, dirty = true) }
-        publish()
-        return true
-    }
-
     /** Terapkan ukuran font dan nomor baris ke editor yang sedang terpasang. */
     fun applyAppearance(appearance: CodeAppearance) {
         val target = editor ?: return

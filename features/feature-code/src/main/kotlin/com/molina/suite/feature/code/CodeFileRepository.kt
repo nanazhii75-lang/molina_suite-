@@ -33,6 +33,9 @@ internal class CodeFileRepository {
             when {
                 !file.isFile -> CodeFileLoad.Failed("Bukan berkas biasa: ${file.path}")
                 !file.canRead() -> CodeFileLoad.Failed("Berkas tidak bisa dibaca: ${file.path}")
+                !CodeExtensions.isOpenable(file.name) -> CodeFileLoad.Failed(
+                    "Jenis berkas .${CodeExtensions.extensionOf(file.name)} belum didukung editor"
+                )
                 file.length() > maxBytes -> CodeFileLoad.TooLarge(file.length(), maxBytes)
                 else -> decode(file.readBytes())
             }
@@ -70,7 +73,10 @@ internal class CodeFileRepository {
             val text = decoder.decode(ByteBuffer.wrap(bytes, offset, bytes.size - offset)).toString()
             CodeFileLoad.Loaded(text, Charsets.UTF_8, hasBom)
         } catch (e: CharacterCodingException) {
-            CodeFileLoad.Loaded(String(bytes, Charsets.ISO_8859_1), Charsets.ISO_8859_1, false)
+            CodeFileLoad.Failed(
+                "Berkas bukan UTF-8. Editor hanya membuka dan menyimpan UTF-8, " +
+                    "jadi berkas ini tidak dibuka agar isinya tidak rusak."
+            )
         }
     }
 

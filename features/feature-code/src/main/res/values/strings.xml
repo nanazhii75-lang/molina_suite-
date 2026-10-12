@@ -80,6 +80,13 @@
     <string name="code_picker_name_hint">Nama berkas</string>
     <string name="code_picker_name_invalid">Nama tidak valid. Isi nama tanpa tanda / dan bukan . atau ..</string>
     <string name="code_picker_name_is_folder">%1$s adalah folder, bukan berkas.</string>
+    <string name="code_picker_extension_label">Ekstensi</string>
+    <string name="code_picker_extension_title">Pilih ekstensi</string>
+    <string name="code_picker_extension_none">Tanpa ekstensi</string>
+    <string name="code_picker_extension_unsupported">Ekstensi .%1$s belum didukung editor. Pilih dari daftar ekstensi.</string>
+    <string name="code_picker_default_base">tanpa-judul</string>
+    <string name="code_picker_encoding_label">Enkode</string>
+    <string name="code_picker_encoding_locked">UTF-8 · Terkunci</string>
     <string name="code_picker_overwrite_title">Timpa berkas?</string>
     <string name="code_picker_overwrite_message">%1$s sudah ada dan isinya akan diganti.</string>
     <string name="code_picker_overwrite_yes">Timpa</string>
@@ -138,8 +145,8 @@
     <string name="code_syntax_failed">Bahasa ini tidak bisa dimuat.</string>
 
     <string name="code_encoding_title">Enkode untuk penyimpanan</string>
-    <string name="code_encoding_changed">Enkode diatur ke %1$s. Simpan berkas untuk menerapkannya.</string>
-    <string name="code_encoding_unsupported">Teks berisi karakter yang tidak bisa dikodekan dengan %1$s.</string>
+    <string name="code_encoding_locked_message">Enkode dikunci ke UTF-8. Berkas dibuka dan disimpan sebagai UTF-8 supaya isinya tidak rusak.</string>
+    <string name="code_encoding_bom_note">Berkas ini memakai BOM dan BOM dipertahankan saat disimpan.</string>
 
     <string name="code_appearance_size">Ukuran font: %1$d sp</string>
     <string name="code_appearance_line_numbers">Tampilkan nomor baris</string>

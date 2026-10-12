@@ -323,7 +323,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             override fun onStatistics() = showStatistics()
             override fun onShare() = shareText()
             override fun onSyntax() = chooseSyntax()
-            override fun onEncoding() = chooseEncoding()
+            override fun onEncoding() = showEncodingInfo()
             override fun onAppearance() = showAppearance()
             override fun onWordwrapChanged(enabled: Boolean) = session.setWordwrap(enabled)
             override fun onReadOnlyChanged(readOnly: Boolean) = session.setReadOnly(readOnly)
@@ -607,18 +607,17 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         }
     }
 
-    private fun chooseEncoding() {
-        val doc = session.document.value
-        val options = CodeEncoding.values()
-        val checked = options.indexOfFirst { it.charset == doc.charset && it.bom == doc.hasBom }
-        CodeChoiceDialog.show(requireContext(), R.string.code_encoding_title, options.map { it.label }, checked) { index ->
-            val choice = options[index]
-            if (session.changeEncoding(choice.charset, choice.bom)) {
-                toast(getString(R.string.code_encoding_changed, choice.label))
-            } else {
-                toast(getString(R.string.code_encoding_unsupported, choice.label))
-            }
+    /** Enkode dikunci ke UTF-8, jadi dialog ini hanya memberi tahu dan tidak punya pilihan. */
+    private fun showEncodingInfo() {
+        val message = StringBuilder(getString(R.string.code_encoding_locked_message))
+        if (session.document.value.hasBom) {
+            message.append("\n\n").append(getString(R.string.code_encoding_bom_note))
         }
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.code_encoding_title)
+            .setMessage(message.toString())
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun showAppearance() {

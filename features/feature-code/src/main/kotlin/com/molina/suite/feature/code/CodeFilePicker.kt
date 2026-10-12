@@ -73,6 +73,7 @@ internal class CodeFilePicker(
     private lateinit var favoriteButton: View
     private lateinit var extensionScroll: HorizontalScrollView
     private lateinit var extensionRow: LinearLayout
+    private lateinit var extensionButton: TextView
 
     fun show() {
         dialog = Dialog(context, android.R.style.Theme_Material_NoActionBar)
@@ -179,7 +180,32 @@ internal class CodeFilePicker(
                 ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             )
         }
-        nameInput.doAfterTextChanged { updateExtensionSuggestions() }
+        extensionButton = TextView(context).apply {
+            setTextColor(CodePalette.TEXT)
+            textSize = 14f
+            gravity = Gravity.CENTER_VERTICAL
+            compoundDrawablePadding = CodeUi.dp(context, 4)
+            setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_code_arrow_down, 0)
+            compoundDrawableTintList = ColorStateList.valueOf(CodePalette.TEXT)
+            setPadding(
+                CodeUi.dp(context, 12),
+                CodeUi.dp(context, 8),
+                CodeUi.dp(context, 8),
+                CodeUi.dp(context, 8)
+            )
+            background = GradientDrawable().apply {
+                cornerRadius = CodeUi.dp(context, 6).toFloat()
+                setColor(CodePalette.PANEL)
+                setStroke(CodeUi.dp(context, 1), CodePalette.ACCENT)
+            }
+            isClickable = true
+            setOnClickListener { chooseExtension() }
+        }
+        updateExtensionButton()
+        nameInput.doAfterTextChanged {
+            updateExtensionSuggestions()
+            updateExtensionButton()
+        }
 
         return LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
@@ -195,6 +221,12 @@ internal class CodeFilePicker(
                 )
                 addView(
                     extensionScroll,
+                    LinearLayout.LayoutParams(MATCH, WRAP).apply {
+                        setMargins(CodeUi.dp(context, 16), 0, CodeUi.dp(context, 16), CodeUi.dp(context, 8))
+                    }
+                )
+                addView(
+                    buildSaveOptions(),
                     LinearLayout.LayoutParams(MATCH, WRAP).apply {
                         setMargins(CodeUi.dp(context, 16), 0, CodeUi.dp(context, 16), CodeUi.dp(context, 8))
                     }
@@ -353,6 +385,87 @@ internal class CodeFilePicker(
         setOnClickListener { onClick() }
     }
 
+    /** Baris di bawah nama berkas: dropdown ekstensi dan enkode yang dikunci ke UTF-8. */
+    private fun buildSaveOptions(): View {
+        val lockIcon = ImageView(context).apply {
+            setImageResource(R.drawable.ic_code_lock)
+            imageTintList = ColorStateList.valueOf(CodePalette.TEXT_MUTED)
+            contentDescription = context.getString(R.string.code_picker_encoding_locked)
+        }
+        val lockLabel = TextView(context).apply {
+            setText(R.string.code_picker_encoding_locked)
+            setTextColor(CodePalette.TEXT_MUTED)
+            textSize = 14f
+        }
+        val encodingValue = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(
+                lockIcon,
+                LinearLayout.LayoutParams(CodeUi.dp(context, 18), CodeUi.dp(context, 18)).apply {
+                    marginEnd = CodeUi.dp(context, 6)
+                }
+            )
+            addView(lockLabel, LinearLayout.LayoutParams(WRAP, WRAP))
+        }
+        return LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(
+                optionRow(R.string.code_picker_extension_label, extensionButton),
+                LinearLayout.LayoutParams(MATCH, WRAP)
+            )
+            addView(
+                optionRow(R.string.code_picker_encoding_label, encodingValue),
+                LinearLayout.LayoutParams(MATCH, WRAP).apply { topMargin = CodeUi.dp(context, 8) }
+            )
+        }
+    }
+
+    private fun optionRow(label: Int, value: View): View = LinearLayout(context).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        addView(
+            TextView(context).apply {
+                setText(label)
+                setTextColor(CodePalette.TEXT)
+                textSize = 14f
+            },
+            LinearLayout.LayoutParams(0, WRAP, 1f)
+        )
+        addView(value, LinearLayout.LayoutParams(WRAP, WRAP))
+    }
+
+    private fun updateExtensionButton() {
+        val extension = CodeExtensions.extensionOf(nameInput.text.toString())
+        extensionButton.text = if (extension == null) {
+            context.getString(R.string.code_picker_extension_none)
+        } else {
+            "." + extension
+        }
+    }
+
+    private fun chooseExtension() {
+        val choices = CodeExtensions.saveAsChoices()
+        val current = CodeExtensions.extensionOf(nameInput.text.toString())?.lowercase(Locale.ROOT)
+        val checked = if (current == null) -1 else choices.indexOf(current)
+        CodeChoiceDialog.show(
+            context,
+            R.string.code_picker_extension_title,
+            choices.map { "." + it },
+            checked
+        ) { index -> applyChosenExtension(choices[index]) }
+    }
+
+    /** Ganti ekstensi nama berkas dengan pilihan dropdown; nama kosong dipakaikan nama bawaan. */
+    private fun applyChosenExtension(extension: String) {
+        val name = nameInput.text.toString().trim()
+        val dot = name.lastIndexOf('.')
+        val base = if (dot > 0) name.substring(0, dot) else name.trimEnd('.')
+        val stem = base.ifEmpty { context.getString(R.string.code_picker_default_base) }
+        nameInput.setText("$stem.$extension")
+        nameInput.setSelection(nameInput.text.length)
+    }
+
     private fun onItemClicked(file: File?) {
         when {
             file == null -> Unit
@@ -377,6 +490,15 @@ internal class CodeFilePicker(
         val name = nameInput.text.toString().trim()
         if (name.isEmpty() || name == "." || name == ".." || name.contains('/')) {
             toast(context.getString(R.string.code_picker_name_invalid))
+            return
+        }
+        if (!CodeExtensions.isOpenable(name)) {
+            toast(
+                context.getString(
+                    R.string.code_picker_extension_unsupported,
+                    CodeExtensions.extensionOf(name).orEmpty()
+                )
+            )
             return
         }
         val target = File(currentDir, name)
