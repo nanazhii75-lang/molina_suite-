@@ -147,7 +147,7 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
     private fun runInTerminal(command: String) {
         if (runJob?.isActive == true) return
         val host = activity ?: return
-        val line = ShellLine.wrapForDebian(command)
+        val line = ShellLine.wrapForDebianRoot(command)
         runJob = viewLifecycleOwner.lifecycleScope.launch {
             val reason = TerminalCommandRunner.run(host, line)
             if (reason != null) toast(getString(R.string.library_run_failed, reason))

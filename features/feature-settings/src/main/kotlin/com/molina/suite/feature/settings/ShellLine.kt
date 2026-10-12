@@ -31,6 +31,19 @@ internal object ShellLine {
             "proot-distro login debian -- bash -c $quoted; else bash -c $quoted; fi"
     }
 
+    /**
+     * Seperti [wrapForDebian] untuk perintah yang butuh root (apt, pasang paket). Dari shell host
+     * dipakai proot-distro (root); di dalam Debian sebagai root dijalankan langsung; di dalam
+     * Debian sebagai user dicetak petunjuk karena apt akan ditolak.
+     */
+    fun wrapForDebianRoot(inner: String): String {
+        val quoted = quote(inner)
+        return "if command -v proot-distro >/dev/null 2>&1; then " +
+            "proot-distro login debian -- bash -c $quoted; " +
+            "elif [ \"$(id -u)\" = 0 ]; then bash -c $quoted; " +
+            "else echo 'Perintah ini butuh root. Ketik exit, lalu molina-login root.'; fi"
+    }
+
     /** Perintah Android (am, pm) hanya ada di shell host; di dalam Debian tampilkan petunjuk. */
     fun guardAndroid(inner: String): String =
         "if command -v proot-distro >/dev/null 2>&1; then $inner; " +

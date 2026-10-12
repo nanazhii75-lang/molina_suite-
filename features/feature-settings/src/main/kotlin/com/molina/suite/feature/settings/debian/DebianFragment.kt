@@ -11,7 +11,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.molina.suite.feature.settings.R
@@ -19,8 +21,11 @@ import com.molina.suite.feature.settings.Refreshable
 import com.molina.suite.feature.settings.TerminalCommandRunner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+private const val SESSION_POLL_MS = 1500L
 
 /** Layar Debian: status rootfs, install, update, dan panduan login/logout. */
 class DebianFragment : Fragment(R.layout.fragment_debian), Refreshable {
@@ -30,6 +35,7 @@ class DebianFragment : Fragment(R.layout.fragment_debian), Refreshable {
     private var statusView: TextView? = null
     private var rows: List<Row> = emptyList()
     private var installed: Boolean? = null
+    private var insideDebian = false
     private var runJob: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -56,6 +62,14 @@ class DebianFragment : Fragment(R.layout.fragment_debian), Refreshable {
         }
         updateRows()
         refresh()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    if (isVisible) pollSession()
+                    delay(SESSION_POLL_MS)
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -69,8 +83,19 @@ class DebianFragment : Fragment(R.layout.fragment_debian), Refreshable {
         val appContext = requireContext().applicationContext
         viewLifecycleOwner.lifecycleScope.launch {
             val ok = withContext(Dispatchers.IO) { DebianStatus.isInstalled(appContext) }
+            insideDebian = withContext(Dispatchers.IO) { DebianSession.isInside(appContext) }
             installed = ok
             statusView?.setText(if (ok) R.string.debian_status_installed else R.string.debian_status_missing)
+            updateRows()
+        }
+    }
+
+    /** Memeriksa penanda sesi Debian dan memperbarui kartu hanya bila statusnya berubah. */
+    private suspend fun pollSession() {
+        val appContext = context?.applicationContext ?: return
+        val inside = withContext(Dispatchers.IO) { DebianSession.isInside(appContext) }
+        if (inside != insideDebian) {
+            insideDebian = inside
             updateRows()
         }
     }
@@ -81,6 +106,8 @@ class DebianFragment : Fragment(R.layout.fragment_debian), Refreshable {
                 Availability.ALWAYS -> true
                 Availability.WHEN_MISSING -> installed == false
                 Availability.WHEN_INSTALLED -> installed == true
+                Availability.WHEN_INSTALLED_OUTSIDE -> installed == true && !insideDebian
+                Availability.WHEN_IN_DEBIAN -> insideDebian
             }
             row.root.alpha = if (enabled) 1f else 0.5f
             row.run.isEnabled = enabled

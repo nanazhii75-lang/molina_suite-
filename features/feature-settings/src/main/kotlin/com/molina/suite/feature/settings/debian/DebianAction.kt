@@ -6,7 +6,17 @@ import com.molina.suite.feature.settings.ShellLine
 import com.molina.suite.feature.settings.packages.PackageCatalog
 
 /** Kapan sebuah aksi Debian boleh dipakai. */
-internal enum class Availability { ALWAYS, WHEN_MISSING, WHEN_INSTALLED }
+internal enum class Availability {
+    ALWAYS,
+    WHEN_MISSING,
+    WHEN_INSTALLED,
+
+    /** Terpasang dan Terminal sedang di shell biasa (belum di dalam Debian). */
+    WHEN_INSTALLED_OUTSIDE,
+
+    /** Terminal sedang di dalam Debian (lewat molina-login). */
+    WHEN_IN_DEBIAN
+}
 
 /** Satu kartu aksi pada layar Debian. [command] diketik ke Terminal bila [runnable]. */
 internal data class DebianAction(
@@ -39,23 +49,33 @@ internal object DebianActions {
         DebianAction(
             title = R.string.debian_update_title,
             description = R.string.debian_update_desc,
-            command = "proot-distro login debian -- bash -c \"apt update && apt upgrade -y\"",
+            command = ShellLine.wrapForDebianRoot("apt update && apt upgrade -y"),
             runnable = true,
-            availability = Availability.WHEN_INSTALLED
+            availability = Availability.WHEN_INSTALLED,
+            preview = "apt update && apt upgrade -y"
         ),
         DebianAction(
-            title = R.string.debian_login_title,
-            description = R.string.debian_login_desc,
-            command = "proot-distro login debian",
+            title = R.string.debian_login_user_title,
+            description = R.string.debian_login_user_desc,
+            command = ShellLine.guardAndroid("molina-login user"),
             runnable = true,
-            availability = Availability.WHEN_INSTALLED
+            availability = Availability.WHEN_INSTALLED_OUTSIDE,
+            preview = "molina-login user"
+        ),
+        DebianAction(
+            title = R.string.debian_login_root_title,
+            description = R.string.debian_login_root_desc,
+            command = ShellLine.guardAndroid("molina-login root"),
+            runnable = true,
+            availability = Availability.WHEN_INSTALLED_OUTSIDE,
+            preview = "molina-login root"
         ),
         DebianAction(
             title = R.string.debian_logout_title,
             description = R.string.debian_logout_desc,
             command = "exit",
             runnable = true,
-            availability = Availability.ALWAYS,
+            availability = Availability.WHEN_IN_DEBIAN,
             confirmMessage = R.string.debian_logout_confirm
         )
     )

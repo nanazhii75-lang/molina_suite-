@@ -36,10 +36,12 @@
     <string name="debian_install_desc">Mengunduh dan memasang rootfs Debian, lalu memasang yt-dlp (python, venv, curl_cffi). Butuh internet dan cukup lama; ketuk Segarkan setelah selesai.</string>
     <string name="debian_update_title">Update Debian</string>
     <string name="debian_update_desc">Memperbarui daftar paket dan paket terpasang di dalam Debian.</string>
-    <string name="debian_login_title">Masuk ke Debian</string>
-    <string name="debian_login_desc">Membuka shell Debian di sesi Terminal aktif. Prompt berubah menjadi root@localhost.</string>
+    <string name="debian_login_user_title">Masuk sebagai user</string>
+    <string name="debian_login_user_desc">Masuk Debian sebagai user@localhost dan menyimpannya sebagai pilihan login. Aktif saat Terminal di shell biasa.</string>
+    <string name="debian_login_root_title">Masuk sebagai root</string>
+    <string name="debian_login_root_desc">Masuk Debian sebagai root@localhost dan menyimpannya sebagai pilihan login. Dipakai untuk apt dan memasang paket.</string>
     <string name="debian_logout_title">Keluar dari Debian</string>
-    <string name="debian_logout_desc">Mengetik exit ke Terminal untuk keluar dari Debian. Bila terminal sedang di shell biasa, sesi akan tertutup.</string>
+    <string name="debian_logout_desc">Mengetik exit ke Terminal untuk kembali ke shell biasa. Hanya aktif saat Terminal berada di dalam Debian.</string>
 
     <string name="library_restore">Pulihkan</string>
     <string name="library_restore_done">%1$d entri bawaan dipulihkan</string>
@@ -81,7 +83,7 @@
     <string name="library_requires_message">Entri ini butuh %1$s, tetapi belum terpasang di Debian.</string>
     <string name="library_install_and_run">Install lalu jalankan</string>
     <string name="library_run_anyway">Jalankan saja</string>
-    <string name="debian_logout_confirm">Mengetik exit ke sesi Terminal aktif. Di dalam Debian, kamu kembali ke shell biasa. Di shell biasa, sesi akan tertutup.</string>
+    <string name="debian_logout_confirm">Mengetik exit ke sesi Terminal aktif. Kamu kembali ke shell biasa.</string>
     <string name="debian_confirm_run">Lanjutkan</string>
     <string name="library_line_counter">%1$d / %2$d baris</string>
     <string name="library_error_too_long">Isi melebihi %1$d baris</string>

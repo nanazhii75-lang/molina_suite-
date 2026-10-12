@@ -72,3 +72,7 @@ tercatat sebagai commit terpisah.
 - `app/.../MolinaShellProfile.java` (baru): dipanggil dari `TermuxInstaller` bersama `applyMolinaBanner()`.
 - `etc/profile.d/03-molina-login.sh`: pada sesi bash interaktif pertama menanyakan login Debian sebagai `user@localhost` atau `root@localhost`, menyimpan pilihan di `~/.molina/login-mode`, lalu `proot-distro login debian` (user: `--user user`, dibuat otomatis dengan `useradd -m`). Rootfs belum terpasang: shell host tetap dipakai tanpa pertanyaan. Ganti pilihan dengan `molina-login [user|root]`; lewati dengan `MOLINA_NO_LOGIN_PROMPT=1`.
 - Prompt Debian: blok bertanda `molina-prompt` ditambahkan ke `~/.bashrc` root, user, dan `/etc/skel`. Format `root@localhost:path $` dan `user@localhost:path $`: nama hijau (SGR 32), path hijau muda (SGR 92), tanda akhir `$` untuk root maupun user. `clear` dan Ctrl+L di Debian mencetak ulang banner yang sama dengan host.
+
+## Skrip login: prompt dan penanda sesi
+- `MolinaShellProfile` kini hanya menulis dua berkas di prefix host: `etc/profile.d/03-molina-login.sh` dan `etc/molina/prompt-block.bashrc`. Penulisan blok prompt ke `~/.bashrc` rootfs pindah ke skrip login dan dijalankan sebelum setiap login (tidak lagi menunggu aplikasi dimulai ulang).
+- Selama sesi Debian berjalan, skrip menulis PID shell host ke `~/.molina/in-debian` dan menghapusnya saat keluar. Menu Debian di Setting membaca penanda ini (PID harus masih hidup) untuk mengaktifkan atau menonaktifkan kartu Keluar dan kartu Masuk.
