@@ -60,9 +60,25 @@ internal object ShellLine {
     fun fillScript(entry: LibraryEntry, values: Map<String, String>): String =
         PlaceholderTemplate.fill(entry.content, values.mapValues { quote(it.value) })
 
-    /** Satu baris ketik yang menjalankan berkas skrip hasil [ScriptStager]. */
-    fun buildScriptRun(entry: LibraryEntry, scriptPath: String): String =
-        wrap(entry.runIn, "bash " + quote(scriptPath))
+    /** True bila baris pertama skrip adalah shebang (#!), mis. #!/usr/bin/env python3. */
+    fun hasShebang(content: String): Boolean = content.trimStart('\uFEFF').startsWith("#!")
+
+    /**
+     * Satu baris ketik yang menjalankan berkas skrip hasil [ScriptStager].
+     *
+     * Penyimpanan bersama (/sdcard) tidak bisa di-chmod dan tidak bisa dieksekusi, jadi skrip
+     * ber-shebang disalin dulu ke $HOME/.molina/run milik lingkungan tujuan (host atau Debian),
+     * diberi izin execute, lalu dijalankan langsung sehingga interpreter dari shebang dipakai.
+     * Skrip tanpa shebang tetap dijalankan dengan bash.
+     */
+    fun buildScriptRun(entry: LibraryEntry, scriptPath: String): String {
+        if (!hasShebang(entry.content)) return wrap(entry.runIn, "bash " + quote(scriptPath))
+        val name = scriptPath.substringAfterLast('/')
+        val target = "\"\$HOME/.molina/run/" + name + "\""
+        val inner = "mkdir -p \"\$HOME/.molina/run\" && cp " + quote(scriptPath) + " " + target +
+            " && chmod +x " + target + " && " + target
+        return wrap(entry.runIn, inner)
+    }
 
     /** Menyisipkan perintah install sebelum isi entri; gagal install menghentikan jalannya. */
     fun withInstall(content: String, install: String): String =
