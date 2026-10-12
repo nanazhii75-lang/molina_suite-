@@ -8,6 +8,7 @@ import com.molina.suite.core.common.EngineRegistry
 internal class CodeEngine(application: Application, val editorOpen: EditorOpenBoard) {
     val textMate = CodeTextMate(application.assets)
     val session = CodeEditorSession(CodeFileRepository(), textMate)
+    val workspace = CodeWorkspace(application)
 }
 
 /**

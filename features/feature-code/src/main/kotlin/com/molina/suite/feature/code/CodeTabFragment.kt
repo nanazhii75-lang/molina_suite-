@@ -23,12 +23,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.EditorOpenRequest
+import com.molina.suite.core.common.HostBackPressHandler
 import com.molina.suite.core.common.HostChromeController
 import com.molina.suite.core.storage.MolinaStorage
 import io.github.rosemoe.sora.widget.CodeEditor
@@ -39,7 +41,7 @@ import java.io.File
  * Tab Code: header, editor Sora, bar pencarian, dan toolbar. Hanya urusan tampilan;
  * dokumen dan logika berkas ada di [CodeEditorSession] dan [CodeFileRepository].
  */
-class CodeTabFragment : Fragment() {
+class CodeTabFragment : Fragment(), HostBackPressHandler {
 
     private val session: CodeEditorSession
         get() = CodeEngineModule.requireEngine().session
@@ -50,6 +52,8 @@ class CodeTabFragment : Fragment() {
     private var searchBar: CodeSearchBar? = null
     private var tabBar: CodeTabBar? = null
     private var keyboardWatcher: CodeKeyboardWatcher? = null
+    private var drawer: DrawerLayout? = null
+    private var treeController: CodeTreeController? = null
     private var afterPermission: (() -> Unit)? = null
 
     private val permissionLauncher = registerForActivityResult(
@@ -128,20 +132,56 @@ class CodeTabFragment : Fragment() {
         pathView = path
         searchBar = bar
 
-        return LinearLayout(context).apply {
+        val content = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(CodePalette.BACKGROUND)
-            layoutParams = ViewGroup.LayoutParams(MATCH, MATCH)
             addView(headerView, LinearLayout.LayoutParams(MATCH, WRAP))
             addView(tabs.view, LinearLayout.LayoutParams(MATCH, WRAP))
             addView(editorView, LinearLayout.LayoutParams(MATCH, 0, 1f))
             addView(bar.view, LinearLayout.LayoutParams(MATCH, WRAP))
             addView(actions, LinearLayout.LayoutParams(MATCH, WRAP))
         }
+
+        val tree = CodeTreeController(
+            context,
+            CodeEngineModule.requireEngine().workspace,
+            object : CodeTreeController.Host {
+                override fun onOpenFile(file: File) {
+                    closeTree()
+                    openFile(file)
+                }
+
+                override fun onChooseFolder() {
+                    closeTree()
+                    requestOpenFolder()
+                }
+            }
+        )
+        treeController = tree
+        val drawerWidth = minOf(
+            CodeUi.dp(context, DRAWER_WIDTH_DP),
+            (context.resources.displayMetrics.widthPixels * DRAWER_MAX_FRACTION).toInt()
+        )
+        return DrawerLayout(context).apply {
+            layoutParams = ViewGroup.LayoutParams(MATCH, MATCH)
+            setScrimColor(DRAWER_SCRIM)
+            addView(content, DrawerLayout.LayoutParams(MATCH, MATCH))
+            addView(tree.view, DrawerLayout.LayoutParams(drawerWidth, MATCH, Gravity.START))
+            addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
+                override fun onDrawerOpened(drawerView: View) {
+                    hideIme()
+                    tree.reload()
+                }
+            })
+            drawer = this
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val workspace = CodeEngineModule.requireEngine().workspace
+        workspace.restoreIfPossible()
+        treeController?.attach(viewLifecycleOwner.lifecycleScope)
         keyboardWatcher = CodeKeyboardWatcher(requireActivity().window, view) { visible ->
             (activity as? HostChromeController)?.setChromeCompact(visible)
         }
@@ -154,6 +194,7 @@ class CodeTabFragment : Fragment() {
                 launch { session.document.collect { renderDocument(it) } }
                 launch { session.search.collect { searchBar?.render(it) } }
                 launch { session.tabBar.collect { tabBar?.render(it) } }
+                launch { workspace.tree.collect { treeController?.show(it) } }
                 launch {
                     val board = CodeEngineModule.requireEngine().editorOpen
                     board.pending.collect { request ->
@@ -166,6 +207,7 @@ class CodeTabFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        CodeEngineModule.requireEngine().workspace.restoreIfPossible()
         updateKeyboardWatcher()
     }
 
@@ -193,6 +235,8 @@ class CodeTabFragment : Fragment() {
         pathView = null
         searchBar = null
         tabBar = null
+        drawer = null
+        treeController = null
         super.onDestroyView()
     }
 
@@ -220,6 +264,7 @@ class CodeTabFragment : Fragment() {
         }
         titleView?.text = title
         pathView?.text = doc.file?.parent ?: MolinaStorage.sharedRoot().path
+        treeController?.setActiveFile(doc.file)
     }
 
     private fun notifyReplaceUnavailable() {
@@ -313,8 +358,40 @@ class CodeTabFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch { session.closeTab(id) }
     }
 
+    /** Buka: pilih berkas tunggal atau folder yang ditampilkan sebagai pohon direktori. */
     private fun requestOpen() {
+        val choices = listOf(
+            getString(R.string.code_open_choice_file),
+            getString(R.string.code_open_choice_folder)
+        )
+        CodeChoiceDialog.show(requireContext(), R.string.code_open_choose_title, choices, -1) { index ->
+            if (index == 0) requestOpenFile() else requestOpenFolder()
+        }
+    }
+
+    private fun requestOpenFile() {
         ensureStorage { showPicker(CodePickerMode.OPEN) { openFile(it) } }
+    }
+
+    private fun requestOpenFolder() {
+        ensureStorage {
+            showPicker(CodePickerMode.OPEN_FOLDER) { folder ->
+                CodeEngineModule.requireEngine().workspace.open(folder)
+                drawer?.openDrawer(Gravity.START)
+            }
+        }
+    }
+
+    private fun closeTree() {
+        drawer?.closeDrawer(Gravity.START)
+    }
+
+    /** Back menutup panel pohon lebih dulu; bila tertutup, perilaku default shell berjalan. */
+    override fun onHostBackPressed(): Boolean {
+        val layout = drawer ?: return false
+        if (!layout.isDrawerOpen(Gravity.START)) return false
+        layout.closeDrawer(Gravity.START)
+        return true
     }
 
     private fun requestSaveAs(afterSaved: (() -> Unit)? = null) {
@@ -549,5 +626,8 @@ class CodeTabFragment : Fragment() {
     private companion object {
         const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
         const val WRAP = ViewGroup.LayoutParams.WRAP_CONTENT
+        const val DRAWER_WIDTH_DP = 300
+        const val DRAWER_MAX_FRACTION = 0.85f
+        const val DRAWER_SCRIM = 0x66000000
     }
 }

@@ -83,6 +83,19 @@
     <string name="code_picker_unreadable">Folder tidak bisa dibaca</string>
     <string name="code_picker_error">Folder bersama tidak bisa disiapkan:\n%1$s</string>
 
+    <string name="code_open_choose_title">Buka</string>
+    <string name="code_open_choice_file">Berkas</string>
+    <string name="code_open_choice_folder">Folder (pohon direktori)</string>
+    <string name="code_picker_title_folder">Pilih folder</string>
+    <string name="code_picker_use_folder">Pilih folder ini</string>
+    <string name="code_tree_none_title">Belum ada folder</string>
+    <string name="code_tree_none_hint">Buka sebuah folder untuk menampilkan pohon direktorinya. Geser dari tepi kiri layar kapan saja untuk membuka panel ini.</string>
+    <string name="code_tree_open_folder">Buka folder</string>
+    <string name="code_tree_change_folder">Ganti folder</string>
+    <string name="code_tree_close_folder">Tutup folder</string>
+    <string name="code_tree_more">… dan %1$d lainnya</string>
+    <string name="code_tree_unreadable">Folder tidak bisa dibaca</string>
+
     <string name="code_permission_denied">Izin penyimpanan diperlukan untuk membuka dan menyimpan berkas.</string>
     <string name="code_open_failed">Gagal membuka %1$s:\n%2$s</string>
     <string name="code_file_too_large">Berkas terlalu besar (%1$s). Batasnya %2$s.</string>

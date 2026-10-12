@@ -28,5 +28,6 @@ dependencies {
     implementation(project(":core:core-storage"))
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.fragment:fragment:1.5.4")
+    implementation("androidx.drawerlayout:drawerlayout:1.2.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
 }

@@ -29,7 +29,7 @@ import java.io.File
 import java.util.Date
 import java.util.Locale
 
-internal enum class CodePickerMode { OPEN, SAVE_AS }
+internal enum class CodePickerMode { OPEN, SAVE_AS, OPEN_FOLDER }
 
 /**
  * Pengelola berkas layar penuh untuk "Buka" dan "Simpan sebagai": breadcrumb path,
@@ -88,7 +88,11 @@ internal class CodeFilePicker(
     }
 
     private fun buildContent(): View {
-        val title = if (mode == CodePickerMode.SAVE_AS) R.string.code_picker_title_save else R.string.code_picker_title_open
+        val title = when (mode) {
+            CodePickerMode.SAVE_AS -> R.string.code_picker_title_save
+            CodePickerMode.OPEN_FOLDER -> R.string.code_picker_title_folder
+            CodePickerMode.OPEN -> R.string.code_picker_title_open
+        }
 
         val header = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -187,6 +191,9 @@ internal class CodeFilePicker(
         if (mode == CodePickerMode.SAVE_AS) {
             column.addView(floatingButton(R.drawable.ic_code_save, R.string.code_picker_save_here) { confirmSave() })
         }
+        if (mode == CodePickerMode.OPEN_FOLDER) {
+            column.addView(floatingButton(R.drawable.ic_code_folder, R.string.code_picker_use_folder) { finish(currentDir) })
+        }
         column.addView(floatingButton(R.drawable.ic_code_close, R.string.code_picker_cancel) { dialog.dismiss() })
         return column
     }
@@ -228,7 +235,8 @@ internal class CodeFilePicker(
         }
         val filter = nameFilter.lowercase(Locale.ROOT)
         val visible = children.orEmpty().filter { file ->
-            (showHidden || !file.name.startsWith(".")) &&
+            (mode != CodePickerMode.OPEN_FOLDER || file.isDirectory) &&
+                (showHidden || !file.name.startsWith(".")) &&
                 (filter.isEmpty() || file.name.lowercase(Locale.ROOT).contains(filter))
         }
         items = visible.sortedWith(comparator())
