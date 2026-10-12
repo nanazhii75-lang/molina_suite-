@@ -76,3 +76,6 @@ tercatat sebagai commit terpisah.
 ## Skrip login: prompt dan penanda sesi
 - `MolinaShellProfile` kini hanya menulis dua berkas di prefix host: `etc/profile.d/03-molina-login.sh` dan `etc/molina/prompt-block.bashrc`. Penulisan blok prompt ke `~/.bashrc` rootfs pindah ke skrip login dan dijalankan sebelum setiap login (tidak lagi menunggu aplikasi dimulai ulang).
 - Selama sesi Debian berjalan, skrip menulis PID shell host ke `~/.molina/in-debian` dan menghapusnya saat keluar. Menu Debian di Setting membaca penanda ini (PID harus masih hidup) untuk mengaktifkan atau menonaktifkan kartu Keluar dan kartu Masuk.
+
+## Persetujuan login root
+- Login sebagai root meminta persetujuan: di Terminal lewat pertanyaan `Setuju? [y/N]` (pilihan 2 di menu awal dan `molina-login root`), di Setting lewat dialog Lanjutkan/Batal pada kartu "Masuk sebagai root". Kartu Setting menjalankan `molina-login root --yes` agar tidak bertanya dua kali. Login otomatis dengan pilihan root yang sudah tersimpan tidak bertanya lagi. Login sebagai user tidak meminta persetujuan.

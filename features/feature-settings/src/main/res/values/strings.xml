@@ -39,7 +39,8 @@
     <string name="debian_login_user_title">Masuk sebagai user</string>
     <string name="debian_login_user_desc">Masuk Debian sebagai user@localhost dan menyimpannya sebagai pilihan login. Aktif saat Terminal di shell biasa.</string>
     <string name="debian_login_root_title">Masuk sebagai root</string>
-    <string name="debian_login_root_desc">Masuk Debian sebagai root@localhost dan menyimpannya sebagai pilihan login. Dipakai untuk apt dan memasang paket.</string>
+    <string name="debian_login_root_desc">Masuk Debian sebagai root@localhost dan menyimpannya sebagai pilihan login. Dipakai untuk apt dan memasang paket. Meminta persetujuan dulu.</string>
+    <string name="debian_login_root_confirm">Masuk sebagai root? Root di Debian berjalan di dalam sandbox aplikasi (bukan root Android), tetapi bisa mengubah atau menghapus apa saja di Debian. Pilih user biasa bila tidak perlu apt atau memasang paket.</string>
     <string name="debian_logout_title">Keluar dari Debian</string>
     <string name="debian_logout_desc">Mengetik exit ke Terminal untuk kembali ke shell biasa. Hanya aktif saat Terminal berada di dalam Debian.</string>
 

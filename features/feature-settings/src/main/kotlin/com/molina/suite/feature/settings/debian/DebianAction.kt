@@ -65,10 +65,11 @@ internal object DebianActions {
         DebianAction(
             title = R.string.debian_login_root_title,
             description = R.string.debian_login_root_desc,
-            command = ShellLine.guardAndroid("molina-login root"),
+            command = ShellLine.guardAndroid("molina-login root --yes"),
             runnable = true,
             availability = Availability.WHEN_INSTALLED_OUTSIDE,
-            preview = "molina-login root"
+            preview = "molina-login root",
+            confirmMessage = R.string.debian_login_root_confirm
         ),
         DebianAction(
             title = R.string.debian_logout_title,
