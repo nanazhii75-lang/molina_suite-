@@ -23,6 +23,7 @@ internal object BuiltinLibrary {
             """printf '%-12s' mediainfo; command -v mediainfo >/dev/null 2>&1 && mediainfo --Version 2>&1 | sed -n '/v[0-9]/{p;q}' || echo 'belum terpasang'"""
 
     val entries: List<LibraryEntry> = listOf(
+        IptvIndonesia.entry,
         entry(
             "builtin-ytdlp-playlist", "Unduh playlist (yt-dlp)",
             "yt-dlp -P $downloads -o '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' {URL}",
