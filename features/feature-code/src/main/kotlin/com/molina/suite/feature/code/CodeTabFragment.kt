@@ -4,14 +4,10 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Typeface
 import android.os.Bundle
 import android.text.InputType
-import android.text.Spannable
-import android.text.SpannableStringBuilder
 import android.text.TextUtils
 import android.text.format.Formatter
-import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -53,8 +49,8 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         get() = CodeEngineModule.requireEngine().session
 
     private var editor: CodeEditor? = null
-    private var titleView: TextView? = null
     private var pathView: TextView? = null
+    private var contentView: View? = null
     private var searchBar: CodeSearchBar? = null
     private var tabBar: CodeTabBar? = null
     private var actionBar: CodeActionBar? = null
@@ -80,25 +76,12 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         val editorView = CodeEditorFactory.create(context)
         editor = editorView
 
-        val title = TextView(context).apply {
-            setTextColor(CodePalette.TEXT)
-            textSize = 13f
-            includeFontPadding = false
-            setTypeface(typeface, Typeface.BOLD)
-            maxLines = 1
-            ellipsize = TextUtils.TruncateAt.END
-        }
         val path = TextView(context).apply {
             setTextColor(CodePalette.TEXT_MUTED)
-            textSize = 10f
+            textSize = 11f
             includeFontPadding = false
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.START
-        }
-        val titleColumn = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            addView(title)
-            addView(path)
         }
         val moreButton = CodeUi.iconButton(context, R.drawable.ic_code_more, R.string.code_header_more) { }
         moreButton.setOnClickListener { showActionMenu(it) }
@@ -108,7 +91,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             gravity = Gravity.CENTER_VERTICAL
             setBackgroundColor(CodePalette.PANEL)
             setPadding(CodeUi.dp(context, 12), 0, CodeUi.dp(context, 2), 0)
-            addView(titleColumn, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            addView(path, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
             addView(moreButton, LinearLayout.LayoutParams(CodeUi.dp(context, 40), CodeUi.dp(context, 36)))
         }
 
@@ -131,7 +114,6 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         })
         tabBar = tabs
 
-        titleView = title
         pathView = path
         searchBar = bar
 
@@ -144,6 +126,8 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             addView(bar.view, LinearLayout.LayoutParams(MATCH, WRAP))
             addView(actions.view, LinearLayout.LayoutParams(MATCH, WRAP))
         }
+
+        contentView = content
 
         val tree = CodeTreeController(
             context,
@@ -195,7 +179,11 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         val workspace = CodeEngineModule.requireEngine().workspace
         workspace.restoreIfPossible()
         treeController?.attach(viewLifecycleOwner.lifecycleScope)
-        keyboardWatcher = CodeKeyboardWatcher(requireActivity().window, view) { visible ->
+        keyboardWatcher = CodeKeyboardWatcher(
+            window = requireActivity().window,
+            anchor = view,
+            onOverlapChanged = { px -> contentView?.setPadding(0, 0, 0, px) }
+        ) { visible ->
             (activity as? HostChromeController)?.setChromeCompact(visible)
         }
         renderDocument(session.document.value)
@@ -249,8 +237,8 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             target.release()
         }
         editor = null
-        titleView = null
         pathView = null
+        contentView = null
         searchBar = null
         tabBar = null
         actionBar = null
@@ -269,19 +257,6 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
     }
 
     private fun renderDocument(doc: CodeDocument) {
-        val name = doc.file?.name ?: getString(R.string.code_untitled)
-        val title = SpannableStringBuilder(name)
-        if (doc.dirty) {
-            val start = title.length
-            title.append(" \u25CF")
-            title.setSpan(
-                ForegroundColorSpan(CodePalette.ACCENT),
-                start,
-                title.length,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
-        titleView?.text = title
         pathView?.text = doc.file?.parent ?: MolinaStorage.sharedRoot().path
         treeController?.setActiveFile(doc.file)
     }
