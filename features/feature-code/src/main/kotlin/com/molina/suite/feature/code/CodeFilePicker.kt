@@ -25,6 +25,7 @@ import android.widget.ListView
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.widget.doAfterTextChanged
 import java.io.File
 import java.util.Date
 import java.util.Locale
@@ -70,6 +71,8 @@ internal class CodeFilePicker(
     private lateinit var nameInput: EditText
     private lateinit var adapter: FileAdapter
     private lateinit var favoriteButton: View
+    private lateinit var extensionScroll: HorizontalScrollView
+    private lateinit var extensionRow: LinearLayout
 
     fun show() {
         dialog = Dialog(context, android.R.style.Theme_Material_NoActionBar)
@@ -164,6 +167,19 @@ internal class CodeFilePicker(
             inputType = InputType.TYPE_CLASS_TEXT
             setSingleLine(true)
         }
+        extensionRow = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        extensionScroll = HorizontalScrollView(context).apply {
+            isHorizontalScrollBarEnabled = false
+            visibility = View.GONE
+            addView(
+                extensionRow,
+                ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            )
+        }
+        nameInput.doAfterTextChanged { updateExtensionSuggestions() }
 
         return LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
@@ -175,6 +191,12 @@ internal class CodeFilePicker(
                     nameInput,
                     LinearLayout.LayoutParams(MATCH, WRAP).apply {
                         setMargins(CodeUi.dp(context, 16), 0, CodeUi.dp(context, 16), CodeUi.dp(context, 4))
+                    }
+                )
+                addView(
+                    extensionScroll,
+                    LinearLayout.LayoutParams(MATCH, WRAP).apply {
+                        setMargins(CodeUi.dp(context, 16), 0, CodeUi.dp(context, 16), CodeUi.dp(context, 8))
                     }
                 )
             }
@@ -283,6 +305,52 @@ internal class CodeFilePicker(
             })
         }
         breadcrumbScroll.post { breadcrumbScroll.fullScroll(View.FOCUS_RIGHT) }
+    }
+
+    /** Saran ekstensi: setelah titik pada nama berkas, tampilkan ekstensi yang diawali huruf yang diketik. */
+    private fun updateExtensionSuggestions() {
+        val name = nameInput.text.toString()
+        val dot = name.lastIndexOf('.')
+        val suggestions = if (dot <= 0 || dot == name.length - 1) {
+            emptyList()
+        } else {
+            CodeExtensions.suggest(name.substring(dot + 1))
+        }
+        extensionRow.removeAllViews()
+        for (extension in suggestions) {
+            extensionRow.addView(
+                extensionChip(extension) { applyExtension(dot, extension) },
+                LinearLayout.LayoutParams(WRAP, WRAP).apply { marginEnd = CodeUi.dp(context, 8) }
+            )
+        }
+        extensionScroll.scrollTo(0, 0)
+        extensionScroll.visibility = if (suggestions.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    private fun applyExtension(dot: Int, extension: String) {
+        val name = nameInput.text.toString()
+        if (dot < 0 || dot >= name.length) return
+        nameInput.setText(name.substring(0, dot + 1) + extension)
+        nameInput.setSelection(nameInput.text.length)
+    }
+
+    private fun extensionChip(extension: String, onClick: () -> Unit): View = TextView(context).apply {
+        text = "." + extension
+        setTextColor(CodePalette.TEXT)
+        textSize = 14f
+        setPadding(
+            CodeUi.dp(context, 12),
+            CodeUi.dp(context, 6),
+            CodeUi.dp(context, 12),
+            CodeUi.dp(context, 6)
+        )
+        background = GradientDrawable().apply {
+            cornerRadius = CodeUi.dp(context, 16).toFloat()
+            setColor(CodePalette.PANEL)
+            setStroke(CodeUi.dp(context, 1), CodePalette.ACCENT)
+        }
+        isClickable = true
+        setOnClickListener { onClick() }
     }
 
     private fun onItemClicked(file: File?) {
