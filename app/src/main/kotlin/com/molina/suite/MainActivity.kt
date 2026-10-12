@@ -22,7 +22,6 @@ import com.molina.suite.ui.EngineUnavailableFragment
 import com.molina.suite.ui.colorRes
 import com.molina.suite.ui.labelRes
 import kotlinx.coroutines.launch
-import java.io.File
 
 class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher {
 
@@ -47,21 +46,13 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
         installBackHandling()
 
         if (savedInstanceState == null) {
-            binding.bottomNav.selectedItemId = startTabId()
+            binding.bottomNav.selectedItemId = R.id.nav_terminal
         }
 
         bindDaemon(DaemonId.TERMINAL, binding.dotTerminal)
         bindDaemon(DaemonId.WEBDAV, binding.dotWebdav)
         bindDaemon(DaemonId.MPV, binding.dotMpv)
     }
-
-    /**
-     * Tab awal: mpv. Pengecualian pemasangan pertama: bootstrap (usr/) baru dipasang saat tab
-     * Terminal pertama kali tampil, dan yt-dlp di mpv serta perintah dari Settings bergantung
-     * padanya, jadi selama usr/bin/bash belum ada aplikasi dibuka di Terminal.
-     */
-    private fun startTabId(): Int =
-        if (File(filesDir, BOOTSTRAP_MARKER).exists()) R.id.nav_mpv else R.id.nav_terminal
 
     /** Ikon tab aktif penuh warna, tab lain sedikit redup; ikon berwarna sendiri-sendiri. */
     private fun applyNavIcons(selectedId: Int) {
@@ -146,8 +137,6 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
     }
 
     private companion object {
-        const val BOOTSTRAP_MARKER = "usr/bin/bash"
-
         /** id menu -> (ikon redup, ikon aktif). */
         val NAV_ICONS = mapOf(
             R.id.nav_mpv to (R.drawable.ic_nav_mpv_off to R.drawable.ic_nav_mpv_on),
