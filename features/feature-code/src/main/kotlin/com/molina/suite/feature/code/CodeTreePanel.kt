@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.text.TextUtils
 import android.view.Gravity
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -13,7 +14,10 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ListView
+import android.widget.PopupMenu
 import android.widget.TextView
+import com.molina.suite.core.common.ScriptRunLine
+import com.molina.suite.core.common.ScriptRunTarget
 import java.io.File
 
 /**
@@ -29,6 +33,7 @@ internal class CodeTreePanel(
         fun onChooseFolder()
         fun onChooseFile()
         fun onCloseFolder()
+        fun onRunFile(file: File, target: ScriptRunTarget)
     }
 
     private var rows: List<CodeTreeRow> = emptyList()
@@ -144,6 +149,15 @@ internal class CodeTreePanel(
             setOnItemClickListener { _, _, position, _ ->
                 (rows.getOrNull(position) as? CodeTreeRow.Entry)?.let { callbacks.onRowClicked(it) }
             }
+            setOnItemLongClickListener { _, itemView, position, _ ->
+                val entry = rows.getOrNull(position) as? CodeTreeRow.Entry
+                if (entry == null || entry.isDirectory || !ScriptRunLine.isRunnableName(entry.file.name)) {
+                    false
+                } else {
+                    showRunMenu(itemView, entry.file)
+                    true
+                }
+            }
         }
 
         noFolderView.addView(
@@ -186,6 +200,22 @@ internal class CodeTreePanel(
             addView(header, LinearLayout.LayoutParams(MATCH, WRAP))
             addView(body, LinearLayout.LayoutParams(MATCH, 0, 1f))
         }
+    }
+
+    private fun showRunMenu(anchor: View, file: File) {
+        val popup = PopupMenu(context, anchor, Gravity.END)
+        popup.menu.add(Menu.NONE, MENU_RUN_DEBIAN, 0, R.string.code_tree_run_debian)
+        popup.menu.add(Menu.NONE, MENU_RUN_HOST, 1, R.string.code_tree_run_host)
+        popup.setOnMenuItemClickListener { item ->
+            val target = when (item.itemId) {
+                MENU_RUN_DEBIAN -> ScriptRunTarget.DEBIAN
+                MENU_RUN_HOST -> ScriptRunTarget.HOST
+                else -> null
+            }
+            if (target != null) callbacks.onRunFile(file, target)
+            target != null
+        }
+        popup.show()
     }
 
     private fun dp(value: Int): Int = CodeUi.dp(context, value)
@@ -260,6 +290,8 @@ internal class CodeTreePanel(
 
     private companion object {
         const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
+        const val MENU_RUN_DEBIAN = 1
+        const val MENU_RUN_HOST = 2
         const val WRAP = ViewGroup.LayoutParams.WRAP_CONTENT
     }
 }

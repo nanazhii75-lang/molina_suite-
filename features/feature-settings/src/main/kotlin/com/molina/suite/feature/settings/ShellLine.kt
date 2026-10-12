@@ -1,5 +1,6 @@
 package com.molina.suite.feature.settings
 
+import com.molina.suite.core.common.ScriptRunLine
 import com.molina.suite.feature.settings.library.LibraryEntry
 import com.molina.suite.feature.settings.library.RunMode
 
@@ -19,17 +20,13 @@ internal object PlaceholderTemplate {
 internal object ShellLine {
 
     /** Membungkus [value] dengan tanda kutip tunggal shell. */
-    fun quote(value: String): String = "'" + value.replace("'", "'\\''") + "'"
+    fun quote(value: String): String = ScriptRunLine.quote(value)
 
     /**
      * Menjalankan [inner] di dalam Debian. Dari shell host dipakai proot-distro; bila sudah
      * berada di dalam Debian (proot-distro tidak ada) perintah dijalankan langsung.
      */
-    fun wrapForDebian(inner: String): String {
-        val quoted = quote(inner)
-        return "if command -v proot-distro >/dev/null 2>&1; then " +
-            "proot-distro login debian -- bash -c $quoted; else bash -c $quoted; fi"
-    }
+    fun wrapForDebian(inner: String): String = ScriptRunLine.wrapForDebian(inner)
 
     /**
      * Seperti [wrapForDebian] untuk perintah yang butuh root (apt, pasang paket). Dari shell host
@@ -61,7 +58,7 @@ internal object ShellLine {
         PlaceholderTemplate.fill(entry.content, values.mapValues { quote(it.value) })
 
     /** True bila baris pertama skrip adalah shebang (#!), mis. #!/usr/bin/env python3. */
-    fun hasShebang(content: String): Boolean = content.trimStart('\uFEFF').startsWith("#!")
+    fun hasShebang(content: String): Boolean = ScriptRunLine.hasShebang(content)
 
     /**
      * Satu baris ketik yang menjalankan berkas skrip hasil [ScriptStager].
@@ -73,11 +70,7 @@ internal object ShellLine {
      */
     fun buildScriptRun(entry: LibraryEntry, scriptPath: String): String {
         if (!hasShebang(entry.content)) return wrap(entry.runIn, "bash " + quote(scriptPath))
-        val name = scriptPath.substringAfterLast('/')
-        val target = "\"\$HOME/.molina/run/" + name + "\""
-        val inner = "mkdir -p \"\$HOME/.molina/run\" && cp " + quote(scriptPath) + " " + target +
-            " && chmod +x " + target + " && " + target
-        return wrap(entry.runIn, inner)
+        return wrap(entry.runIn, ScriptRunLine.executeCopy(scriptPath))
     }
 
     /** Menyisipkan perintah install sebelum isi entri; gagal install menghentikan jalannya. */

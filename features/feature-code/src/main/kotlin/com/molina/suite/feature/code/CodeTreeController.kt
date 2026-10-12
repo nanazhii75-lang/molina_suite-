@@ -2,6 +2,7 @@ package com.molina.suite.feature.code
 
 import android.content.Context
 import android.view.View
+import com.molina.suite.core.common.ScriptRunTarget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -22,6 +23,7 @@ internal class CodeTreeController(
         fun onOpenFile(file: File)
         fun onChooseFolder()
         fun onChooseFile()
+        fun onRunFile(file: File, target: ScriptRunTarget)
     }
 
     private val panel = CodeTreePanel(context, this)
@@ -71,6 +73,8 @@ internal class CodeTreeController(
     override fun onChooseFolder() = host.onChooseFolder()
 
     override fun onChooseFile() = host.onChooseFile()
+
+    override fun onRunFile(file: File, target: ScriptRunTarget) = host.onRunFile(file, target)
 
     override fun onCloseFolder() = workspace.close()
 }

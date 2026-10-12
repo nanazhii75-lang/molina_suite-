@@ -32,9 +32,13 @@ import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.EditorOpenRequest
 import com.molina.suite.core.common.HostBackPressHandler
 import com.molina.suite.core.common.HostChromeController
+import com.molina.suite.core.common.HostTabSwitcher
+import com.molina.suite.core.common.ScriptRunTarget
 import com.molina.suite.core.storage.MolinaStorage
 import io.github.rosemoe.sora.widget.CodeEditor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
@@ -159,6 +163,11 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
                 override fun onChooseFile() {
                     closeTree()
                     requestOpenFile()
+                }
+
+                override fun onRunFile(file: File, target: ScriptRunTarget) {
+                    closeTree()
+                    runFile(file, target)
                 }
             }
         )
@@ -291,6 +300,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             CodeAction(R.drawable.ic_code_arrow_left, R.string.code_key_left) { session.moveCursorLeft() },
             CodeAction(R.drawable.ic_code_arrow_right, R.string.code_key_right) { session.moveCursorRight() },
             CodeAction(R.drawable.ic_code_copy_all, R.string.code_key_copy_all) { copyAll() },
+            CodeAction(R.drawable.ic_code_run, R.string.code_key_run) { runCurrent() },
             CodeAction(R.drawable.ic_code_close, R.string.code_key_close) { requestClose() }
         )
     )
@@ -468,6 +478,44 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             )
             CodeFileLoad.Binary -> toast(getString(R.string.code_file_binary))
             is CodeFileLoad.Failed -> toast(getString(R.string.code_open_failed, file.name, result.reason))
+        }
+    }
+
+    /** Jalankan: simpan dulu bila perlu, lalu jalankan di Debian lewat tab Terminal. */
+    private fun runCurrent() {
+        val doc = session.document.value
+        val file = doc.file
+        when {
+            file == null -> requestSaveAs {
+                session.document.value.file?.let { runFile(it, ScriptRunTarget.DEBIAN) }
+            }
+            doc.dirty -> viewLifecycleOwner.lifecycleScope.launch {
+                if (save()) runFile(file, ScriptRunTarget.DEBIAN)
+            }
+            else -> runFile(file, ScriptRunTarget.DEBIAN)
+        }
+    }
+
+    private fun runFile(file: File, target: ScriptRunTarget) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val head = withContext(Dispatchers.IO) { CodeScriptRunner.readHead(file) }
+            if (head == null) {
+                toast(getString(R.string.code_run_unreadable, file.name))
+                return@launch
+            }
+            val outcome = CodeScriptRunner.run(
+                CodeEngineModule.requireEngine().terminalInput,
+                activity as? HostTabSwitcher,
+                file,
+                head,
+                target
+            )
+            when (outcome) {
+                CodeRunOutcome.Started -> Unit
+                CodeRunOutcome.Unsupported -> toast(getString(R.string.code_run_unsupported))
+                CodeRunOutcome.NoSwitcher -> toast(getString(R.string.code_run_no_switcher))
+                is CodeRunOutcome.Rejected -> toast(getString(R.string.code_run_failed, outcome.reason))
+            }
         }
     }
 
