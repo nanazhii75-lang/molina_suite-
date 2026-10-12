@@ -4,7 +4,7 @@
     <string name="packages_remove">Hapus</string>
     <string name="packages_installed_version">Terpasang · %1$s</string>
     <string name="packages_remove_title">Hapus %1$s?</string>
-    <string name="packages_remove_message">Paket, konfigurasi sistem, sisa dependensi, dan cache alat ini dihapus total dari Debian. File pribadi di folder home (misalnya .gitconfig dan .ssh) dan folder /sdcard/Molina tidak disentuh.</string>
+    <string name="packages_remove_message">Paket, konfigurasi sistem, sisa dependensi, dan cache alat ini dihapus total dari Debian. Konfigurasi pribadi alat ini ikut dihapus. Kunci SSH (~/.ssh) dan folder /sdcard/Molina tidak disentuh.</string>
     <string name="packages_remove_kept">Tetap dipertahankan karena dipakai alat lain yang terpasang: %1$s.</string>
     <string name="packages_remove_confirm">Hapus</string>
     <string name="packages_remove_in_use">%1$s masih dipakai alat lain yang terpasang, jadi tidak dihapus.</string>

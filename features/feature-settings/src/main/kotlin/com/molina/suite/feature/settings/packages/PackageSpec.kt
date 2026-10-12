@@ -26,7 +26,8 @@ private const val NODE_RUNTIME_SETUP =
 private val CLEAN_PATHS: Map<String, List<String>> = mapOf(
     "python" to listOf("/root/.cache/pip"),
     "jdk17" to listOf("/root/.java"),
-    "aria2" to listOf("/root/.aria2", "/root/.cache/aria2")
+    "aria2" to listOf("/root/.aria2", "/root/.cache/aria2"),
+    "git" to listOf("/root/.gitconfig", "/root/.git-credentials", "/root/.config/git")
 )
 
 internal enum class PackageKind { APT, YTDLP_VENV, NODE_RUNTIME }
@@ -83,7 +84,7 @@ internal data class PackageSpec(
     /**
      * Satu baris di dalam Debian yang membuang alat sampai bersih: paket beserta konfigurasi
      * sistemnya (purge), sisa dependensi yang tak terpakai (autoremove), cache apt, dan berkas
-     * tambahan alat. Berkas pribadi di home dan /sdcard/Molina tidak disentuh.
+     * tambahan alat. Kunci SSH dan /sdcard/Molina tidak disentuh.
      */
     fun removeCommand(protectedApt: Set<String>): String {
         val steps = ArrayList<String>()
