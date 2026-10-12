@@ -7,8 +7,9 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 
 /**
- * Menyusun halaman HTML untuk Tinjauan. Markdown dirender dengan CommonMark: HTML mentah di
- * dalam Markdown di-escape dan URL berbahaya dibersihkan. Berkas HTML dipakai apa adanya;
+ * Menyusun halaman HTML untuk Tinjauan. Markdown dirender dengan CommonMark 0.13.0 (versi yang
+ * sama dengan Markwon di engine Terminal): HTML mentah di dalam Markdown di-escape. Tautan
+ * tidak berbahaya karena JavaScript mati di Markdown dan navigasi diblokir. Berkas HTML dipakai apa adanya;
  * bila [baseUrl] ada, tag base disisipkan supaya gambar dan CSS relatif ikut terbaca.
  */
 internal object CodePreviewRenderer {
@@ -23,7 +24,6 @@ internal object CodePreviewRenderer {
     private val renderer: HtmlRenderer = HtmlRenderer.builder()
         .extensions(EXTENSIONS)
         .escapeHtml(true)
-        .sanitizeUrls(true)
         .build()
 
     private val HEAD_TAG = Regex("<head(\\s[^>]*)?>", RegexOption.IGNORE_CASE)
