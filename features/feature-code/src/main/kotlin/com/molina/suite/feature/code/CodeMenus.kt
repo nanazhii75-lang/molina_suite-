@@ -7,16 +7,10 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
 
-internal interface CodeFileMenuListener {
+internal interface CodeActionMenuListener {
     fun onNew()
     fun onOpen()
-    fun onSave()
-    fun onSaveAs()
     fun onReload()
-    fun onClose()
-}
-
-internal interface CodeActionMenuListener {
     fun onSearch()
     fun onShare()
     fun onGoToLine()
@@ -28,15 +22,15 @@ internal interface CodeActionMenuListener {
     fun onReadOnlyChanged(readOnly: Boolean)
 }
 
-/** Menu popup tab Code. Hanya membangun menu; setiap pilihan diteruskan ke listener. */
+/**
+ * Menu popup tab Code (ikon titik tiga di header). Hanya membangun menu; setiap pilihan
+ * diteruskan ke listener. Simpan, Simpan sebagai, dan Tutup ada di toolbar bawah.
+ */
 internal object CodeMenus {
 
     private const val ID_NEW = 1
     private const val ID_OPEN = 2
-    private const val ID_SAVE = 3
-    private const val ID_SAVE_AS = 4
     private const val ID_RELOAD = 5
-    private const val ID_CLOSE = 6
 
     private const val ID_SEARCH = 11
     private const val ID_GOTO = 12
@@ -48,55 +42,32 @@ internal object CodeMenus {
     private const val ID_APPEARANCE = 18
     private const val ID_SHARE = 19
 
-    fun showFileMenu(
-        context: Context,
-        anchor: View,
-        document: CodeDocument,
-        listener: CodeFileMenuListener
-    ) {
-        val popup = PopupMenu(context, anchor, Gravity.START)
-        val menu = popup.menu
-        menu.add(Menu.NONE, ID_NEW, 0, R.string.code_menu_new)
-        menu.add(Menu.NONE, ID_OPEN, 1, R.string.code_menu_open)
-        menu.add(Menu.NONE, ID_SAVE, 2, R.string.code_menu_save).isEnabled =
-            document.dirty || document.file == null
-        menu.add(Menu.NONE, ID_SAVE_AS, 3, R.string.code_menu_save_as)
-        menu.add(Menu.NONE, ID_RELOAD, 4, R.string.code_menu_reload).isEnabled = document.file != null
-        menu.add(Menu.NONE, ID_CLOSE, 5, R.string.code_menu_close)
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                ID_NEW -> listener.onNew()
-                ID_OPEN -> listener.onOpen()
-                ID_SAVE -> listener.onSave()
-                ID_SAVE_AS -> listener.onSaveAs()
-                ID_RELOAD -> listener.onReload()
-                ID_CLOSE -> listener.onClose()
-                else -> return@setOnMenuItemClickListener false
-            }
-            true
-        }
-        popup.show()
-    }
-
     fun showActionMenu(
         context: Context,
         anchor: View,
+        document: CodeDocument,
         options: CodeViewOptions,
         listener: CodeActionMenuListener
     ) {
         val popup = PopupMenu(context, anchor, Gravity.END)
         val menu = popup.menu
-        menu.add(Menu.NONE, ID_SEARCH, 0, R.string.code_menu_search)
-        menu.add(Menu.NONE, ID_SHARE, 1, R.string.code_menu_share)
-        menu.add(Menu.NONE, ID_GOTO, 2, R.string.code_menu_goto)
-        menu.add(Menu.NONE, ID_SYNTAX, 3, R.string.code_menu_syntax)
-        menu.add(Menu.NONE, ID_ENCODING, 4, R.string.code_menu_encoding)
-        menu.add(Menu.NONE, ID_APPEARANCE, 5, R.string.code_menu_appearance)
-        menu.add(Menu.NONE, ID_STATS, 6, R.string.code_menu_stats)
-        checkable(menu.add(Menu.NONE, ID_WRAP, 7, R.string.code_menu_wordwrap), options.wordwrap)
-        checkable(menu.add(Menu.NONE, ID_READONLY, 8, R.string.code_menu_readonly), options.readOnly)
+        menu.add(Menu.NONE, ID_NEW, 0, R.string.code_menu_new)
+        menu.add(Menu.NONE, ID_OPEN, 1, R.string.code_menu_open)
+        menu.add(Menu.NONE, ID_RELOAD, 2, R.string.code_menu_reload).isEnabled = document.file != null
+        menu.add(Menu.NONE, ID_SEARCH, 3, R.string.code_menu_search)
+        menu.add(Menu.NONE, ID_SHARE, 4, R.string.code_menu_share)
+        menu.add(Menu.NONE, ID_GOTO, 5, R.string.code_menu_goto)
+        menu.add(Menu.NONE, ID_SYNTAX, 6, R.string.code_menu_syntax)
+        menu.add(Menu.NONE, ID_ENCODING, 7, R.string.code_menu_encoding)
+        menu.add(Menu.NONE, ID_APPEARANCE, 8, R.string.code_menu_appearance)
+        menu.add(Menu.NONE, ID_STATS, 9, R.string.code_menu_stats)
+        checkable(menu.add(Menu.NONE, ID_WRAP, 10, R.string.code_menu_wordwrap), options.wordwrap)
+        checkable(menu.add(Menu.NONE, ID_READONLY, 11, R.string.code_menu_readonly), options.readOnly)
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
+                ID_NEW -> listener.onNew()
+                ID_OPEN -> listener.onOpen()
+                ID_RELOAD -> listener.onReload()
                 ID_SEARCH -> listener.onSearch()
                 ID_SHARE -> listener.onShare()
                 ID_GOTO -> listener.onGoToLine()

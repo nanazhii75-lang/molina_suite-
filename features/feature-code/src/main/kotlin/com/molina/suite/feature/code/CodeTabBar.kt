@@ -60,7 +60,7 @@ internal class CodeTabBar(
     private fun buildChip(item: CodeTabItem, active: Boolean): View {
         val label = TextView(context).apply {
             text = titleOf(item)
-            textSize = 13f
+            textSize = 12f
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
             maxWidth = CodeUi.dp(context, MAX_TITLE_DP)
@@ -122,8 +122,8 @@ internal class CodeTabBar(
     private companion object {
         const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
         const val WRAP = ViewGroup.LayoutParams.WRAP_CONTENT
-        const val HEIGHT_DP = 40
+        const val HEIGHT_DP = 32
         const val MAX_TITLE_DP = 140
-        const val CLOSE_DP = 32
+        const val CLOSE_DP = 28
     }
 }

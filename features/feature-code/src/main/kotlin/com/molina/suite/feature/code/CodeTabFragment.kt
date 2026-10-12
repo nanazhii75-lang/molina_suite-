@@ -79,14 +79,16 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
 
         val title = TextView(context).apply {
             setTextColor(CodePalette.TEXT)
-            textSize = 16f
+            textSize = 13f
+            includeFontPadding = false
             setTypeface(typeface, Typeface.BOLD)
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
         }
         val path = TextView(context).apply {
             setTextColor(CodePalette.TEXT_MUTED)
-            textSize = 12f
+            textSize = 10f
+            includeFontPadding = false
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.START
         }
@@ -95,8 +97,6 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             addView(title)
             addView(path)
         }
-        val menuButton = CodeUi.iconButton(context, R.drawable.ic_code_menu, R.string.code_header_menu) { }
-        menuButton.setOnClickListener { showFileMenu(it) }
         val moreButton = CodeUi.iconButton(context, R.drawable.ic_code_more, R.string.code_header_more) { }
         moreButton.setOnClickListener { showActionMenu(it) }
 
@@ -104,14 +104,9 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setBackgroundColor(CodePalette.PANEL)
-            setPadding(CodeUi.dp(context, 4), CodeUi.dp(context, 4), CodeUi.dp(context, 4), CodeUi.dp(context, 4))
-            addView(menuButton, LinearLayout.LayoutParams(CodeUi.dp(context, 44), CodeUi.dp(context, 48)))
-            addView(
-                titleColumn,
-                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-                    .apply { marginStart = CodeUi.dp(context, 4) }
-            )
-            addView(moreButton, LinearLayout.LayoutParams(CodeUi.dp(context, 44), CodeUi.dp(context, 48)))
+            setPadding(CodeUi.dp(context, 12), 0, CodeUi.dp(context, 2), 0)
+            addView(titleColumn, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            addView(moreButton, LinearLayout.LayoutParams(CodeUi.dp(context, 40), CodeUi.dp(context, 36)))
         }
 
         val bar = CodeSearchBar(context, object : CodeSearchBar.Callbacks {
@@ -305,19 +300,11 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         )
     )
 
-    private fun showFileMenu(anchor: View) {
-        CodeMenus.showFileMenu(requireContext(), anchor, session.document.value, object : CodeFileMenuListener {
+    private fun showActionMenu(anchor: View) {
+        val menuListener = object : CodeActionMenuListener {
             override fun onNew() = requestNew()
             override fun onOpen() = requestOpen()
-            override fun onSave() = saveCurrent()
-            override fun onSaveAs() = requestSaveAs()
             override fun onReload() = requestReload()
-            override fun onClose() = requestClose()
-        })
-    }
-
-    private fun showActionMenu(anchor: View) {
-        CodeMenus.showActionMenu(requireContext(), anchor, session.options.value, object : CodeActionMenuListener {
             override fun onSearch() = openSearch()
             override fun onGoToLine() = promptGoToLine()
             override fun onStatistics() = showStatistics()
@@ -327,7 +314,14 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             override fun onAppearance() = showAppearance()
             override fun onWordwrapChanged(enabled: Boolean) = session.setWordwrap(enabled)
             override fun onReadOnlyChanged(readOnly: Boolean) = session.setReadOnly(readOnly)
-        })
+        }
+        CodeMenus.showActionMenu(
+            requireContext(),
+            anchor,
+            session.document.value,
+            session.options.value,
+            menuListener
+        )
     }
 
     private fun openSearch() {
