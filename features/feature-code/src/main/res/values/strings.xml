@@ -103,6 +103,7 @@
     <string name="code_tree_open_folder">Buka folder</string>
     <string name="code_tree_change_folder">Ganti folder</string>
     <string name="code_tree_close_folder">Tutup folder</string>
+    <string name="code_tree_up_folder">Naik ke folder induk</string>
     <string name="code_tree_open_file">Buka berkas</string>
     <string name="code_tree_open_file_short">Buka berkas</string>
     <string name="code_tree_run_debian">Jalankan di Debian</string>

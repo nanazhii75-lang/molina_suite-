@@ -32,6 +32,7 @@ internal class CodeTreePanel(
         fun onRowClicked(row: CodeTreeRow.Entry)
         fun onChooseFolder()
         fun onChooseFile()
+        fun onUpFolder()
         fun onCloseFolder()
         fun onRunFile(file: File, target: ScriptRunTarget)
     }
@@ -55,6 +56,14 @@ internal class CodeTreePanel(
     private val headerButtons = LinearLayout(context).apply {
         orientation = LinearLayout.HORIZONTAL
     }
+
+    /** Tombol back di kiri judul: naik ke folder induk dari folder yang sedang terbuka. */
+    private val upButton = CodeUi.iconButton(
+        context,
+        R.drawable.ic_code_arrow_back,
+        R.string.code_tree_up_folder,
+        CodePalette.ACCENT
+    ) { callbacks.onUpFolder() }
     private val adapter = RowAdapter()
     private val listView = ListView(context)
     private val emptyListView = TextView(context).apply {
@@ -80,6 +89,9 @@ internal class CodeTreePanel(
         pathView.text = root.path
         pathView.visibility = View.VISIBLE
         headerButtons.visibility = View.VISIBLE
+        upButton.visibility = View.VISIBLE
+        val parent = root.parentFile
+        setUpEnabled(parent != null && parent.canRead())
         noFolderView.visibility = View.GONE
         listView.visibility = View.VISIBLE
         rows = emptyList()
@@ -91,6 +103,7 @@ internal class CodeTreePanel(
         nameView.setText(R.string.code_tree_none_title)
         pathView.visibility = View.GONE
         headerButtons.visibility = View.GONE
+        upButton.visibility = View.GONE
         listView.visibility = View.GONE
         emptyListView.visibility = View.GONE
         noFolderView.visibility = View.VISIBLE
@@ -138,8 +151,9 @@ internal class CodeTreePanel(
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setBackgroundColor(CodePalette.PANEL)
-            setPadding(dp(12), dp(4), dp(4), dp(4))
-            addView(titleColumn, LinearLayout.LayoutParams(0, WRAP, 1f))
+            setPadding(dp(4), dp(4), dp(4), dp(4))
+            addView(upButton, LinearLayout.LayoutParams(dp(40), dp(48)))
+            addView(titleColumn, LinearLayout.LayoutParams(0, WRAP, 1f).apply { marginStart = dp(8) })
             addView(headerButtons, LinearLayout.LayoutParams(WRAP, WRAP))
         }
 
@@ -200,6 +214,12 @@ internal class CodeTreePanel(
             addView(header, LinearLayout.LayoutParams(MATCH, WRAP))
             addView(body, LinearLayout.LayoutParams(MATCH, 0, 1f))
         }
+    }
+
+    /** Back abu-abu dan tidak bisa diketuk bila folder terbuka tidak punya induk yang bisa dibaca. */
+    private fun setUpEnabled(enabled: Boolean) {
+        upButton.isEnabled = enabled
+        upButton.imageTintList = ColorStateList.valueOf(if (enabled) CodePalette.ACCENT else CodePalette.TEXT_MUTED)
     }
 
     private fun showRunMenu(anchor: View, file: File) {

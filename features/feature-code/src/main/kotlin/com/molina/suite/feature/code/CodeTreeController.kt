@@ -76,5 +76,11 @@ internal class CodeTreeController(
 
     override fun onRunFile(file: File, target: ScriptRunTarget) = host.onRunFile(file, target)
 
+    /** Jadikan folder induk sebagai folder kerja; folder induk yang tidak terbaca diabaikan. */
+    override fun onUpFolder() {
+        val parent = tree?.root?.parentFile ?: return
+        if (parent.isDirectory && parent.canRead()) workspace.open(parent)
+    }
+
     override fun onCloseFolder() = workspace.close()
 }
