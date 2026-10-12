@@ -33,11 +33,15 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Tanpa ini Material mewarnai ulang semua ikon dengan satu warna (abu-abu / amber).
+        binding.bottomNav.itemIconTintList = null
         binding.bottomNav.setOnItemSelectedListener { item ->
             val engineId = engineIdFor(item.itemId) ?: return@setOnItemSelectedListener false
+            applyNavIcons(item.itemId)
             show(engineId)
             true
         }
+        applyNavIcons(binding.bottomNav.selectedItemId)
         binding.bottomNav.setOnItemReselectedListener { }
         installBackHandling()
 
@@ -48,6 +52,14 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
         bindDaemon(DaemonId.TERMINAL, binding.dotTerminal)
         bindDaemon(DaemonId.WEBDAV, binding.dotWebdav)
         bindDaemon(DaemonId.MPV, binding.dotMpv)
+    }
+
+    /** Ikon tab aktif penuh warna, tab lain sedikit redup; ikon berwarna sendiri-sendiri. */
+    private fun applyNavIcons(selectedId: Int) {
+        val menu = binding.bottomNav.menu
+        for ((id, icons) in NAV_ICONS) {
+            menu.findItem(id)?.setIcon(if (id == selectedId) icons.second else icons.first)
+        }
     }
 
     /** Meneruskan tombol Back ke fragment tab yang sedang tampil sebelum perilaku default shell. */
@@ -122,5 +134,15 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
                 }
             }
         }
+    }
+
+    private companion object {
+        /** id menu -> (ikon redup, ikon aktif). */
+        val NAV_ICONS = mapOf(
+            R.id.nav_mpv to (R.drawable.ic_nav_mpv_off to R.drawable.ic_nav_mpv_on),
+            R.id.nav_terminal to (R.drawable.ic_nav_terminal_off to R.drawable.ic_nav_terminal_on),
+            R.id.nav_code to (R.drawable.ic_nav_code_off to R.drawable.ic_nav_code_on),
+            R.id.nav_settings to (R.drawable.ic_nav_settings_off to R.drawable.ic_nav_settings_on)
+        )
     }
 }
