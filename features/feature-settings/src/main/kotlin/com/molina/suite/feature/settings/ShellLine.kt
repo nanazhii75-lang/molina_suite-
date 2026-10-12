@@ -24,7 +24,7 @@ internal object ShellLine {
 
     /**
      * Menjalankan [inner] di dalam Debian. Dari shell host dipakai proot-distro; bila sudah
-     * berada di dalam Debian (proot-distro tidak ada) perintah dijalankan langsung.
+     * berada di dalam Debian (terdeteksi lewat /etc/debian_version) perintah dijalankan langsung.
      */
     fun wrapForDebian(inner: String): String = ScriptRunLine.wrapForDebian(inner)
 
@@ -35,16 +35,19 @@ internal object ShellLine {
      */
     fun wrapForDebianRoot(inner: String): String {
         val quoted = quote(inner)
-        return "if command -v proot-distro >/dev/null 2>&1; then " +
+        return "if ${ScriptRunLine.IN_DEBIAN_TEST}; then " +
+            "if [ \"$(id -u)\" = 0 ]; then bash -c $quoted; " +
+            "else echo 'Perintah ini butuh root. Ketik exit, lalu molina-login root.'; fi; " +
+            "elif command -v proot-distro >/dev/null 2>&1; then " +
             "proot-distro login debian -- bash -c $quoted; " +
-            "elif [ \"$(id -u)\" = 0 ]; then bash -c $quoted; " +
-            "else echo 'Perintah ini butuh root. Ketik exit, lalu molina-login root.'; fi"
+            "else echo 'Debian belum terpasang. Pasang dulu lewat Settings, bagian Debian.'; fi"
     }
 
     /** Perintah Android (am, pm) hanya ada di shell host; di dalam Debian tampilkan petunjuk. */
     fun guardAndroid(inner: String): String =
-        "if command -v proot-distro >/dev/null 2>&1; then $inner; " +
-            "else echo 'Perintah ini hanya jalan di shell biasa. Ketik exit untuk keluar dari Debian.'; fi"
+        "if ${ScriptRunLine.IN_DEBIAN_TEST}; then " +
+            "echo 'Perintah ini hanya jalan di shell biasa. Ketik exit untuk keluar dari Debian.'; " +
+            "else $inner; fi"
 
     /** [values] diisikan ke placeholder dengan quote shell otomatis. */
     fun build(entry: LibraryEntry, values: Map<String, String>): String =

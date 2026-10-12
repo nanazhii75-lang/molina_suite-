@@ -42,7 +42,7 @@ final class MolinaShellProfile {
             + "__molina_mode=\"\"\n"
             + "\n"
             + "__molina_debian_ready() {\n"
-            + "\tcommand -v proot-distro >/dev/null 2>&1 && [ -d \"$__molina_rootfs/etc\" ]\n"
+            + "\t[ ! -f /etc/debian_version ] && command -v proot-distro >/dev/null 2>&1 && [ -d \"$__molina_rootfs/etc\" ]\n"
             + "}\n"
             + "\n"
             + "__molina_load_mode() {\n"

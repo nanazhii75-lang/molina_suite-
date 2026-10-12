@@ -19,17 +19,26 @@ object ScriptRunLine {
 
     private const val SHARED_STORAGE_PREFIX = "/storage/emulated/0/"
 
+    /**
+     * Uji shell: benar bila shell berjalan di dalam Debian (PRoot). Android host tidak punya
+     * berkas ini. Jangan memakai `command -v proot-distro`: perintah itu tetap ditemukan dari
+     * dalam Debian dan proot-distro menolak jalan di bawah PRoot.
+     */
+    const val IN_DEBIAN_TEST = "[ -f /etc/debian_version ]"
+
     /** Membungkus [value] dengan tanda kutip tunggal shell. */
     fun quote(value: String): String = "'" + value.replace("'", "'\\''") + "'"
 
     /**
      * Menjalankan [inner] di dalam Debian. Dari shell host dipakai proot-distro; bila sudah
-     * berada di dalam Debian (proot-distro tidak ada) perintah dijalankan langsung.
+     * berada di dalam Debian (terdeteksi lewat /etc/debian_version) perintah dijalankan langsung.
      */
     fun wrapForDebian(inner: String): String {
         val quoted = quote(inner)
-        return "if command -v proot-distro >/dev/null 2>&1; then " +
-            "proot-distro login debian -- bash -c $quoted; else bash -c $quoted; fi"
+        return "if $IN_DEBIAN_TEST; then bash -c $quoted; " +
+            "elif command -v proot-distro >/dev/null 2>&1; then " +
+            "proot-distro login debian -- bash -c $quoted; " +
+            "else echo 'Debian belum terpasang. Pasang dulu lewat Settings, bagian Debian.'; fi"
     }
 
     /** True bila baris pertama skrip adalah shebang (#!), mis. #!/usr/bin/env python3. */
