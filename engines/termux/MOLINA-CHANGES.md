@@ -61,3 +61,9 @@ tercatat sebagai commit terpisah.
 - `item_terminal_sessions_list.xml`: baris sesi dibungkus FrameLayout dengan tombol x kecil (`session_close_button`, ikon `ic_molina_close_session`) di pojok kanan atas.
 - `TermuxSessionsListViewController`: tombol x tampil untuk sesi ke-2 dan seterusnya; sesi yang masih berjalan dikonfirmasi dulu (`title_confirm_kill_process`).
 - `TermuxTerminalSessionClient.closeSession()`: sesi berjalan dihentikan lalu dihapus dari daftar saat `onSessionFinished`; sesi selesai langsung dihapus. Sesi yang sedang tampil tidak berpindah kecuali sesi itu sendiri yang ditutup.
+
+## Banner permanen
+- `TermuxInstaller.applyMolinaBanner()`: menulis `etc/profile.d/02-molina-banner.sh` setiap aplikasi dimulai (hanya bila isi berbeda). Untuk bash interaktif, fungsi `clear` dan tombol Ctrl+L mencetak ulang motd (atau `~/.termux/motd.sh`) setelah layar dibersihkan; `clear -x` tetap bawaan.
+- Tombol CLEAR di Extra Keys (CSI 3 J lalu Ctrl+L) ikut memunculkan banner. Dimatikan dengan `MOLINA_NO_BANNER_REDRAW=1` atau `~/.hushlogin`.
+- Warna brand: motd "Welcome Molina Terminal" tebal hijau muda (256-color 120, #87ff87), tetap sama di semua tema warna terminal.
+- Ukuran teks default terminal: 12 dp menjadi 8 dp (`TermuxAppSharedPreferences.getDefaultFontSizes`; mode float ikut). Ukuran yang sudah disimpan pengguna lewat zoom tidak berubah.

@@ -136,7 +136,7 @@ public class TermuxAppSharedPreferences {
         sizes[1] = (int) (4f * dipInPixels); // min
 
         // http://www.google.com/design/spec/style/typography.html#typography-line-height
-        int defaultFontSize = Math.round(12 * dipInPixels);
+        int defaultFontSize = Math.round(8 * dipInPixels);
         // Make it divisible by 2 since that is the minimal adjustment step:
         if (defaultFontSize % 2 == 1) defaultFontSize--;
 

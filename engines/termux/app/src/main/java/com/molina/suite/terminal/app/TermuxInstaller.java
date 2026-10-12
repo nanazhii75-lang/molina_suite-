@@ -106,6 +106,7 @@ final class TermuxInstaller {
                 Logger.logInfo(LOG_TAG, "The termux prefix directory \"" + TERMUX_PREFIX_DIR_PATH + "\" exists but is empty or only contains the tmp directory.");
             } else {
                 applyMolinaMotd();
+                applyMolinaBanner();
                 whenDone.run();
                 return;
             }
@@ -246,6 +247,7 @@ final class TermuxInstaller {
 
                     Logger.logInfo(LOG_TAG, "Bootstrap packages installed successfully.");
                     applyMolinaMotd();
+                    applyMolinaBanner();
                     activity.runOnUiThread(whenDone);
 
                 } catch (final Exception e) {
@@ -265,7 +267,7 @@ final class TermuxInstaller {
     }
 
     /** Isi motd yang dicetak oleh bin/login tepat di atas prompt. */
-    private static final String MOLINA_MOTD = "Welcome Molina Terminal\n";
+    private static final String MOLINA_MOTD = "\033[1;38;5;120mWelcome Molina Terminal\033[0m\n";
 
     /**
      * Menimpa etc/motd bawaan bootstrap dengan sapaan Molina. Dipanggil setiap aplikasi dimulai
@@ -287,6 +289,65 @@ final class TermuxInstaller {
             }
         } catch (Exception e) {
             Logger.logStackTraceWithMessage(LOG_TAG, "Gagal menulis motd Molina", e);
+        }
+    }
+
+    /**
+     * Skrip profile.d yang mencetak ulang sapaan Molina setiap layar dibersihkan lewat perintah
+     * clear, Ctrl+L, atau tombol CLEAR. Hanya bash interaktif; clear -x tetap bawaan.
+     */
+    private static final String MOLINA_BANNER_SCRIPT =
+              "# Molina Terminal: banner permanen. Ditulis ulang oleh aplikasi setiap start; jangan diedit manual.\n"
+            + "[ -n \"${BASH_VERSION-}\" ] || return 0\n"
+            + "case $- in *i*) ;; *) return 0 ;; esac\n"
+            + "[ -n \"${MOLINA_NO_BANNER_REDRAW-}\" ] && return 0\n"
+            + "\n"
+            + "__molina_banner() {\n"
+            + "\t[ -f \"$HOME/.hushlogin\" ] && return 0\n"
+            + "\tif [ -x \"$HOME/.termux/motd.sh\" ]; then\n"
+            + "\t\t\"$HOME/.termux/motd.sh\"\n"
+            + "\telif [ -f \"%PREFIX%/etc/motd\" ]; then\n"
+            + "\t\tcat \"%PREFIX%/etc/motd\"\n"
+            + "\tfi\n"
+            + "}\n"
+            + "\n"
+            + "__molina_clear_screen() {\n"
+            + "\tif command -v clear >/dev/null 2>&1; then\n"
+            + "\t\tcommand clear\n"
+            + "\telse\n"
+            + "\t\tprintf '\\033[H\\033[2J\\033[3J'\n"
+            + "\tfi\n"
+            + "\t__molina_banner\n"
+            + "}\n"
+            + "\n"
+            + "clear() {\n"
+            + "\tif [ $# -eq 0 ]; then\n"
+            + "\t\t__molina_clear_screen\n"
+            + "\telse\n"
+            + "\t\tcommand clear \"$@\"\n"
+            + "\tfi\n"
+            + "}\n"
+            + "\n"
+            + "bind -x '\"\\C-l\": __molina_clear_screen' 2>/dev/null\n";
+
+    /** Menulis etc/profile.d/02-molina-banner.sh bila isinya berbeda. Dipanggil bersama applyMolinaMotd. */
+    static void applyMolinaBanner() {
+        try {
+            File dir = new File(TERMUX_PREFIX_DIR_PATH, "etc/profile.d");
+            if (!dir.isDirectory() && !dir.mkdirs()) return;
+            File script = new File(dir, "02-molina-banner.sh");
+            byte[] expected = MOLINA_BANNER_SCRIPT
+                .replace("%PREFIX%", TERMUX_PREFIX_DIR_PATH)
+                .getBytes(StandardCharsets.UTF_8);
+            if (script.isFile()) {
+                if (Arrays.equals(Files.readAllBytes(script.toPath()), expected)) return;
+                script.setWritable(true, true);
+            }
+            try (FileOutputStream out = new FileOutputStream(script, false)) {
+                out.write(expected);
+            }
+        } catch (Exception e) {
+            Logger.logStackTraceWithMessage(LOG_TAG, "Gagal menulis banner Molina", e);
         }
     }
 
