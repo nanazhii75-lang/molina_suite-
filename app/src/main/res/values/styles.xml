@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Molina" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/molina_amber</item>
+        <item name="colorOnPrimary">@color/molina_bg</item>
+        <item name="colorSecondaryContainer">@color/molina_amber_container</item>
+        <item name="colorSurface">@color/molina_surface</item>
+        <item name="android:colorBackground">@color/molina_bg</item>
+        <item name="android:windowBackground">@color/molina_bg</item>
+        <item name="android:statusBarColor">@color/molina_bg</item>
+        <item name="android:navigationBarColor">@color/molina_surface</item>
+    </style>
+</resources>

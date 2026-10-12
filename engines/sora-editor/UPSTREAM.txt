@@ -1,0 +1,6 @@
+Upstream : https://github.com/Rosemoe/sora-editor
+Tag      : 0.23.4
+Commit   : dadd162532ea00f26434c6d0e3e5705524dae9cf
+Lisensi  : GNU LGPL 2.1 (lihat LICENSE)
+Catatan  : tidak ada file upstream yang diubah. Build memakai modul tipis di
+           engines/sora-modules/ yang mengarah ke sumber di folder ini.

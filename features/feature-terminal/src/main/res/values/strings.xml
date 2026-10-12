@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="terminal_title">Molina Terminal</string>
+    <string name="terminal_description">Terminal Linux untuk menjalankan daemon unduhan (aria2c, yt-dlp), WebDAV, dan SSH.</string>
+    <string name="terminal_open">Buka Terminal</string>
+    <string name="terminal_open_failed">Terminal tidak dapat dibuka.</string>
+</resources>

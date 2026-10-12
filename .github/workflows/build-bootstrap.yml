@@ -1,0 +1,1325 @@
+name: Build Bootstrap (com.molina.suite)
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit termux-packages (fork agnostic-apollo, branch infra-improvs)"
+        required: true
+        default: "fb44d31f3445d7efd2cee6dada47aa19401c1329"
+      build:
+        description: "Jalankan build bootstrap sungguhan (false = hanya preflight)"
+        type: boolean
+        required: true
+        default: false
+      use_cache:
+        description: "Pakai cache build antar-run (matikan setelah mengubah patch global)"
+        type: boolean
+        required: true
+        default: true
+      release:
+        description: "Izinkan publikasi ke release repo (biarkan false sampai semua diagnosa tuntas)"
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      TP_REPO: agnostic-apollo/termux-packages
+      TP_COMMIT: ${{ inputs.commit }}
+      NEW_PKG: com.molina.suite
+      CACHE_EPOCH: "1"
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Ambil termux-packages pada commit terpin
+        run: |
+          mkdir tp && cd tp
+          git init -q
+          git remote add origin "https://github.com/$TP_REPO.git"
+          git fetch -q --depth 1 origin "$TP_COMMIT"
+          git checkout -q FETCH_HEAD
+          echo "COMMIT: $(git rev-parse HEAD)"
+
+      - name: Patch nama paket di properties.sh
+        run: |
+          cd tp
+          n=$(grep -c '^TERMUX_APP__PACKAGE_NAME="com.termux"$' scripts/properties.sh || true)
+          if [ "$n" != "1" ]; then
+            echo "GAGAL: diharapkan tepat 1 baris TERMUX_APP__PACKAGE_NAME=\"com.termux\", ditemukan $n"
+            exit 1
+          fi
+          sed -i "s|^TERMUX_APP__PACKAGE_NAME=\"com.termux\"\$|TERMUX_APP__PACKAGE_NAME=\"$NEW_PKG\"|" scripts/properties.sh
+          grep -n '^TERMUX_APP__PACKAGE_NAME=' scripts/properties.sh
+
+      - name: Patch namespace komponen app
+        run: |
+          cd tp
+          n=$(grep -c '^TERMUX_APP__NAMESPACE="com.termux"$' scripts/properties.sh || true)
+          if [ "$n" != "1" ]; then
+            echo "GAGAL: diharapkan tepat 1 baris TERMUX_APP__NAMESPACE=com.termux, ditemukan $n"
+            exit 1
+          fi
+          sed -i 's|^TERMUX_APP__NAMESPACE="com.termux"$|TERMUX_APP__NAMESPACE="com.molina.suite.terminal"|' scripts/properties.sh
+          grep -n '^TERMUX_APP__NAMESPACE=' scripts/properties.sh
+          echo "=== com.termux di paket yang mungkin masuk bootstrap ==="
+          grep -rIn "com\.termux" packages/dpkg packages/openssh packages/apr packages/libandroid-wordexp packages/nlohmann-json | head -40 || true
+
+      - name: Preflight (bukti untuk ditinjau)
+        run: |
+          cd tp
+          echo "=== properties.sh 395-410 ==="
+          sed -n 395,410p scripts/properties.sh
+          echo "=== properties.sh 467-520 ==="
+          sed -n 467,520p scripts/properties.sh
+          echo "=== Nilai turunan setelah patch ==="
+          bash -c 'source scripts/properties.sh >/dev/null 2>&1; for v in TERMUX_APP__PACKAGE_NAME TERMUX_APP__DATA_DIR TERMUX__PREFIX TERMUX__HOME; do echo "$v=${!v}"; done' || echo "source properties.sh gagal"
+          echo "=== com.termux hardcode di luar packages/ ==="
+          grep -rIn "com\.termux" Dockerfile scripts build-package.sh clean.sh 2>/dev/null | head -80 || true
+          echo "=== isi scripts/bootstrap ==="
+          ls -R scripts/bootstrap | head -40
+          echo "=== second-stage di sumber ==="
+          grep -rIl "second-stage" scripts | head || true
+
+      - name: Diagnosa NDK dan properti namespace
+        if: ${{ always() }}
+        run: |
+          cd tp
+          echo "=== sumber error NDK ==="
+          grep -rn "NDK not pointing" -B10 -A3 scripts build-package.sh | head -60 || true
+          echo "=== referensi NDK di skrip ==="
+          grep -n "NDK" scripts/Dockerfile scripts/run-docker.sh scripts/setup-android-sdk.sh | head -40 || true
+          grep -n "NDK_VERSION" scripts/properties.sh | head -10 || true
+          echo "=== isi image package-builder ==="
+          docker pull -q ghcr.io/termux/package-builder:latest
+          docker image inspect ghcr.io/termux/package-builder:latest --format '{{.Id}} {{.Created}}'
+          docker run --rm ghcr.io/termux/package-builder:latest bash -c 'env | grep -i -E "ndk|android|builder"; ls /home/builder/lib 2>&1; ls /home/builder 2>&1' || true
+          echo "=== properties.sh namespace 1828-1905 ==="
+          sed -n 1828,1905p scripts/properties.sh
+
+      - name: Diagnosa lanjutan - image dan namespace
+        if: ${{ always() }}
+        run: |
+          cd tp
+          echo "=== properties.sh 300-335 (versi NDK) ==="
+          sed -n 300,335p scripts/properties.sh
+          echo "=== run-docker.sh ==="
+          head -150 scripts/run-docker.sh
+          echo "=== update-docker.sh ==="
+          head -60 scripts/update-docker.sh
+          echo "=== Dockerfile ==="
+          head -80 scripts/Dockerfile
+          echo "=== semua TERMUX_APP__NAMESPACE di properties.sh ==="
+          grep -n "TERMUX_APP__NAMESPACE" scripts/properties.sh
+          echo "=== definisi nama kelas komponen 1905-1990 ==="
+          sed -n 1905,1990p scripts/properties.sh | grep -v '^#' | grep -v '^$'
+          echo "=== jumlah paket yang memuat com.termux ==="
+          grep -rIl "com\.termux" packages | cut -d/ -f2 | sort -u | wc -l
+          grep -rIl "com\.termux" packages | cut -d/ -f2 | sort -u | head -80
+
+      - name: Diagnosa ncurses dan stabilitas checksum
+        if: ${{ always() }}
+        run: |
+          cd tp
+          echo "=== ncurses build.sh: baris foot ==="
+          grep -n -i "foot" packages/ncurses/build.sh || echo "tidak ada"
+          echo "=== ncurses build.sh 1-70 ==="
+          sed -n 1,70p packages/ncurses/build.sh
+          echo "=== stabilitas unduhan foot (3 kali) ==="
+          for i in 1 2 3; do curl -fsSL https://codeberg.org/dnkl/foot/archive/1.23.1.tar.gz | sha256sum; sleep 10; done
+          echo "=== paket lain yang mengunduh dari codeberg ==="
+          grep -rl "codeberg.org" packages | head -20 || true
+
+      - name: Patch checksum arsip foot
+        if: ${{ inputs.build }}
+        run: |
+          cd tp
+          OLD=02072b8f0aaf26907b6b02293c875539ce52fc59079344e7cf811ab03394cfa3
+          NEW=b3fa774983abb5f95aecca4557d146091d8666bc65fb310d4d3e38327357ade9
+          F=x11-packages/foot/build.sh
+          n=$(grep -c "$OLD" "$F" || true)
+          if [ "$n" != "1" ]; then
+            echo "GAGAL: checksum lama ditemukan $n kali di $F, diharapkan 1"
+            exit 1
+          fi
+          ACTUAL=$(curl -fsSL https://codeberg.org/dnkl/foot/archive/1.23.1.tar.gz | sha256sum | cut -d' ' -f1)
+          if [ "$ACTUAL" != "$NEW" ]; then
+            echo "GAGAL: unduhan sekarang $ACTUAL, bukan $NEW; tidak ditambal"
+            exit 1
+          fi
+          sed -i "s|$OLD|$NEW|" "$F"
+          grep -n "TERMUX_PKG_SHA256" "$F"
+
+      - name: Diagnosa libunbound
+        if: ${{ always() }}
+        run: |
+          cd tp
+          echo "=== libunbound build.sh ==="
+          cat packages/libunbound/build.sh
+          echo "=== swig dan python di setup-ubuntu.sh ==="
+          grep -n -i "swig\|python" scripts/setup-ubuntu.sh | head -20 || true
+          echo "=== siapa yang bergantung pada libunbound ==="
+          grep -ln "libunbound" packages/*/build.sh | head -20 || true
+          echo "=== DEPENDS gnupg dan gnutls ==="
+          grep -n "DEPENDS" packages/gnupg/build.sh packages/gnutls/build.sh || true
+
+      - name: Patch libunbound tanpa binding Python
+        if: ${{ inputs.build }}
+        run: |
+          cd tp
+          F=packages/libunbound/build.sh
+          chk() {
+            n=$(grep -c -x -F -- "$1" "$F" || true)
+            if [ "$n" != "1" ]; then
+              echo "GAGAL: baris '$1' ditemukan $n kali di $F, diharapkan 1"
+              exit 1
+            fi
+          }
+          chk 'TERMUX_PKG_BUILD_DEPENDS="python, swig"'
+          chk 'TERMUX_PKG_PYTHON_COMMON_DEPS="wheel"'
+          chk 'TERMUX_PKG_PYTHON_BUILD_DEPS="swig"'
+          chk '--with-pyunbound'
+          sed -i '/^TERMUX_PKG_BUILD_DEPENDS="python, swig"$/d' "$F"
+          sed -i '/^TERMUX_PKG_PYTHON_COMMON_DEPS="wheel"$/d' "$F"
+          sed -i '/^TERMUX_PKG_PYTHON_BUILD_DEPS="swig"$/d' "$F"
+          sed -i 's|^--with-pyunbound$|--without-pyunbound|' "$F"
+          grep -n "pyunbound\|PYTHON\|BUILD_DEPENDS" "$F" || echo "tidak ada sisa referensi python"
+
+      - name: Patch libunbound tambah libexpat
+        if: ${{ inputs.build }}
+        run: |
+          cd tp
+          F=packages/libunbound/build.sh
+          if [ ! -f packages/libexpat/build.sh ]; then
+            echo "GAGAL: packages/libexpat/build.sh tidak ada; paket bernama expat:"
+            ls packages | grep -i expat || true
+            exit 1
+          fi
+          n=$(grep -c '^TERMUX_PKG_DEPENDS="libevent, libnghttp2, openssl, resolv-conf"$' "$F" || true)
+          if [ "$n" != "1" ]; then
+            echo "GAGAL: baris DEPENDS ditemukan $n kali, diharapkan 1"
+            exit 1
+          fi
+          b=$(grep -c '^TERMUX_PKG_BUILD_DEPENDS=' "$F" || true)
+          if [ "$b" != "0" ]; then
+            echo "GAGAL: BUILD_DEPENDS sudah ada ($b), patch sebelumnya tidak sesuai harapan"
+            exit 1
+          fi
+          sed -i '/^TERMUX_PKG_DEPENDS="libevent, libnghttp2, openssl, resolv-conf"$/a TERMUX_PKG_BUILD_DEPENDS="libexpat"' "$F"
+          grep -n "DEPENDS\|pyunbound\|libexpat" "$F"
+
+      - name: Diagnosa docbook-xml
+        if: ${{ always() }}
+        run: |
+          cd tp
+          echo "=== docbook-xml build.sh ==="
+          cat packages/docbook-xml/build.sh
+          echo "=== apt: baris docbook dan dokumentasi ==="
+          grep -n -i "docbook\|WITH_DOC\|DOC\b\|DEPENDS" packages/apt/build.sh || true
+          echo "=== siapa lagi yang butuh docbook-xml ==="
+          grep -ln "docbook-xml" packages/*/build.sh | head -30 || true
+          echo "=== uji kandidat URL (status HTTP, sha256 bila 200) ==="
+          for u in \
+            https://docbook.org/xml/4.1.2/docbkx412.zip \
+            https://docbook.org/xml/4.1.2/docbook-xml-4.1.2.zip \
+            https://www.oasis-open.org/docbook/xml/4.1.2/docbkx412.zip \
+            https://web.archive.org/web/2024/https://docbook.org/xml/4.1.2/docbkx412.zip ; do
+            code=$(curl -sIL -o /dev/null -w '%{http_code}' "$u" || echo ERR)
+            echo "$code $u"
+            if [ "$code" = "200" ]; then curl -fsSL "$u" | sha256sum; fi
+          done
+
+      - name: Uji URL docbook-xml di oasis-open
+        if: always()
+        run: |
+          set -u
+          want_for() {
+            case "$1" in
+              4.1.2) echo 30f0644064e0ea71751438251940b1431f46acada814a062870f486c772e7772 ;;
+              4.2) echo acc4601e4f97a196076b7e64b368d9248b07c7abf26b34a02cca40eeebe60fa2 ;;
+              4.3) echo 23068a94ea6fd484b004c5a73ec36a66aa47ea8f0d6b62cc1695931f5c143464 ;;
+              4.4) echo 02f159eb88c4254d95e831c51c144b1863b216d909b5ff45743a1ce6f5273090 ;;
+              4.5) echo 4e4e037a2b83c98c6c94818390d4bdd3f6e10f6ec62dd79188594e26190dc7b4 ;;
+            esac
+          }
+          check() {
+            local url="$1" want="$2" code got
+            code=$(curl -sL --retry 2 -o /tmp/dbx.zip -w '%{http_code}' "$url" || echo 000)
+            if [ "$code" = "200" ]; then
+              got=$(sha256sum /tmp/dbx.zip | cut -d' ' -f1)
+              if [ "$got" = "$want" ]; then
+                echo "COCOK  $code $url"
+              else
+                echo "BEDA   $code $url got=$got want=$want"
+              fi
+            else
+              echo "GAGAL  $code $url"
+            fi
+          }
+          for ver in 4.1.2 4.2 4.3 4.4 4.5; do
+            want=$(want_for "$ver")
+            if [ "$ver" = "4.1.2" ]; then f=docbkx412.zip; else f=docbook-xml-$ver.zip; fi
+            check "https://docbook.org/xml/$ver/$f" "$want"
+            check "https://www.oasis-open.org/docbook/xml/$ver/$f" "$want"
+          done
+
+      - name: Patch URL docbook-xml ke oasis-open
+        if: inputs.build
+        run: |
+          set -euo pipefail
+          cd tp
+          f=packages/docbook-xml/build.sh
+          old='https://docbook.org/xml/'
+          new='https://www.oasis-open.org/docbook/xml/'
+          n_old=$(grep -cF -- "$old" "$f" || true)
+          n_new=$(grep -cF -- "$new" "$f" || true)
+          if [ "$n_old" = "0" ] && [ "$n_new" = "5" ]; then
+            echo "SUDAH: URL docbook-xml sudah memakai oasis-open."
+            exit 0
+          fi
+          if [ "$n_old" != "5" ] || [ "$n_new" != "0" ]; then
+            echo "GAGAL: harus 5 URL docbook.org dan 0 oasis-open, ditemukan $n_old dan $n_new"
+            exit 1
+          fi
+          want_for() {
+            case "$1" in
+              4.1.2) echo 30f0644064e0ea71751438251940b1431f46acada814a062870f486c772e7772 ;;
+              4.2) echo acc4601e4f97a196076b7e64b368d9248b07c7abf26b34a02cca40eeebe60fa2 ;;
+              4.3) echo 23068a94ea6fd484b004c5a73ec36a66aa47ea8f0d6b62cc1695931f5c143464 ;;
+              4.4) echo 02f159eb88c4254d95e831c51c144b1863b216d909b5ff45743a1ce6f5273090 ;;
+              4.5) echo 4e4e037a2b83c98c6c94818390d4bdd3f6e10f6ec62dd79188594e26190dc7b4 ;;
+            esac
+          }
+          for ver in 4.1.2 4.2 4.3 4.4 4.5; do
+            want=$(want_for "$ver")
+            if [ "$ver" = "4.1.2" ]; then fn=docbkx412.zip; else fn=docbook-xml-$ver.zip; fi
+            url="${new}${ver}/${fn}"
+            code=$(curl -sL --retry 3 -o /tmp/dbx.zip -w '%{http_code}' "$url" || echo 000)
+            if [ "$code" != "200" ]; then
+              echo "GAGAL: $url membalas $code, build.sh tidak ditambal"
+              exit 1
+            fi
+            got=$(sha256sum /tmp/dbx.zip | cut -d' ' -f1)
+            if [ "$got" != "$want" ]; then
+              echo "GAGAL: hash beda untuk $url got=$got want=$want, build.sh tidak ditambal"
+              exit 1
+            fi
+            echo "COCOK  $url"
+          done
+          sed -i "s|${old}|${new}|g" "$f"
+          n_old=$(grep -cF -- "$old" "$f" || true)
+          n_new=$(grep -cF -- "$new" "$f" || true)
+          if [ "$n_old" != "0" ] || [ "$n_new" != "5" ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n_old dan $n_new)"
+            exit 1
+          fi
+          echo "OK: 5 URL docbook-xml dialihkan ke oasis-open"
+          grep -nF -- "$new" "$f"
+
+      - name: Diagnosa command-not-found
+        if: always()
+        run: |
+          set -u
+          cd tp
+          echo "=== packages/command-not-found/build.sh ==="
+          cat packages/command-not-found/build.sh
+          echo "=== paket zile di packages ==="
+          ls -d packages/zile* 2>&1 || true
+          grep -ln "zile" packages/*/build.sh 2>/dev/null | head -20 || true
+          echo "=== unduh tarball command-not-found 3.1 ==="
+          rm -rf /tmp/cnf && mkdir -p /tmp/cnf
+          curl -fsSL --retry 3 https://github.com/termux/command-not-found/archive/3.1.tar.gz | tar -xz -C /tmp/cnf --strip-components=1
+          find /tmp/cnf -maxdepth 2 -type f | sort
+          echo "=== lokasi pesan error ==="
+          grep -rn "Package name not found" /tmp/cnf || true
+          echo "=== generate-db.js (maks 200 baris) ==="
+          f=$(find /tmp/cnf -name generate-db.js | head -1)
+          echo "berkas: $f"
+          head -200 "$f"
+
+      - name: Diagnosa command-not-found bagian 2
+        if: always()
+        run: |
+          set -u
+          cd tp
+          rm -rf /tmp/cnf2 && mkdir -p /tmp/cnf2
+          curl -fsSL --retry 3 https://github.com/termux/command-not-found/archive/3.1.tar.gz | tar -xz -C /tmp/cnf2 --strip-components=1
+          echo "=== generate-db.js baris 195-260 ==="
+          sed -n '195,260p' /tmp/cnf2/generate-db.js
+          echo "=== repo.json ==="
+          cat repo.json
+          echo "=== referensi command-not-found di scripts ==="
+          grep -rn "command-not-found" scripts/ | head -30 || true
+          echo "=== paket yang bergantung command-not-found ==="
+          grep -ln "command-not-found" packages/*/build.sh || true
+          echo "=== alternatives zile ==="
+          ls packages/zile/ 2>&1
+          cat packages/zile/*.alternatives 2>&1 || true
+
+      - name: Diagnosa command-not-found bagian 3
+        if: always()
+        run: |
+          set -u
+          cd tp
+          rm -rf /tmp/cnf3 && mkdir -p /tmp/cnf3
+          curl -fsSL --retry 3 https://github.com/termux/command-not-found/archive/3.1.tar.gz | tar -xz -C /tmp/cnf3 --strip-components=1
+          echo "=== generate-db.js baris 260-400 ==="
+          sed -n '260,400p' /tmp/cnf3/generate-db.js
+          echo "=== CMakeLists.txt ==="
+          cat /tmp/cnf3/CMakeLists.txt
+          echo "=== command-not-found.cpp (PREFIX dan include) ==="
+          grep -n "PREFIX\|#include\|commands-" /tmp/cnf3/command-not-found.cpp | head -40
+          echo "=== baris command-not-found di build.sh shell ==="
+          grep -n "command-not-found" packages/bash/build.sh packages/fish/build.sh packages/nushell/build.sh packages/zsh/build.sh
+          echo "=== build-bootstraps.sh baris 600-640 ==="
+          sed -n '600,640p' scripts/build-bootstraps.sh
+
+      - name: Patch bootstrap tanpa command-not-found
+        if: inputs.build
+        run: |
+          set -euo pipefail
+          cd tp
+          f=scripts/build-bootstraps.sh
+          pat='PACKAGES_LIST+=("command-not-found")'
+          note='molina - command-not-found dikeluarkan'
+          n=$(grep -cF -- "$pat" "$f" || true)
+          m=$(grep -cF -- "$note" "$f" || true)
+          if [ "$n" = "0" ] && [ "$m" = "1" ]; then
+            echo "SUDAH: command-not-found sudah dikeluarkan dari PACKAGES_LIST."
+            exit 0
+          fi
+          if [ "$n" != "1" ] || [ "$m" != "0" ]; then
+            echo "GAGAL: harus 1 baris paket dan 0 penanda, ditemukan $n dan $m"
+            exit 1
+          fi
+          sed -i 's|^\([[:space:]]*\)PACKAGES_LIST+=("command-not-found")[[:space:]]*$|\1: # molina - command-not-found dikeluarkan (db memakai repo resmi berprefix com.termux)|' "$f"
+          n=$(grep -cF -- "$pat" "$f" || true)
+          m=$(grep -cF -- "$note" "$f" || true)
+          if [ "$n" != "0" ] || [ "$m" != "1" ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n dan $m)"
+            exit 1
+          fi
+          bash -n "$f"
+          echo "OK: command-not-found dikeluarkan, sintaks skrip valid"
+          grep -n "command-not-found" "$f"
+
+      - name: Patch URL sumber dos2unix
+        if: inputs.build
+        run: |
+          set -euo pipefail
+          cd tp
+          f=packages/dos2unix/build.sh
+          old='TERMUX_PKG_SRCURL=https://waterlan.home.xs4all.nl/dos2unix/dos2unix-${TERMUX_PKG_VERSION}.tar.gz'
+          new='TERMUX_PKG_SRCURL=https://deb.debian.org/debian/pool/main/d/dos2unix/dos2unix_${TERMUX_PKG_VERSION}.orig.tar.gz'
+          n_old=$(grep -cxF -- "$old" "$f" || true)
+          n_new=$(grep -cxF -- "$new" "$f" || true)
+          if [ "$n_old" = "0" ] && [ "$n_new" = "1" ]; then
+            echo "SUDAH: URL dos2unix sudah memakai arsip Debian."
+            exit 0
+          fi
+          if [ "$n_old" != "1" ] || [ "$n_new" != "0" ]; then
+            echo "GAGAL: harus 1 baris lama dan 0 baris baru, ditemukan $n_old dan $n_new"
+            exit 1
+          fi
+          v=$(grep -c '^TERMUX_PKG_VERSION=7.5.2$' "$f" || true)
+          if [ "$v" != "1" ]; then
+            echo "GAGAL: versi paket bukan 7.5.2 ($v)"
+            exit 1
+          fi
+          want=$(grep '^TERMUX_PKG_SHA256=' "$f" | cut -d= -f2)
+          url=https://deb.debian.org/debian/pool/main/d/dos2unix/dos2unix_7.5.2.orig.tar.gz
+          code=$(curl -sL --retry 3 -o /tmp/d2u.tgz -w '%{http_code}' "$url" || echo 000)
+          if [ "$code" != "200" ]; then
+            echo "GAGAL: $url membalas $code, build.sh tidak ditambal"
+            exit 1
+          fi
+          got=$(sha256sum /tmp/d2u.tgz | cut -d' ' -f1)
+          if [ "$got" != "$want" ]; then
+            echo "GAGAL: hash beda got=$got want=$want, build.sh tidak ditambal"
+            exit 1
+          fi
+          echo "COCOK  $url"
+          echo "entri pertama arsip: $(tar -tzf /tmp/d2u.tgz | head -1)"
+          OLD="$old" NEW="$new" perl -0pi -e 's/\Q$ENV{OLD}\E/$ENV{NEW}/' "$f"
+          n_old=$(grep -cxF -- "$old" "$f" || true)
+          n_new=$(grep -cxF -- "$new" "$f" || true)
+          if [ "$n_old" != "0" ] || [ "$n_new" != "1" ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n_old dan $n_new)"
+            exit 1
+          fi
+          bash -n "$f"
+          echo "OK: URL dos2unix dialihkan ke arsip Debian, checksum tidak diubah"
+          grep -n "TERMUX_PKG_SRCURL\|TERMUX_PKG_SHA256" "$f"
+
+      - name: Diagnosa nano
+        if: always()
+        continue-on-error: true
+        run: |
+          set +e
+          cd tp
+          echo "=== packages/nano/build.sh ==="
+          cat packages/nano/build.sh
+          echo "=== nano di daftar bootstrap ==="
+          grep -n '"nano"' scripts/build-bootstraps.sh
+          echo "=== paket yang menyebut nano di DEPENDS atau RECOMMENDS ==="
+          grep -n "DEPENDS.*nano\|RECOMMENDS.*nano" packages/*/build.sh
+          echo "=== isi dist/latest di situs nano ==="
+          curl -sL --retry 2 https://nano-editor.org/dist/latest/ | grep -o 'nano-[0-9][0-9.]*tar.xz' | sort -u | head
+          want=$(grep '^TERMUX_PKG_SHA256=' packages/nano/build.sh | cut -d= -f2)
+          echo "=== checksum yang diharapkan: $want ==="
+          for url in \
+            https://nano-editor.org/dist/latest/nano-8.5.tar.xz \
+            https://nano-editor.org/dist/v8/nano-8.5.tar.xz \
+            https://www.nano-editor.org/dist/v8/nano-8.5.tar.xz \
+            https://ftp.gnu.org/gnu/nano/nano-8.5.tar.xz ; do
+            code=$(curl -sL --retry 2 -o /tmp/nano.tar.xz -w '%{http_code}' "$url")
+            if [ "$code" = "200" ]; then
+              got=$(sha256sum /tmp/nano.tar.xz | cut -d' ' -f1)
+              size=$(stat -c %s /tmp/nano.tar.xz)
+              if [ "$got" = "$want" ]; then
+                echo "COCOK  $code $url ($size byte)"
+              else
+                echo "BEDA   $code $url ($size byte) got=$got"
+              fi
+            else
+              echo "GAGAL  $code $url"
+            fi
+          done
+          exit 0
+
+      - name: Patch URL sumber nano
+        if: inputs.build
+        run: |
+          set -euo pipefail
+          cd tp
+          f=packages/nano/build.sh
+          old='TERMUX_PKG_SRCURL=https://nano-editor.org/dist/latest/nano-$TERMUX_PKG_VERSION.tar.xz'
+          new='TERMUX_PKG_SRCURL=https://ftp.gnu.org/gnu/nano/nano-$TERMUX_PKG_VERSION.tar.xz'
+          n_old=$(grep -cxF -- "$old" "$f" || true)
+          n_new=$(grep -cxF -- "$new" "$f" || true)
+          if [ "$n_old" = "0" ] && [ "$n_new" = "1" ]; then
+            echo "SUDAH: URL nano sudah memakai ftp.gnu.org."
+            exit 0
+          fi
+          if [ "$n_old" != "1" ] || [ "$n_new" != "0" ]; then
+            echo "GAGAL: harus 1 baris lama dan 0 baris baru, ditemukan $n_old dan $n_new"
+            exit 1
+          fi
+          v=$(grep -c '^TERMUX_PKG_VERSION="8.5"$' "$f" || true)
+          if [ "$v" != "1" ]; then
+            echo "GAGAL: versi paket bukan 8.5 ($v)"
+            exit 1
+          fi
+          want=$(grep '^TERMUX_PKG_SHA256=' "$f" | cut -d= -f2)
+          url=https://ftp.gnu.org/gnu/nano/nano-8.5.tar.xz
+          code=$(curl -sL --retry 3 -o /tmp/nano.tar.xz -w '%{http_code}' "$url" || echo 000)
+          if [ "$code" != "200" ]; then
+            echo "GAGAL: $url membalas $code, build.sh tidak ditambal"
+            exit 1
+          fi
+          got=$(sha256sum /tmp/nano.tar.xz | cut -d' ' -f1)
+          if [ "$got" != "$want" ]; then
+            echo "GAGAL: hash beda got=$got want=$want, build.sh tidak ditambal"
+            exit 1
+          fi
+          echo "COCOK  $url"
+          echo "entri pertama arsip: $(tar -tJf /tmp/nano.tar.xz | head -1)"
+          OLD="$old" NEW="$new" perl -0pi -e 's/\Q$ENV{OLD}\E/$ENV{NEW}/' "$f"
+          n_old=$(grep -cxF -- "$old" "$f" || true)
+          n_new=$(grep -cxF -- "$new" "$f" || true)
+          if [ "$n_old" != "0" ] || [ "$n_new" != "1" ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n_old dan $n_new)"
+            exit 1
+          fi
+          bash -n "$f"
+          echo "OK: URL nano dialihkan ke ftp.gnu.org, checksum tidak diubah"
+          grep -n "TERMUX_PKG_SRCURL\|TERMUX_PKG_SHA256" "$f"
+
+      - name: Diagnosa kode keluar run-docker
+        if: always()
+        continue-on-error: true
+        run: |
+          set +e
+          cd tp
+          echo "=== set, trap, exit di run-docker.sh ==="
+          grep -n "set -\|trap\|exit" scripts/run-docker.sh
+          echo "=== set, trap, exit di build-bootstraps.sh (60 pertama) ==="
+          grep -n "^set \|set -\|trap \|exit " scripts/build-bootstraps.sh | head -60
+          echo "=== scripts/utils/docker/docker.sh ==="
+          wc -l scripts/utils/docker/docker.sh
+          sed -n '1,160p' scripts/utils/docker/docker.sh
+          exit 0
+
+      - name: Diagnosa trap build-bootstraps
+        if: always()
+        continue-on-error: true
+        run: |
+          set +e
+          cd tp
+          echo "=== build-bootstraps.sh baris 286-350 ==="
+          sed -n '286,350p' scripts/build-bootstraps.sh
+          echo "=== build-bootstraps.sh baris 655-690 ==="
+          sed -n '655,690p' scripts/build-bootstraps.sh
+          exit 0
+
+      - name: Patch trap build-bootstraps (kode keluar palsu)
+        if: inputs.build
+        run: |
+          F=tp/scripts/build-bootstraps.sh
+          old='build_bootstrap_killtree "$1" $$;'
+          new='build_bootstrap_killtree "$1" $$ || true;'
+          n_old=$(grep -cF "$old" "$F" || true)
+          n_new=$(grep -cF "$new" "$F" || true)
+          if [ "$n_old" != 1 ] || [ "$n_new" != 0 ]; then
+            echo "GAGAL: harus 1 baris lama dan 0 baris baru, ditemukan $n_old dan $n_new"
+            grep -n "build_bootstrap_killtree" "$F"
+            exit 1
+          fi
+          sed -i 's#build_bootstrap_killtree "\$1" \$\$;#build_bootstrap_killtree "$1" $$ || true;#' "$F"
+          n_old=$(grep -cF "$old" "$F" || true)
+          n_new=$(grep -cF "$new" "$F" || true)
+          if [ "$n_old" != 0 ] || [ "$n_new" != 1 ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n_old dan $n_new)"
+            exit 1
+          fi
+          bash -n "$F"
+          echo "OK: trap ditambal"
+          grep -n -B2 -A3 'killtree "\$1" \$\$' "$F"
+
+      - name: Diagnosa sumber com.termux di termux-tools
+        if: always()
+        continue-on-error: true
+        run: |
+          set +e
+          cd tp
+          echo "=== isi packages/termux-tools ==="
+          ls -la packages/termux-tools
+          echo "=== packages/termux-tools/build.sh ==="
+          cat packages/termux-tools/build.sh
+          echo "=== baris com.termux/com.molina di scripts/properties.sh (maks 40) ==="
+          grep -n "TERMUX_APP__PACKAGE_NAME\|TERMUX_APP__NAMESPACE\|com\.termux\|com\.molina" scripts/properties.sh | head -40
+          echo "=== termux-am dan termux-exec: baris relevan di build.sh ==="
+          grep -n "com\.termux\|TERMUX_APP\|sed \|SRCURL\|VERSION=" packages/termux-am/build.sh packages/termux-exec/build.sh | head -40
+          cd ..
+          rm -rf dg && mkdir dg && cd dg
+          curl -fsSL -o tt.tar.gz https://github.com/termux/termux-tools/archive/refs/tags/v1.45.0.tar.gz
+          ls -l tt.tar.gz
+          tar xzf tt.tar.gz || { echo "tar gagal"; exit 0; }
+          cd termux-tools-1.45.0 || { echo "folder hasil ekstrak tidak ada"; ls; exit 0; }
+          echo "=== daftar berkas di tarball (maks 60) ==="
+          find . -type f | sort | head -60
+          echo "=== berkas yang memuat com.termux di tarball asli ==="
+          grep -rlF "com.termux" . | sort
+          echo "=== placeholder @...@ di tarball (jumlah per jenis) ==="
+          grep -rhoE "@[A-Z_]+@" . | sort | uniq -c | sort -rn | head -30
+          echo "=== contoh baris com.termux (maks 50) ==="
+          grep -rnF "com.termux" . | head -50
+          echo "=== berkas hasil build di zip untuk pembanding: baris com.termux di pkg ==="
+          exit 0
+
+      - name: Patch termux-tools (teruskan nama paket ke configure)
+        if: inputs.build
+        run: |
+          F=tp/packages/termux-tools/build.sh
+          P=tp/scripts/properties.sh
+          LINE='TERMUX_PKG_EXTRA_CONFIGURE_ARGS="TERMUX_APP_PACKAGE=${TERMUX_APP__PACKAGE_NAME}"'
+          n_pkg=$(grep -c '^TERMUX_APP__PACKAGE_NAME="com.molina.suite"$' "$P" || true)
+          n_old=$(grep -c '^TERMUX_PKG_EXTRA_CONFIGURE_ARGS' "$F" || true)
+          n_anchor=$(grep -c '^TERMUX_PKG_ESSENTIAL=true$' "$F" || true)
+          if [ "$n_pkg" != 1 ] || [ "$n_old" != 0 ] || [ "$n_anchor" != 1 ]; then
+            echo "GAGAL: properties=$n_pkg (harus 1), EXTRA_CONFIGURE_ARGS=$n_old (harus 0), anchor=$n_anchor (harus 1)"
+            grep -n "TERMUX_PKG_EXTRA_CONFIGURE_ARGS\|TERMUX_PKG_ESSENTIAL" "$F"
+            exit 1
+          fi
+          sed -i '/^TERMUX_PKG_ESSENTIAL=true$/a TERMUX_PKG_EXTRA_CONFIGURE_ARGS="TERMUX_APP_PACKAGE=${TERMUX_APP__PACKAGE_NAME}"' "$F"
+          n_new=$(grep -cF "$LINE" "$F" || true)
+          if [ "$n_new" != 1 ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n_new)"
+            exit 1
+          fi
+          bash -n "$F"
+          echo "OK: termux-tools meneruskan TERMUX_APP_PACKAGE ke configure"
+          sed -n '1,12p' "$F"
+
+      - name: Patch termux-tools (komponen app memakai namespace Java)
+        if: inputs.build
+        run: |
+          F=tp/packages/termux-tools/build.sh
+          SNIP=$(mktemp)
+          cat > "$SNIP" << 'SNIPEOF'
+            # molina: komponen app memakai namespace Java, bukan nama paket
+            local _mf _mn=0
+            for _mf in termux-open termux-reset termux-wake-lock termux-wake-unlock; do
+              _mn=$((_mn + $(grep -cF '@TERMUX_APP_PACKAGE@/@TERMUX_APP_PACKAGE@.app.' "$TERMUX_PKG_SRCDIR/scripts/${_mf}.in" || true)))
+            done
+            if [ "$_mn" != 4 ] || [ -z "${TERMUX_APP__NAMESPACE:-}" ]; then
+              echo "GAGAL molina: komponen=$_mn (harus 4), namespace='${TERMUX_APP__NAMESPACE:-}'" 1>&2
+              exit 1
+            fi
+            for _mf in termux-open termux-reset termux-wake-lock termux-wake-unlock; do
+              sed -i "s|@TERMUX_APP_PACKAGE@/@TERMUX_APP_PACKAGE@\.app\.|@TERMUX_APP_PACKAGE@/${TERMUX_APP__NAMESPACE}.app.|g" "$TERMUX_PKG_SRCDIR/scripts/${_mf}.in"
+            done
+          SNIPEOF
+          n_fn=$(grep -c '^termux_step_pre_configure() {$' "$F" || true)
+          n_done=$(grep -c 'molina: komponen app' "$F" || true)
+          if [ "$n_fn" != 1 ] || [ "$n_done" != 0 ]; then
+            echo "GAGAL: fungsi=$n_fn (harus 1), sudah ditambal=$n_done (harus 0)"
+            grep -n "termux_step_pre_configure" "$F"
+            exit 1
+          fi
+          sed -i '/^termux_step_pre_configure() {$/r '"$SNIP" "$F"
+          n_done=$(grep -c 'molina: komponen app' "$F" || true)
+          if [ "$n_done" != 1 ]; then
+            echo "GAGAL: hasil patch tidak sesuai ($n_done)"
+            exit 1
+          fi
+          bash -n "$F"
+          echo "OK: build.sh termux-tools ditambal"
+          sed -n '/^termux_step_pre_configure() {$/,/^}/p' "$F"
+
+      - name: Tulis berkas penjaga pkg dan uji kering
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          F=tp/packages/termux-tools/build.sh
+          G=tp/packages/termux-tools/molina-pkg-guard.txt
+          [ -f "$F" ] || { echo "GAGAL: $F tidak ada"; exit 1; }
+          cat > "$G" << 'GEOF'
+              # molina: repo resmi Termux tidak kompatibel dengan prefix ini
+              echo "molina: repo apt molina belum tersedia." 1>&2
+              echo "Repo resmi Termux dibangun untuk prefix lain dan tidak dapat dipasang di sini." 1>&2
+              echo "Pasang paket lewat Debian PRoot." 1>&2
+              exit 1
+          GEOF
+          n_bd=$(grep -rl 'TERMUX_PKG_BUILDER_DIR' tp/scripts | wc -l)
+          if [ "$n_bd" -lt 1 ]; then echo "GAGAL: TERMUX_PKG_BUILDER_DIR tidak dikenal di tp/scripts"; exit 1; fi
+          url=$(bash -c 'set +u; source "$1" >/dev/null 2>&1; echo "$TERMUX_PKG_SRCURL"' _ "$F")
+          sha=$(bash -c 'set +u; source "$1" >/dev/null 2>&1; echo "$TERMUX_PKG_SHA256"' _ "$F")
+          if [ -z "$url" ] || [ -z "$sha" ]; then echo "GAGAL: SRCURL atau SHA256 kosong"; exit 1; fi
+          D=$(mktemp -d)
+          curl -fsSL --retry 3 "$url" -o "$D/src.tgz" || { echo "GAGAL: unduh sumber termux-tools"; exit 1; }
+          got=$(sha256sum "$D/src.tgz" | cut -d' ' -f1)
+          if [ "$got" != "$sha" ]; then echo "GAGAL: SHA256 beda ($got)"; exit 1; fi
+          mkdir "$D/s" && tar -xf "$D/src.tgz" -C "$D/s" --strip-components=1
+          P="$D/s/scripts/pkg.in"
+          [ -f "$P" ] || { echo "GAGAL: scripts/pkg.in tidak ada"; exit 1; }
+          if grep -q "$(printf '\r')" "$P"; then echo "GAGAL: pkg.in CRLF"; exit 1; fi
+          n_a=$(grep -c '^select_mirror() {$' "$P" || true)
+          if [ "$n_a" != 1 ]; then echo "GAGAL: anchor select_mirror=$n_a (harus 1)"; exit 1; fi
+          sed 's|@[A-Za-z_]*@|x|g' "$P" > "$D/base.sh"
+          if bash -n "$D/base.sh" 2>/dev/null; then
+            BASE_OK=1
+          else
+            BASE_OK=0
+            echo "PERINGATAN: pkg.in asli tidak lolos bash -n setelah placeholder diganti; cek sintaks dilewati"
+          fi
+          sed -i '/^select_mirror() {$/r '"$G" "$P"
+          n_g=$(grep -cF 'molina: repo resmi Termux' "$P" || true)
+          if [ "$n_g" != 1 ]; then echo "GAGAL: penjaga masuk $n_g kali (harus 1)"; exit 1; fi
+          if [ "$BASE_OK" = 1 ]; then
+            sed 's|@[A-Za-z_]*@|x|g' "$P" > "$D/patched.sh"
+            bash -n "$D/patched.sh" || { echo "GAGAL: pkg.in hasil patch tidak lolos bash -n"; exit 1; }
+          fi
+          { sed -n '/^select_mirror() {$/,/^    exit 1$/p' "$P"; echo '}'; echo 'select_mirror'; } > "$D/fn.sh"
+          rc=0
+          out=$(bash "$D/fn.sh" 2>&1) || rc=$?
+          echo "keluaran penjaga (rc=$rc):"
+          echo "$out"
+          if [ "$rc" != 1 ] || ! echo "$out" | grep -qF 'molina: repo apt molina belum tersedia'; then
+            echo "GAGAL: penjaga tidak berperilaku seperti yang diharapkan"
+            exit 1
+          fi
+          echo "OK: uji kering penjaga pkg lolos"
+
+      - name: Patch termux-tools (penjaga pkg, repo resmi Termux tidak dipakai)
+        if: inputs.build
+        run: |
+          F=tp/packages/termux-tools/build.sh
+          G=tp/packages/termux-tools/molina-pkg-guard.txt
+          SNIP=$(mktemp)
+          cat > "$SNIP" << 'SNIPEOF'
+            # molina: penjaga pkg (repo resmi Termux tidak kompatibel dengan prefix ini)
+            local _pf="$TERMUX_PKG_SRCDIR/scripts/pkg.in" _pg="$TERMUX_PKG_BUILDER_DIR/molina-pkg-guard.txt"
+            if [ "$(grep -c '^select_mirror() {$' "$_pf" || true)" != 1 ] || [ ! -f "$_pg" ] || grep -q "$(printf '\r')" "$_pf"; then
+              echo "GAGAL molina: anchor select_mirror tidak tepat 1, berkas penjaga hilang, atau pkg.in CRLF" 1>&2
+              exit 1
+            fi
+            sed -i '/^select_mirror() {$/r '"$_pg" "$_pf"
+            if [ "$(grep -cF 'molina: repo resmi Termux' "$_pf" || true)" != 1 ]; then
+              echo "GAGAL molina: penjaga pkg tidak masuk ke pkg.in" 1>&2
+              exit 1
+            fi
+          SNIPEOF
+          [ -f "$G" ] || { echo "GAGAL: $G tidak ada"; exit 1; }
+          if grep -q "$(printf '\r')" "$F"; then echo "GAGAL: build.sh CRLF"; exit 1; fi
+          n_fn=$(grep -c '^termux_step_pre_configure() {$' "$F" || true)
+          n_k=$(grep -c 'molina: komponen app' "$F" || true)
+          n_done=$(grep -c '# molina: penjaga pkg (' "$F" || true)
+          if [ "$n_fn" != 1 ] || [ "$n_k" != 1 ] || [ "$n_done" != 0 ]; then
+            echo "GAGAL: fungsi=$n_fn (harus 1), patch komponen=$n_k (harus 1), penjaga=$n_done (harus 0)"
+            exit 1
+          fi
+          sed -i '/^termux_step_pre_configure() {$/r '"$SNIP" "$F"
+          n_done=$(grep -c '# molina: penjaga pkg (' "$F" || true)
+          if [ "$n_done" != 1 ]; then echo "GAGAL: hasil patch tidak sesuai ($n_done)"; exit 1; fi
+          bash -n "$F"
+          echo "OK: build.sh termux-tools memuat penjaga pkg"
+          sed -n '/^termux_step_pre_configure() {$/,/^}/p' "$F"
+
+      - name: Diagnosa rencana tambah paket dan sumber apt
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          echo "=== build-bootstraps.sh: opsi dan argumen"
+          grep -n -E '^[[:space:]]*(--[a-z-]+|-[a-z])[|)]|--add|getopt|PACKAGES|generate-bootstraps' scripts/build-bootstraps.sh | head -60 || true
+          echo "=== build-bootstraps.sh: 60 baris pertama"
+          sed -n '1,60p' scripts/build-bootstraps.sh
+          echo "=== generate-bootstraps.sh: daftar paket dan opsi"
+          grep -n -E 'PACKAGES|--add|--repository|--pm|REPO|sources\.list' scripts/generate-bootstraps.sh | head -80 || true
+          echo "=== sumber URL repo di skrip dan paket inti"
+          grep -rn -E 'packages-cf\.termux\.dev|packages\.termux\.dev|termux-main|TERMUX_REPO' scripts packages/apt packages/termux-tools packages/termux-keyring 2>/dev/null | grep -v '\.patch' | head -50 || true
+          echo "=== apt build.sh: penulisan sources.list"
+          grep -n -E 'sources\.list|termux-main|mirror' packages/apt/build.sh | head -30 || true
+          echo "=== ketersediaan paket kandidat"
+          for p in proot libtalloc proot-distro git openssh tmux; do
+            if [ -f "packages/$p/build.sh" ]; then
+              echo "ADA   $p: $(grep -m1 '^TERMUX_PKG_VERSION=' packages/$p/build.sh)"
+            else
+              echo "TIDAK $p"
+            fi
+          done
+          echo "=== proot build.sh"
+          grep -n -E 'DEPENDS|com\.termux|TERMUX_PREFIX|TERMUX_PKG_SRCURL|LOADER|configure' packages/proot/build.sh | head -30 || true
+
+      - name: Patch apt (nonaktifkan repo resmi Termux di sources.list)
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          F=packages/apt/build.sh
+          [ -f "$F" ] || { echo "GAGAL: $F tidak ada"; exit 1; }
+          python3 - <<'PYX'
+          import sys
+          from pathlib import Path
+          p = Path("packages/apt/build.sh")
+          t = p.read_text(encoding="utf-8")
+          rep = [
+              ('echo "deb https://packages-cf.termux.dev/apt/termux-main/ stable main"',
+               'echo "# [molina] Repo resmi Termux dinonaktifkan: paketnya dibangun untuk prefix bawaan Termux dan tidak dapat dipasang di prefix ini."'),
+              ('echo "# deb https://packages.termux.dev/apt/termux-main/ stable main"',
+               'echo "# [molina] Tambahkan repo apt molina di sini bila sudah tersedia."'),
+          ]
+          for old, new in rep:
+              n = t.count(old)
+              if n != 1:
+                  print("GAGAL: pola harus tepat 1 kali, ditemukan %d: %s" % (n, old))
+                  sys.exit(1)
+              t = t.replace(old, new)
+          p.write_text(t, encoding="utf-8")
+          print("OK: sources.list di apt build.sh dinetralkan")
+          PYX
+          bash -n "$F" && echo "OK: sintaks bash valid"
+          echo "=== hasil (baris 70-85)"
+          sed -n '70,85p' "$F"
+
+      - name: Diagnosa opsi tambah paket dan proot-distro
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          echo "=== usage build-bootstraps.sh (360-380)"
+          sed -n '360,380p' scripts/build-bootstraps.sh
+          echo "=== parsing opsi (486-520)"
+          sed -n '486,520p' scripts/build-bootstraps.sh
+          echo "=== kondisi paket inti (616-632)"
+          sed -n '616,632p' scripts/build-bootstraps.sh
+          echo "=== flag Android10"
+          grep -n 'BOOTSTRAP_ANDROID10_COMPATIBLE' scripts/build-bootstraps.sh || true
+          echo "=== proot-distro"
+          grep -n -E 'DEPENDS|SRCURL|com\.termux|TERMUX_PREFIX' packages/proot-distro/build.sh || true
+          echo "=== libtalloc"
+          grep -n -E 'DEPENDS|SRCURL' packages/libtalloc/build.sh || true
+          echo "=== berkas lain yang menyebut URL repo resmi"
+          grep -rIln -E 'packages-cf\.termux\.dev|packages\.termux\.dev' packages scripts | head -20 || true
+          echo "=== termux-tools dan termux-keyring"
+          grep -rIn -E 'termux-main|packages-cf|packages\.termux\.dev|chosen_mirrors' packages/termux-tools packages/termux-keyring | head -40 || true
+          echo "=== isi packages/termux-tools"
+          ls packages/termux-tools | head -30
+
+      - name: Diagnosa dependensi paket tambahan
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          S=scripts/build-bootstraps.sh
+          echo "=== penanganan dependensi (85-135)"
+          sed -n '85,135p' $S || true
+          echo "=== loop build paket (566-614)"
+          sed -n '566,614p' $S || true
+          echo "=== setelah daftar paket (658-770)"
+          sed -n '658,770p' $S || true
+          echo "=== kata kunci dpkg/status/depends"
+          grep -n -i -E 'dpkg|status|depends|Packages' $S | head -60 || true
+          echo "=== metadata paket kandidat"
+          for p in proot libtalloc proot-distro file; do
+            echo "--- $p"
+            grep -n -E '^TERMUX_PKG_(VERSION|REVISION|DEPENDS|BUILD_DEPENDS)=' packages/$p/build.sh || true
+          done
+          echo "=== ncurses-utils"
+          ls packages/ncurses 2>&1 | head -20 || true
+          grep -rn 'ncurses-utils' packages/ncurses 2>/dev/null | head -10 || true
+          echo "=== file dan libmagic"
+          ls packages/file 2>&1 | head -20 || true
+          echo "=== termux-tools build.sh"
+          grep -n -E 'SRCURL|VERSION|REVISION|mirror|pkg|change-repo' packages/termux-tools/build.sh | head -40 || true
+
+      - name: Diagnosa sumber termux-tools (skrip pkg dan berkas mirror)
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          F=packages/termux-tools/build.sh
+          [ -f "$F" ] || { echo "GAGAL: $F tidak ada"; exit 1; }
+          echo "=== build.sh lengkap"
+          cat "$F"
+          echo "=== URL sumber"
+          url=$(bash -c 'set +u; source "$1" >/dev/null 2>&1; echo "$TERMUX_PKG_SRCURL"' _ "$F")
+          echo "SRCURL=$url"
+          if [ -n "$url" ]; then
+            mkdir -p /tmp/tt
+            if curl -fsSL --retry 3 "$url" -o /tmp/tt.src; then
+              tar -xf /tmp/tt.src -C /tmp/tt --strip-components=1 || echo "ekstrak gagal"
+              echo "=== struktur sumber"
+              find /tmp/tt -maxdepth 3 -not -path '*/.git*' | sort | head -80
+              echo "=== lokasi select_mirror dan chosen_mirrors"
+              grep -rIn -E 'select_mirror|chosen_mirrors|MIRROR_BASE_DIR' /tmp/tt | head -30 || true
+              echo "=== direktori mirrors"
+              find /tmp/tt -type d -name mirrors | head
+              echo "jumlah berkas di bawah mirrors: $(find /tmp/tt -path '*mirrors*' -type f | wc -l)"
+            else
+              echo "unduh sumber gagal"
+            fi
+          fi
+
+      - name: Probe URL sumber paket tambahan
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          for p in proot libtalloc proot-distro file; do
+            f="packages/$p/build.sh"
+            echo "=== $p"
+            [ -f "$f" ] || { echo "TIDAK ADA: $f"; continue; }
+            url=$(bash -c 'set +u; source "$1" >/dev/null 2>&1; echo "$TERMUX_PKG_SRCURL"' _ "$f")
+            sha=$(bash -c 'set +u; source "$1" >/dev/null 2>&1; echo "$TERMUX_PKG_SHA256"' _ "$f")
+            echo "SRCURL=$url"
+            echo "SHA256 di build.sh=$sha"
+            if [ -z "$url" ]; then echo "SRCURL kosong"; continue; fi
+            rm -f /tmp/probe.src
+            if curl -fsSL --retry 2 --max-time 180 "$url" -o /tmp/probe.src; then
+              got=$(sha256sum /tmp/probe.src | cut -d' ' -f1)
+              if [ "$got" = "$sha" ]; then echo "UNDUH OK, SHA256 COCOK"; else echo "UNDUH OK, SHA256 BEDA: unduhan=$got"; fi
+            else
+              echo "UNDUH GAGAL (kode curl $?)"
+            fi
+          done
+
+      - name: Bangun image builder dari commit terpin
+        if: ${{ inputs.build }}
+        run: |
+          docker build -t molina-package-builder:local tp/scripts
+
+      - name: Verifikasi image builder
+        if: ${{ inputs.build }}
+        run: |
+          docker run --rm molina-package-builder:local bash -c 'ls -d /home/builder/lib/android-ndk-r28c && ls -ld /data/data /data/data/*'
+
+      - name: Siapkan container builder
+        if: ${{ inputs.build }}
+        run: |
+          if [ "$(id -u)" != "1001" ]; then
+            echo "GAGAL: uid runner $(id -u) bukan 1001; run-docker.sh biasanya menyesuaikan uid builder, container manual belum"
+            exit 1
+          fi
+          docker run --detach --init --name termux-package-builder \
+            --volume "$PWD/tp:/home/builder/termux-packages" \
+            --security-opt "seccomp=$PWD/tp/scripts/profile.json" \
+            --tty molina-package-builder:local
+          docker ps --filter name=termux-package-builder --format '{{.Names}} {{.Status}}'
+
+      - name: Pulihkan cache build (unduh)
+        id: bscache
+        if: ${{ inputs.build && inputs.use_cache }}
+        uses: actions/cache/restore@v4
+        with:
+          path: bscache
+          key: bsc-${{ env.CACHE_EPOCH }}-${{ inputs.commit }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            bsc-${{ env.CACHE_EPOCH }}-${{ inputs.commit }}-
+
+      - name: Pulihkan state ke container
+        if: ${{ inputs.build && inputs.use_cache && steps.bscache.outputs.cache-matched-key != '' }}
+        run: |
+          command -v zstd >/dev/null || sudo apt-get install -y -qq zstd
+          ls -lh bscache
+          if [ ! -f bscache/state.tar.zst ]; then
+            echo "GAGAL: state.tar.zst tidak ada di cache"; exit 1
+          fi
+          zstd -dc bscache/state.tar.zst | docker exec -i termux-package-builder sudo tar -C / -xpf -
+          if [ -f bscache/output.tar.zst ]; then
+            zstd -dc bscache/output.tar.zst | tar -C tp -xpf -
+          fi
+          echo "CACHE_RESTORED=true" >> "$GITHUB_ENV"
+          echo "=== paket bertanda selesai ==="
+          docker exec termux-package-builder ls /data/data/.built-packages 2>/dev/null | head -60 || true
+
+      - name: Hapus penanda built termux-tools (paksa bangun ulang)
+        if: ${{ inputs.build }}
+        run: |
+          docker exec termux-package-builder sudo rm -f /data/data/.built-packages/termux-tools
+          docker exec termux-package-builder sudo rm -rf /home/builder/.termux-build/termux-tools
+          if docker exec termux-package-builder test -e /data/data/.built-packages/termux-tools; then
+            echo "GAGAL: penanda termux-tools masih ada"
+            exit 1
+          fi
+          echo "OK: penanda dan direktori build termux-tools dihapus"
+          echo "=== paket bertanda selesai (seharusnya tanpa termux-tools) ==="
+          docker exec termux-package-builder ls /data/data/.built-packages | head -60 || true
+
+      - name: Hapus penanda built apt dan ncurses (paksa bangun ulang)
+        if: ${{ inputs.build }}
+        run: |
+          for p in apt ncurses; do
+            docker exec termux-package-builder sudo rm -f /data/data/.built-packages/$p
+            docker exec termux-package-builder sudo rm -rf /home/builder/.termux-build/$p
+            if docker exec termux-package-builder test -e /data/data/.built-packages/$p; then
+              echo "GAGAL: penanda $p masih ada"
+              exit 1
+            fi
+            echo "OK: penanda dan direktori build $p dihapus"
+          done
+          echo "=== paket bertanda selesai (seharusnya tanpa termux-tools, apt, ncurses) ==="
+          docker exec termux-package-builder ls /data/data/.built-packages | head -60 || true
+
+      - name: Build bootstrap aarch64
+        if: ${{ inputs.build }}
+        run: |
+          cd tp
+          (while sleep 600; do echo "== heartbeat $(date -u +%T) =="; tail -n 3 ../build.log; done) &
+          HB=$!
+          NOCLEAN=""
+          if [ "${CACHE_RESTORED:-}" = "true" ]; then NOCLEAN="--no-clean"; fi
+          echo "NOCLEAN='$NOCLEAN'"
+          set +e
+          TERMUX_BUILDER_IMAGE_NAME=molina-package-builder:local ./scripts/run-docker.sh ./scripts/build-bootstraps.sh --architectures aarch64 --no-build-unneeded-subpackages --packages-pre-additional ncurses-utils --packages-post-additional proot,libtalloc,proot-distro,file $NOCLEAN &> ../build.log
+          rc=$?
+          kill $HB 2>/dev/null
+          if [ $rc -ne 0 ]; then
+            echo "GAGAL: build exit $rc; 80 baris terakhir:"
+            tail -n 80 ../build.log
+            exit $rc
+          fi
+
+      - name: Simpan state dari container
+        id: bssave
+        if: ${{ always() && inputs.build && inputs.use_cache }}
+        run: |
+          command -v zstd >/dev/null || sudo apt-get install -y -qq zstd
+          if ! docker ps -q --filter name=termux-package-builder | grep -q .; then
+            echo "container tidak berjalan; lewati penyimpanan"; exit 0
+          fi
+          rm -rf bscache && mkdir -p bscache
+          docker exec termux-package-builder sudo tar -C / -cpf - data home/builder/.termux-build | zstd -T0 -3 -q -o bscache/state.tar.zst
+          if [ -d tp/output ]; then
+            tar -C tp -cpf - output | zstd -T0 -3 -q -o bscache/output.tar.zst
+          fi
+          du -sh bscache/*
+          echo "saved=true" >> "$GITHUB_OUTPUT"
+
+      - name: Simpan cache build (unggah)
+        if: ${{ always() && inputs.build && inputs.use_cache && steps.bssave.outputs.saved == 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: bscache
+          key: bsc-${{ env.CACHE_EPOCH }}-${{ inputs.commit }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Diagnosa pasca-build
+        if: ${{ always() && inputs.build }}
+        continue-on-error: true
+        run: |
+          set +e
+          echo "=== zip yang ada di tp ==="
+          find tp -maxdepth 3 -name '*.zip' -printf '%p %s byte\n' 2>/dev/null
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          echo "ZIP=$ZIP"
+          if [ -n "$ZIP" ]; then
+            p=$(unzip -Z1 "$ZIP" | grep 'second-stage' | head -1)
+            echo "=== berkas second-stage dalam zip: $p ==="
+            unzip -p "$ZIP" "$p" | head -3
+            echo "=== jumlah berkas dalam zip ==="
+            unzip -Z1 "$ZIP" | wc -l
+          fi
+          echo "=== exit code atau error di build.log (30 terakhir) ==="
+          grep -n -i "exited with exit code\|exit code\|Failed to\|ERROR" build.log | tail -30
+          echo "=== 15 baris terakhir scripts/build-bootstraps.sh ==="
+          tail -15 tp/scripts/build-bootstraps.sh
+          echo "=== 25 baris terakhir scripts/run-docker.sh ==="
+          tail -25 tp/scripts/run-docker.sh
+          exit 0
+
+      - name: Diagnosa isi bootstrap
+        if: ${{ always() && inputs.build }}
+        continue-on-error: true
+        run: |
+          set +e
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          [ -n "$ZIP" ] || { echo "zip tidak ada"; exit 0; }
+          rm -rf /tmp/bz && mkdir -p /tmp/bz && unzip -q "$ZIP" -d /tmp/bz
+          echo "=== semua berkas second-stage ==="
+          (cd /tmp/bz && find . -name '*second-stage*' | sort)
+          echo "=== shebang second-stage utama ==="
+          head -3 /tmp/bz/etc/termux/bootstrap/termux-bootstrap-second-stage.sh
+          echo "=== jumlah berkas yang memuat com.termux ==="
+          grep -rIl 'com\.termux' /tmp/bz | wc -l
+          echo "=== daftar berkas (30 pertama) ==="
+          grep -rIl 'com\.termux' /tmp/bz | sed 's|/tmp/bz/||' | head -30
+          echo "=== baris yang memuat com.termux (40 pertama) ==="
+          grep -rIn 'com\.termux' /tmp/bz | sed 's|/tmp/bz/||' | head -40
+          echo "=== SYMLINKS.txt ==="
+          ls -la /tmp/bz/SYMLINKS.txt
+          exit 0
+
+      - name: Diagnosa sisa com.termux
+        if: ${{ always() && inputs.build }}
+        continue-on-error: true
+        run: |
+          set +e
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          [ -n "$ZIP" ] || { echo "zip tidak ada"; exit 0; }
+          rm -rf /tmp/bz2 && mkdir -p /tmp/bz2 && unzip -q "$ZIP" -d /tmp/bz2
+          echo "=== token unik yang memuat com.termux ==="
+          grep -rIoh '[A-Za-z0-9_./@:-]*com\.termux[A-Za-z0-9_./@:-]*' /tmp/bz2 | sort | uniq -c | sort -rn | head -60
+          echo "=== berkas dan jumlah baris ==="
+          grep -rIc 'com\.termux' /tmp/bz2 | grep -v ':0$' | sed 's|/tmp/bz2/||' | sort
+          echo "=== paket pemilik tiap berkas ==="
+          P=/data/data/com.molina.suite/files/usr
+          for f in $(grep -rIl 'com\.termux' /tmp/bz2 | sed 's|/tmp/bz2/||' | grep -v '^var/lib/dpkg'); do
+            own=$(grep -lxF "$P/$f" /tmp/bz2/var/lib/dpkg/info/*.list | xargs -r -n1 basename | tr '\n' ' ')
+            echo "$f -> $own"
+          done
+          echo "=== waktu build paket di container ==="
+          docker exec termux-package-builder ls -l --time-style=full-iso /data/data/.built-packages 2>/dev/null | grep -E 'termux-tools|termux-exec|termux-am|termux-core|apt|bash'
+          echo "=== packages/termux-tools ==="
+          ls tp/packages/termux-tools
+          grep -n "com.termux\|TERMUX_APP\|TERMUX_REPO\|@TERMUX" tp/packages/termux-tools/build.sh | head -40
+          grep -rn "com\.termux" tp/packages/termux-tools 2>/dev/null | head -40
+          echo "=== second-stage baru ==="
+          ls -la /tmp/bz2/etc/termux/termux-bootstrap /tmp/bz2/etc/termux/termux-bootstrap/second-stage
+          head -5 /tmp/bz2/etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh
+          exit 0
+
+      - name: Diagnosa second-stage baru
+        if: ${{ always() && inputs.build }}
+        continue-on-error: true
+        run: |
+          set +e
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          [ -n "$ZIP" ] || { echo "zip tidak ada"; exit 0; }
+          rm -rf /tmp/bz3 && mkdir -p /tmp/bz3 && unzip -q "$ZIP" -d /tmp/bz3
+          echo "=== izin berkas second-stage di zip ==="
+          unzip -Z "$ZIP" 'etc/termux/termux-bootstrap/*' 'etc/profile.d/01-*'
+          echo "=== skrip fallback (maks 120 baris) ==="
+          head -120 /tmp/bz3/etc/profile.d/01-termux-bootstrap-second-stage-fallback.sh
+          echo "=== skrip second-stage (maks 150 baris) ==="
+          head -150 /tmp/bz3/etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh
+          echo "=== isi direktori termux-bootstrap ==="
+          find /tmp/bz3/etc/termux/termux-bootstrap -type f | sed 's|/tmp/bz3/||' | sort
+          exit 0
+
+      - name: Diagnosa komponen app di bootstrap
+        if: ${{ always() && inputs.build }}
+        continue-on-error: true
+        run: |
+          set +e
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          echo "ZIP=$ZIP"
+          [ -n "$ZIP" ] || exit 0
+          for f in bin/termux-wake-lock bin/termux-wake-unlock bin/termux-open bin/termux-reset bin/termux-reload-settings bin/termux-setup-storage; do
+            echo "=== $f ==="
+            unzip -p "$ZIP" "$f" | grep -n "com\.\(molina\|termux\)"
+          done
+          echo "=== bin/pkg ==="
+          unzip -p "$ZIP" bin/pkg | grep -n "com\.\(molina\|termux\)" | head -25
+          echo "=== bin/login ==="
+          unzip -p "$ZIP" bin/login | grep -n "com\.\(molina\|termux\)" | head -15
+          echo "=== bin/chsh ==="
+          unzip -p "$ZIP" bin/chsh | grep -n "com\.\(molina\|termux\)" | head -10
+          exit 0
+
+      - name: Verifikasi hasil
+        if: ${{ inputs.build }}
+        run: |
+          ZIP=$(find tp -maxdepth 2 -name 'bootstrap-aarch64.zip' | head -1)
+          [ -n "$ZIP" ] || { echo "GAGAL: bootstrap-aarch64.zip tidak ditemukan"; exit 1; }
+          cp "$ZIP" bootstrap-aarch64.zip
+          sha256sum bootstrap-aarch64.zip | tee bootstrap-aarch64.zip.sha256
+          ls -l bootstrap-aarch64.zip
+          SHEBANG=$(unzip -p bootstrap-aarch64.zip etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh | head -1)
+          echo "Shebang second stage: $SHEBANG"
+          case "$SHEBANG" in
+            *"/data/data/$NEW_PKG/files/usr/bin/"*) echo "OK: shebang berprefix $NEW_PKG" ;;
+            *) echo "GAGAL: shebang tidak berprefix $NEW_PKG"; exit 1 ;;
+          esac
+          mkdir x && cd x && unzip -q ../bootstrap-aarch64.zip
+          echo "Berkas yang masih memuat com.termux (jumlah): $(grep -rlaF 'com.termux' . | wc -l)"
+          grep -rlaF 'com.termux' . | head -20 || true
+          # [molina] penjaga paket tambahan
+          python3 - <<'PYV'
+          import glob
+          import re
+          import sys
+          from pathlib import Path
+
+          REQUIRED = ["proot", "libtalloc", "proot-distro", "file", "ncurses-utils"]
+          problems = []
+
+
+          def paragraphs(text):
+              for block in re.split(r"\n\s*\n", text):
+                  fields = {}
+                  key = None
+                  for line in block.splitlines():
+                      if line[:1] in (" ", "\t") and key:
+                          fields[key] += "\n" + line.strip()
+                      elif ":" in line:
+                          key, _, val = line.partition(":")
+                          key = key.strip()
+                          fields[key] = val.strip()
+                  if fields.get("Package"):
+                      yield fields
+
+
+          def dep_groups(field):
+              for group in field.split(","):
+                  alts = []
+                  for alt in group.split("|"):
+                      name = re.sub(r"\(.*?\)", "", alt).strip()
+                      if name:
+                          alts.append(name.split()[0].split(":")[0])
+                  if alts:
+                      yield alts
+
+
+          status_path = Path("var/lib/dpkg/status")
+          if not status_path.is_file():
+              print("GAGAL: var/lib/dpkg/status tidak ada di zip")
+              sys.exit(1)
+
+          pkgs = {}
+          provides = set()
+          for f in paragraphs(status_path.read_text(encoding="utf-8", errors="replace")):
+              st = f.get("Status", "").split()
+              if st and st[-1] == "installed":
+                  pkgs[f["Package"]] = f
+                  for p in f.get("Provides", "").split(","):
+                      p = p.strip()
+                      if p:
+                          provides.add(p.split()[0])
+          print("Paket terpasang di status dpkg: %d" % len(pkgs))
+
+
+          def unmet(name):
+              out = []
+              for field in ("Pre-Depends", "Depends"):
+                  for alts in dep_groups(pkgs[name].get(field, "")):
+                      if not any(a in pkgs or a in provides for a in alts):
+                          out.append(" | ".join(alts))
+              return out
+
+
+          for r in REQUIRED:
+              if r not in pkgs:
+                  problems.append("paket %s tidak ada di status dpkg" % r)
+              else:
+                  for u in unmet(r):
+                      problems.append("dependensi %s dari %s tidak terpenuhi" % (u, r))
+
+          info = []
+          for name in sorted(pkgs):
+              if name in REQUIRED:
+                  continue
+              for u in unmet(name):
+                  info.append("%s membutuhkan %s" % (name, u))
+          print("Dependensi tidak terpenuhi pada paket lain (info saja): %d" % len(info))
+          for line in info[:40]:
+              print("  " + line)
+
+          sl = Path("etc/apt/sources.list")
+          if not sl.is_file():
+              problems.append("etc/apt/sources.list tidak ada")
+          else:
+              active = [l for l in sl.read_text(encoding="utf-8").splitlines() if re.match(r"\s*deb\s", l)]
+              if active:
+                  problems.append("sources.list masih punya baris deb aktif: %s" % active)
+
+          for pat in ("bin/proot", "bin/proot-distro", "bin/file", "lib/libtalloc.so*", "libexec/proot*"):
+              print(("ADA   " if glob.glob(pat) else "TIDAK ") + pat)
+
+          if problems:
+              print("GAGAL penjaga paket tambahan:")
+              for p in problems:
+                  print("  - " + p)
+              sys.exit(1)
+          print("OK penjaga paket tambahan")
+          PYV
+          # [molina] penjaga pkg di bin/pkg
+          [ -f bin/pkg ] || { echo "GAGAL: bin/pkg tidak ada di zip"; exit 1; }
+          n_sm=$(grep -c '^select_mirror() {$' bin/pkg || true)
+          n_pg=$(grep -cF 'molina: repo resmi Termux tidak kompatibel' bin/pkg || true)
+          n_ph=$(grep -c '@TERMUX_[A-Z_]*@' bin/pkg || true)
+          echo "bin/pkg: select_mirror=$n_sm (harus 1), penjaga=$n_pg (harus 1), placeholder tersisa=$n_ph (info)"
+          if [ "$n_sm" != 1 ] || [ "$n_pg" != 1 ]; then
+            echo "GAGAL: bin/pkg tidak memuat penjaga molina tepat 1 kali"
+            grep -n 'select_mirror' bin/pkg | head -10 || true
+            exit 1
+          fi
+          nextline=$(sed -n '/^select_mirror() {$/{n;p;}' bin/pkg)
+          case "$nextline" in
+            *"molina: repo resmi Termux tidak kompatibel"*) ;;
+            *) echo "GAGAL: penjaga bukan baris pertama select_mirror: $nextline"; exit 1 ;;
+          esac
+          bash -n bin/pkg || { echo "GAGAL: bin/pkg tidak lolos bash -n"; exit 1; }
+          echo "OK: bin/pkg memuat penjaga molina"
+          sed -n '/^select_mirror() {$/,+6p' bin/pkg
+          grep -n 'com.molina.suite' bin/pkg | head -5 || true
+
+      - name: Unggah log build
+        if: ${{ always() && inputs.build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: ignore
+
+      - name: Unggah zip bootstrap (sementara, bukan rilis)
+        if: ${{ always() && inputs.build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-aarch64-uji
+          path: |
+            bootstrap-aarch64.zip
+            bootstrap-aarch64.zip.sha256
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Publikasikan ke release repo
+        if: ${{ inputs.build && inputs.release }}
+        run: |
+          TAG="bootstrap-molina-$(date -u +%Y.%m.%d)-r${GITHUB_RUN_NUMBER}"
+          gh release create "$TAG" bootstrap-aarch64.zip bootstrap-aarch64.zip.sha256 \
+            --repo "$GITHUB_REPOSITORY" \
+            --prerelease \
+            --title "Bootstrap $NEW_PKG ($TAG)" \
+            --notes "Bootstrap aarch64 untuk prefix $NEW_PKG. Sumber: $TP_REPO @ $TP_COMMIT"
+          echo "RELEASE_TAG=$TAG"
+          echo "URL=https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/bootstrap-aarch64.zip"
+          cat bootstrap-aarch64.zip.sha256

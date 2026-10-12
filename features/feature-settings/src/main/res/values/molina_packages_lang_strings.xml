@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pkg_kotlin_title">Kotlin</string>
+    <string name="pkg_kotlin_desc">Kompilator Kotlin resmi di /opt/kotlinc (kotlinc dan kotlin); butuh JDK 17. Opsional: tidak ikut Install semua.</string>
+    <string name="pkg_gcc_title">C dan C++</string>
+    <string name="pkg_gcc_desc">gcc, g++, dan make untuk berkas .c dan .cpp. Opsional: tidak ikut Install semua.</string>
+    <string name="pkg_go_title">Go</string>
+    <string name="pkg_go_desc">Kompilator dan alat Go dari repositori Debian 12. Opsional: tidak ikut Install semua.</string>
+    <string name="pkg_rust_title">Rust</string>
+    <string name="pkg_rust_desc">rustc dan cargo dari repositori Debian 12. Opsional: tidak ikut Install semua.</string>
+    <string name="pkg_php_title">PHP</string>
+    <string name="pkg_php_desc">php-cli untuk menjalankan skrip PHP. Opsional: tidak ikut Install semua.</string>
+    <string name="pkg_ruby_title">Ruby</string>
+    <string name="pkg_ruby_desc">Interpreter Ruby dari repositori Debian 12. Opsional: tidak ikut Install semua.</string>
+    <string name="pkg_lua_title">Lua</string>
+    <string name="pkg_lua_desc">Interpreter Lua 5.4 dari repositori Debian 12. Opsional: tidak ikut Install semua.</string>
+</resources>

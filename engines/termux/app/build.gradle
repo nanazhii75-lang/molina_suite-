@@ -1,0 +1,143 @@
+// molina-suite: dimodifikasi dari upstream termux-app v0.118.3.
+// Versi asli ada di riwayat git (commit "vendor: termux-app v0.118.3").
+plugins {
+    id "com.android.library"
+}
+
+android {
+    namespace "com.molina.suite.terminal"
+    compileSdk rootProject.ext.compileSdkVersion
+    ndkVersion project.property("ndkVersion")
+
+    defaultConfig {
+        minSdk rootProject.ext.minSdkVersion
+
+        externalNativeBuild {
+            ndkBuild {
+                cFlags "-std=c11", "-Wall", "-Wextra", "-Werror", "-Os", "-fno-stack-protector", "-Wl,--gc-sections"
+            }
+        }
+
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path "src/main/cpp/Android.mk"
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+}
+
+dependencies {
+    implementation "androidx.annotation:annotation:1.3.0"
+    implementation "androidx.appcompat:appcompat:1.3.1"
+    implementation "androidx.core:core:1.6.0"
+    implementation "androidx.drawerlayout:drawerlayout:1.1.1"
+    implementation "androidx.preference:preference:1.1.1"
+    implementation "androidx.viewpager:viewpager:1.0.0"
+    implementation "com.google.android.material:material:1.4.0"
+    implementation "com.google.guava:guava:24.1-jre"
+    implementation "io.noties.markwon:core:$markwonVersion"
+    implementation "io.noties.markwon:ext-strikethrough:$markwonVersion"
+    implementation "io.noties.markwon:linkify:$markwonVersion"
+    implementation "io.noties.markwon:recycler:$markwonVersion"
+
+    implementation project(":engines:termux:terminal-view")
+    implementation project(":engines:termux:termux-shared")
+
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.robolectric:robolectric:4.4"
+}
+
+def downloadBootstrap(String arch, String expectedChecksum, String version) {
+    def digest = java.security.MessageDigest.getInstance("SHA-256")
+
+    def localUrl = "src/main/cpp/bootstrap-" + arch + ".zip"
+    def file = new File(projectDir, localUrl)
+    if (file.exists()) {
+        def buffer = new byte[8192]
+        def input = new FileInputStream(file)
+        while (true) {
+            def readBytes = input.read(buffer)
+            if (readBytes < 0) break
+            digest.update(buffer, 0, readBytes)
+        }
+        input.close()
+        def checksum = new BigInteger(1, digest.digest()).toString(16)
+        while (checksum.length() < 64) { checksum = "0" + checksum }
+        if (checksum == expectedChecksum) {
+            return
+        } else {
+            logger.quiet("Deleting old local file with wrong hash: " + localUrl)
+            file.delete()
+        }
+    }
+
+    // Catatan: URL ini diarahkan ke release bootstrap molina-suite (prefix com.molina.suite) pada Fase 1b.
+    def remoteUrl = "https://github.com/nanazhii75-lang/molina_suite-/releases/download/" + version + "/bootstrap-" + arch + ".zip"
+    logger.quiet("Downloading " + remoteUrl + " ...")
+
+    file.parentFile.mkdirs()
+    def out = new BufferedOutputStream(new FileOutputStream(file))
+
+    def connection = new URL(remoteUrl).openConnection()
+    connection.setInstanceFollowRedirects(true)
+    def digestStream = new java.security.DigestInputStream(connection.inputStream, digest)
+    out << digestStream
+    out.close()
+
+    def checksum = new BigInteger(1, digest.digest()).toString(16)
+    while (checksum.length() < 64) { checksum = "0" + checksum }
+    if (checksum != expectedChecksum) {
+        file.delete()
+        throw new GradleException("Wrong checksum for " + remoteUrl + ": expected: " + expectedChecksum + ", actual: " + checksum)
+    }
+}
+
+clean {
+    doLast {
+        def tree = fileTree(new File(projectDir, 'src/main/cpp'))
+        tree.include 'bootstrap-*.zip'
+        tree.each { it.delete() }
+    }
+}
+
+task downloadBootstraps() {
+    doLast {
+        def version = "bootstrap-molina-2026.10.09-r53"
+        downloadBootstrap("aarch64", "2d32914b3d330954a9aa40d84126f382c2a6084dfb0e738e688432003cdd5077", version)
+        // Fase 1b: bootstrap molina baru tersedia untuk aarch64; arsitektur lain menyusul.
+        // downloadBootstrap("arm",     "f3bb9d1b32552b34fff41861dbf193ec5ba2848d67d779ac1c7256da6640f85d", version)
+        // downloadBootstrap("i686",    "36db3e1ac3547f9a174fd763bd9a484fa1a3449cdd81e1cf2408ff0454f839c6", version)
+        // downloadBootstrap("x86_64",  "1c124ec2396ee70a51b0b0a574f29aa659526aa2b9f558f993b2fb05d1e51855", version)
+    }
+}
+
+// Zip bootstrap harus ada sebelum kompilasi native (termux-bootstrap-zip.S meng-include-nya).
+tasks.configureEach { task ->
+    if (task.name != "downloadBootstraps" &&
+            (task.name == "preBuild" ||
+             task.name.startsWith("generateJsonModel") ||
+             task.name.startsWith("configureNdkBuild") ||
+             task.name.startsWith("buildNdkBuild") ||
+             task.name.startsWith("externalNativeBuild"))) {
+        task.dependsOn("downloadBootstraps")
+    }
+}

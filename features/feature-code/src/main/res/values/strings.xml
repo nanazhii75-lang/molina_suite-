@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="code_title">Molina Code</string>
+    <string name="code_untitled">Tidak berjudul</string>
+    <string name="code_default_file_name">tanpa-judul.txt</string>
+
+    <string name="code_header_more">Aksi lainnya</string>
+
+    <string name="code_key_open">Buka</string>
+    <string name="code_key_paste">Tempel</string>
+    <string name="code_key_undo">Urungkan</string>
+    <string name="code_key_redo">Ulangi</string>
+    <string name="code_key_left">Kursor ke kiri</string>
+    <string name="code_key_right">Kursor ke kanan</string>
+    <string name="code_key_save">Simpan</string>
+    <string name="code_key_close">Tutup</string>
+    <string name="code_key_copy_all">Salin semua</string>
+    <string name="code_copy_all_done">Seluruh teks disalin</string>
+    <string name="code_copy_all_empty">Tidak ada teks untuk disalin</string>
+    <string name="code_copy_all_too_large">Teks terlalu besar untuk disalin ke clipboard</string>
+
+    <string name="code_menu_new">Baru</string>
+    <string name="code_menu_open">Buka</string>
+    <string name="code_menu_save">Simpan</string>
+    <string name="code_menu_save_as">Simpan sebagai</string>
+    <string name="code_menu_reload">Muat ulang</string>
+    <string name="code_menu_close">Tutup</string>
+    <string name="code_menu_search">Cari</string>
+    <string name="code_menu_goto">Pergi ke baris</string>
+    <string name="code_menu_stats">Statistik</string>
+    <string name="code_menu_wordwrap">Pembungkus kata</string>
+    <string name="code_menu_readonly">Hanya baca</string>
+
+    <string name="code_search_title">Cari</string>
+    <string name="code_search_find_hint">Cari teks</string>
+    <string name="code_search_replace_hint">Ganti dengan</string>
+    <string name="code_search_case">Kasus sensitif</string>
+    <string name="code_search_regex">Persamaan reguler</string>
+    <string name="code_search_wrap">Membungkus di sekitar</string>
+    <string name="code_search_find">Cari</string>
+    <string name="code_search_replace">Ganti</string>
+    <string name="code_search_replace_all">Ganti semua</string>
+    <string name="code_search_invalid">Regex salah</string>
+    <string name="code_search_readonly">Mode hanya baca aktif, penggantian tidak bisa dilakukan.</string>
+    <string name="code_search_no_match">Tidak ada pencarian aktif atau kecocokan untuk diganti.</string>
+    <string name="code_search_close">Tutup pencarian</string>
+
+    <string name="code_goto_hint">1 sampai %1$d</string>
+    <string name="code_goto_confirm">Pergi</string>
+    <string name="code_goto_invalid">Masukkan nomor baris antara 1 dan %1$d.</string>
+
+    <string name="code_stats_lines">Baris: %1$d</string>
+    <string name="code_stats_words">Kata: %1$d</string>
+    <string name="code_stats_characters">Karakter: %1$d</string>
+    <string name="code_stats_size">Ukuran: %1$s</string>
+    <string name="code_stats_encoding">Enkode: %1$s</string>
+    <string name="code_stats_selected">Karakter terpilih: %1$d</string>
+
+    <string name="code_picker_title_open">Buka berkas</string>
+    <string name="code_picker_title_save">Simpan sebagai</string>
+    <string name="code_picker_up">Naik satu folder</string>
+    <string name="code_picker_sort">Urutkan</string>
+    <string name="code_picker_sort_name">Nama</string>
+    <string name="code_picker_sort_date">Tanggal diubah</string>
+    <string name="code_picker_sort_size">Ukuran</string>
+    <string name="code_picker_favorites">Favorit</string>
+    <string name="code_picker_favorite_add">Tambah folder ini ke favorit</string>
+    <string name="code_picker_favorite_remove">Hapus folder ini dari favorit</string>
+    <string name="code_picker_favorite_missing">Folder favorit tidak ditemukan dan dihapus dari daftar:\n%1$s</string>
+    <string name="code_picker_filter">Filter</string>
+    <string name="code_picker_show_hidden">Tampilkan berkas tersembunyi</string>
+    <string name="code_picker_filter_name">Filter nama</string>
+    <string name="code_picker_filter_hint">Bagian dari nama berkas</string>
+    <string name="code_picker_new_folder">Folder baru</string>
+    <string name="code_picker_folder_hint">Nama folder</string>
+    <string name="code_picker_folder_failed">Gagal membuat folder %1$s.</string>
+    <string name="code_picker_save_here">Simpan sebagai</string>
+    <string name="code_picker_cancel">Batal</string>
+    <string name="code_picker_name_hint">Nama berkas</string>
+    <string name="code_picker_name_invalid">Nama tidak valid. Isi nama tanpa tanda / dan bukan . atau ..</string>
+    <string name="code_picker_name_is_folder">%1$s adalah folder, bukan berkas.</string>
+    <string name="code_picker_extension_label">Ekstensi</string>
+    <string name="code_picker_extension_title">Pilih ekstensi</string>
+    <string name="code_picker_extension_none">Tanpa ekstensi</string>
+    <string name="code_picker_extension_unsupported">Ekstensi .%1$s belum didukung editor. Pilih dari daftar ekstensi.</string>
+    <string name="code_picker_default_base">tanpa-judul</string>
+    <string name="code_picker_encoding_label">Enkode</string>
+    <string name="code_picker_encoding_locked">UTF-8 · Terkunci</string>
+    <string name="code_picker_overwrite_title">Timpa berkas?</string>
+    <string name="code_picker_overwrite_message">%1$s sudah ada dan isinya akan diganti.</string>
+    <string name="code_picker_overwrite_yes">Timpa</string>
+    <string name="code_picker_empty">Folder kosong</string>
+    <string name="code_picker_unreadable">Folder tidak bisa dibaca</string>
+    <string name="code_picker_error">Folder bersama tidak bisa disiapkan:\n%1$s</string>
+
+    <string name="code_open_choose_title">Buka</string>
+    <string name="code_open_choice_file">Berkas</string>
+    <string name="code_open_choice_folder">Folder (pohon direktori)</string>
+    <string name="code_picker_title_folder">Pilih folder</string>
+    <string name="code_picker_use_folder">Pilih folder ini</string>
+    <string name="code_tree_none_title">Belum ada folder</string>
+    <string name="code_tree_none_hint">Buka sebuah folder untuk menampilkan pohon direktorinya. Geser dari tepi kiri layar kapan saja untuk membuka panel ini.</string>
+    <string name="code_tree_open_folder">Buka folder</string>
+    <string name="code_tree_change_folder">Ganti folder</string>
+    <string name="code_tree_close_folder">Tutup folder</string>
+    <string name="code_tree_up_folder">Naik ke folder induk</string>
+    <string name="code_tree_open_file">Buka berkas</string>
+    <string name="code_tree_open_file_short">Buka berkas</string>
+    <string name="code_tree_run_debian">Jalankan di Debian</string>
+    <string name="code_tree_run_host">Jalankan di Host</string>
+    <string name="code_key_run">Jalankan</string>
+    <string name="code_run_unsupported">Berkas ini belum bisa dijalankan. Yang didukung: .sh, .py, atau skrip berawalan #!.</string>
+    <string name="code_run_unreadable">Gagal membaca %1$s</string>
+    <string name="code_run_no_switcher">Tidak bisa berpindah ke tab Terminal.</string>
+    <string name="code_run_failed">Gagal menjalankan: %1$s</string>
+    <string name="code_tree_more">… dan %1$d lainnya</string>
+    <string name="code_tree_unreadable">Folder tidak bisa dibaca</string>
+
+    <string name="code_permission_denied">Izin penyimpanan diperlukan untuk membuka dan menyimpan berkas.</string>
+    <string name="code_open_failed">Gagal membuka %1$s:\n%2$s</string>
+    <string name="code_file_too_large">Berkas terlalu besar (%1$s). Batasnya %2$s.</string>
+    <string name="code_file_binary">Berkas ini tampaknya biner dan tidak bisa disunting sebagai teks.</string>
+    <string name="code_save_ok">Tersimpan: %1$s</string>
+    <string name="code_save_failed">Gagal menyimpan:\n%1$s</string>
+    <string name="code_unsaved_title">Perubahan belum disimpan</string>
+    <string name="code_unsaved_message">%1$s memiliki perubahan yang belum disimpan.</string>
+    <string name="code_unsaved_save">Simpan</string>
+    <string name="code_unsaved_discard">Buang</string>
+    <string name="code_reload_title">Muat ulang berkas?</string>
+    <string name="code_reload_message">Perubahan di %1$s yang belum disimpan akan dibuang.</string>
+    <string name="code_reload_confirm">Muat ulang</string>
+    <string name="code_reload_untitled">Dokumen belum disimpan, jadi tidak ada berkas untuk dimuat ulang.</string>
+
+    <string name="code_menu_share">Bagikan</string>
+    <string name="code_menu_syntax">Syntax</string>
+    <string name="code_menu_encoding">Enkode</string>
+    <string name="code_menu_appearance">Gaya Visual</string>
+
+    <string name="code_share_title">Bagikan teks lewat</string>
+    <string name="code_share_too_large">Teks terlalu besar untuk dibagikan langsung. Simpan berkas lalu bagikan dari pengelola file.</string>
+    <string name="code_share_failed">Tidak ada aplikasi yang bisa menerima teks ini.</string>
+
+    <string name="code_syntax_title">Syntax</string>
+    <string name="code_syntax_plain">Teks polos</string>
+    <string name="code_syntax_failed">Bahasa ini tidak bisa dimuat.</string>
+
+    <string name="code_encoding_title">Enkode untuk penyimpanan</string>
+    <string name="code_encoding_locked_message">Enkode dikunci ke UTF-8. Berkas dibuka dan disimpan sebagai UTF-8 supaya isinya tidak rusak.</string>
+    <string name="code_encoding_bom_note">Berkas ini memakai BOM dan BOM dipertahankan saat disimpan.</string>
+
+    <string name="code_appearance_size">Ukuran font: %1$d sp</string>
+    <string name="code_appearance_line_numbers">Tampilkan nomor baris</string>
+    <string name="code_appearance_apply">Terapkan</string>
+
+    <string name="code_appearance_theme">Tema warna</string>
+    <string name="code_theme_darcula">Bawaan (Darcula)</string>
+    <string name="code_theme_obsidian">Obsidian</string>
+    <string name="code_open_kept_unsaved">%1$s punya perubahan yang belum disimpan, jadi isinya tidak dimuat ulang.</string>
+    <string name="code_preview_title">Tinjauan</string>
+    <string name="code_preview_back">Kembali</string>
+    <string name="code_preview_unavailable">Tinjauan tidak bisa dibuka.</string>
+    <string name="code_preview_failed">Gagal menyiapkan Tinjauan: %1$s</string>
+    <string name="code_preview_too_large">Berkas terlalu besar untuk ditinjau (maksimal 8 MB).</string>
+    <string name="code_preview_blocked">Tautan di Tinjauan tidak dibuka.</string>
+    <string name="code_preview_renderer_gone">Tinjauan berhenti karena WebView bermasalah.</string>
+    <string name="code_preview_cache_failed">Gagal menyiapkan berkas Tinjauan.</string>
+</resources>

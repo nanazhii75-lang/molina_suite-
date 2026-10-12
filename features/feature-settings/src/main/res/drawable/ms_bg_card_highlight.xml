@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Kartu paket yang disorot karena dibutuhkan alat lain (Quick Downloader, Play by URL). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/ms_card" />
+    <stroke
+        android:width="2dp"
+        android:color="@color/ms_amber" />
+    <corners android:radius="@dimen/ms_card_radius" />
+</shape>

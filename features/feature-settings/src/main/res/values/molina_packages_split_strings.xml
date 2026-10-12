@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pkg_git_title">Git</string>
+    <string name="pkg_git_desc">Kontrol versi: clone, commit, dan push dari terminal.</string>
+    <string name="pkg_curl_title">curl</string>
+    <string name="pkg_curl_desc">Unduh dan uji HTTP dari terminal; dipakai Cek Jaringan.</string>
+    <string name="pkg_wget_title">wget</string>
+    <string name="pkg_wget_desc">Pengunduh berkas lewat HTTP dan FTP.</string>
+    <string name="pkg_unzip_title">unzip</string>
+    <string name="pkg_unzip_desc">Mengekstrak arsip zip.</string>
+    <string name="pkg_p7zip_title">p7zip</string>
+    <string name="pkg_p7zip_desc">Arsip 7z, zip, tar, dan format lain lewat perintah 7z.</string>
+    <string name="pkg_nano_title">nano</string>
+    <string name="pkg_nano_desc">Editor teks di terminal.</string>
+    <string name="pkg_rsync_title">rsync</string>
+    <string name="pkg_rsync_desc">Sinkronisasi dan salin folder besar.</string>
+    <string name="pkg_jq_title">jq</string>
+    <string name="pkg_jq_desc">Memproses dan merapikan JSON di terminal.</string>
+    <string name="pkg_mediainfo_title">mediainfo</string>
+    <string name="pkg_mediainfo_desc">Detail teknis berkas media.</string>
+    <string name="pkg_tmux_title">tmux</string>
+    <string name="pkg_tmux_desc">Beberapa sesi dalam satu terminal; sesi bertahan saat terputus.</string>
+    <string name="pkg_ssh_title">OpenSSH client</string>
+    <string name="pkg_ssh_desc">ssh, scp, dan sftp untuk terhubung ke server lain.</string>
+</resources>

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-settings-design-7a -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ms_bg"
+    android:clipToPadding="false"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/ms_space_md">
+
+        <TextView
+            style="@style/Molina.Text.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/ms_space_md"
+            android:text="@string/tools_title" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ms_bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/ms_space_md">
+
+            <TextView
+                style="@style/Molina.Text.Item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tools_downloader_title" />
+
+            <TextView
+                style="@style/Molina.Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_xs"
+                android:text="@string/tools_downloader_desc" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tools_url_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_md"
+                android:hint="@string/tools_url_hint"
+                android:textColorHint="@color/ms_text_secondary">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/tools_url"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:inputType="textUri|textNoSuggestions"
+                    android:maxLines="3"
+                    android:textColor="@color/ms_text_primary" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tools_paste"
+                style="@style/Molina.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="@string/tools_paste" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tools_format"
+                style="@style/Molina.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_sm" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tools_engine"
+                style="@style/Molina.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_sm" />
+
+            <TextView
+                android:id="@+id/tools_requires"
+                style="@style/Molina.Text.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_md" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tools_start"
+                style="@style/Molina.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_md"
+                android:text="@string/tools_start" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/ms_card_gap"
+            android:background="@drawable/ms_bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/ms_space_md">
+
+            <TextView
+                style="@style/Molina.Text.Item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tools_convert_title" />
+
+            <TextView
+                style="@style/Molina.Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_xs"
+                android:text="@string/tools_convert_desc" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tools_convert_pick"
+                style="@style/Molina.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_md"
+                android:ellipsize="middle"
+                android:maxLines="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tools_convert_format"
+                style="@style/Molina.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_sm" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tools_convert_start"
+                style="@style/Molina.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_sm"
+                android:text="@string/tools_convert_start" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/ms_card_gap"
+            android:background="@drawable/ms_bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/ms_space_md">
+
+            <TextView
+                style="@style/Molina.Text.Item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tools_probe_title" />
+
+            <TextView
+                style="@style/Molina.Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_xs"
+                android:text="@string/tools_probe_desc" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tools_probe_pick"
+                style="@style/Molina.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_md"
+                android:ellipsize="middle"
+                android:maxLines="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tools_probe_start"
+                style="@style/Molina.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_sm"
+                android:text="@string/tools_probe_start" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/ms_card_gap"
+            android:background="@drawable/ms_bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/ms_space_md">
+
+            <TextView
+                style="@style/Molina.Text.Item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tools_network_title" />
+
+            <TextView
+                android:id="@+id/tools_network_desc"
+                style="@style/Molina.Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_xs" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tools_network_start"
+                style="@style/Molina.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_md"
+                android:text="@string/tools_network_start" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

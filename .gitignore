@@ -1,0 +1,19 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.cxx/
+.externalNativeBuild/
+captures/
+*.apk
+*.aab
+*.keystore
+*.jks
+.DS_Store
+
+# zip bootstrap diunduh saat build
+engines/termux/app/src/main/cpp/bootstrap-*.zip
+
+# keystore debug tetap (bukan rahasia), pengecualian dari *.keystore
+!app/molina-debug.keystore

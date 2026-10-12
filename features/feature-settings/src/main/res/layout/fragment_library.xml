@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-settings-design-6a -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ms_bg"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/ms_space_md"
+        android:paddingTop="@dimen/ms_space_md"
+        android:paddingEnd="@dimen/ms_space_sm"
+        android:paddingBottom="@dimen/ms_space_sm">
+
+        <TextView
+            style="@style/Molina.Text.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/settings_library_title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/library_restore"
+            style="@style/Molina.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/library_restore" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/library_add"
+            style="@style/Molina.Button.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/ms_space_xs"
+            android:text="@string/library_add" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/library_error"
+        style="@style/Molina.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/ms_space_md"
+        android:textColor="@color/ms_status_error"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/library_empty"
+        style="@style/Molina.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="@dimen/ms_space_lg"
+        android:text="@string/library_empty"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/library_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingTop="@dimen/ms_space_xs"
+        android:paddingBottom="@dimen/ms_space_lg" />
+</LinearLayout>

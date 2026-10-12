@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-settings-design-7a -->
+<resources>
+    <string name="settings_tools_title">Pusat Kontrol</string>
+    <string name="settings_tools_subtitle">Alat siap pakai lewat form, tanpa mengetik perintah</string>
+
+    <string name="tools_title">Pusat Kontrol</string>
+    <string name="tools_downloader_title">Quick Downloader</string>
+    <string name="tools_downloader_desc">Tempel tautan video, pilih format, lalu unduh ke folder Downloads. Konten yang butuh login: taruh cookies.txt di folder Molina. Progres tampil di layar khusus, detail teknis tetap ada di Terminal.</string>
+    <string name="tools_url_hint">Tautan video</string>
+    <string name="tools_url_invalid">Tautan harus diawali http:// atau https://</string>
+    <string name="tools_paste">Tempel</string>
+    <string name="tools_paste_empty">Papan klip kosong</string>
+    <string name="tools_format_label">Format: %1$s</string>
+    <string name="tools_engine_label">Mesin: %1$s</string>
+    <string name="tools_format_title">Pilih format</string>
+    <string name="tools_engine_title">Pilih mesin unduh</string>
+    <string name="tools_format_mp4_1080">MP4 1080p</string>
+    <string name="tools_format_mp4_720">MP4 720p</string>
+    <string name="tools_format_best">Terbaik (H.264, kompatibel)</string>
+    <string name="tools_format_mp3">Audio MP3</string>
+    <string name="tools_engine_ytdlp">yt-dlp</string>
+    <string name="tools_engine_aria2">yt-dlp + aria2</string>
+    <string name="tools_start">Mulai unduh</string>
+    <string name="tools_requires">Butuh: %1$s</string>
+    <string name="tools_requires_missing">Belum terpasang: %1$s</string>
+    <string name="tools_no_debian">Debian belum terpasang. Pasang lewat menu Debian dulu.</string>
+    <string name="tools_missing_message">Alat berikut belum terpasang: %1$s</string>
+    <string name="tools_install_and_run">Install lalu jalankan</string>
+    <string name="tools_run_anyway">Jalankan saja</string>
+    <string name="tools_cancel">Batal</string>
+    <string name="tools_run_failed">Gagal menjalankan: %1$s</string>
+
+    <string name="tools_convert_title">Konverter Media</string>
+    <string name="tools_convert_desc">Ubah file media ke MP3, M4A, Opus, MP4, MKV, atau WebM. Progres tampil di layar khusus, detail teknis tetap ada di Terminal. Hasil disimpan di folder Downloads.</string>
+    <string name="tools_convert_start">Konversi</string>
+    <string name="tools_probe_title">Info video (ffprobe)</string>
+    <string name="tools_probe_desc">Tampilkan durasi, resolusi, codec, dan audio sebuah file media di layar khusus. Detail teknis tetap ada di Terminal.</string>
+    <string name="tools_probe_start">Tampilkan info</string>
+
+    <string name="tools_network_title">Cek Jaringan</string>
+    <string name="tools_network_desc">Ukur ping, kecepatan unduh, dan kecepatan upload lewat server Cloudflare. Hasil tampil di layar khusus, detail teknis tetap ada di Terminal. Memakai data hingga %1$d MB.</string>
+    <string name="tools_network_start">Mulai cek</string>
+    <string name="tools_pick_label">Pilih file media</string>
+    <string name="tools_pick_selected">File: %1$s</string>
+    <string name="tools_pick_title">Pilih file</string>
+    <string name="tools_pick_meta">%1$s  •  %2$s  •  %3$s</string>
+    <string name="tools_pick_first">Pilih file dulu</string>
+    <string name="tools_no_media">Belum ada file media di folder Molina</string>
+    <string name="tools_permission_denied">Izin penyimpanan dibutuhkan untuk melihat file</string>
+    <string name="tools_output_failed">Gagal menyiapkan folder Downloads</string>
+
+    <string name="tools_convert_target_label">Hasil: %1$s</string>
+    <string name="tools_convert_target_title">Pilih format hasil</string>
+    <string name="tools_mode_title">Cara memproses video</string>
+    <string name="tools_target_mp3">MP3 (audio 320 kbps)</string>
+    <string name="tools_target_mp4">MP4 (H.264 + AAC)</string>
+    <string name="tools_target_mkv">MKV (H.264 + AAC)</string>
+    <string name="tools_target_webm">WebM (VP9 + Opus, lambat di HP)</string>
+    <string name="tools_target_m4a">M4A (audio AAC 256 kbps)</string>
+    <string name="tools_target_opus">Opus (audio 160 kbps, kecil)</string>
+    <string name="tools_mode_copy">Salin stream: cepat, kualitas tetap, gagal bila codec tidak cocok</string>
+    <string name="tools_mode_reencode">Re-encode: lambat, hasil selalu kompatibel</string>
+</resources>

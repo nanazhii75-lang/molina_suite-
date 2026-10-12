@@ -1,0 +1,11 @@
+#!/data/data/com.molina.suite/files/usr/bin/bash
+# Pembungkus yt-dlp untuk mpv: menjalankan yt-dlp di dalam Debian (proot-distro).
+# stdout hanya berisi keluaran yt-dlp agar JSON bisa di-parse oleh ytdl_hook.
+SELF="${0%/*}"
+PREFIX="${SELF%/bin}"
+export PREFIX
+export HOME="${PREFIX%/usr}/home"
+export TMPDIR="$PREFIX/tmp"
+export PATH="$PREFIX/bin"
+mkdir -p "$TMPDIR"
+exec proot-distro login debian --shared-tmp -- /usr/local/bin/yt-dlp "$@" </dev/null

@@ -1,0 +1,54 @@
+name: Probe Bootstrap Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "Repo termux-packages (owner/nama)"
+        required: true
+        default: "agnostic-apollo/termux-packages"
+      ref:
+        description: "Branch atau tag"
+        required: true
+        default: "infra-improvs"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TP_REPO: ${{ inputs.repo }}
+      TP_REF: ${{ inputs.ref }}
+    steps:
+      - name: Sumber daya runner
+        run: |
+          df -h /
+          nproc
+          free -h
+          docker --version
+
+      - name: Clone termux-packages
+        run: |
+          git clone --depth 1 --branch "$TP_REF" "https://github.com/$TP_REPO.git" tp
+          cd tp
+          echo "COMMIT: $(git rev-parse HEAD)"
+          git log -1 --format='%an | %ad | %s'
+
+      - name: Variabel nama paket di properties.sh
+        run: |
+          cd tp
+          grep -n "TERMUX_APP_PACKAGE\|TERMUX_APP__PACKAGE_NAME" scripts/properties.sh || echo "TIDAK ADA POLA INI"
+
+      - name: Help build-bootstraps.sh
+        run: |
+          cd tp
+          ls scripts | head -60
+          bash scripts/build-bootstraps.sh --help 2>&1 | head -80 || echo "help gagal (exit $?)"
+
+      - name: Paket default bootstrap
+        run: |
+          cd tp
+          grep -n "PACKAGES+=\|PACKAGES=(" scripts/build-bootstraps.sh | head -60 || echo "pola tidak cocok"

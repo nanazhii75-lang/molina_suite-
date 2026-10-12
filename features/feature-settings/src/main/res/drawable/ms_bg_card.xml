@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-settings-design-6a -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/ms_card" />
+    <stroke
+        android:width="@dimen/ms_card_stroke"
+        android:color="@color/ms_card_border" />
+    <corners android:radius="@dimen/ms_card_radius" />
+</shape>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="run_convert_title">Konversi Media</string>
+    <string name="run_convert_done">Konversi selesai</string>
+    <string name="run_convert_note">Konversi memakai ffmpeg. Keluaran lengkapnya ada di tab Terminal. Hasil disimpan di folder Downloads Molina.</string>
+    <string name="run_stage_convert">Mengonversi…</string>
+
+    <string name="run_info_source">SUMBER</string>
+    <string name="run_info_result">HASIL</string>
+    <string name="run_info_speed">KECEPATAN</string>
+    <string name="run_info_size">UKURAN</string>
+    <string name="run_info_eta">SISA WAKTU</string>
+    <string name="run_info_processed">DIPROSES</string>
+    <string name="run_info_working">Berjalan</string>
+    <string name="run_info_unavailable">Tidak tersedia</string>
+    <string name="run_info_eta_done">Selesai</string>
+</resources>
