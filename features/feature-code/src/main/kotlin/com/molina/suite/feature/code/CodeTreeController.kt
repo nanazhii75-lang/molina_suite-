@@ -21,6 +21,7 @@ internal class CodeTreeController(
     interface Host {
         fun onOpenFile(file: File)
         fun onChooseFolder()
+        fun onChooseFile()
     }
 
     private val panel = CodeTreePanel(context, this)
@@ -68,6 +69,8 @@ internal class CodeTreeController(
     }
 
     override fun onChooseFolder() = host.onChooseFolder()
+
+    override fun onChooseFile() = host.onChooseFile()
 
     override fun onCloseFolder() = workspace.close()
 }

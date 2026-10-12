@@ -155,6 +155,11 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
                     closeTree()
                     requestOpenFolder()
                 }
+
+                override fun onChooseFile() {
+                    closeTree()
+                    requestOpenFile()
+                }
             }
         )
         treeController = tree
@@ -278,14 +283,14 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
     private fun buildActionBar(context: Context): View = CodeActionBar.build(
         context,
         listOf(
-            CodeAction(R.drawable.ic_code_folder, R.string.code_key_open) { requestOpen() },
+            CodeAction(R.drawable.ic_code_save, R.string.code_key_save) { saveCurrent() },
             CodeAction(R.drawable.ic_code_paste, R.string.code_key_paste) { session.paste() },
             CodeAction(R.drawable.ic_code_undo, R.string.code_key_undo) { session.undo() },
             CodeAction(R.drawable.ic_code_redo, R.string.code_key_redo) { session.redo() },
             CodeAction(R.drawable.ic_code_search, R.string.code_menu_search) { openSearch() },
             CodeAction(R.drawable.ic_code_arrow_left, R.string.code_key_left) { session.moveCursorLeft() },
             CodeAction(R.drawable.ic_code_arrow_right, R.string.code_key_right) { session.moveCursorRight() },
-            CodeAction(R.drawable.ic_code_save, R.string.code_key_save) { saveCurrent() },
+            CodeAction(R.drawable.ic_code_copy_all, R.string.code_key_copy_all) { copyAll() },
             CodeAction(R.drawable.ic_code_close, R.string.code_key_close) { requestClose() }
         )
     )
@@ -464,6 +469,16 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             CodeFileLoad.Binary -> toast(getString(R.string.code_file_binary))
             is CodeFileLoad.Failed -> toast(getString(R.string.code_open_failed, file.name, result.reason))
         }
+    }
+
+    private fun copyAll() {
+        val message = when (session.copyAll()) {
+            CodeEditorSession.CopyAllResult.COPIED -> R.string.code_copy_all_done
+            CodeEditorSession.CopyAllResult.EMPTY -> R.string.code_copy_all_empty
+            CodeEditorSession.CopyAllResult.TOO_LARGE -> R.string.code_copy_all_too_large
+            CodeEditorSession.CopyAllResult.NO_EDITOR -> R.string.code_copy_all_empty
+        }
+        toast(getString(message))
     }
 
     private fun saveCurrent() {

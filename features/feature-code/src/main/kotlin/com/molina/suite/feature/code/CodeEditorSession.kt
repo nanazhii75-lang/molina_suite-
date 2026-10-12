@@ -219,6 +219,20 @@ internal class CodeEditorSession(
         editor?.pasteText()
     }
 
+    /** Hasil [copyAll]. */
+    enum class CopyAllResult { COPIED, EMPTY, TOO_LARGE, NO_EDITOR }
+
+    /** Memilih seluruh teks tab aktif lalu menyalinnya ke clipboard. */
+    fun copyAll(): CopyAllResult {
+        val target = editor ?: return CopyAllResult.NO_EDITOR
+        val length = target.text.length
+        if (length == 0) return CopyAllResult.EMPTY
+        if (length > target.props.clipboardTextLengthLimit) return CopyAllResult.TOO_LARGE
+        target.selectAll()
+        target.copyText(false)
+        return CopyAllResult.COPIED
+    }
+
     fun setWordwrap(enabled: Boolean) {
         mutableOptions.update { it.copy(wordwrap = enabled) }
         editor?.setWordwrap(enabled)

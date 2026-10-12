@@ -27,6 +27,7 @@ internal class CodeTreePanel(
     interface Callbacks {
         fun onRowClicked(row: CodeTreeRow.Entry)
         fun onChooseFolder()
+        fun onChooseFile()
         fun onCloseFolder()
     }
 
@@ -106,6 +107,12 @@ internal class CodeTreePanel(
 
     private fun build(): View {
         headerButtons.addView(
+            CodeUi.iconButton(context, R.drawable.ic_code_file, R.string.code_tree_open_file_short) {
+                callbacks.onChooseFile()
+            },
+            LinearLayout.LayoutParams(dp(44), dp(48))
+        )
+        headerButtons.addView(
             CodeUi.iconButton(context, R.drawable.ic_code_folder, R.string.code_tree_change_folder) {
                 callbacks.onChooseFolder()
             },
@@ -155,6 +162,15 @@ internal class CodeTreePanel(
                 setOnClickListener { callbacks.onChooseFolder() }
             },
             LinearLayout.LayoutParams(WRAP, WRAP).apply { topMargin = dp(16) }
+        )
+        noFolderView.addView(
+            Button(context).apply {
+                setText(R.string.code_tree_open_file)
+                setTextColor(Color.WHITE)
+                backgroundTintList = ColorStateList.valueOf(CodePalette.ACCENT_DARK)
+                setOnClickListener { callbacks.onChooseFile() }
+            },
+            LinearLayout.LayoutParams(WRAP, WRAP).apply { topMargin = dp(8) }
         )
 
         val body = FrameLayout(context).apply {

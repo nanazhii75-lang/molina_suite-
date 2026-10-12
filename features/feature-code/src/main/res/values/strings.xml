@@ -15,6 +15,10 @@
     <string name="code_key_right">Kursor ke kanan</string>
     <string name="code_key_save">Simpan</string>
     <string name="code_key_close">Tutup</string>
+    <string name="code_key_copy_all">Salin semua</string>
+    <string name="code_copy_all_done">Seluruh teks disalin</string>
+    <string name="code_copy_all_empty">Tidak ada teks untuk disalin</string>
+    <string name="code_copy_all_too_large">Teks terlalu besar untuk disalin ke clipboard</string>
 
     <string name="code_menu_new">Baru</string>
     <string name="code_menu_open">Buka</string>
@@ -93,6 +97,8 @@
     <string name="code_tree_open_folder">Buka folder</string>
     <string name="code_tree_change_folder">Ganti folder</string>
     <string name="code_tree_close_folder">Tutup folder</string>
+    <string name="code_tree_open_file">Buka berkas</string>
+    <string name="code_tree_open_file_short">Buka berkas</string>
     <string name="code_tree_more">… dan %1$d lainnya</string>
     <string name="code_tree_unreadable">Folder tidak bisa dibaca</string>
 
