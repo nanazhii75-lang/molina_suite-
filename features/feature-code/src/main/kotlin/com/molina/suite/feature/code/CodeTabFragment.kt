@@ -33,10 +33,12 @@ import com.molina.suite.core.common.EditorOpenRequest
 import com.molina.suite.core.common.HostBackPressHandler
 import com.molina.suite.core.common.HostChromeController
 import com.molina.suite.core.common.HostTabSwitcher
+import com.molina.suite.core.common.ScriptRunLine
 import com.molina.suite.core.common.ScriptRunTarget
 import com.molina.suite.core.storage.MolinaStorage
 import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -55,6 +57,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
     private var pathView: TextView? = null
     private var searchBar: CodeSearchBar? = null
     private var tabBar: CodeTabBar? = null
+    private var actionBar: CodeActionBar? = null
     private var keyboardWatcher: CodeKeyboardWatcher? = null
     private var drawer: DrawerLayout? = null
     private var treeController: CodeTreeController? = null
@@ -121,6 +124,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             override fun onClosed() = session.stopSearch()
         })
         val actions = buildActionBar(context)
+        actionBar = actions
         val tabs = CodeTabBar(context, object : CodeTabBar.Callbacks {
             override fun onSelect(id: Long) = selectTab(id)
             override fun onClose(id: Long) = requestCloseTab(id)
@@ -138,7 +142,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             addView(tabs.view, LinearLayout.LayoutParams(MATCH, WRAP))
             addView(editorView, LinearLayout.LayoutParams(MATCH, 0, 1f))
             addView(bar.view, LinearLayout.LayoutParams(MATCH, WRAP))
-            addView(actions, LinearLayout.LayoutParams(MATCH, WRAP))
+            addView(actions.view, LinearLayout.LayoutParams(MATCH, WRAP))
         }
 
         val tree = CodeTreeController(
@@ -195,12 +199,17 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             (activity as? HostChromeController)?.setChromeCompact(visible)
         }
         renderDocument(session.document.value)
+        renderActions(session.document.value, session.hasContent.value)
         tabBar?.render(session.tabBar.value)
         val target = requireNotNull(editor)
         viewLifecycleOwner.lifecycleScope.launch { session.attach(target) }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { session.document.collect { renderDocument(it) } }
+                launch {
+                    combine(session.document, session.hasContent) { doc, content -> doc to content }
+                        .collect { (doc, content) -> renderActions(doc, content) }
+                }
                 launch { session.search.collect { searchBar?.render(it) } }
                 launch { session.tabBar.collect { tabBar?.render(it) } }
                 launch { workspace.tree.collect { treeController?.show(it) } }
@@ -244,6 +253,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         pathView = null
         searchBar = null
         tabBar = null
+        actionBar = null
         drawer = null
         treeController = null
         super.onDestroyView()
@@ -284,19 +294,40 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         )
     }
 
-    private fun buildActionBar(context: Context): View = CodeActionBar.build(
+    /**
+     * Ikon yang butuh isi (Simpan, Cari, kursor, Salin semua) abu-abu di lembar kosong. Jalankan
+     * hanya aktif untuk berkas berekstensi yang bisa dijalankan atau ditinjau, atau untuk lembar
+     * tanpa nama yang sudah berisi (Jalankan lalu meminta nama berkas).
+     */
+    private fun renderActions(doc: CodeDocument, hasContent: Boolean) {
+        val bar = actionBar ?: return
+        val file = doc.file
+        bar.setEnabled(R.drawable.ic_code_save, hasContent || file != null)
+        bar.setEnabled(R.drawable.ic_code_search, hasContent)
+        bar.setEnabled(R.drawable.ic_code_arrow_left, hasContent)
+        bar.setEnabled(R.drawable.ic_code_arrow_right, hasContent)
+        bar.setEnabled(R.drawable.ic_code_copy_all, hasContent)
+        val canRun = if (file == null) {
+            hasContent
+        } else {
+            CodePreviewKind.of(file.name) != null || ScriptRunLine.isRunnableName(file.name)
+        }
+        bar.setEnabled(R.drawable.ic_code_run, canRun)
+    }
+
+    private fun buildActionBar(context: Context): CodeActionBar = CodeActionBar.build(
         context,
         listOf(
-            CodeAction(R.drawable.ic_code_save, R.string.code_key_save) { showSaveChoice() },
-            CodeAction(R.drawable.ic_code_paste, R.string.code_key_paste) { session.paste() },
-            CodeAction(R.drawable.ic_code_undo, R.string.code_key_undo) { session.undo() },
-            CodeAction(R.drawable.ic_code_redo, R.string.code_key_redo) { session.redo() },
-            CodeAction(R.drawable.ic_code_search, R.string.code_menu_search) { openSearch() },
-            CodeAction(R.drawable.ic_code_arrow_left, R.string.code_key_left) { session.moveCursorLeft() },
-            CodeAction(R.drawable.ic_code_arrow_right, R.string.code_key_right) { session.moveCursorRight() },
-            CodeAction(R.drawable.ic_code_copy_all, R.string.code_key_copy_all) { copyAll() },
-            CodeAction(R.drawable.ic_code_run, R.string.code_key_run) { runCurrent() },
-            CodeAction(R.drawable.ic_code_close, R.string.code_key_close) { requestClose() }
+            CodeAction(R.drawable.ic_code_save, R.string.code_key_save, CodePalette.TOOL_SAVE) { showSaveChoice() },
+            CodeAction(R.drawable.ic_code_paste, R.string.code_key_paste, CodePalette.TOOL_PASTE) { session.paste() },
+            CodeAction(R.drawable.ic_code_undo, R.string.code_key_undo, CodePalette.TOOL_UNDO) { session.undo() },
+            CodeAction(R.drawable.ic_code_redo, R.string.code_key_redo, CodePalette.TOOL_REDO) { session.redo() },
+            CodeAction(R.drawable.ic_code_search, R.string.code_menu_search, CodePalette.TOOL_SEARCH) { openSearch() },
+            CodeAction(R.drawable.ic_code_arrow_left, R.string.code_key_left, CodePalette.TOOL_CURSOR) { session.moveCursorLeft() },
+            CodeAction(R.drawable.ic_code_arrow_right, R.string.code_key_right, CodePalette.TOOL_CURSOR) { session.moveCursorRight() },
+            CodeAction(R.drawable.ic_code_copy_all, R.string.code_key_copy_all, CodePalette.TOOL_COPY_ALL) { copyAll() },
+            CodeAction(R.drawable.ic_code_run, R.string.code_key_run, CodePalette.TOOL_RUN) { runCurrent() },
+            CodeAction(R.drawable.ic_code_close, R.string.code_key_close, CodePalette.TOOL_CLOSE) { requestClose() }
         )
     )
 
@@ -483,6 +514,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         val doc = session.document.value
         val file = doc.file
         when {
+            file == null && !session.hasContent.value -> Unit
             file == null -> requestSaveAs {
                 session.document.value.file?.let { dispatchRun(it) }
             }

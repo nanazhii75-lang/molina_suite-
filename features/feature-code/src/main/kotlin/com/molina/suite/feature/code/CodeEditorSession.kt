@@ -53,6 +53,11 @@ internal class CodeEditorSession(
     private val mutableSearch = MutableStateFlow(CodeSearchState.NONE)
     val search: StateFlow<CodeSearchState> = mutableSearch.asStateFlow()
 
+    private val mutableHasContent = MutableStateFlow(false)
+
+    /** True bila editor aktif berisi teks; dipakai toolbar untuk menonaktifkan aksi di lembar kosong. */
+    val hasContent: StateFlow<Boolean> = mutableHasContent.asStateFlow()
+
     private var editor: CodeEditor? = null
     private var applyingText = false
 
@@ -65,6 +70,7 @@ internal class CodeEditorSession(
         target.subscribeEvent(
             ContentChangeEvent::class.java,
             EventReceiver<ContentChangeEvent> { event, _ ->
+                if (target === editor) mutableHasContent.value = target.text.length > 0
                 if (target === editor && !applyingText &&
                     event.action != ContentChangeEvent.ACTION_SET_NEW_TEXT
                 ) {
@@ -90,6 +96,7 @@ internal class CodeEditorSession(
         if (editor !== target) return
         captureActive(target)
         mutableSearch.value = CodeSearchState.NONE
+        mutableHasContent.value = false
         editor = null
     }
 
@@ -399,6 +406,7 @@ internal class CodeEditorSession(
             applyingText = false
         }
         val content = target.text
+        mutableHasContent.value = content.length > 0
         val safeLine = line.coerceIn(0, (content.lineCount - 1).coerceAtLeast(0))
         val safeColumn = column.coerceIn(0, content.getColumnCount(safeLine))
         try {

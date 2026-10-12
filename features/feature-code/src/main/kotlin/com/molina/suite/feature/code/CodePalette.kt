@@ -10,6 +10,20 @@ internal object CodePalette {
     val ACCENT_DARK: Int = 0xFF8D5A2B.toInt()
     val FOLDER: Int = 0xFF7FB8E8.toInt()
 
+    /** Warna ikon toolbar bawah: satu warna per aksi. */
+    val TOOL_SAVE: Int = 0xFF42A5F5.toInt()
+    val TOOL_PASTE: Int = 0xFF26C6DA.toInt()
+    val TOOL_UNDO: Int = 0xFFFFA726.toInt()
+    val TOOL_REDO: Int = 0xFFFF8A65.toInt()
+    val TOOL_SEARCH: Int = 0xFFFFEE58.toInt()
+    val TOOL_CURSOR: Int = 0xFFBA68C8.toInt()
+    val TOOL_COPY_ALL: Int = 0xFFF06292.toInt()
+    val TOOL_RUN: Int = 0xFF4CAF50.toInt()
+    val TOOL_CLOSE: Int = 0xFFEF5350.toInt()
+
+    /** Ikon toolbar yang tidak bisa dipakai pada keadaan sekarang. */
+    val TOOL_DISABLED: Int = 0xFF5A5D5F.toInt()
+
     /** Blok latar semua kecocokan pencarian; gelap supaya teks terang di atasnya tetap terbaca. */
     val MATCH_BLOCK: Int = 0xFF7A4A12.toInt()
 }
