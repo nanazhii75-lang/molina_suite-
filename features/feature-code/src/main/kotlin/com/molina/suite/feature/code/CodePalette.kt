@@ -9,4 +9,7 @@ internal object CodePalette {
     val ACCENT: Int = 0xFFFF9800.toInt()
     val ACCENT_DARK: Int = 0xFF8D5A2B.toInt()
     val FOLDER: Int = 0xFF7FB8E8.toInt()
+
+    /** Blok latar semua kecocokan pencarian; gelap supaya teks terang di atasnya tetap terbaca. */
+    val MATCH_BLOCK: Int = 0xFF7A4A12.toInt()
 }

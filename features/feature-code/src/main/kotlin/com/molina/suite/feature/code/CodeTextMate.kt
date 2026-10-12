@@ -54,6 +54,7 @@ internal class CodeTextMate(private val assets: AssetManager) {
             Log.w(TAG, "Skema warna TextMate gagal dibuat", e)
             return CodeHighlighting(null, null)
         }
+        scheme.setColor(EditorColorScheme.MATCHED_TEXT_BACKGROUND, CodePalette.MATCH_BLOCK)
         val scope = fileName?.let { scopeFor(it) }
         Log.i(TAG, "prepare file=$fileName scope=$scope")
         val language = scope?.let {
