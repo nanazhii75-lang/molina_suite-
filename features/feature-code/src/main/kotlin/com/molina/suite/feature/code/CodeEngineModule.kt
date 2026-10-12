@@ -1,10 +1,11 @@
 package com.molina.suite.feature.code
 
 import android.app.Application
+import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.EngineRegistry
 
 /** Komponen engine Code yang dipakai bersama oleh fitur dan fragment tab. */
-internal class CodeEngine(application: Application) {
+internal class CodeEngine(application: Application, val editorOpen: EditorOpenBoard) {
     val textMate = CodeTextMate(application.assets)
     val session = CodeEditorSession(CodeFileRepository(), textMate)
 }
@@ -18,8 +19,8 @@ object CodeEngineModule {
     @Volatile
     private var engine: CodeEngine? = null
 
-    fun install(application: Application, engines: EngineRegistry) {
-        engine = CodeEngine(application)
+    fun install(application: Application, engines: EngineRegistry, editorOpen: EditorOpenBoard) {
+        engine = CodeEngine(application, editorOpen)
         engines.register(CodeFeature())
     }
 

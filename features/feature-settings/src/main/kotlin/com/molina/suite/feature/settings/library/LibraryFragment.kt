@@ -18,10 +18,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.molina.suite.core.common.EngineId
+import com.molina.suite.core.common.HostTabSwitcher
 import com.molina.suite.core.storage.MolinaStorage
 import com.molina.suite.feature.settings.PlaceholderTemplate
 import com.molina.suite.feature.settings.Refreshable
@@ -86,6 +89,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
             return
         }
         viewLifecycleOwner.lifecycleScope.launch {
+            var report = EditorSync.Report.EMPTY
             val result = withContext<LibraryResult<List<LibraryEntry>>>(Dispatchers.IO) {
                 if (!repository.isInitialized()) {
                     val seeded = repository.addMissing(BuiltinLibrary.entries)
@@ -93,15 +97,24 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
                 }
                 BuiltinRetirer.apply(repository)
                 BuiltinUpgrader.apply(repository)
-                repository.list()
+                val listed = repository.list()
+                if (listed is LibraryResult.Ok) {
+                    report = EditorSync.apply(repository, listed.value)
+                    if (report.imported.isNotEmpty()) repository.list() else listed
+                } else {
+                    listed
+                }
             }
+            announce(report)
             render(result)
             refreshRequirements()
         }
     }
 
+    /** Dipanggil saat tab Settings tampil lagi; ikut menyinkronkan perubahan dari editor. */
     override fun refresh() {
-        if (view != null) refreshRequirements()
+        if (view == null) return
+        if (hasStoragePermission()) load() else refreshRequirements()
     }
 
     override fun onResume() {
@@ -327,6 +340,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
         })
         updateCounter()
 
+        var openAfterSave = false
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle(if (entry == null) R.string.library_add_title else R.string.library_edit_title)
             .setView(dialogView)
@@ -336,7 +350,13 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
         val dialog = builder.create()
 
         dialog.setOnShowListener {
+            dialogView.findViewById<MaterialButton>(R.id.library_edit_in_editor).setOnClickListener {
+                openAfterSave = true
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+            }
             dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                val openNow = openAfterSave
+                openAfterSave = false
                 val name = nameInput.text?.toString().orEmpty().trim()
                 val content = contentInput.text?.toString().orEmpty().trim()
                 val note = noteInput.text?.toString().orEmpty().trim()
@@ -358,7 +378,10 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
                 } else {
                     entry.copy(name = name, content = content, note = note, runIn = runIn)
                 }
-                save(saved) { dialog.dismiss() }
+                save(saved) {
+                    dialog.dismiss()
+                    if (openNow) openInEditor(saved)
+                }
             }
             if (entry != null) {
                 dialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener {
@@ -369,12 +392,38 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
         dialog.show()
     }
 
+    /** Menyimpan isi mentah entri ke salinan suntingan, meminta tab Code membukanya, lalu pindah ke sana. */
+    private fun openInEditor(entry: LibraryEntry) {
+        val host = activity ?: return
+        val board = SettingsDependencies.editorOpen()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val staged = withContext(Dispatchers.IO) { ScriptStager.stageForEdit(entry.id, entry.content) }
+            when (staged) {
+                is LibraryResult.Ok -> {
+                    board.request(staged.value)
+                    (host as? HostTabSwitcher)?.showEngine(EngineId.CODE)
+                }
+                is LibraryResult.Failure -> toast(getString(R.string.library_editor_stage_failed, staged.reason))
+            }
+        }
+    }
+
+    /** Mengumumkan hasil sinkron balik dari editor: entri yang diperbarui dan yang ditolak. */
+    private fun announce(report: EditorSync.Report) {
+        for ((name, lines) in report.imported) toast(getString(R.string.library_editor_imported, name, lines))
+        for ((name, reason) in report.rejected) toast(getString(R.string.library_editor_rejected, name, reason))
+    }
+
     private fun confirmDelete(entry: LibraryEntry, onDeleted: () -> Unit) {
         MaterialAlertDialogBuilder(requireContext())
             .setMessage(getString(R.string.library_delete_confirm, entry.name))
             .setPositiveButton(R.string.library_delete) { _, _ ->
                 viewLifecycleOwner.lifecycleScope.launch {
-                    when (val r = withContext(Dispatchers.IO) { repository.remove(entry.id) }) {
+                    when (val r = withContext(Dispatchers.IO) {
+                        repository.remove(entry.id).also {
+                            if (it is LibraryResult.Ok) ScriptStager.removeEditCopy(entry.id)
+                        }
+                    }) {
                         is LibraryResult.Ok -> {
                             onDeleted()
                             load()

@@ -122,4 +122,5 @@
     <string name="code_appearance_theme">Tema warna</string>
     <string name="code_theme_darcula">Bawaan (Darcula)</string>
     <string name="code_theme_obsidian">Obsidian</string>
+    <string name="code_open_kept_unsaved">%1$s punya perubahan yang belum disimpan, jadi isinya tidak dimuat ulang.</string>
 </resources>

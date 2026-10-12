@@ -16,6 +16,15 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.regex.PatternSyntaxException
 
+/** Hasil [CodeEditorSession.openRequested]. */
+internal sealed interface CodeRequestedOpen {
+    /** Berkas dibuka atau dimuat ulang; [load] null berarti tab sudah ada dan hanya diaktifkan. */
+    data class Loaded(val load: CodeFileLoad?) : CodeRequestedOpen
+
+    /** Tab berkas ini punya perubahan belum disimpan: tab diaktifkan, isinya tidak diganti. */
+    object KeptUnsaved : CodeRequestedOpen
+}
+
 /**
  * Sesi penyuntingan seumur proses: memegang daftar tab dokumen (selalu ada minimal
  * satu; awalnya "Tidak berjudul") dan menghubungkan tab aktif ke [CodeEditor] yang
@@ -107,6 +116,18 @@ internal class CodeEditorSession(
         publish()
         editor?.let { showActive(it) }
         return result
+    }
+
+    /**
+     * Membuka [file] atas permintaan modul lain. Berkas yang belum terbuka dibuka di tab baru;
+     * tab yang sudah ada diaktifkan dan, bila bersih, dimuat ulang dari penyimpanan supaya isinya
+     * sama dengan berkas. Tab dengan perubahan belum disimpan tidak pernah ditimpa.
+     */
+    suspend fun openRequested(file: File): CodeRequestedOpen {
+        val existing = tabs.findByFile(file) ?: return CodeRequestedOpen.Loaded(open(file))
+        activateTab(existing.id)
+        if (tabs.active.document.dirty) return CodeRequestedOpen.KeptUnsaved
+        return CodeRequestedOpen.Loaded(reload())
     }
 
     /** Muat ulang isi berkas pada tab aktif dari penyimpanan dan buang perubahan di editor. */

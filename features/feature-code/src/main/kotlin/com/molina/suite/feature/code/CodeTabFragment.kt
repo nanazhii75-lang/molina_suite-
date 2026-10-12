@@ -27,6 +27,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.molina.suite.core.common.EditorOpenBoard
+import com.molina.suite.core.common.EditorOpenRequest
 import com.molina.suite.core.common.HostChromeController
 import com.molina.suite.core.storage.MolinaStorage
 import io.github.rosemoe.sora.widget.CodeEditor
@@ -152,6 +154,12 @@ class CodeTabFragment : Fragment() {
                 launch { session.document.collect { renderDocument(it) } }
                 launch { session.search.collect { searchBar?.render(it) } }
                 launch { session.tabBar.collect { tabBar?.render(it) } }
+                launch {
+                    val board = CodeEngineModule.requireEngine().editorOpen
+                    board.pending.collect { request ->
+                        if (request != null) handleOpenRequest(board, request)
+                    }
+                }
             }
         }
     }
@@ -351,6 +359,17 @@ class CodeTabFragment : Fragment() {
             is MolinaStorage.EnsureResult.Failed ->
                 toast(getString(R.string.code_picker_error, prepared.reason))
         }
+    }
+
+    /** Permintaan modul lain (mis. Library) membuka berkas; papan menyimpannya sampai tab ini siap. */
+    private suspend fun handleOpenRequest(board: EditorOpenBoard, request: EditorOpenRequest) {
+        closeSearch()
+        val file = File(request.path)
+        when (val outcome = session.openRequested(file)) {
+            is CodeRequestedOpen.Loaded -> reportLoad(outcome.load, file)
+            CodeRequestedOpen.KeptUnsaved -> toast(getString(R.string.code_open_kept_unsaved, file.name))
+        }
+        board.consume(request)
     }
 
     private fun openFile(file: File) {

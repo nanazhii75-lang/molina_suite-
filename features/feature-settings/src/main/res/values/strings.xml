@@ -89,4 +89,8 @@
     <string name="library_line_counter">%1$d / %2$d baris</string>
     <string name="library_error_too_long">Isi melebihi %1$d baris</string>
     <string name="library_item_preview_more">%1$s …  (%2$d baris)</string>
+    <string name="library_edit_in_editor">Edit di Editor</string>
+    <string name="library_editor_imported">%1$s diperbarui dari editor (%2$d baris)</string>
+    <string name="library_editor_rejected">Perubahan dari editor untuk %1$s ditolak: %2$s. Entri lama tetap aman.</string>
+    <string name="library_editor_stage_failed">Gagal menyiapkan berkas editor: %1$s</string>
 </resources>

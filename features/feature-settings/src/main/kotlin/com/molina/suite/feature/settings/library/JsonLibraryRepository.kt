@@ -25,7 +25,8 @@ class JsonLibraryRepository(private val file: File) : LibraryRepository {
         val clean = entry.copy(
             name = entry.name.trim(),
             content = entry.content.trim(),
-            note = entry.note.trim()
+            note = entry.note.trim(),
+            updatedAt = System.currentTimeMillis()
         )
         val problem = validate(clean)
         if (problem != null) return@synchronized LibraryResult.Failure(problem)
@@ -94,7 +95,8 @@ class JsonLibraryRepository(private val file: File) : LibraryRepository {
                         content = item.getString(KEY_CONTENT),
                         note = item.optString(KEY_NOTE, ""),
                         runIn = RunMode.fromKey(item.optString(KEY_RUN_IN, RunMode.HOST.key)),
-                        builtin = item.optBoolean(KEY_BUILTIN, false)
+                        builtin = item.optBoolean(KEY_BUILTIN, false),
+                        updatedAt = item.optLong(KEY_UPDATED_AT, 0L)
                     )
                 )
             }
@@ -127,6 +129,7 @@ class JsonLibraryRepository(private val file: File) : LibraryRepository {
                         .put(KEY_NOTE, entry.note)
                         .put(KEY_RUN_IN, entry.runIn.key)
                         .put(KEY_BUILTIN, entry.builtin)
+                        .put(KEY_UPDATED_AT, entry.updatedAt)
                 )
             }
             val root = JSONObject().put(KEY_VERSION, SCHEMA_VERSION).put(KEY_ENTRIES, array)
@@ -160,6 +163,7 @@ class JsonLibraryRepository(private val file: File) : LibraryRepository {
         private const val KEY_NOTE = "note"
         private const val KEY_RUN_IN = "runIn"
         private const val KEY_BUILTIN = "builtin"
+        private const val KEY_UPDATED_AT = "updatedAt"
 
         /** Lokasi standar: library.json di folder bersama molina-suite. */
         fun createDefault(): JsonLibraryRepository =

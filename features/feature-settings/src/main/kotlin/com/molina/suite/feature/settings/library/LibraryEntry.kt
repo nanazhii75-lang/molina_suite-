@@ -25,7 +25,9 @@ data class LibraryEntry(
     val content: String,
     val note: String = "",
     val runIn: RunMode = RunMode.HOST,
-    val builtin: Boolean = false
+    val builtin: Boolean = false,
+    /** Waktu ubah terakhir (ms epoch); 0 untuk entri lama. Dipakai sinkron balik dari editor. */
+    val updatedAt: Long = 0L
 ) {
     companion object {
         fun create(
