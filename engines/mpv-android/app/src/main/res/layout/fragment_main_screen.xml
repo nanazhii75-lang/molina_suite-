@@ -81,20 +81,11 @@
 
                 <ImageView
                     android:id="@+id/logo"
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
+                    android:layout_width="220dp"
+                    android:layout_height="220dp"
                     android:contentDescription="@string/molina_cinema_title"
-                    app:srcCompat="@drawable/molina_cinema_logo" />
+                    app:srcCompat="@drawable/molina_home_logo" />
 
-                <TextView
-                    android:id="@+id/logoTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/molina_cinema_title"
-                    android:textColor="#FFB300"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
