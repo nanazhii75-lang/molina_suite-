@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import sys as _sys
+_sys.exit('Dipensiunkan: playlist IPTV kini di features/feature-settings/src/main/assets/iptv/indonesia.m3u dan diperbarui lewat dialog IPTV di Library.')
 """Membundel playlist IPTV Indonesia (iptv-org) sebagai entri bawaan Library "IPTV Indonesia".
 
 Idempotent: playlist diunduh, dibuat jadi IptvIndonesia.kt (ditulis ulang hanya bila berubah),

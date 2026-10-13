@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play">Putar</string>
+    <string name="iptv_update">Perbarui</string>
+    <string name="iptv_reset">Bawaan</string>
+    <string name="iptv_url_hint">URL playlist M3U (http atau https)</string>
+    <string name="iptv_status_loading">Memuat…</string>
+    <string name="iptv_status_builtin">Sumber: bawaan aplikasi (%1$d channel)</string>
+    <string name="iptv_status_custom">Sumber: URL sendiri (%1$d channel), diperbarui %2$s</string>
+    <string name="iptv_downloading">Mengunduh dan menyaring playlist…</string>
+    <string name="iptv_update_done">Playlist diperbarui: %1$d channel</string>
+    <string name="iptv_update_failed">Gagal, playlist lama tetap dipakai: %1$s</string>
+    <string name="iptv_reset_done">Kembali ke playlist bawaan (%1$d channel)</string>
+    <string name="iptv_http_warning">Perhatian: http:// tidak terenkripsi, isinya bisa diubah di jaringan.</string>
+</resources>

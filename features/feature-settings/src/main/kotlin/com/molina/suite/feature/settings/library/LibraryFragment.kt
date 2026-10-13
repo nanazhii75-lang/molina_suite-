@@ -179,6 +179,10 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
 
     /** Menanyakan nilai placeholder bila ada, lalu menjalankan entri. */
     private fun prepareRun(entry: LibraryEntry) {
+        if (entry.id == IptvIndonesia.ENTRY_ID) {
+            showIptv()
+            return
+        }
         if (LibraryRequirements.of(entry.id).isEmpty()) {
             proceedRun(entry)
             return
@@ -211,6 +215,143 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
             }
         }
         builder.show()
+    }
+
+    /** Dialog IPTV: putar, perbarui dari URL sendiri, atau kembali ke bundel bawaan. */
+    private fun showIptv() {
+        val ctx = requireContext()
+        val appContext = ctx.applicationContext
+        val pad = (24 * resources.displayMetrics.density).toInt()
+        val column = LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(pad, pad / 3, pad, 0)
+        }
+        val statusView = TextView(ctx).apply { text = getString(R.string.iptv_status_loading) }
+        val urlLayout = TextInputLayout(ctx).apply { hint = getString(R.string.iptv_url_hint) }
+        val urlInput = TextInputEditText(urlLayout.context).apply {
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI or
+                InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            maxLines = 1
+        }
+        urlLayout.addView(
+            urlInput,
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        )
+        column.addView(statusView)
+        column.addView(
+            urlLayout,
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        )
+
+        val dialog = MaterialAlertDialogBuilder(ctx)
+            .setTitle(IptvIndonesia.entry.name)
+            .setView(column)
+            .setPositiveButton(R.string.iptv_play, null)
+            .setNeutralButton(R.string.iptv_update, null)
+            .setNegativeButton(R.string.iptv_reset, null)
+            .create()
+
+        dialog.setOnShowListener {
+            val play = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+            val update = dialog.getButton(DialogInterface.BUTTON_NEUTRAL)
+            val reset = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+            val buttons = listOf(play, update, reset)
+            var urlFilled = false
+
+            fun setBusy(busy: Boolean) {
+                buttons.forEach { it.isEnabled = !busy }
+                urlInput.isEnabled = !busy
+            }
+
+            fun describe(s: IptvSource.Status): String {
+                var text = if (s.custom) {
+                    val date = java.text.DateFormat
+                        .getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.SHORT)
+                        .format(java.util.Date(s.updatedAt))
+                    getString(R.string.iptv_status_custom, s.channels, date)
+                } else {
+                    getString(R.string.iptv_status_builtin, s.channels)
+                }
+                if (s.url.startsWith("http://", ignoreCase = true)) {
+                    text += "\n" + getString(R.string.iptv_http_warning)
+                }
+                return text
+            }
+
+            fun refreshStatus(prefix: String?) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val s = withContext(Dispatchers.IO) { IptvSource.status(appContext) }
+                    if (!urlFilled) {
+                        urlFilled = true
+                        urlInput.setText(s.url)
+                    }
+                    val base = describe(s)
+                    statusView.text = if (prefix == null) base else prefix + "\n" + base
+                }
+            }
+
+            play.setOnClickListener {
+                setBusy(true)
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val ready = withContext(Dispatchers.IO) { IptvSource.ensureActive(appContext) }
+                    when (ready) {
+                        is LibraryResult.Failure -> {
+                            statusView.text = getString(R.string.library_run_failed, ready.reason)
+                            setBusy(false)
+                        }
+                        is LibraryResult.Ok -> {
+                            val host: android.content.Context = activity ?: appContext
+                            val error = IptvSource.play(host, ready.value)
+                            if (error == null) {
+                                dialog.dismiss()
+                            } else {
+                                statusView.text = getString(R.string.library_run_failed, error)
+                                setBusy(false)
+                            }
+                        }
+                    }
+                }
+            }
+
+            update.setOnClickListener {
+                val typed = urlInput.text?.toString().orEmpty().trim()
+                if (typed.isEmpty()) {
+                    urlLayout.error = getString(R.string.library_error_value)
+                    return@setOnClickListener
+                }
+                urlLayout.error = null
+                setBusy(true)
+                statusView.text = getString(R.string.iptv_downloading)
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val result = withContext(Dispatchers.IO) { IptvSource.update(appContext, typed) }
+                    setBusy(false)
+                    when (result) {
+                        is LibraryResult.Failure ->
+                            refreshStatus(getString(R.string.iptv_update_failed, result.reason))
+                        is LibraryResult.Ok ->
+                            refreshStatus(getString(R.string.iptv_update_done, result.value))
+                    }
+                }
+            }
+
+            reset.setOnClickListener {
+                setBusy(true)
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val result = withContext(Dispatchers.IO) { IptvSource.reset(appContext) }
+                    setBusy(false)
+                    urlInput.setText("")
+                    when (result) {
+                        is LibraryResult.Failure ->
+                            refreshStatus(getString(R.string.iptv_update_failed, result.reason))
+                        is LibraryResult.Ok ->
+                            refreshStatus(getString(R.string.iptv_reset_done, result.value))
+                    }
+                }
+            }
+
+            refreshStatus(null)
+        }
+        dialog.show()
     }
 
     private fun proceedRun(entry: LibraryEntry) {
