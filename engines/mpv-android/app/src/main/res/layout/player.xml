@@ -294,15 +294,15 @@
             app:srcCompat="@drawable/ic_screen_rotation_24dp"
             app:tint="@color/tint_normal" />
 
-        <!-- tombol daftar playlist: bulat, semi-transparan, di sisi kanan, agak ke bawah agar mudah dijangkau jempol -->
+        <!-- tombol daftar playlist: bulat, semi-transparan, di kanan bawah tepat di atas bar kontrol (area jempol/gesture volume) -->
         <ImageButton
             android:id="@+id/openPlaylistBtn"
             android:layout_width="44dp"
             android:layout_height="44dp"
+            android:layout_above="@id/controls"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="120dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginBottom="12dp"
             android:alpha="0.65"
             android:background="@drawable/molina_float_button_bg"
             android:contentDescription="@string/ui_open_playlist"
