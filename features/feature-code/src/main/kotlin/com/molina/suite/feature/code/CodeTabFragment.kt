@@ -738,8 +738,8 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
     private companion object {
         const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
         const val WRAP = ViewGroup.LayoutParams.WRAP_CONTENT
-        const val DRAWER_WIDTH_DP = 300
-        const val DRAWER_MAX_FRACTION = 0.85f
+        const val DRAWER_WIDTH_DP = 260
+        const val DRAWER_MAX_FRACTION = 0.75f
         const val DRAWER_SCRIM = 0x66000000
     }
 }
