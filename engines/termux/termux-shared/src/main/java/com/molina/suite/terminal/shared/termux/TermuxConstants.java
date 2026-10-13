@@ -276,7 +276,7 @@ public final class TermuxConstants {
      */
 
     /** Termux app name */
-    public static final String TERMUX_APP_NAME = "Termux"; // Default: "Termux"
+    public static final String TERMUX_APP_NAME = "Molina Terminal"; // Default: "Termux"
     /** Termux package name */
     public static final String TERMUX_PACKAGE_NAME = "com.molina.suite"; // Default: "com.molina.suite"
 
@@ -285,7 +285,7 @@ public final class TermuxConstants {
     /** Termux Github repo name */
     public static final String TERMUX_GITHUB_REPO_NAME = "termux-app"; // Default: "termux-app"
     /** Termux Github repo url */
-    public static final String TERMUX_GITHUB_REPO_URL = TERMUX_GITHUB_ORGANIZATION_URL + "/" + TERMUX_GITHUB_REPO_NAME; // Default: "https://github.com/termux/termux-app"
+    public static final String TERMUX_GITHUB_REPO_URL = "https://github.com/nanazhii75-lang/molina_suite-"; // Default: "https://github.com/termux/termux-app"
     /** Termux Github issues repo url */
     public static final String TERMUX_GITHUB_ISSUES_REPO_URL = TERMUX_GITHUB_REPO_URL + "/issues"; // Default: "https://github.com/termux/termux-app/issues"
     /** Termux F-Droid package url */
@@ -492,13 +492,13 @@ public final class TermuxConstants {
     public static final String TERMUX_SITE = TERMUX_APP_NAME + " Site"; // Default: "Termux Site"
 
     /** Termux Site url */
-    public static final String TERMUX_SITE_URL = "https://termux.dev"; // Default: "https://termux.dev"
+    public static final String TERMUX_SITE_URL = "https://github.com/nanazhii75-lang/molina_suite-"; // Default: "https://termux.dev"
 
     /** Termux Wiki */
     public static final String TERMUX_WIKI = TERMUX_APP_NAME + " Wiki"; // Default: "Termux Wiki"
 
     /** Termux Wiki url */
-    public static final String TERMUX_WIKI_URL = "https://wiki.termux.com"; // Default: "https://wiki.termux.com"
+    public static final String TERMUX_WIKI_URL = "https://github.com/nanazhii75-lang/molina_suite-"; // Default: "https://wiki.termux.com"
 
     /** Termux Github wiki repo url */
     public static final String TERMUX_GITHUB_WIKI_REPO_URL = TERMUX_GITHUB_REPO_URL + "/wiki"; // Default: "https://github.com/termux/termux-app/wiki"
@@ -522,7 +522,7 @@ public final class TermuxConstants {
 
 
     /** Termux donate url */
-    public static final String TERMUX_DONATE_URL = TERMUX_SITE_URL + "/donate"; // Default: "https://termux.dev/donate"
+    public static final String TERMUX_DONATE_URL = "https://github.com/nanazhii75-lang/molina_suite-"; // Default: "https://termux.dev/donate"
 
 
 
