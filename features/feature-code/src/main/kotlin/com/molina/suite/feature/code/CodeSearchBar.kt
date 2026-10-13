@@ -14,6 +14,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
 
@@ -39,6 +40,9 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         backgroundTintList = ColorStateList.valueOf(CodePalette.ACCENT)
         inputType = InputType.TYPE_CLASS_TEXT
         setSingleLine(true)
+        minHeight = 0
+        minimumHeight = 0
+        setPadding(paddingLeft, CodeUi.dp(context, 6), paddingRight, CodeUi.dp(context, 6))
     }
 
     private fun check(label: Int, checked: Boolean): CheckBox = CheckBox(context).apply {
@@ -48,6 +52,8 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         setTextColor(CodePalette.TEXT)
         buttonTintList = ColorStateList.valueOf(CodePalette.ACCENT)
         isFocusableInTouchMode = false
+        minHeight = 0
+        minimumHeight = 0
         setOnCheckedChangeListener { _, _ -> callbacks.onRequestChanged(request()) }
     }
 
@@ -60,6 +66,16 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
             isFocusableInTouchMode = false
             setOnClickListener { onClick() }
         }
+
+    private fun compactAction(label: Int, onClick: () -> Unit): Button = action(label, onClick).apply {
+        minWidth = 0
+        minimumWidth = 0
+        minHeight = 0
+        minimumHeight = 0
+        textSize = 13f
+        val pad = CodeUi.dp(context, 10)
+        setPadding(pad, 0, pad, 0)
+    }
 
     private val findInput: EditText = field(R.string.code_search_find_hint).apply {
         imeOptions = EditorInfo.IME_ACTION_SEARCH
@@ -96,57 +112,71 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         gravity = Gravity.END or Gravity.CENTER_VERTICAL
     }
 
+    /** Baris Ganti; disembunyikan bawaan supaya panel Cari tidak menutupi ruang kerja. */
+    private val replaceRow: LinearLayout = LinearLayout(context).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        visibility = View.GONE
+        addView(replaceInput, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        addView(compactAction(R.string.code_search_replace) {
+            callbacks.onReplace(replaceInput.text.toString())
+        })
+        addView(compactAction(R.string.code_search_replace_all) {
+            callbacks.onReplaceAll(replaceInput.text.toString())
+        })
+    }
+
+    private val replaceToggle: CheckBox = check(R.string.code_search_replace_toggle, false).apply {
+        setOnCheckedChangeListener { _, on ->
+            replaceRow.visibility = if (on) View.VISIBLE else View.GONE
+        }
+    }
+
     val view: View = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
         setBackgroundColor(CodePalette.PANEL)
-        setPadding(CodeUi.dp(context, 16), CodeUi.dp(context, 8), CodeUi.dp(context, 8), CodeUi.dp(context, 4))
+        setPadding(CodeUi.dp(context, 12), CodeUi.dp(context, 4), CodeUi.dp(context, 4), CodeUi.dp(context, 2))
         visibility = View.GONE
 
         addView(
             LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
+                addView(findInput, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
                 addView(
-                    TextView(context).apply {
-                        setText(R.string.code_search_title)
-                        setTextColor(CodePalette.ACCENT)
-                        textSize = 16f
-                        setTypeface(typeface, Typeface.BOLD)
-                    },
-                    LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                    counter,
+                    LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply { marginStart = CodeUi.dp(context, 8) }
                 )
-                addView(counter)
+                addView(compactAction(R.string.code_search_find) { callbacks.onFind() })
                 addView(
                     CodeUi.iconButton(context, R.drawable.ic_code_close, R.string.code_search_close) { hide() },
                     LinearLayout.LayoutParams(CodeUi.dp(context, 40), CodeUi.dp(context, 40))
                 )
             },
-            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            matchWidth()
         )
-        addView(findInput, matchWidth())
-        addView(replaceInput, matchWidth())
-        for (row in listOf(listOf(caseBox, blockBox), listOf(regexBox, wrapBox))) {
-            addView(
-                LinearLayout(context).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    for (box in row) {
-                        addView(box, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-                    }
-                },
-                matchWidth()
-            )
-        }
+        addView(replaceRow, matchWidth())
         addView(
-            LinearLayout(context).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.END
-                addView(action(R.string.code_search_replace_all) {
-                    callbacks.onReplaceAll(replaceInput.text.toString())
-                })
-                addView(action(R.string.code_search_replace) {
-                    callbacks.onReplace(replaceInput.text.toString())
-                })
-                addView(action(R.string.code_search_find) { callbacks.onFind() })
+            HorizontalScrollView(context).apply {
+                isHorizontalScrollBarEnabled = false
+                addView(
+                    LinearLayout(context).apply {
+                        orientation = LinearLayout.HORIZONTAL
+                        gravity = Gravity.CENTER_VERTICAL
+                        for (box in listOf(caseBox, blockBox, regexBox, wrapBox, replaceToggle)) {
+                            addView(
+                                box,
+                                LinearLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT
+                                ).apply { marginEnd = CodeUi.dp(context, 12) }
+                            )
+                        }
+                    }
+                )
             },
             matchWidth()
         )
