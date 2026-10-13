@@ -42,7 +42,8 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         setSingleLine(true)
         minHeight = 0
         minimumHeight = 0
-        setPadding(paddingLeft, CodeUi.dp(context, 6), paddingRight, CodeUi.dp(context, 6))
+        // teks diangkat dari garis bawah: padding bawah lebih besar, tinggi total tetap
+        setPadding(paddingLeft, 0, paddingRight, CodeUi.dp(context, 12))
     }
 
     private fun action(label: Int, onClick: () -> Unit): Button =
