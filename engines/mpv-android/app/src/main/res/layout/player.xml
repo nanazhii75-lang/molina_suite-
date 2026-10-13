@@ -243,18 +243,6 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/topRotateBtn"
-                style="?buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/ui_rotate_screen"
-                android:minWidth="40dp"
-                android:minHeight="40dp"
-                android:padding="4dp"
-                app:srcCompat="@drawable/ic_screen_rotation_24dp"
-                app:tint="@color/tint_normal" />
-
-            <ImageButton
                 android:id="@+id/topLockBtn"
                 style="?buttonBarButtonStyle"
                 android:layout_width="wrap_content"
@@ -288,6 +276,23 @@
                 app:tint="@color/tint_normal" />
 
         </LinearLayout>
+
+        <!-- tombol putar layar: bulat, semi-transparan, tepat di bawah ikon setting -->
+        <ImageButton
+            android:id="@+id/topRotateBtn"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/top_controls"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="8dp"
+            android:alpha="0.65"
+            android:background="@drawable/molina_float_button_bg"
+            android:contentDescription="@string/ui_rotate_screen"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_screen_rotation_24dp"
+            app:tint="@color/tint_normal" />
 
         <!-- mismatching width/height so that the button appears exactly square?! -->
         <ImageButton

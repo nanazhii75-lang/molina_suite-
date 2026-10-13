@@ -160,6 +160,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
         override fun run() {
             binding.topControls.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
+            binding.topRotateBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.controls.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION).setListener(listener)
         }
     }
@@ -583,6 +584,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
     private var useAudioUI = false
     private var lockedUI = false
+    // perangkat tanpa mode potret (Android TV) tidak memakai tombol putar layar
+    private val rotateButtonAvailable by lazy {
+        packageManager.hasSystemFeature(PackageManager.FEATURE_SCREEN_PORTRAIT)
+    }
 
     private fun pauseForDialog(): StateRestoreCallback {
         val useKeepOpen = when (noUIPauseMode) {
@@ -631,14 +636,17 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         fadeHandler.removeCallbacks(fadeRunnable)
         binding.controls.animate().cancel()
         binding.topControls.animate().cancel()
+        binding.topRotateBtn.animate().cancel()
 
         // reset controls alpha to be visible
         binding.controls.alpha = 1f
         binding.topControls.alpha = 1f
+        binding.topRotateBtn.alpha = ROTATE_BTN_ALPHA
 
         if (binding.controls.visibility != View.VISIBLE) {
             binding.controls.visibility = View.VISIBLE
             binding.topControls.visibility = View.VISIBLE
+            binding.topRotateBtn.visibility = if (rotateButtonAvailable) View.VISIBLE else View.GONE
 
             if (this.statsFPS) {
                 updateStats()
@@ -662,6 +670,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         // see http://stackoverflow.com/a/12655713/2606891
         binding.controls.visibility = View.GONE
         binding.topControls.visibility = View.GONE
+        binding.topRotateBtn.visibility = View.GONE
         binding.statsTextView.visibility = View.GONE
 
         val insetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -1148,13 +1157,26 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             }
         }
 
-        dialog = with (AlertDialog.Builder(this)) {
+        dialog = with (AlertDialog.Builder(this, R.style.PlaylistPanelTheme)) {
             val inflater = LayoutInflater.from(context)
             setView(impl.buildView(inflater))
             setOnDismissListener { restore() }
             create()
         }
         dialog.show()
+        dockPlaylistPanel(dialog)
+    }
+
+    /** Menempelkan dialog playlist di tepi kanan sebagai panel setinggi layar. */
+    private fun dockPlaylistPanel(dialog: AlertDialog) {
+        val window = dialog.window ?: return
+        val metrics = resources.displayMetrics
+        val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val width = (metrics.widthPixels * (if (landscape) 0.45f else 0.8f)).toInt()
+            .coerceIn((260 * metrics.density).toInt(), (440 * metrics.density).toInt())
+            .coerceAtMost(metrics.widthPixels)
+        window.setGravity(Gravity.END)
+        window.setLayout(width, ViewGroup.LayoutParams.MATCH_PARENT)
     }
 
     private fun pickDecoder() {
@@ -1949,7 +1971,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 gestureTextView.visibility = View.GONE
                 if (liveSwipeOpensPlaylist) {
                     liveSwipeOpensPlaylist = false
-                    openPlaylistMenu(pauseForDialog())
+                    openPlaylistMenu({})
                 }
             }
 
@@ -1975,6 +1997,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         private const val TAG = "mpv"
         // jarak geser (dalam satuan gestur seek, 150 = lebar layar penuh) pembuka daftar channel live
         private const val LIVE_SWIPE_PLAYLIST_DIFF = 30f
+        // transparansi tombol putar layar saat kontrol tampil penuh
+        private const val ROTATE_BTN_ALPHA = 0.65f
         // how long should controls be displayed on screen (ms)
         private const val CONTROLS_DISPLAY_TIMEOUT = 1500L
         // how long controls fade to disappear (ms)
