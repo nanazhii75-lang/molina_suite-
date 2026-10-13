@@ -9,4 +9,6 @@
     <color name="molina_status_on">#4CAF50</color>
     <color name="molina_status_off">#6B6B6B</color>
     <color name="molina_status_error">#E53935</color>
+    <color name="monitor_cpu">#FFD54F</color>
+    <color name="monitor_ram">#FFFFFF</color>
 </resources>

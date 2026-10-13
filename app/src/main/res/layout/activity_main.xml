@@ -146,7 +146,7 @@
             android:autoSizeTextType="uniform"
             android:gravity="center"
             android:maxLines="1"
-            android:textColor="@color/molina_text_secondary"
+            android:textColor="@color/monitor_cpu"
             android:textSize="11sp" />
 
         <TextView
@@ -160,7 +160,7 @@
             android:autoSizeTextType="uniform"
             android:gravity="center"
             android:maxLines="1"
-            android:textColor="@color/molina_text_secondary"
+            android:textColor="@color/monitor_ram"
             android:textSize="11sp" />
     </LinearLayout>
 
