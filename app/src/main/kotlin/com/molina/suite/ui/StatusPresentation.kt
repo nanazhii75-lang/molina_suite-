@@ -3,6 +3,7 @@ package com.molina.suite.ui
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import com.molina.suite.R
+import com.molina.suite.core.common.DaemonId
 import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.EngineStatus
 
@@ -13,6 +14,19 @@ fun EngineStatus.colorRes(): Int = when (this) {
     EngineStatus.ERROR -> R.color.molina_status_error
     EngineStatus.STOPPED, EngineStatus.UNAVAILABLE -> R.color.molina_status_off
 }
+
+/** Warna titik header: tiap daemon punya warna sendiri saat RUNNING; status lain memakai warna umum. */
+@ColorRes
+fun EngineStatus.daemonColorRes(id: DaemonId): Int =
+    if (this == EngineStatus.RUNNING) {
+        when (id) {
+            DaemonId.TERMINAL -> R.color.daemon_terminal
+            DaemonId.MPV -> R.color.daemon_mpv
+            DaemonId.CODE -> R.color.molina_status_on
+        }
+    } else {
+        colorRes()
+    }
 
 @StringRes
 fun EngineStatus.labelRes(): Int = when (this) {

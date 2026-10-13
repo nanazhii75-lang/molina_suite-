@@ -11,4 +11,6 @@
     <color name="molina_status_error">#E53935</color>
     <color name="monitor_cpu">#FFD54F</color>
     <color name="monitor_ram">#FFFFFF</color>
+    <color name="daemon_terminal">#4CAF50</color>
+    <color name="daemon_mpv">#4FC3F7</color>
 </resources>

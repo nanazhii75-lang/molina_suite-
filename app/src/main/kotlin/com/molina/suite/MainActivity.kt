@@ -19,9 +19,9 @@ import com.molina.suite.core.common.HostContextMenuListener
 import com.molina.suite.core.common.HostTabSwitcher
 import com.molina.suite.databinding.ActivityMainBinding
 import com.molina.suite.meter.SystemMeterSampler
+import com.molina.suite.ui.daemonColorRes
 import com.molina.suite.ui.EngineUnavailableFragment
 import com.molina.suite.ui.MeterBarPresenter
-import com.molina.suite.ui.colorRes
 import com.molina.suite.ui.labelRes
 import kotlinx.coroutines.launch
 
@@ -52,7 +52,6 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
         }
 
         bindDaemon(DaemonId.TERMINAL, binding.dotTerminal)
-        bindDaemon(DaemonId.WEBDAV, binding.dotWebdav)
         bindDaemon(DaemonId.MPV, binding.dotMpv)
         bindMeter()
     }
@@ -145,7 +144,7 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 molina.daemons.status(id).collect { status ->
-                    val color = ContextCompat.getColor(this@MainActivity, status.colorRes())
+                    val color = ContextCompat.getColor(this@MainActivity, status.daemonColorRes(id))
                     dot.backgroundTintList = ColorStateList.valueOf(color)
                     dot.contentDescription = getString(status.labelRes())
                 }
