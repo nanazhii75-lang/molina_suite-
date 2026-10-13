@@ -7,8 +7,8 @@ internal object CodePalette {
     /** Latar halaman kerja (editor, nomor baris, tab aktif): hitam pekat. */
     val EDITOR_BACKGROUND: Int = 0xFF000000.toInt()
 
-    /** Sorotan baris aktif; sedikit lebih terang dari latar supaya tetap terlihat. */
-    val EDITOR_CURRENT_LINE: Int = 0xFF161616.toInt()
+    /** Sorotan baris aktif (juga baris tujuan "Pergi ke baris"): cokelat amber gelap, jelas terlihat di latar hitam pekat. */
+    val EDITOR_CURRENT_LINE: Int = 0xFF33260A.toInt()
 
     /** Nomor baris di tepi editor: cyan terang, kontras tinggi di latar hitam pekat. */
     val EDITOR_LINE_NUMBER: Int = 0xFF4DD0E1.toInt()
@@ -37,5 +37,5 @@ internal object CodePalette {
     val TOOL_DISABLED: Int = 0xFF5A5D5F.toInt()
 
     /** Blok latar semua kecocokan pencarian; gelap supaya teks terang di atasnya tetap terbaca. */
-    val MATCH_BLOCK: Int = 0xFF7A4A12.toInt()
+    val MATCH_BLOCK: Int = 0xFF5C3A0A.toInt()
 }

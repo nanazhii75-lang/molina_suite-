@@ -442,7 +442,12 @@ internal class CodeEditorSession(
         val tab = tabs.find(tabId) ?: return
         val choice = tab.syntax
         val highlighting = textMate.prepare(if (choice == null) tab.document.file?.name else null)
-        highlighting.scheme?.let { target.setColorScheme(it) }
+        highlighting.scheme?.let {
+            target.setColorScheme(it)
+            // attachEditor() pada skema TextMate memuat ulang tema dan menghapus warna Molina;
+            // timpa lagi supaya latar hitam pekat, nomor baris, dan sorotan baris berlaku.
+            textMate.applyOverrides(it)
+        }
         val language = if (choice == null || choice == CodeTabs.SYNTAX_PLAIN) {
             highlighting.language
         } else {
