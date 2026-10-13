@@ -161,7 +161,7 @@ final class MolinaShellProfile {
             + "\t\t\t;;\n"
             + "\t\t*) return 2 ;;\n"
             + "\tesac\n"
-            + "\tprintf 'Kembali ke shell Termux. Ketik molina-login untuk masuk Debian lagi.\\n'\n"
+            + "\tprintf 'Kembali ke shell Molina. Ketik molina-login untuk masuk Debian lagi.\\n'\n"
             + "}\n"
             + "\n"
             + "molina-login() {\n"
