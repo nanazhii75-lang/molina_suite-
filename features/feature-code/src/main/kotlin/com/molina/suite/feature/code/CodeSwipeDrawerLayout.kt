@@ -20,6 +20,7 @@ internal class CodeSwipeDrawerLayout(
 ) : DrawerLayout(context) {
 
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+    private val openDistance = OPEN_DISTANCE_DP * context.resources.displayMetrics.density
     private val screenLocation = IntArray(2)
     private var tracking = false
     private var downX = 0f
@@ -36,7 +37,7 @@ internal class CodeSwipeDrawerLayout(
                 val dx = ev.rawX - downX
                 val dy = abs(ev.rawY - downY)
                 when {
-                    dx > touchSlop * OPEN_SLOP_FACTOR && dx > dy * OPEN_DOMINANCE -> {
+                    dx > openDistance && dx > dy * OPEN_DOMINANCE -> {
                         tracking = false
                         if (canOpen()) {
                             openDrawer(Gravity.START)
@@ -69,7 +70,8 @@ internal class CodeSwipeDrawerLayout(
     }
 
     private companion object {
-        const val OPEN_SLOP_FACTOR = 3
-        const val OPEN_DOMINANCE = 2
+        const val OPEN_SLOP_FACTOR = 5
+        const val OPEN_DOMINANCE = 3
+        const val OPEN_DISTANCE_DP = 96f
     }
 }
