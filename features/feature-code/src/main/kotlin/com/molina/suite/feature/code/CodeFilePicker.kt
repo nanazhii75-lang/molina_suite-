@@ -142,7 +142,7 @@ internal class CodeFilePicker(
             this.adapter = this@CodeFilePicker.adapter
             divider = null
             clipToPadding = false
-            setPadding(0, 0, 0, CodeUi.dp(context, 200))
+            setPadding(0, 0, 0, CodeUi.dp(context, 150))
             setOnItemClickListener { _, _, position, _ -> onItemClicked(items.getOrNull(position)) }
         }
         emptyView = TextView(context).apply {
@@ -154,7 +154,7 @@ internal class CodeFilePicker(
             addView(listView, FrameLayout.LayoutParams(MATCH, MATCH))
             addView(emptyView, FrameLayout.LayoutParams(MATCH, WRAP, Gravity.CENTER))
             addView(buildFloatingButtons(), FrameLayout.LayoutParams(WRAP, WRAP, Gravity.BOTTOM or Gravity.END).apply {
-                setMargins(0, 0, CodeUi.dp(context, 16), CodeUi.dp(context, 16))
+                setMargins(0, 0, CodeUi.dp(context, 12), CodeUi.dp(context, 12))
             })
         }
 
@@ -256,8 +256,8 @@ internal class CodeFilePicker(
         val chip = TextView(context).apply {
             setText(label)
             setTextColor(CodePalette.TEXT)
-            textSize = 13f
-            setPadding(CodeUi.dp(context, 10), CodeUi.dp(context, 4), CodeUi.dp(context, 10), CodeUi.dp(context, 4))
+            textSize = 11f
+            setPadding(CodeUi.dp(context, 8), CodeUi.dp(context, 3), CodeUi.dp(context, 8), CodeUi.dp(context, 3))
             background = GradientDrawable().apply {
                 setColor(CodePalette.PANEL)
                 cornerRadius = CodeUi.dp(context, 6).toFloat()
@@ -268,14 +268,15 @@ internal class CodeFilePicker(
                 shape = GradientDrawable.OVAL
                 setColor(CodePalette.ACCENT_DARK)
             }
-            elevation = CodeUi.dp(context, 4).toFloat()
+            elevation = CodeUi.dp(context, 3).toFloat()
+            setPadding(CodeUi.dp(context, 8), CodeUi.dp(context, 8), CodeUi.dp(context, 8), CodeUi.dp(context, 8))
         }
         return LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL or Gravity.END
-            addView(chip, LinearLayout.LayoutParams(WRAP, WRAP).apply { marginEnd = CodeUi.dp(context, 10) })
-            addView(circle, LinearLayout.LayoutParams(CodeUi.dp(context, 52), CodeUi.dp(context, 52)))
-            layoutParams = LinearLayout.LayoutParams(WRAP, WRAP).apply { topMargin = CodeUi.dp(context, 12) }
+            addView(chip, LinearLayout.LayoutParams(WRAP, WRAP).apply { marginEnd = CodeUi.dp(context, 8) })
+            addView(circle, LinearLayout.LayoutParams(CodeUi.dp(context, 36), CodeUi.dp(context, 36)))
+            layoutParams = LinearLayout.LayoutParams(WRAP, WRAP).apply { topMargin = CodeUi.dp(context, 8) }
         }
     }
 
