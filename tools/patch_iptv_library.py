@@ -38,6 +38,52 @@ def fetch() -> str:
     sys.exit("Gagal mengunduh playlist:\n  " + "\n  ".join(errors))
 
 
+def split_extinf(line: str):
+    """Pisahkan '#EXTINF:' menjadi (kepala, judul) pada koma pertama di luar tanda kutip."""
+    body = line[len("#EXTINF:"):]
+    in_quote = False
+    for i, ch in enumerate(body):
+        if ch == '"':
+            in_quote = not in_quote
+        elif ch == "," and not in_quote:
+            return body[:i], body[i + 1:].strip()
+    i = body.rfind(",")  # kutip tidak seimbang: pakai koma terakhir
+    return (body[:i], body[i + 1:].strip()) if i >= 0 else (body, "")
+
+
+def normalize(lines):
+    """Rapikan baris EXTINF agar judul channel benar di mpv.
+
+    Atribut berkoma (mis. http-user-agent="... (KHTML, like Gecko) ...") membuat mpv memotong judul
+    di koma pertama. Hanya tvg-id yang dipertahankan; http-referrer dan http-user-agent dipindah
+    ke baris #EXTVLCOPT. Baris lain tidak diubah.
+    """
+    out, seen = [], set()
+    for raw in lines:
+        line = raw.strip()
+        if not line:
+            continue
+        if line.startswith("#EXTINF:"):
+            seen = set()
+            head, title = split_extinf(line)
+            attrs = dict(re.findall(r'([\w-]+)="([^"]*)"', head))
+            duration = head.split()[0] if head.split() else "-1"
+            tvg = f' tvg-id="{attrs["tvg-id"]}"' if attrs.get("tvg-id") else ""
+            out.append(f"#EXTINF:{duration}{tvg},{title}")
+            for key in ("http-referrer", "http-user-agent"):
+                if attrs.get(key):
+                    opt = f"#EXTVLCOPT:{key}={attrs[key]}"
+                    seen.add(opt)
+                    out.append(opt)
+            continue
+        if line.startswith("#EXTVLCOPT:"):
+            if line in seen:
+                continue
+            seen.add(line)
+        out.append(line)
+    return out
+
+
 def kt(line: str) -> str:
     return '"' + line.replace("\\", "\\\\").replace('"', '\\"').replace("$", "\\$") + '"'
 
@@ -96,7 +142,7 @@ def render(lines) -> str:
 def main() -> None:
     if not BUILTIN.is_file():
         sys.exit(f"Tidak ditemukan: {BUILTIN} (jalankan dari akar repo)")
-    code = render(fetch().split("\n"))
+    code = render(normalize(fetch().split("\n")))
     if not TARGET.is_file() or TARGET.read_text(encoding="utf-8") != code:
         TARGET.write_text(code, encoding="utf-8")
         print(f"Ditulis: {TARGET}")
