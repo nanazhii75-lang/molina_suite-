@@ -39,6 +39,7 @@ internal class CodeTreePanel(
 
     private var rows: List<CodeTreeRow> = emptyList()
     private var activePath: String? = null
+    private var revealPending = false
 
     private val nameView = TextView(context).apply {
         setTextColor(CodePalette.TEXT)
@@ -115,6 +116,22 @@ internal class CodeTreePanel(
         rows = newRows
         adapter.notifyDataSetChanged()
         emptyListView.visibility = if (newRows.isEmpty()) View.VISIBLE else View.GONE
+        if (revealPending) {
+            revealPending = false
+            scrollToActive()
+        }
+    }
+
+    /** Gulir ke berkas aktif pada penyetelan baris berikutnya, saat pohon mengikuti berkas aktif. */
+    fun requestReveal() {
+        revealPending = true
+    }
+
+    private fun scrollToActive() {
+        val path = activePath ?: return
+        val index = rows.indexOfFirst { it is CodeTreeRow.Entry && !it.isDirectory && it.file.path == path }
+        if (index < 0) return
+        listView.post { listView.setSelectionFromTop(index, dp(48)) }
     }
 
     fun setActivePath(path: String?) {

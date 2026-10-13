@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
 
+/** Hasil [CodeWorkspace.follow]. */
+internal enum class CodeFollow { IGNORED, REVEALED, REROOTED }
+
 /**
  * Folder kerja yang sedang terbuka di tab Code. Path-nya diingat antar-peluncuran;
  * folder baru dipulihkan hanya bila masih ada dan bisa diakses.
@@ -31,6 +34,21 @@ internal class CodeWorkspace(context: Context) {
     fun close() {
         prefs.edit().remove(KEY_ROOT).apply()
         mutableTree.value = null
+    }
+
+    /**
+     * Arahkan pohon ke lokasi [file]. Bila [file] ada di dalam folder yang terbuka, folder itu
+     * tetap jadi akar dan folder-folder sampai ke [file] dibuka ([CodeFollow.REVEALED]). Bila di
+     * luar, folder tempat [file] berada dijadikan akar baru ([CodeFollow.REROOTED]). Folder yang
+     * tidak ada atau tidak terbaca diabaikan ([CodeFollow.IGNORED]).
+     */
+    fun follow(file: File): CodeFollow {
+        val parent = file.parentFile ?: return CodeFollow.IGNORED
+        if (!parent.isDirectory || !parent.canRead()) return CodeFollow.IGNORED
+        val current = mutableTree.value
+        if (current != null && current.reveal(file)) return CodeFollow.REVEALED
+        open(parent)
+        return CodeFollow.REROOTED
     }
 
     /**

@@ -3,6 +3,7 @@ package com.molina.suite.feature.code
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.IOException
 import java.util.Locale
 
 /** Satu baris pohon direktori yang siap ditampilkan; [depth] dihitung dari folder akar. */
@@ -38,6 +39,31 @@ internal class CodeFolderTree(val root: File) {
             if (directory.path == root.path) return
             if (!expanded.remove(directory.path)) expanded.add(directory.path)
         }
+    }
+
+    /**
+     * Buka semua folder di antara akar dan [file] supaya [file] terlihat. False bila [file]
+     * berada di luar folder akar; pohon tidak diubah dalam kasus itu.
+     */
+    fun reveal(file: File): Boolean {
+        val rootPath = canonicalPath(root).trimEnd('/')
+        val filePath = canonicalPath(file)
+        if (!filePath.startsWith("$rootPath/")) return false
+        val parts = filePath.substring(rootPath.length + 1).split('/').dropLast(1)
+        synchronized(lock) {
+            var directory = root
+            for (part in parts) {
+                directory = File(directory, part)
+                expanded.add(directory.path)
+            }
+        }
+        return true
+    }
+
+    private fun canonicalPath(file: File): String = try {
+        file.canonicalPath
+    } catch (e: IOException) {
+        file.absolutePath
     }
 
     suspend fun rows(): List<CodeTreeRow> = withContext(Dispatchers.IO) {

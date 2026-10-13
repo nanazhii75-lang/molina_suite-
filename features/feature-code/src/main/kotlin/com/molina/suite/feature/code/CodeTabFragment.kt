@@ -57,6 +57,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
     private var keyboardWatcher: CodeKeyboardWatcher? = null
     private var drawer: DrawerLayout? = null
     private var treeController: CodeTreeController? = null
+    private var lastFollowedPath: String? = null
     private var afterPermission: (() -> Unit)? = null
 
     private val permissionLauncher = registerForActivityResult(
@@ -244,6 +245,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         actionBar = null
         drawer = null
         treeController = null
+        lastFollowedPath = null
         super.onDestroyView()
     }
 
@@ -259,6 +261,24 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
     private fun renderDocument(doc: CodeDocument) {
         pathView?.text = doc.file?.parent ?: MolinaStorage.sharedRoot().path
         treeController?.setActiveFile(doc.file)
+        followActiveFile(doc.file)
+    }
+
+    /** Arahkan pohon folder ke lokasi berkas aktif; hanya saat berkas aktif berganti, bukan tiap perubahan dokumen. */
+    private fun followActiveFile(file: File?) {
+        val path = file?.path
+        if (path == lastFollowedPath) return
+        val controller = treeController ?: return
+        lastFollowedPath = path
+        if (file == null) return
+        when (CodeEngineModule.requireEngine().workspace.follow(file)) {
+            CodeFollow.IGNORED -> Unit
+            CodeFollow.REVEALED -> {
+                controller.requestReveal()
+                controller.reload()
+            }
+            CodeFollow.REROOTED -> controller.requestReveal()
+        }
     }
 
     private fun notifyReplaceUnavailable() {

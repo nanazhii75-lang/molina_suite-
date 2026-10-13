@@ -61,6 +61,9 @@ internal class CodeTreeController(
 
     fun setActiveFile(file: File?) = panel.setActivePath(file?.path)
 
+    /** Gulir ke berkas aktif begitu isi pohon berikutnya tampil. */
+    fun requestReveal() = panel.requestReveal()
+
     override fun onRowClicked(row: CodeTreeRow.Entry) {
         if (row.isDirectory) {
             tree?.toggle(row.file)
