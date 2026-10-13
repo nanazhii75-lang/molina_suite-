@@ -12,12 +12,29 @@ object MolinaPlaylist {
 
     private const val EXTRA_URLS = "molina_playlist_urls"
     private const val EXTRA_INDEX = "molina_playlist_index"
+    private const val EXTRA_TITLES = "molina_playlist_titles"
+    private const val MAX_TITLE_LENGTH = 200
     private const val WATCH_PREFIX = "https://www.youtube.com/watch?v="
-    private const val MAX_ITEMS = 20
+    private const val MAX_ITEMS = 30
 
-    fun put(intent: Intent, urls: List<String>, index: Int) {
+    fun put(intent: Intent, urls: List<String>, titles: List<String>, index: Int) {
         intent.putStringArrayListExtra(EXTRA_URLS, ArrayList(urls))
+        intent.putStringArrayListExtra(EXTRA_TITLES, ArrayList(titles))
         intent.putExtra(EXTRA_INDEX, index)
+    }
+
+    /**
+     * Judul per URL untuk panel playlist; kosong bila ekstra tidak ada atau jumlahnya tidak sama
+     * dengan jumlah URL. Judul dipotong agar intent dari aplikasi lain tidak memuat teks raksasa.
+     */
+    fun titles(intent: Intent?): Map<String, String> {
+        if (intent == null) return emptyMap()
+        val urls = intent.getStringArrayListExtra(EXTRA_URLS) ?: return emptyMap()
+        val titles = intent.getStringArrayListExtra(EXTRA_TITLES) ?: return emptyMap()
+        if (titles.size != urls.size) return emptyMap()
+        val map = LinkedHashMap<String, String>()
+        for (i in urls.indices) map[urls[i]] = titles[i].take(MAX_TITLE_LENGTH)
+        return map
     }
 
     /**

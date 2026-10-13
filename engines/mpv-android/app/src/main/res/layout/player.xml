@@ -294,6 +294,24 @@
             app:srcCompat="@drawable/ic_screen_rotation_24dp"
             app:tint="@color/tint_normal" />
 
+        <!-- tombol daftar playlist: bulat, semi-transparan, di bawah tombol putar layar -->
+        <ImageButton
+            android:id="@+id/openPlaylistBtn"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/topRotateBtn"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="8dp"
+            android:alpha="0.65"
+            android:background="@drawable/molina_float_button_bg"
+            android:contentDescription="@string/ui_open_playlist"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_playlist_24dp"
+            app:tint="@color/tint_normal" />
+
         <!-- mismatching width/height so that the button appears exactly square?! -->
         <ImageButton
             android:id="@+id/unlockBtn"

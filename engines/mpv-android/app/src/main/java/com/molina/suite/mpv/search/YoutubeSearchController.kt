@@ -61,6 +61,18 @@ object YoutubeSearchController {
         if (current.page > 1) load(current.page - 1)
     }
 
+    /** Semua hasil yang sudah diambil, urut halaman 1..n tanpa celah; kosong bila belum ada. */
+    fun fetchedItems(): List<YoutubeResult> {
+        val all = ArrayList<YoutubeResult>()
+        var page = 1
+        while (true) {
+            val data = pages[page] ?: break
+            all.addAll(data.items)
+            page += 1
+        }
+        return all
+    }
+
     /** Mengulang pengambilan halaman yang terakhir diminta (setelah gagal). */
     fun retry() {
         if (query.isNotEmpty()) load(targetPage)

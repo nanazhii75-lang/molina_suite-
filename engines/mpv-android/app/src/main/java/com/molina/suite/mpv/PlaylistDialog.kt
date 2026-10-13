@@ -11,7 +11,11 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 
-internal class PlaylistDialog(private val player: MPVView) {
+internal class PlaylistDialog(
+    private val player: MPVView,
+    /** Judul per URL dari hasil pencarian; menggantikan nama berkas mentah seperti watch?v=... */
+    private val titles: Map<String, String> = emptyMap()
+) {
     private lateinit var binding: DialogPlaylistBinding
 
     private var playlist = listOf<MPVView.PlaylistItem>()
@@ -102,7 +106,7 @@ internal class PlaylistDialog(private val player: MPVView) {
             }
 
             fun bind(item: MPVView.PlaylistItem, selected: Boolean) {
-                textView.text = item.title ?: Utils.fileBasename(item.filename)
+                textView.text = parent.titles[item.filename] ?: item.title ?: Utils.fileBasename(item.filename)
                 textView.setTypeface(null, if (selected) Typeface.BOLD else Typeface.NORMAL)
             }
         }

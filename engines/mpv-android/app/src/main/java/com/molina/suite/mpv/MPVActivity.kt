@@ -161,6 +161,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         override fun run() {
             binding.topControls.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.topRotateBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
+            binding.openPlaylistBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.controls.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION).setListener(listener)
         }
     }
@@ -228,6 +229,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 autoRotationMode = "manual"
                 cycleOrientation()
             }
+            openPlaylistBtn.setOnClickListener { openPlaylistMenu({}) }
             topMenuBtn.setOnClickListener { openTopMenu() }
             unlockBtn.setOnClickListener { unlockUI() }
             playbackDurationTxt.setOnClickListener {
@@ -279,6 +281,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     // Perintah pelengkap playlist hasil pencarian; dijalankan sekali saat file mulai dimuat.
     @Volatile
     private var pendingPlaylist: List<Array<String>>? = null
+    // judul per URL yang dibawa intent pencarian; dipakai panel playlist
+    private var playlistTitles: Map<String, String> = emptyMap()
 
     // Activity lifetime
 
@@ -336,6 +340,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         }
 
         pendingPlaylist = com.molina.suite.mpv.search.MolinaPlaylist.read(intent, filepath)
+        playlistTitles = if (pendingPlaylist != null)
+            com.molina.suite.mpv.search.MolinaPlaylist.titles(intent)
+        else
+            emptyMap()
         player.addObserver(this)
         player.initialize(filesDir.path, cacheDir.path)
         player.playFile(filepath)
@@ -427,6 +435,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             moveTaskToBack(true)
         } else {
             pendingPlaylist = com.molina.suite.mpv.search.MolinaPlaylist.read(intent, filepath)
+            playlistTitles = if (pendingPlaylist != null)
+                com.molina.suite.mpv.search.MolinaPlaylist.titles(intent)
+            else
+                emptyMap()
             MPVLib.command(arrayOf("loadfile", filepath))
         }
     }
@@ -637,16 +649,19 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.controls.animate().cancel()
         binding.topControls.animate().cancel()
         binding.topRotateBtn.animate().cancel()
+        binding.openPlaylistBtn.animate().cancel()
 
         // reset controls alpha to be visible
         binding.controls.alpha = 1f
         binding.topControls.alpha = 1f
         binding.topRotateBtn.alpha = ROTATE_BTN_ALPHA
+        binding.openPlaylistBtn.alpha = ROTATE_BTN_ALPHA
 
         if (binding.controls.visibility != View.VISIBLE) {
             binding.controls.visibility = View.VISIBLE
             binding.topControls.visibility = View.VISIBLE
             binding.topRotateBtn.visibility = if (rotateButtonAvailable) View.VISIBLE else View.GONE
+            binding.openPlaylistBtn.visibility = if (psc.playlistCount > 1) View.VISIBLE else View.GONE
 
             if (this.statsFPS) {
                 updateStats()
@@ -671,6 +686,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.controls.visibility = View.GONE
         binding.topControls.visibility = View.GONE
         binding.topRotateBtn.visibility = View.GONE
+        binding.openPlaylistBtn.visibility = View.GONE
         binding.statsTextView.visibility = View.GONE
 
         val insetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -1124,7 +1140,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     }
 
     private fun openPlaylistMenu(restore: StateRestoreCallback) {
-        val impl = PlaylistDialog(player)
+        val impl = PlaylistDialog(player, playlistTitles)
         lateinit var dialog: AlertDialog
 
         impl.listeners = object : PlaylistDialog.Listeners {
@@ -1623,6 +1639,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     }
 
     private fun updatePlaylistButtons() {
+        binding.openPlaylistBtn.visibility =
+            if (binding.controls.visibility == View.VISIBLE && psc.playlistCount > 1) View.VISIBLE else View.GONE
         val plCount = psc.playlistCount
         val plPos = psc.playlistPos
 

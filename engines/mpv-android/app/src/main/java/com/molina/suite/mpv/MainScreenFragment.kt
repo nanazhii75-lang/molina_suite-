@@ -24,7 +24,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.molina.suite.mpv.search.YoutubeResultsPanel
 import com.molina.suite.mpv.search.MolinaPlaylist
-import com.molina.suite.mpv.search.SearchState
 import com.molina.suite.mpv.search.YoutubeResult
 import com.molina.suite.mpv.search.YoutubeSearchController
 
@@ -243,15 +242,15 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
      * sehingga Next/Previous mengikuti urutan hasil pencarian.
      */
     private fun playResults(selected: YoutubeResult) {
-        val items = (YoutubeSearchController.state as? SearchState.Results)?.items
-        val index = items?.indexOfFirst { it.id == selected.id } ?: -1
-        if (items == null || index < 0) {
+        val items = YoutubeSearchController.fetchedItems()
+        val index = items.indexOfFirst { it.id == selected.id }
+        if (index < 0) {
             playFile(selected.watchUrl)
             return
         }
         val intent = Intent()
         intent.putExtra("filepath", items[index].watchUrl)
-        MolinaPlaylist.put(intent, items.map { it.watchUrl }, index)
+        MolinaPlaylist.put(intent, items.map { it.watchUrl }, items.map { it.title }, index)
         intent.setClass(requireContext(), MPVActivity::class.java)
         playerLauncher.launch(intent)
     }
