@@ -32,8 +32,8 @@ internal class CodeActionBar private constructor(
     }
 
     companion object {
-        private const val MIN_WIDTH_DP = 40
-        private const val HEIGHT_DP = 48
+        private const val MIN_WIDTH_DP = 32
+        private const val HEIGHT_DP = 40
 
         fun build(context: Context, actions: List<CodeAction>): CodeActionBar {
             val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
