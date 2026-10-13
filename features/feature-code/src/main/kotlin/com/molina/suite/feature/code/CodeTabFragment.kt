@@ -92,7 +92,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             setBackgroundColor(CodePalette.PANEL)
             setPadding(CodeUi.dp(context, 12), 0, CodeUi.dp(context, 2), 0)
             addView(path, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-            addView(moreButton, LinearLayout.LayoutParams(CodeUi.dp(context, 40), CodeUi.dp(context, 36)))
+            addView(moreButton, LinearLayout.LayoutParams(CodeUi.dp(context, 36), CodeUi.dp(context, 28)))
         }
 
         val bar = CodeSearchBar(context, object : CodeSearchBar.Callbacks {
@@ -104,7 +104,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             override fun onReplaceAll(replacement: String) {
                 if (!session.replaceAll(replacement)) notifyReplaceUnavailable()
             }
-            override fun onClosed() = session.stopSearch()
+            override fun onClosed() = session.closeSearchPanel()
         })
         val actions = buildActionBar(context)
         actionBar = actions
@@ -119,7 +119,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
 
         val content = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(CodePalette.BACKGROUND)
+            setBackgroundColor(CodePalette.EDITOR_BACKGROUND)
             addView(headerView, LinearLayout.LayoutParams(MATCH, WRAP))
             addView(tabs.view, LinearLayout.LayoutParams(MATCH, WRAP))
             addView(editorView, LinearLayout.LayoutParams(MATCH, 0, 1f))

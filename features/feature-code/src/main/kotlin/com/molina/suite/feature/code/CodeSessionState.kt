@@ -9,7 +9,7 @@ internal data class CodeViewOptions(
 /** Permintaan pencarian dari panel Cari; semua opsi ikut dikirim agar sesi tidak menyimpan keadaan view. */
 internal data class CodeSearchRequest(
     val query: String,
-    val caseSensitive: Boolean,
+    val block: Boolean,
     val regex: Boolean,
     val wrapAround: Boolean
 )

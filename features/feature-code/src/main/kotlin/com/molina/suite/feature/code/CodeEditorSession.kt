@@ -61,6 +61,9 @@ internal class CodeEditorSession(
     private var editor: CodeEditor? = null
     private var applyingText = false
 
+    /** True bila pencarian terakhir meminta Blok: penandaan kecocokan dipertahankan setelah panel Cari ditutup. */
+    private var keepBlock = false
+
     fun tabLimitMessage(): String =
         "Terlalu banyak tab terbuka (maksimal ${tabs.limit}); tutup salah satu dulu"
 
@@ -97,6 +100,7 @@ internal class CodeEditorSession(
         captureActive(target)
         mutableSearch.value = CodeSearchState.NONE
         mutableHasContent.value = false
+        keepBlock = false
         editor = null
     }
 
@@ -278,6 +282,7 @@ internal class CodeEditorSession(
         target.setLineNumberEnabled(appearance.lineNumbers)
         CodeThemeState.name = appearance.theme
         textMate.applyTheme()
+        textMate.applyOverrides(target.colorScheme)
     }
 
     /** Pindah ke awal baris [line] (berbasis satu); false bila di luar jangkauan. */
@@ -308,13 +313,16 @@ internal class CodeEditorSession(
         val searcher = target.searcher
         searcher.setCyclicJumping(request.wrapAround)
         try {
+            // Pencarian selalu peka huruf besar-kecil: KT, Kt, kt, dan kT adalah kata berbeda.
             searcher.search(
                 request.query,
-                EditorSearcher.SearchOptions(!request.caseSensitive, request.regex)
+                EditorSearcher.SearchOptions(false, request.regex)
             )
+            keepBlock = request.block
             mutableSearch.value = CodeSearchState(request.query, 0, 0)
         } catch (e: PatternSyntaxException) {
             if (searcher.hasQuery()) searcher.stopSearch()
+            keepBlock = false
             mutableSearch.value = CodeSearchState(request.query, 0, 0, invalidPattern = true)
         }
     }
@@ -345,8 +353,19 @@ internal class CodeEditorSession(
     }
 
     fun stopSearch() {
+        keepBlock = false
         editor?.let { if (it.searcher.hasQuery()) it.searcher.stopSearch() }
         mutableSearch.value = CodeSearchState.NONE
+    }
+
+    /**
+     * Dipanggil saat panel Cari ditutup. Bila Blok aktif dan masih ada kueri, penandaan
+     * kecocokan dibiarkan tampil; selain itu pencarian dihentikan seperti biasa.
+     */
+    fun closeSearchPanel() {
+        val target = editor
+        if (keepBlock && target != null && target.searcher.hasQuery()) return
+        stopSearch()
     }
 
     private suspend fun write(tab: CodeTab, target: File): CodeFileSave {

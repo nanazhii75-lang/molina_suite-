@@ -84,7 +84,7 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         imeOptions = EditorInfo.IME_ACTION_DONE
     }
 
-    private val caseBox: CheckBox = check(R.string.code_search_case, false)
+    private val blockBox: CheckBox = check(R.string.code_search_block, false)
     private val regexBox: CheckBox = check(R.string.code_search_regex, false)
     private val wrapBox: CheckBox = check(R.string.code_search_wrap, true)
 
@@ -126,7 +126,7 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         addView(
             LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
-                for (box in listOf(caseBox, regexBox, wrapBox)) {
+                for (box in listOf(blockBox, regexBox, wrapBox)) {
                     addView(box, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
                 }
             },
@@ -155,7 +155,7 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
 
     private fun request(): CodeSearchRequest = CodeSearchRequest(
         query = findInput.text.toString(),
-        caseSensitive = caseBox.isChecked,
+        block = blockBox.isChecked,
         regex = regexBox.isChecked,
         wrapAround = wrapBox.isChecked
     )

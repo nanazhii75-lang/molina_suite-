@@ -39,8 +39,8 @@ internal object CodeAppearanceDialog {
             setPadding(0, pad / 2, 0, 0)
         }
         val choices = listOf(
-            CodeAppearance.THEME_DARCULA to context.getString(R.string.code_theme_darcula),
-            CodeAppearance.THEME_OBSIDIAN to context.getString(R.string.code_theme_obsidian)
+            CodeAppearance.THEME_OBSIDIAN to context.getString(R.string.code_theme_obsidian),
+            CodeAppearance.THEME_DARCULA to context.getString(R.string.code_theme_darcula)
         )
         val group = RadioGroup(context)
         val buttons = choices.map { (id, title) ->

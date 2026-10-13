@@ -6,7 +6,7 @@ import android.content.Context
 internal data class CodeAppearance(
     val textSizeSp: Int = DEFAULT_SP,
     val lineNumbers: Boolean = true,
-    val theme: String = THEME_DARCULA
+    val theme: String = THEME_OBSIDIAN
 ) {
     companion object {
         const val MIN_SP = 10
@@ -14,14 +14,14 @@ internal data class CodeAppearance(
         const val DEFAULT_SP = 14
         const val THEME_DARCULA = "darcula"
         const val THEME_OBSIDIAN = "obsidian"
-        val THEMES = listOf(THEME_DARCULA, THEME_OBSIDIAN)
+        val THEMES = listOf(THEME_OBSIDIAN, THEME_DARCULA)
     }
 }
 
 /** Tema warna yang sedang aktif; dibaca CodeTextMate saat membuat skema warna. */
 internal object CodeThemeState {
     @Volatile
-    var name: String = CodeAppearance.THEME_DARCULA
+    var name: String = CodeAppearance.THEME_OBSIDIAN
 }
 
 internal class CodeAppearanceStore(context: Context) {
@@ -30,12 +30,12 @@ internal class CodeAppearanceStore(context: Context) {
         .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     fun load(): CodeAppearance {
-        val saved = prefs.getString(KEY_THEME, CodeAppearance.THEME_DARCULA)
+        val saved = prefs.getString(KEY_THEME, CodeAppearance.THEME_OBSIDIAN)
         return CodeAppearance(
             textSizeSp = prefs.getInt(KEY_SIZE, CodeAppearance.DEFAULT_SP)
                 .coerceIn(CodeAppearance.MIN_SP, CodeAppearance.MAX_SP),
             lineNumbers = prefs.getBoolean(KEY_LINES, true),
-            theme = if (saved != null && saved in CodeAppearance.THEMES) saved else CodeAppearance.THEME_DARCULA
+            theme = if (saved != null && saved in CodeAppearance.THEMES) saved else CodeAppearance.THEME_OBSIDIAN
         )
     }
 

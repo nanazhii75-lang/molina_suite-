@@ -3,6 +3,12 @@ package com.molina.suite.feature.code
 /** Warna chrome tab Code; selaras dengan tema TextMate Darcula yang dimuat. */
 internal object CodePalette {
     val BACKGROUND: Int = 0xFF2B2B2B.toInt()
+
+    /** Latar halaman kerja (editor, nomor baris, tab aktif): hitam pekat. */
+    val EDITOR_BACKGROUND: Int = 0xFF000000.toInt()
+
+    /** Sorotan baris aktif; sedikit lebih terang dari latar supaya tetap terlihat. */
+    val EDITOR_CURRENT_LINE: Int = 0xFF161616.toInt()
     val PANEL: Int = 0xFF313335.toInt()
     val TEXT: Int = 0xFFA9B7C6.toInt()
     val TEXT_MUTED: Int = 0xFF808080.toInt()

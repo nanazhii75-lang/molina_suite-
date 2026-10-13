@@ -2,7 +2,7 @@
 <resources>
     <string name="code_title">Molina Code</string>
     <string name="code_untitled">Tidak berjudul</string>
-    <string name="code_default_file_name">tanpa-judul.txt</string>
+    <string name="code_default_file_name">tanpa-judul.md</string>
 
     <string name="code_header_more">Aksi lainnya</string>
 
@@ -34,7 +34,7 @@
     <string name="code_search_title">Cari</string>
     <string name="code_search_find_hint">Cari teks</string>
     <string name="code_search_replace_hint">Ganti dengan</string>
-    <string name="code_search_case">Kasus sensitif</string>
+    <string name="code_search_block">Blok</string>
     <string name="code_search_regex">Persamaan reguler</string>
     <string name="code_search_wrap">Membungkus di sekitar</string>
     <string name="code_search_find">Cari</string>
@@ -153,8 +153,8 @@
     <string name="code_appearance_apply">Terapkan</string>
 
     <string name="code_appearance_theme">Tema warna</string>
-    <string name="code_theme_darcula">Bawaan (Darcula)</string>
-    <string name="code_theme_obsidian">Obsidian</string>
+    <string name="code_theme_darcula">Darcula</string>
+    <string name="code_theme_obsidian">Obsidian (bawaan)</string>
     <string name="code_open_kept_unsaved">%1$s punya perubahan yang belum disimpan, jadi isinya tidak dimuat ulang.</string>
     <string name="code_preview_title">Tinjauan</string>
     <string name="code_preview_back">Kembali</string>

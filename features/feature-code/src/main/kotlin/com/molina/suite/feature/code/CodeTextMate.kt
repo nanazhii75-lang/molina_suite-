@@ -54,7 +54,7 @@ internal class CodeTextMate(private val assets: AssetManager) {
             Log.w(TAG, "Skema warna TextMate gagal dibuat", e)
             return CodeHighlighting(null, null)
         }
-        scheme.setColor(EditorColorScheme.MATCHED_TEXT_BACKGROUND, CodePalette.MATCH_BLOCK)
+        applyOverrides(scheme)
         val scope = fileName?.let { scopeFor(it) }
         Log.i(TAG, "prepare file=$fileName scope=$scope")
         val language = scope?.let {
@@ -66,6 +66,18 @@ internal class CodeTextMate(private val assets: AssetManager) {
             }
         }
         return CodeHighlighting(scheme, language)
+    }
+
+    /**
+     * Warna Molina di atas tema TextMate: latar hitam pekat, nomor baris, sorotan baris
+     * aktif, dan blok kecocokan pencarian. Dipanggil lagi setelah tema diganti karena
+     * pergantian tema menulis ulang warna skema.
+     */
+    fun applyOverrides(scheme: EditorColorScheme) {
+        scheme.setColor(EditorColorScheme.WHOLE_BACKGROUND, CodePalette.EDITOR_BACKGROUND)
+        scheme.setColor(EditorColorScheme.LINE_NUMBER_BACKGROUND, CodePalette.EDITOR_BACKGROUND)
+        scheme.setColor(EditorColorScheme.CURRENT_LINE, CodePalette.EDITOR_CURRENT_LINE)
+        scheme.setColor(EditorColorScheme.MATCHED_TEXT_BACKGROUND, CodePalette.MATCH_BLOCK)
     }
 
     private fun ensureReady(): Boolean {

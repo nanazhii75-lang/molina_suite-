@@ -60,7 +60,7 @@ internal class CodeTabBar(
     private fun buildChip(item: CodeTabItem, active: Boolean): View {
         val label = TextView(context).apply {
             text = titleOf(item)
-            textSize = 12f
+            textSize = 11f
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
             maxWidth = CodeUi.dp(context, MAX_TITLE_DP)
@@ -90,7 +90,7 @@ internal class CodeTabBar(
         }
         return LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(if (active) CodePalette.BACKGROUND else CodePalette.PANEL)
+            setBackgroundColor(if (active) CodePalette.EDITOR_BACKGROUND else CodePalette.PANEL)
             isClickable = true
             setOnClickListener { callbacks.onSelect(item.id) }
             addView(content, LinearLayout.LayoutParams(WRAP, 0, 1f))
@@ -122,8 +122,8 @@ internal class CodeTabBar(
     private companion object {
         const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
         const val WRAP = ViewGroup.LayoutParams.WRAP_CONTENT
-        const val HEIGHT_DP = 32
+        const val HEIGHT_DP = 26
         const val MAX_TITLE_DP = 140
-        const val CLOSE_DP = 28
+        const val CLOSE_DP = 24
     }
 }
