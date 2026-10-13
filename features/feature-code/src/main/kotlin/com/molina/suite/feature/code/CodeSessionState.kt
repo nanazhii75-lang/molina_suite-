@@ -11,7 +11,8 @@ internal data class CodeSearchRequest(
     val query: String,
     val block: Boolean,
     val regex: Boolean,
-    val wrapAround: Boolean
+    val wrapAround: Boolean,
+    val caseSensitive: Boolean = true
 )
 
 /**

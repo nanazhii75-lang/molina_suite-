@@ -313,10 +313,11 @@ internal class CodeEditorSession(
         val searcher = target.searcher
         searcher.setCyclicJumping(request.wrapAround)
         try {
-            // Pencarian selalu peka huruf besar-kecil: KT, Kt, kt, dan kT adalah kata berbeda.
+            // Bawaan peka huruf besar-kecil: KT, Kt, kt, dan kT adalah kata berbeda.
+            // Parameter pertama SearchOptions adalah caseInsensitive, jadi dibalik dari caseSensitive.
             searcher.search(
                 request.query,
-                EditorSearcher.SearchOptions(false, request.regex)
+                EditorSearcher.SearchOptions(!request.caseSensitive, request.regex)
             )
             keepBlock = request.block
             mutableSearch.value = CodeSearchState(request.query, 0, 0)

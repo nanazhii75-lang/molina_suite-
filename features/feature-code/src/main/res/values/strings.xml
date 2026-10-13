@@ -35,6 +35,7 @@
     <string name="code_search_find_hint">Cari teks</string>
     <string name="code_search_replace_hint">Ganti dengan</string>
     <string name="code_search_block">Blok</string>
+    <string name="code_search_case">Huruf besar/kecil</string>
     <string name="code_search_regex">Persamaan reguler</string>
     <string name="code_search_wrap">Membungkus di sekitar</string>
     <string name="code_search_find">Cari</string>

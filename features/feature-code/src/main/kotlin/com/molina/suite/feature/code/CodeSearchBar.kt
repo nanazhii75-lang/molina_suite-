@@ -85,6 +85,7 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
     }
 
     private val blockBox: CheckBox = check(R.string.code_search_block, false)
+    private val caseBox: CheckBox = check(R.string.code_search_case, true)
     private val regexBox: CheckBox = check(R.string.code_search_regex, false)
     private val wrapBox: CheckBox = check(R.string.code_search_wrap, true)
 
@@ -124,15 +125,17 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         )
         addView(findInput, matchWidth())
         addView(replaceInput, matchWidth())
-        addView(
-            LinearLayout(context).apply {
-                orientation = LinearLayout.HORIZONTAL
-                for (box in listOf(blockBox, regexBox, wrapBox)) {
-                    addView(box, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-                }
-            },
-            matchWidth()
-        )
+        for (row in listOf(listOf(caseBox, blockBox), listOf(regexBox, wrapBox))) {
+            addView(
+                LinearLayout(context).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    for (box in row) {
+                        addView(box, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+                    }
+                },
+                matchWidth()
+            )
+        }
         addView(
             LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -158,7 +161,8 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         query = findInput.text.toString(),
         block = blockBox.isChecked,
         regex = regexBox.isChecked,
-        wrapAround = wrapBox.isChecked
+        wrapAround = wrapBox.isChecked,
+        caseSensitive = caseBox.isChecked
     )
 
     fun show() {
