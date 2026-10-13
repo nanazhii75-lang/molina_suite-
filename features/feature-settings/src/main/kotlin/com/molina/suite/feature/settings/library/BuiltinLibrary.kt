@@ -96,12 +96,6 @@ internal object BuiltinLibrary {
             "builtin-net-resolv", "DNS yang dipakai Debian",
             "cat /etc/resolv.conf",
             "Daftar server DNS di dalam Debian.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-net-share", "Bagikan folder Downloads (HTTP)",
-            "python3 -m http.server 8080 --directory $downloads",
-            "Buka http://IP-HP:8080 dari perangkat lain di Wi-Fi yang sama. Hentikan dengan Ctrl+C.",
-            RunMode.DEBIAN
         )
     )
 
@@ -196,6 +190,12 @@ internal object BuiltinLibrary {
             ENSURE_CURL + "curl -s -o /dev/null -w 'HTTP %{http_code} dalam %{time_total} detik\\n' " +
                 "https://www.google.com/generate_204",
             "HTTP 204 berarti internet tersambung.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-share", "Bagikan folder Downloads (HTTP)",
+            "python3 -m http.server 8080 --directory $downloads",
+            "Buka http://IP-HP:8080 dari perangkat lain di Wi-Fi yang sama. Hentikan dengan Ctrl+C.",
+            RunMode.DEBIAN
         )
     )
 

@@ -3,7 +3,7 @@
     <string name="pkg_git_title">Git</string>
     <string name="pkg_git_desc">Kontrol versi: clone, commit, dan push dari terminal.</string>
     <string name="pkg_curl_title">curl</string>
-    <string name="pkg_curl_desc">Unduh dan uji HTTP dari terminal; dipakai Cek Jaringan.</string>
+    <string name="pkg_curl_desc">Unduh dan uji HTTP dari terminal.</string>
     <string name="pkg_wget_title">wget</string>
     <string name="pkg_wget_desc">Pengunduh berkas lewat HTTP dan FTP.</string>
     <string name="pkg_unzip_title">unzip</string>

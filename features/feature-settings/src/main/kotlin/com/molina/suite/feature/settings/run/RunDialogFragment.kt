@@ -33,7 +33,7 @@ import java.io.File
  */
 internal class RunDialogFragment : DialogFragment(R.layout.dialog_run) {
 
-    private var kind: RunKind = RunKind.NETWORK
+    private var kind: RunKind = RunKind.PROBE
     private var statusPath: String = ""
     private var startedAt: Long = 0L
     private var finished = false
@@ -43,7 +43,7 @@ internal class RunDialogFragment : DialogFragment(R.layout.dialog_run) {
         setStyle(STYLE_NORMAL, R.style.Molina_RunDialog)
         isCancelable = false
         val args = requireArguments()
-        kind = RunKind.values().getOrElse(args.getInt(ARG_KIND, 0)) { RunKind.NETWORK }
+        kind = RunKind.values().getOrElse(args.getInt(ARG_KIND, 0)) { RunKind.PROBE }
         statusPath = args.getString(ARG_STATUS_PATH).orEmpty()
         startedAt = args.getLong(ARG_STARTED_AT, System.currentTimeMillis())
     }

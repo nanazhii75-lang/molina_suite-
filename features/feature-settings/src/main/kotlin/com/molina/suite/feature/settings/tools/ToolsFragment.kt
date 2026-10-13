@@ -18,7 +18,6 @@ import com.molina.suite.feature.settings.packages.PackageDetection
 import com.molina.suite.feature.settings.packages.PackageDetector
 import com.molina.suite.feature.settings.packages.PackageSpec
 import com.molina.suite.feature.settings.library.LibraryResult
-import com.molina.suite.feature.settings.run.NetworkRun
 import com.molina.suite.feature.settings.run.RunDialogFragment
 import com.molina.suite.feature.settings.run.RunKind
 import com.molina.suite.feature.settings.run.RunSessions
@@ -90,9 +89,6 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
         v.probePick.setOnClickListener { picker.pick { probeSource = it; renderSelection() } }
         view.findViewById<View>(R.id.tools_convert_start).setOnClickListener { startConvert() }
         view.findViewById<View>(R.id.tools_probe_start).setOnClickListener { startProbe() }
-        view.findViewById<TextView>(R.id.tools_network_desc).text =
-            getString(R.string.tools_network_desc, NetworkRun.MAX_DATA_MB)
-        view.findViewById<View>(R.id.tools_network_start).setOnClickListener { startNetworkCheck() }
         renderSelection()
         refreshRequirements()
     }
@@ -262,10 +258,6 @@ class ToolsFragment : Fragment(R.layout.fragment_tools), Refreshable {
             return
         }
         startRun(RunKind.PROBE, listOf(source.terminalPath))
-    }
-
-    private fun startNetworkCheck() {
-        startRun(RunKind.NETWORK)
     }
 
     /**
