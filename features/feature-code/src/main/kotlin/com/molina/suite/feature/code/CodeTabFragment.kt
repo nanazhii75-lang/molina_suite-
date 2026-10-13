@@ -160,7 +160,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             CodeUi.dp(context, DRAWER_WIDTH_DP),
             (context.resources.displayMetrics.widthPixels * DRAWER_MAX_FRACTION).toInt()
         )
-        return DrawerLayout(context).apply {
+        return CodeSwipeDrawerLayout(context) { editor }.apply {
             layoutParams = ViewGroup.LayoutParams(MATCH, MATCH)
             setScrimColor(DRAWER_SCRIM)
             addView(content, DrawerLayout.LayoutParams(MATCH, MATCH))

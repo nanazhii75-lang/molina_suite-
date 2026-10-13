@@ -99,7 +99,7 @@
     <string name="code_picker_title_folder">Pilih folder</string>
     <string name="code_picker_use_folder">Pilih folder ini</string>
     <string name="code_tree_none_title">Belum ada folder</string>
-    <string name="code_tree_none_hint">Buka sebuah folder untuk menampilkan pohon direktorinya. Geser dari tepi kiri layar kapan saja untuk membuka panel ini.</string>
+    <string name="code_tree_none_hint">Buka sebuah folder untuk menampilkan pohon direktorinya. Geser ke kanan di area editor kapan saja untuk membuka panel ini.</string>
     <string name="code_tree_open_folder">Buka folder</string>
     <string name="code_tree_change_folder">Ganti folder</string>
     <string name="code_tree_close_folder">Tutup folder</string>
