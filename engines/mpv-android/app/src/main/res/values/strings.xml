@@ -57,7 +57,6 @@
     <string name="switch_orientation">Switch Orientation</string>
     <string name="ui_rotate_screen" translatable="false">Putar layar</string>
     <string name="ui_open_playlist" translatable="false">Daftar playlist</string>
-    <string name="ui_release_open_playlist" translatable="false">Lepas untuk membuka daftar channel</string>
     <string name="open_external_audio">Open external audio…</string>
     <string name="open_external_sub">Open external subtitle…</string>
     <string name="advanced_menu">Advanced…</string>

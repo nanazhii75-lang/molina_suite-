@@ -1936,10 +1936,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 if (duration == 0f && psc.playlistCount > 1) {
                     // siaran live: seek tidak berarti, geser horizontal membuka daftar channel
                     liveSwipeOpensPlaylist = kotlin.math.abs(diff) >= LIVE_SWIPE_PLAYLIST_DIFF
-                    gestureTextView.text = if (liveSwipeOpensPlaylist)
-                        getString(R.string.ui_release_open_playlist)
-                    else
-                        ""
+                    gestureTextView.text = ""
                     return
                 }
                 if (duration == 0f || initialSeek < 0)
