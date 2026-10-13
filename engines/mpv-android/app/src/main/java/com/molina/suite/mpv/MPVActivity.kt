@@ -161,6 +161,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         override fun run() {
             binding.topControls.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.topRotateBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
+            binding.topPiPBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.openPlaylistBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.controls.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION).setListener(listener)
         }
@@ -600,6 +601,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     private val rotateButtonAvailable by lazy {
         packageManager.hasSystemFeature(PackageManager.FEATURE_SCREEN_PORTRAIT)
     }
+    // tombol layar mengambang hanya ada bila perangkat mendukung picture-in-picture
+    private val pipButtonAvailable by lazy {
+        packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+    }
 
     private fun pauseForDialog(): StateRestoreCallback {
         val useKeepOpen = when (noUIPauseMode) {
@@ -649,18 +654,21 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.controls.animate().cancel()
         binding.topControls.animate().cancel()
         binding.topRotateBtn.animate().cancel()
+        binding.topPiPBtn.animate().cancel()
         binding.openPlaylistBtn.animate().cancel()
 
         // reset controls alpha to be visible
         binding.controls.alpha = 1f
         binding.topControls.alpha = 1f
         binding.topRotateBtn.alpha = ROTATE_BTN_ALPHA
+        binding.topPiPBtn.alpha = ROTATE_BTN_ALPHA
         binding.openPlaylistBtn.alpha = ROTATE_BTN_ALPHA
 
         if (binding.controls.visibility != View.VISIBLE) {
             binding.controls.visibility = View.VISIBLE
             binding.topControls.visibility = View.VISIBLE
             binding.topRotateBtn.visibility = if (rotateButtonAvailable) View.VISIBLE else View.GONE
+            binding.topPiPBtn.visibility = if (pipButtonAvailable) View.VISIBLE else View.GONE
             binding.openPlaylistBtn.visibility = if (psc.playlistCount > 1) View.VISIBLE else View.GONE
 
             if (this.statsFPS) {
@@ -686,6 +694,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.controls.visibility = View.GONE
         binding.topControls.visibility = View.GONE
         binding.topRotateBtn.visibility = View.GONE
+        binding.topPiPBtn.visibility = View.GONE
         binding.openPlaylistBtn.visibility = View.GONE
         binding.statsTextView.visibility = View.GONE
 
