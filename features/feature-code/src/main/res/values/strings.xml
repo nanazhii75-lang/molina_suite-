@@ -37,6 +37,7 @@
     <string name="code_search_block">Blok</string>
     <string name="code_search_case">Huruf besar/kecil</string>
     <string name="code_search_replace_toggle">Ganti teks</string>
+    <string name="code_search_options">Opsi pencarian</string>
     <string name="code_search_regex">Persamaan reguler</string>
     <string name="code_search_wrap">Membungkus di sekitar</string>
     <string name="code_search_find">Cari</string>

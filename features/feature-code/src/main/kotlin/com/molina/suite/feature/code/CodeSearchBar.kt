@@ -1,5 +1,6 @@
 package com.molina.suite.feature.code
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Typeface
@@ -14,7 +15,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
-import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
 
@@ -43,18 +43,6 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         minHeight = 0
         minimumHeight = 0
         setPadding(paddingLeft, CodeUi.dp(context, 6), paddingRight, CodeUi.dp(context, 6))
-    }
-
-    private fun check(label: Int, checked: Boolean): CheckBox = CheckBox(context).apply {
-        setText(label)
-        isChecked = checked
-        textSize = 12f
-        setTextColor(CodePalette.TEXT)
-        buttonTintList = ColorStateList.valueOf(CodePalette.ACCENT)
-        isFocusableInTouchMode = false
-        minHeight = 0
-        minimumHeight = 0
-        setOnCheckedChangeListener { _, _ -> callbacks.onRequestChanged(request()) }
     }
 
     private fun action(label: Int, onClick: () -> Unit): Button =
@@ -100,10 +88,11 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         imeOptions = EditorInfo.IME_ACTION_DONE
     }
 
-    private val blockBox: CheckBox = check(R.string.code_search_block, false)
-    private val caseBox: CheckBox = check(R.string.code_search_case, true)
-    private val regexBox: CheckBox = check(R.string.code_search_regex, false)
-    private val wrapBox: CheckBox = check(R.string.code_search_wrap, true)
+    // Opsi dipilih lewat popup [showOptions]; bawaan: huruf besar/kecil dibedakan mutlak.
+    private var caseSensitive = true
+    private var blockMode = false
+    private var regexMode = false
+    private var wrapMode = true
 
     private val counter: TextView = TextView(context).apply {
         setTextColor(CodePalette.ACCENT)
@@ -126,12 +115,6 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         })
     }
 
-    private val replaceToggle: CheckBox = check(R.string.code_search_replace_toggle, false).apply {
-        setOnCheckedChangeListener { _, on ->
-            replaceRow.visibility = if (on) View.VISIBLE else View.GONE
-        }
-    }
-
     val view: View = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
         setBackgroundColor(CodePalette.PANEL)
@@ -152,6 +135,10 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
                 )
                 addView(compactAction(R.string.code_search_find) { callbacks.onFind() })
                 addView(
+                    CodeUi.iconButton(context, R.drawable.ic_code_more, R.string.code_search_options) { showOptions() },
+                    LinearLayout.LayoutParams(CodeUi.dp(context, 36), CodeUi.dp(context, 40))
+                )
+                addView(
                     CodeUi.iconButton(context, R.drawable.ic_code_close, R.string.code_search_close) { hide() },
                     LinearLayout.LayoutParams(CodeUi.dp(context, 40), CodeUi.dp(context, 40))
                 )
@@ -159,27 +146,6 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
             matchWidth()
         )
         addView(replaceRow, matchWidth())
-        addView(
-            HorizontalScrollView(context).apply {
-                isHorizontalScrollBarEnabled = false
-                addView(
-                    LinearLayout(context).apply {
-                        orientation = LinearLayout.HORIZONTAL
-                        gravity = Gravity.CENTER_VERTICAL
-                        for (box in listOf(caseBox, blockBox, regexBox, wrapBox, replaceToggle)) {
-                            addView(
-                                box,
-                                LinearLayout.LayoutParams(
-                                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                                    ViewGroup.LayoutParams.WRAP_CONTENT
-                                ).apply { marginEnd = CodeUi.dp(context, 12) }
-                            )
-                        }
-                    }
-                )
-            },
-            matchWidth()
-        )
     }
 
     val isShowing: Boolean get() = view.visibility == View.VISIBLE
@@ -189,11 +155,43 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
 
     private fun request(): CodeSearchRequest = CodeSearchRequest(
         query = findInput.text.toString(),
-        block = blockBox.isChecked,
-        regex = regexBox.isChecked,
-        wrapAround = wrapBox.isChecked,
-        caseSensitive = caseBox.isChecked
+        block = blockMode,
+        regex = regexMode,
+        wrapAround = wrapMode,
+        caseSensitive = caseSensitive
     )
+
+    /** Popup opsi pencarian; pilihan baru berlaku setelah Terapkan. */
+    private fun showOptions() {
+        val pad = CodeUi.dp(context, 20)
+        fun box(label: Int, checked: Boolean): CheckBox = CheckBox(context).apply {
+            setText(label)
+            isChecked = checked
+        }
+        val caseCheck = box(R.string.code_search_case, caseSensitive)
+        val blockCheck = box(R.string.code_search_block, blockMode)
+        val regexCheck = box(R.string.code_search_regex, regexMode)
+        val wrapCheck = box(R.string.code_search_wrap, wrapMode)
+        val replaceCheck = box(R.string.code_search_replace_toggle, replaceRow.visibility == View.VISIBLE)
+        val content = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(pad, pad / 2, pad, 0)
+            for (check in listOf(caseCheck, blockCheck, regexCheck, wrapCheck, replaceCheck)) addView(check)
+        }
+        AlertDialog.Builder(context)
+            .setTitle(R.string.code_search_options)
+            .setView(content)
+            .setPositiveButton(R.string.code_appearance_apply) { _, _ ->
+                caseSensitive = caseCheck.isChecked
+                blockMode = blockCheck.isChecked
+                regexMode = regexCheck.isChecked
+                wrapMode = wrapCheck.isChecked
+                replaceRow.visibility = if (replaceCheck.isChecked) View.VISIBLE else View.GONE
+                if (findInput.text.isNotEmpty()) callbacks.onRequestChanged(request())
+            }
+            .setNegativeButton(R.string.code_picker_cancel, null)
+            .show()
+    }
 
     fun show() {
         view.visibility = View.VISIBLE
