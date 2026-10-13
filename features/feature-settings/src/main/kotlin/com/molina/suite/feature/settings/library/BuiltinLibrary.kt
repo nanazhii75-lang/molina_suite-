@@ -86,16 +86,6 @@ internal object BuiltinLibrary {
             "builtin-net-dns", "Cek DNS",
             "getent hosts {HOST}",
             "Menampilkan alamat IP dari nama host. Kosong berarti DNS gagal.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-net-headers", "Header HTTP situs",
-            ENSURE_CURL + "curl -sIL {URL}",
-            "Menampilkan status dan header, mengikuti pengalihan.", RunMode.DEBIAN
-        ),
-        entry(
-            "builtin-net-resolv", "DNS yang dipakai Debian",
-            "cat /etc/resolv.conf",
-            "Daftar server DNS di dalam Debian.", RunMode.DEBIAN
         )
     )
 
@@ -196,6 +186,16 @@ internal object BuiltinLibrary {
             "python3 -m http.server 8080 --directory $downloads",
             "Buka http://IP-HP:8080 dari perangkat lain di Wi-Fi yang sama. Hentikan dengan Ctrl+C.",
             RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-headers", "Header HTTP situs",
+            ENSURE_CURL + "curl -sIL {URL}",
+            "Menampilkan status dan header, mengikuti pengalihan.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-resolv", "DNS yang dipakai Debian",
+            "cat /etc/resolv.conf",
+            "Daftar server DNS di dalam Debian.", RunMode.DEBIAN
         )
     )
 
