@@ -84,6 +84,45 @@ def normalize(lines):
     return out
 
 
+EXTINF_RE = re.compile(r'^#EXTINF:-?\d+( tvg-id="[^"]*")?,')
+OPT_RE = re.compile(r"^#EXTVLCOPT:http-(referrer|user-agent)=\S")
+URL_RE = re.compile(r"^https?://\S+$")
+
+
+def sanitize(lines):
+    """Daftar putih: hanya EXTINF, EXTVLCOPT referrer/user-agent, dan URL http(s).
+
+    Isi playlist ditulis lewat heredoc di shell Library, jadi baris sembarang (mis. penanda akhir
+    heredoc diikuti perintah) tidak boleh lolos. Entri dengan baris tak dikenal dibuang utuh.
+    """
+    out, pending, dropped = ["#EXTM3U"], [], 0
+    for line in lines:
+        if line.startswith("#EXTM3U"):
+            continue
+        if EXTINF_RE.match(line):
+            dropped += 1 if pending else 0
+            pending = [line]
+        elif OPT_RE.match(line):
+            if pending:
+                pending.append(line)
+            else:
+                dropped += 1
+        elif URL_RE.match(line):
+            if pending:
+                out += pending + [line]
+                pending = []
+            else:
+                dropped += 1
+        else:
+            dropped += 1
+            pending = []
+    dropped += 1 if pending else 0
+    if len(out) == 1:
+        sys.exit("Tidak ada channel valid setelah penyaringan")
+    print(f"Disaring: {sum(1 for l in out if l.startswith('#EXTINF'))} channel diterima, {dropped} entri/baris dibuang")
+    return out
+
+
 def kt(line: str) -> str:
     return '"' + line.replace("\\", "\\\\").replace('"', '\\"').replace("$", "\\$") + '"'
 
@@ -142,7 +181,7 @@ def render(lines) -> str:
 def main() -> None:
     if not BUILTIN.is_file():
         sys.exit(f"Tidak ditemukan: {BUILTIN} (jalankan dari akar repo)")
-    code = render(normalize(fetch().split("\n")))
+    code = render(sanitize(normalize(fetch().split("\n"))))
     if not TARGET.is_file() or TARGET.read_text(encoding="utf-8") != code:
         TARGET.write_text(code, encoding="utf-8")
         print(f"Ditulis: {TARGET}")
