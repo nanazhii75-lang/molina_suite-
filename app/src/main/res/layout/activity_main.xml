@@ -118,7 +118,7 @@
             android:autoSizeTextType="uniform"
             android:gravity="center"
             android:maxLines="1"
-            android:textColor="@color/molina_text_secondary"
+            android:textColor="@color/molina_status_on"
             android:textSize="11sp" />
 
         <TextView
@@ -132,7 +132,7 @@
             android:autoSizeTextType="uniform"
             android:gravity="center"
             android:maxLines="1"
-            android:textColor="@color/molina_text_secondary"
+            android:textColor="@color/molina_status_error"
             android:textSize="11sp" />
 
         <TextView
