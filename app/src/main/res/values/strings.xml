@@ -3,6 +3,13 @@
     <string name="app_name">Molina Suite</string>
     <string name="header_title">🌟 molina</string>
 
+    <string name="meter_down">↓ %1$s</string>
+    <string name="meter_up">↑ %1$s</string>
+    <string name="meter_cpu">CPU %1$d%%</string>
+    <string name="meter_cpu_app">CPU app %1$d%%</string>
+    <string name="meter_ram">RAM %1$s/%2$s</string>
+    <string name="meter_unavailable">—</string>
+
     <string name="nav_mpv">mpv</string>
     <string name="nav_terminal">Terminal</string>
     <string name="nav_code">Code</string>

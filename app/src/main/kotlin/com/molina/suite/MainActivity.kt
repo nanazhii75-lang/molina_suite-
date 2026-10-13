@@ -18,7 +18,9 @@ import com.molina.suite.core.common.HostChromeController
 import com.molina.suite.core.common.HostContextMenuListener
 import com.molina.suite.core.common.HostTabSwitcher
 import com.molina.suite.databinding.ActivityMainBinding
+import com.molina.suite.meter.SystemMeterSampler
 import com.molina.suite.ui.EngineUnavailableFragment
+import com.molina.suite.ui.MeterBarPresenter
 import com.molina.suite.ui.colorRes
 import com.molina.suite.ui.labelRes
 import kotlinx.coroutines.launch
@@ -52,6 +54,7 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
         bindDaemon(DaemonId.TERMINAL, binding.dotTerminal)
         bindDaemon(DaemonId.WEBDAV, binding.dotWebdav)
         bindDaemon(DaemonId.MPV, binding.dotMpv)
+        bindMeter()
     }
 
     /** Ikon tab aktif penuh warna, tab lain sedikit redup; ikon berwarna sendiri-sendiri. */
@@ -84,6 +87,7 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
     override fun setChromeCompact(compact: Boolean) {
         val visibility = if (compact) View.GONE else View.VISIBLE
         binding.header.visibility = visibility
+        binding.meterBar.visibility = visibility
         binding.bottomNav.visibility = visibility
     }
 
@@ -122,6 +126,19 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
             tx.show(existing)
         }
         tx.commit()
+    }
+
+    /** Meter jaringan/CPU/RAM di header; hanya aktif selama layar tampil (STARTED). */
+    private fun bindMeter() {
+        val presenter = MeterBarPresenter(
+            this, binding.meterDown, binding.meterUp, binding.meterCpu, binding.meterRam
+        )
+        val sampler = SystemMeterSampler(applicationContext)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sampler.readings().collect { presenter.render(it) }
+            }
+        }
     }
 
     private fun bindDaemon(id: DaemonId, dot: View) {

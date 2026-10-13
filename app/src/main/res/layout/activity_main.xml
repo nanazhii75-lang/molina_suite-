@@ -99,6 +99,71 @@
         </LinearLayout>
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/meterBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingBottom="6dp">
+
+        <TextView
+            android:id="@+id/meterDown"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:autoSizeMaxTextSize="11sp"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeStepGranularity="0.5sp"
+            android:autoSizeTextType="uniform"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textColor="@color/molina_text_secondary"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/meterUp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:autoSizeMaxTextSize="11sp"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeStepGranularity="0.5sp"
+            android:autoSizeTextType="uniform"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textColor="@color/molina_text_secondary"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/meterCpu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.1"
+            android:autoSizeMaxTextSize="11sp"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeStepGranularity="0.5sp"
+            android:autoSizeTextType="uniform"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textColor="@color/molina_text_secondary"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/meterRam"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.4"
+            android:autoSizeMaxTextSize="11sp"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeStepGranularity="0.5sp"
+            android:autoSizeTextType="uniform"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textColor="@color/molina_text_secondary"
+            android:textSize="11sp" />
+    </LinearLayout>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
