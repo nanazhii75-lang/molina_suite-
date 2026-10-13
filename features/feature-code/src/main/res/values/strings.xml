@@ -41,6 +41,9 @@
     <string name="code_search_replace">Ganti</string>
     <string name="code_search_replace_all">Ganti semua</string>
     <string name="code_search_invalid">Regex salah</string>
+    <string name="code_search_count_total">%1$d cocok</string>
+    <string name="code_search_count_position">%1$d dari %2$d</string>
+    <string name="code_search_count_none">Tidak ada yang cocok</string>
     <string name="code_search_readonly">Mode hanya baca aktif, penggantian tidak bisa dilakukan.</string>
     <string name="code_search_no_match">Tidak ada pencarian aktif atau kecocokan untuk diganti.</string>
     <string name="code_search_close">Tutup pencarian</string>

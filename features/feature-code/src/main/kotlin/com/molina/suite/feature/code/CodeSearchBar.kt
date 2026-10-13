@@ -89,8 +89,9 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
     private val wrapBox: CheckBox = check(R.string.code_search_wrap, true)
 
     private val counter: TextView = TextView(context).apply {
-        setTextColor(CodePalette.TEXT_MUTED)
-        textSize = 12f
+        setTextColor(CodePalette.ACCENT)
+        textSize = 14f
+        setTypeface(typeface, Typeface.BOLD)
         gravity = Gravity.END or Gravity.CENTER_VERTICAL
     }
 
@@ -186,8 +187,9 @@ internal class CodeSearchBar(private val context: Context, private val callbacks
         counter.text = when {
             state.invalidPattern -> context.getString(R.string.code_search_invalid)
             state.query.isEmpty() -> ""
-            state.total == 0 -> "0"
-            else -> "${state.current}/${state.total}"
+            state.total == 0 -> context.getString(R.string.code_search_count_none)
+            state.current == 0 -> context.getString(R.string.code_search_count_total, state.total)
+            else -> context.getString(R.string.code_search_count_position, state.current, state.total)
         }
     }
 }
