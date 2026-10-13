@@ -9,6 +9,12 @@ internal object CodePalette {
 
     /** Sorotan baris aktif; sedikit lebih terang dari latar supaya tetap terlihat. */
     val EDITOR_CURRENT_LINE: Int = 0xFF161616.toInt()
+
+    /** Nomor baris di tepi editor: cyan terang, kontras tinggi di latar hitam pekat. */
+    val EDITOR_LINE_NUMBER: Int = 0xFF4DD0E1.toInt()
+
+    /** Nomor baris tempat kursor berada: amber, senada dengan aksen molina. */
+    val EDITOR_LINE_NUMBER_CURRENT: Int = 0xFFFFB300.toInt()
     val PANEL: Int = 0xFF313335.toInt()
     val TEXT: Int = 0xFFA9B7C6.toInt()
     val TEXT_MUTED: Int = 0xFF808080.toInt()

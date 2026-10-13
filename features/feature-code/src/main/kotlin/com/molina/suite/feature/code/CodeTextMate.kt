@@ -77,6 +77,8 @@ internal class CodeTextMate(private val assets: AssetManager) {
         scheme.setColor(EditorColorScheme.WHOLE_BACKGROUND, CodePalette.EDITOR_BACKGROUND)
         scheme.setColor(EditorColorScheme.LINE_NUMBER_BACKGROUND, CodePalette.EDITOR_BACKGROUND)
         scheme.setColor(EditorColorScheme.CURRENT_LINE, CodePalette.EDITOR_CURRENT_LINE)
+        scheme.setColor(EditorColorScheme.LINE_NUMBER, CodePalette.EDITOR_LINE_NUMBER)
+        scheme.setColor(EditorColorScheme.LINE_NUMBER_CURRENT, CodePalette.EDITOR_LINE_NUMBER_CURRENT)
         scheme.setColor(EditorColorScheme.MATCHED_TEXT_BACKGROUND, CodePalette.MATCH_BLOCK)
     }
 
