@@ -223,6 +223,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             cycleSpeedBtn.setOnClickListener { cycleSpeed() }
             topLockBtn.setOnClickListener { lockUI() }
             topPiPBtn.setOnClickListener { goIntoPiP() }
+            topRotateBtn.setOnClickListener {
+                autoRotationMode = "manual"
+                cycleOrientation()
+            }
             topMenuBtn.setOnClickListener { openTopMenu() }
             unlockBtn.setOnClickListener { unlockUI() }
             playbackDurationTxt.setOnClickListener {
@@ -309,6 +313,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             binding.topPiPBtn.visibility = View.GONE
         if (!packageManager.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN))
             binding.topLockBtn.visibility = View.GONE
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_SCREEN_PORTRAIT))
+            binding.topRotateBtn.visibility = View.GONE
 
         if (showMediaTitle)
             binding.controlsTitleGroup.visibility = View.VISIBLE
@@ -1851,6 +1857,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     private var maxVolume = 0
     /** 0 = initial, 1 = paused, 2 = was already paused */
     private var pausedForSeek = 0
+    // geser horizontal pada siaran live (tanpa durasi) sudah melewati ambang pembuka daftar channel
+    private var liveSwipeOpensPlaylist = false
 
     private fun fadeGestureText() {
         fadeHandler.removeCallbacks(fadeRunnable3)
@@ -1876,6 +1884,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                         getStreamMaxVolume(STREAM_TYPE)
                 }
                 pausedForSeek = 0
+                liveSwipeOpensPlaylist = false
 
                 fadeHandler.removeCallbacks(fadeRunnable3)
                 gestureTextView.visibility = View.VISIBLE
@@ -1884,6 +1893,15 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             PropertyChange.Seek -> {
                 // disable seeking when duration is unknown
                 val duration = (psc.duration / 1000f)
+                if (duration == 0f && psc.playlistCount > 1) {
+                    // siaran live: seek tidak berarti, geser horizontal membuka daftar channel
+                    liveSwipeOpensPlaylist = kotlin.math.abs(diff) >= LIVE_SWIPE_PLAYLIST_DIFF
+                    gestureTextView.text = if (liveSwipeOpensPlaylist)
+                        getString(R.string.ui_release_open_playlist)
+                    else
+                        ""
+                    return
+                }
                 if (duration == 0f || initialSeek < 0)
                     return
                 if (smoothSeekGesture && pausedForSeek == 0) {
@@ -1929,6 +1947,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 if (pausedForSeek == 1)
                     player.paused = false
                 gestureTextView.visibility = View.GONE
+                if (liveSwipeOpensPlaylist) {
+                    liveSwipeOpensPlaylist = false
+                    openPlaylistMenu(pauseForDialog())
+                }
             }
 
             /* Tap gestures */
@@ -1951,6 +1973,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
     companion object {
         private const val TAG = "mpv"
+        // jarak geser (dalam satuan gestur seek, 150 = lebar layar penuh) pembuka daftar channel live
+        private const val LIVE_SWIPE_PLAYLIST_DIFF = 30f
         // how long should controls be displayed on screen (ms)
         private const val CONTROLS_DISPLAY_TIMEOUT = 1500L
         // how long controls fade to disappear (ms)

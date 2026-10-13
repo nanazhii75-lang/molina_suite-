@@ -243,6 +243,18 @@
             android:orientation="horizontal">
 
             <ImageButton
+                android:id="@+id/topRotateBtn"
+                style="?buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/ui_rotate_screen"
+                android:minWidth="40dp"
+                android:minHeight="40dp"
+                android:padding="4dp"
+                app:srcCompat="@drawable/ic_screen_rotation_24dp"
+                app:tint="@color/tint_normal" />
+
+            <ImageButton
                 android:id="@+id/topLockBtn"
                 style="?buttonBarButtonStyle"
                 android:layout_width="wrap_content"
