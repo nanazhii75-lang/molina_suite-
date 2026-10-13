@@ -72,11 +72,6 @@ internal object BuiltinLibrary {
             "Membebaskan ruang dari paket yang tidak terpakai.", RunMode.DEBIAN
         ),
         entry(
-            "builtin-net-public-ip", "IP publik",
-            ENSURE_CURL + "curl -s https://api.ipify.org; echo",
-            "Alamat IP yang terlihat dari internet.", RunMode.DEBIAN
-        ),
-        entry(
             "builtin-net-timing", "Waktu respons situs",
             ENSURE_CURL + "curl -s -o /dev/null -w 'DNS %{time_namelookup}s, konek %{time_connect}s, " +
                 "total %{time_total}s\\n' https://{HOST}",
@@ -196,6 +191,11 @@ internal object BuiltinLibrary {
             "builtin-net-resolv", "DNS yang dipakai Debian",
             "cat /etc/resolv.conf",
             "Daftar server DNS di dalam Debian.", RunMode.DEBIAN
+        ),
+        entry(
+            "builtin-net-public-ip", "IP publik",
+            ENSURE_CURL + "curl -s https://api.ipify.org; echo",
+            "Alamat IP yang terlihat dari internet.", RunMode.DEBIAN
         )
     )
 

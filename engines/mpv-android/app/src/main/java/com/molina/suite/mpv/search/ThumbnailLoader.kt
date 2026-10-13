@@ -58,6 +58,7 @@ internal object ThumbnailLoader {
     }
 
     private fun download(url: String): Bitmap? {
+        if (!url.startsWith("https://", ignoreCase = true)) return null
         var connection: HttpURLConnection? = null
         return try {
             connection = (URL(url).openConnection() as HttpURLConnection).apply {
