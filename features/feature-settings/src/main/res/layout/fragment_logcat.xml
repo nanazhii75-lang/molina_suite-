@@ -14,11 +14,26 @@
         android:paddingTop="@dimen/ms_space_md"
         android:paddingEnd="@dimen/ms_space_md">
 
-        <TextView
-            style="@style/Molina.Text.Title"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/settings_logcat_title" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Molina.Text.Title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/settings_logcat_title" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/logcat_refresh"
+                style="@style/Molina.Button.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/logcat_refresh" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/logcat_status"

@@ -67,6 +67,7 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
             it.setOnClickListener { togglePause() }
         }
         view.findViewById<View>(R.id.logcat_clear).setOnClickListener { clear() }
+        view.findViewById<View>(R.id.logcat_refresh).setOnClickListener { manualRefresh() }
         view.findViewById<View>(R.id.logcat_save).setOnClickListener { saveToFile() }
         view.findViewById<View>(R.id.logcat_copy_recent).setOnClickListener { copyRecent() }
         view.findViewById<View>(R.id.logcat_last_crash).setOnClickListener { showLastCrash() }
@@ -120,6 +121,19 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         emptyView?.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
         if (entries.isNotEmpty() && autoScroll?.isChecked == true) list?.scrollToPosition(entries.lastIndex)
         updateStatus()
+    }
+
+    /**
+     * Segarkan manual: menggambar ulang daftar dari buffer saat ini walau sedang dijeda, lalu
+     * melompat ke baris terbaru dan menyalakan lagi gulir otomatis.
+     */
+    private fun manualRefresh() {
+        refresh(true)
+        if (shownCount > 0) {
+            autoScroll?.isChecked = true
+            list?.scrollToPosition(shownCount - 1)
+        }
+        toast(getString(R.string.logcat_refreshed, shownCount))
     }
 
     /** Gulir otomatis mati saat pengguna menggeser menjauhi dasar dan hidup lagi saat tiba di dasar. */
