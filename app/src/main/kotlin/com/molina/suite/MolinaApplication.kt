@@ -39,6 +39,7 @@ class MolinaApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        SettingsEngineModule.installCrashRecorder(this)
         TerminalEngineModule.install(this, engines)
         CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell)
         MpvEngineModule.install(this, engines, toolReadiness, toolSetup)
