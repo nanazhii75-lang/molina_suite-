@@ -48,6 +48,8 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     private var shownRevision = -1L
     private var shownFilter: LogcatFilter? = null
     private var shownCount = 0
+    private var viewSince = 0L
+    private var shownSince = -1L
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val entries = LogcatAdapter { entry -> copyLine(entry) }
@@ -67,7 +69,10 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
             it.setOnClickListener { togglePause() }
         }
         view.findViewById<View>(R.id.logcat_clear).setOnClickListener { clear() }
-        view.findViewById<View>(R.id.logcat_refresh).setOnClickListener { manualRefresh() }
+        view.findViewById<View>(R.id.logcat_refresh).also {
+            it.setOnClickListener { manualRefresh() }
+            it.setOnLongClickListener { showAllHistory() }
+        }
         view.findViewById<View>(R.id.logcat_save).setOnClickListener { saveToFile() }
         view.findViewById<View>(R.id.logcat_copy_recent).setOnClickListener { copyRecent() }
         view.findViewById<View>(R.id.logcat_last_crash).setOnClickListener { showLastCrash() }
@@ -105,6 +110,7 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         autoScroll = null
         shownRevision = -1L
         shownFilter = null
+        shownSince = -1L
         super.onDestroyView()
     }
 
@@ -112,10 +118,11 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     private fun refresh(force: Boolean) {
         val target = adapter ?: return
         val revision = recorder.buffer.revision
-        if (!force && revision == shownRevision && filter == shownFilter) return
-        val entries = recorder.buffer.snapshot(filter)
+        if (!force && revision == shownRevision && filter == shownFilter && viewSince == shownSince) return
+        val entries = recorder.buffer.snapshot(filter, viewSince)
         shownRevision = revision
         shownFilter = filter
+        shownSince = viewSince
         shownCount = entries.size
         target.submit(entries)
         emptyView?.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
@@ -124,16 +131,27 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     }
 
     /**
-     * Segarkan manual: menggambar ulang daftar dari buffer saat ini walau sedang dijeda, lalu
-     * melompat ke baris terbaru dan menyalakan lagi gulir otomatis.
+     * Segarkan: mulai pantau dari nol. Daftar hanya menampilkan log yang masuk setelah tombol
+     * ditekan supaya perilaku aplikasi mudah dibaca; riwayat di buffer dan disk tidak dihapus.
+     * Pemantauan yang sedang dijeda otomatis dilanjutkan.
      */
     private fun manualRefresh() {
-        refresh(true)
-        if (shownCount > 0) {
-            autoScroll?.isChecked = true
-            list?.scrollToPosition(shownCount - 1)
+        viewSince = recorder.buffer.total
+        if (paused) {
+            paused = false
+            updatePauseLabel()
         }
-        toast(getString(R.string.logcat_refreshed, shownCount))
+        autoScroll?.isChecked = true
+        refresh(true)
+        toast(getString(R.string.logcat_refreshed))
+    }
+
+    /** Tahan Segarkan: kembali menampilkan seluruh riwayat yang ada di buffer. */
+    private fun showAllHistory(): Boolean {
+        viewSince = 0L
+        refresh(true)
+        toast(getString(R.string.logcat_show_all))
+        return true
     }
 
     /** Gulir otomatis mati saat pengguna menggeser menjauhi dasar dan hidup lagi saat tiba di dasar. */
@@ -154,6 +172,7 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         view.text = when {
             ended != null -> getString(R.string.logcat_ended, ended)
             paused -> getString(R.string.logcat_status_paused, shownCount, total)
+            viewSince > 0L -> getString(R.string.logcat_status_since, shownCount, total)
             else -> getString(R.string.logcat_status, shownCount, total)
         }
     }
@@ -190,6 +209,7 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
      * menghapus riwayat tidak mengganggu tampilan, jadi hasilnya sengaja tidak dilaporkan.
      */
     private fun clear() {
+        viewSince = 0L
         recorder.clear()
         refresh(true)
     }
@@ -207,13 +227,13 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
 
     /** Menyimpan baris yang sedang tampil ke folder log privat aplikasi. */
     private fun saveToFile() {
-        val entries = recorder.buffer.snapshot(filter)
+        val entries = recorder.buffer.snapshot(filter, viewSince)
         viewLifecycleOwner.lifecycleScope.launch { toast(output.save(entries)) }
     }
 
     /** Menyalin baris-baris terakhir yang sedang tampil ke papan klip. */
     private fun copyRecent() {
-        toast(output.copyRecent(recorder.buffer.snapshot(filter)))
+        toast(output.copyRecent(recorder.buffer.snapshot(filter, viewSince)))
     }
 
     private fun showLastCrash() {

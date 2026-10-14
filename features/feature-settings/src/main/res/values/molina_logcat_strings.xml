@@ -16,5 +16,7 @@
     <string name="logcat_copied">Baris disalin</string>
     <string name="logcat_copy_failed">Tidak bisa menyalin ke papan klip</string>
     <string name="logcat_refresh">Segarkan</string>
-    <string name="logcat_refreshed">Disegarkan • %1$d baris</string>
+    <string name="logcat_refreshed">Disegarkan: hanya log baru yang tampil (tahan Segarkan untuk semua)</string>
+    <string name="logcat_show_all">Menampilkan seluruh riwayat</string>
+    <string name="logcat_status_since">Sejak Segarkan • %1$d dari %2$d baris</string>
 </resources>
