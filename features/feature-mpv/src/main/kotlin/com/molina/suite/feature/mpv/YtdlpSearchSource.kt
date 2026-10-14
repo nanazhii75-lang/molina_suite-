@@ -1,6 +1,9 @@
 package com.molina.suite.feature.mpv
 
 import android.util.Log
+import com.molina.suite.core.common.Activities
+import com.molina.suite.core.common.ActivityPriority
+import com.molina.suite.core.common.ActivitySource
 import com.molina.suite.mpv.search.YoutubeResult
 import com.molina.suite.mpv.search.YoutubeSearchException
 import com.molina.suite.mpv.search.YoutubeSearchException.Reason
@@ -19,6 +22,25 @@ import java.util.concurrent.TimeUnit
 internal class YtdlpSearchSource(private val wrapper: File) : YoutubeSearchSource {
 
     override fun search(
+        query: String,
+        offset: Int,
+        limit: Int,
+        onProgress: (Int) -> Unit
+    ): List<YoutubeResult> =
+        Activities.log.track(ActivitySource.MPV, "Cari di YouTube") { entry ->
+            try {
+                runSearch(query, offset, limit, onProgress).also { entry.end(true, "${it.size} hasil") }
+            } catch (e: YoutubeSearchException) {
+                if (e.cause is InterruptedException) {
+                    entry.end(false, "dibatalkan", ActivityPriority.WARN)
+                } else {
+                    entry.end(false, MpvLogText.redact(e.message ?: e.reason.name))
+                }
+                throw e
+            }
+        }
+
+    private fun runSearch(
         query: String,
         offset: Int,
         limit: Int,

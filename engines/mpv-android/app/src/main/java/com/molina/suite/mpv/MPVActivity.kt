@@ -287,6 +287,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     private var lockReferencesPending = false
     // judul per URL yang dibawa intent pencarian; dipakai panel playlist
     private var playlistTitles: Map<String, String> = emptyMap()
+    // pengamat catatan aktivitas untuk satu pemutaran; null bila tidak ada pencatat terpasang
+    private var activityWatcher: MpvPlaybackWatcher? = null
 
     // Activity lifetime
 
@@ -349,6 +351,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             com.molina.suite.mpv.search.MolinaPlaylist.titles(intent)
         else
             emptyMap()
+        activityWatcher = MpvActivityReporter.watch(MpvOpenKind.fromIntent(intent))
+            ?.also { MPVLib.addLogObserver(it) }
         player.addObserver(this)
         player.initialize(filesDir.path, cacheDir.path)
         player.playFile(filepath)
@@ -417,6 +421,12 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
         // take the background service with us
         stopServiceRunnable.run()
+
+        activityWatcher?.let {
+            MPVLib.removeLogObserver(it)
+            it.close()
+        }
+        activityWatcher = null
 
         player.removeObserver(this)
         player.destroy()
@@ -1883,6 +1893,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     }
 
     override fun event(eventId: Int) {
+        activityWatcher?.onEvent(eventId)
+
         if (eventId == MPVLib.mpvEventId.MPV_EVENT_SHUTDOWN)
             finishWithResult(if (playbackHasStarted) RESULT_OK else RESULT_CANCELED)
 

@@ -4,6 +4,7 @@ import android.app.Application
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.ToolReadinessChecker
 import com.molina.suite.core.common.ToolSetupBoard
+import com.molina.suite.mpv.MpvActivityReporter
 import com.molina.suite.mpv.UrlPlayback
 import com.molina.suite.mpv.search.YoutubeSearch
 
@@ -21,6 +22,7 @@ object MpvEngineModule {
     ) {
         MpvYtdlBridge.install(application)
         YoutubeSearch.install(YtdlpSearchSource(MpvYtdlBridge.wrapperFile(application)))
+        MpvActivityReporter.install(MpvActivityLogger())
         UrlPlayback.install(MpvToolGate(toolReadiness, toolSetup))
         engines.register(MpvFeature())
     }

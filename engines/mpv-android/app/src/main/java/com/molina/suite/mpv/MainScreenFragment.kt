@@ -66,7 +66,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
                 lastPath = path
             }
             it.data?.getStringExtra("path")?.let { path ->
-                playFile(path)
+                playFile(path, MpvOpenKind.LOCAL)
             }
         }
         playerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -94,7 +94,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             with (helper) {
                 builder.setPositiveButton(R.string.dialog_ok) { _, _ ->
                     val url = helper.text
-                    UrlPlayback.check(this@MainScreenFragment, url) { playFile(url) }
+                    UrlPlayback.check(this@MainScreenFragment, url) { playFile(url, MpvOpenKind.URL) }
                 }
                 builder.setNegativeButton(R.string.dialog_cancel) { dialog, _ -> dialog.cancel() }
                 create().show()
@@ -245,17 +245,18 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         val items = YoutubeSearchController.fetchedItems()
         val index = items.indexOfFirst { it.id == selected.id }
         if (index < 0) {
-            playFile(selected.watchUrl)
+            playFile(selected.watchUrl, MpvOpenKind.SEARCH)
             return
         }
         val intent = Intent()
         intent.putExtra("filepath", items[index].watchUrl)
+        intent.putExtra(MpvOpenKind.EXTRA, MpvOpenKind.SEARCH.name)
         MolinaPlaylist.put(intent, items.map { it.watchUrl }, items.map { it.title }, index)
         intent.setClass(requireContext(), MPVActivity::class.java)
         playerLauncher.launch(intent)
     }
 
-    private fun playFile(filepath: String) {
+    private fun playFile(filepath: String, kind: MpvOpenKind) {
         val i: Intent
         if (filepath.startsWith("content://")) {
             i = Intent(Intent.ACTION_VIEW, Uri.parse(filepath))
@@ -263,6 +264,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             i = Intent()
             i.putExtra("filepath", filepath)
         }
+        i.putExtra(MpvOpenKind.EXTRA, kind.name)
         i.setClass(requireContext(), MPVActivity::class.java)
         playerLauncher.launch(i)
     }
