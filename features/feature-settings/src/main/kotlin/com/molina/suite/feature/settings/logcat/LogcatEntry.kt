@@ -8,7 +8,9 @@ internal data class LogcatEntry(
     val tid: Int,
     val level: LogcatLevel,
     val tag: String,
-    val message: String
+    val message: String,
+    /** Jumlah baris identik berurutan yang digabung; 1 untuk baris biasa. */
+    val repeat: Int = 1
 ) {
     /** Bentuk teks satu baris untuk ekspor atau salin; bila dibaca ulang parser hasilnya sama. */
     fun toLine(): String = "$date $time ${pid.toString().padStart(5)} ${tid.toString().padStart(5)} " +

@@ -140,7 +140,7 @@ internal class LogFileStore(
 
     companion object {
         const val DEFAULT_SEGMENT_BYTES = 1024L * 1024L
-        const val DEFAULT_SEGMENTS = 5
+        const val DEFAULT_SEGMENTS = 2
         private const val FIRST_SEQUENCE = 1
         private val SEGMENT_NAME = Regex("""history-(\d{6,})\.log""")
     }

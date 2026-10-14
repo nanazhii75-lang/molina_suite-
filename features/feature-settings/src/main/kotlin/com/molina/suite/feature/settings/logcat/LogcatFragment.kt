@@ -227,13 +227,13 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
 
     /** Menyimpan baris yang sedang tampil ke folder log privat aplikasi. */
     private fun saveToFile() {
-        val entries = recorder.buffer.snapshot(filter, viewSince)
+        val entries = recorder.buffer.snapshot(filter, viewSince, collapse = false)
         viewLifecycleOwner.lifecycleScope.launch { toast(output.save(entries)) }
     }
 
     /** Menyalin baris-baris terakhir yang sedang tampil ke papan klip. */
     private fun copyRecent() {
-        toast(output.copyRecent(recorder.buffer.snapshot(filter, viewSince)))
+        toast(output.copyRecent(recorder.buffer.snapshot(filter, viewSince, collapse = false)))
     }
 
     private fun showLastCrash() {

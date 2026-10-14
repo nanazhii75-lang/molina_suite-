@@ -81,7 +81,7 @@ internal class LogRecorder(
                 produced = true
                 if (!resume.accept(entry)) return
                 buffer.add(entry)
-                enqueue(entry.toLine())
+                if (entry.level >= PERSIST_MIN_LEVEL) enqueue(entry.toLine())
             }
 
             override fun onEnd(error: String?) {
@@ -172,6 +172,9 @@ internal class LogRecorder(
 
     companion object {
         private const val HISTORY_DIR_NAME = "logcat-history"
+
+        /** Tingkat terendah yang ditulis ke disk; di bawahnya hanya ada di buffer selama proses hidup. */
+        private val PERSIST_MIN_LEVEL = LogcatLevel.INFO
         private const val FLUSH_DELAY_MS = 3000L
         private const val FLUSH_LINES = 200
         private const val MAX_FAILURES = 8

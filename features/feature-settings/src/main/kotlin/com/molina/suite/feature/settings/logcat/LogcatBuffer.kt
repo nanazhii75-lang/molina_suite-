@@ -42,14 +42,20 @@ internal class LogcatBuffer(val capacity: Int = DEFAULT_CAPACITY) {
     /**
      * Salinan entri yang lolos [filter], urut dari tertua; aman dipakai di thread tampilan.
      * Hanya entri bernomor urut [since] ke atas yang ikut ([since] dari [total]); 0 berarti semua.
+     * Bila [collapse], baris identik berurutan digabung jadi satu entri ([LogcatEntry.repeat]).
      */
-    fun snapshot(filter: LogcatFilter = LogcatFilter(), since: Long = 0L): List<LogcatEntry> =
+    fun snapshot(
+        filter: LogcatFilter = LogcatFilter(),
+        since: Long = 0L,
+        collapse: Boolean = true
+    ): List<LogcatEntry> =
         synchronized(lock) {
             val skip = (since - (added - entries.size)).coerceIn(0L, entries.size.toLong()).toInt()
-            entries.drop(skip).filter { filter.matches(it) }
+            val picked = entries.drop(skip).filter { filter.matches(it) }
+            if (collapse) picked.collapseRepeats() else picked
         }
 
     companion object {
-        const val DEFAULT_CAPACITY = 8000
+        const val DEFAULT_CAPACITY = 3000
     }
 }

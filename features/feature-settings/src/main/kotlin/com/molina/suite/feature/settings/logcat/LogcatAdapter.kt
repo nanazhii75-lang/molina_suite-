@@ -31,7 +31,8 @@ internal class LogcatAdapter(
     override fun onBindViewHolder(holder: Holder, position: Int) {
         val entry = items[position]
         val view = holder.text
-        view.text = "${entry.time} ${entry.level.symbol}/${entry.tag}: ${entry.message}"
+        val repeats = if (entry.repeat > 1) "  \u00D7${entry.repeat}" else ""
+        view.text = "${entry.time} ${entry.level.symbol}/${entry.tag}: ${entry.message}$repeats"
         view.setTextColor(view.context.getColor(colorOf(entry.level)))
         view.setTypeface(Typeface.MONOSPACE, if (entry.level >= LogcatLevel.ERROR) Typeface.BOLD else Typeface.NORMAL)
         view.setOnLongClickListener {
