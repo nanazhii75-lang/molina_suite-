@@ -132,7 +132,6 @@ public class ThemeRegistry {
 
     public void setTheme(ThemeModel theme) {
         currentThemeModel = theme;
-        android.util.Log.i("MolinaTM", "ThemeRegistry.setTheme " + theme.getName());
 
         if (!allThemeModel.contains(theme)) {
             allThemeModel.add(theme);
