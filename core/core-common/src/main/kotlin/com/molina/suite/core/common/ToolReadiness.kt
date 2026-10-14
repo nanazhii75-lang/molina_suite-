@@ -30,4 +30,10 @@ interface ToolReadinessChecker {
 
     /** Memeriksa [toolIds]; id yang tidak dikenal katalog dilaporkan sebagai [ToolReadiness.Unregistered]. */
     suspend fun check(toolIds: List<String>): ToolReadiness
+
+    /**
+     * Versi alat terpasang di [toolIds], dikunci dengan id katalog. Alat yang tidak terpasang atau
+     * yang versinya tidak terbaca tidak ada di hasil. Bawaan: kosong.
+     */
+    suspend fun versions(toolIds: List<String>): Map<String, String> = emptyMap()
 }

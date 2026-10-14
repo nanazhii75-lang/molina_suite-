@@ -18,6 +18,7 @@ internal interface CodeActionMenuListener {
     fun onEncoding()
     fun onAppearance()
     fun onStatistics()
+    fun onCheck()
     fun onWordwrapChanged(enabled: Boolean)
     fun onReadOnlyChanged(readOnly: Boolean)
 }
@@ -41,6 +42,7 @@ internal object CodeMenus {
     private const val ID_ENCODING = 17
     private const val ID_APPEARANCE = 18
     private const val ID_SHARE = 19
+    private const val ID_CHECK = 20
 
     fun showActionMenu(
         context: Context,
@@ -61,8 +63,9 @@ internal object CodeMenus {
         menu.add(Menu.NONE, ID_ENCODING, 7, R.string.code_menu_encoding)
         menu.add(Menu.NONE, ID_APPEARANCE, 8, R.string.code_menu_appearance)
         menu.add(Menu.NONE, ID_STATS, 9, R.string.code_menu_stats)
-        checkable(menu.add(Menu.NONE, ID_WRAP, 10, R.string.code_menu_wordwrap), options.wordwrap)
-        checkable(menu.add(Menu.NONE, ID_READONLY, 11, R.string.code_menu_readonly), options.readOnly)
+        menu.add(Menu.NONE, ID_CHECK, 10, R.string.code_menu_check)
+        checkable(menu.add(Menu.NONE, ID_WRAP, 11, R.string.code_menu_wordwrap), options.wordwrap)
+        checkable(menu.add(Menu.NONE, ID_READONLY, 12, R.string.code_menu_readonly), options.readOnly)
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 ID_NEW -> listener.onNew()
@@ -75,6 +78,7 @@ internal object CodeMenus {
                 ID_ENCODING -> listener.onEncoding()
                 ID_APPEARANCE -> listener.onAppearance()
                 ID_STATS -> listener.onStatistics()
+                ID_CHECK -> listener.onCheck()
                 ID_WRAP -> listener.onWordwrapChanged(!item.isChecked)
                 ID_READONLY -> listener.onReadOnlyChanged(!item.isChecked)
                 else -> return@setOnMenuItemClickListener false

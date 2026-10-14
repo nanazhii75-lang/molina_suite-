@@ -32,4 +32,11 @@ internal class PackageToolReadinessChecker(context: Context) : ToolReadinessChec
             }
         }
     }
+
+    override suspend fun versions(toolIds: List<String>): Map<String, String> = withContext(Dispatchers.IO) {
+        when (val detection = PackageDetector.detect(appContext)) {
+            is PackageDetection.Ok -> detection.versions.filterKeys { it in toolIds }
+            else -> emptyMap()
+        }
+    }
 }

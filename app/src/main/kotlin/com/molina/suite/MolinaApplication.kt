@@ -40,7 +40,7 @@ class MolinaApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         TerminalEngineModule.install(this, engines)
-        CodeEngineModule.install(this, engines, editorOpen, terminalInput)
+        CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell)
         MpvEngineModule.install(this, engines, toolReadiness, toolSetup)
         SettingsEngineModule.install(engines, terminalInput, toolSetup, editorOpen)
         DaemonStatusBridge.start(engines, daemons)

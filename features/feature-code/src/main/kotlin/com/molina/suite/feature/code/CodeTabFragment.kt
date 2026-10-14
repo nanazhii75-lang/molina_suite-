@@ -31,8 +31,11 @@ import com.molina.suite.core.common.HostChromeController
 import com.molina.suite.core.common.HostTabSwitcher
 import com.molina.suite.core.common.ScriptRunLine
 import com.molina.suite.core.common.ScriptRunTarget
+import com.molina.suite.core.common.EngineId
+import com.molina.suite.core.common.ToolSetupTarget
 import com.molina.suite.core.storage.MolinaStorage
 import io.github.rosemoe.sora.widget.CodeEditor
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -59,6 +62,27 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
     private var treeController: CodeTreeController? = null
     private var lastFollowedPath: String? = null
     private var afterPermission: (() -> Unit)? = null
+
+    /** Alur Lakukan (cek kompilasi); logikanya di [CodeCheckController], tab hanya menyediakan [CodeCheckController.Host]. */
+    private val checkController: CodeCheckController by lazy {
+        val engine = CodeEngineModule.requireEngine()
+        CodeCheckController(
+            object : CodeCheckController.Host {
+                override val context: Context? get() = this@CodeTabFragment.context
+                override val scope: CoroutineScope get() = viewLifecycleOwner.lifecycleScope
+                override fun currentFile(): File? = session.document.value.file
+                override fun isDirty(): Boolean = session.document.value.dirty
+                override suspend fun save(): Boolean = this@CodeTabFragment.save()
+                override fun goToLine(line: Int): Boolean = session.goToLine(line)
+                override fun openSetup(target: ToolSetupTarget, toolIds: List<String>) {
+                    engine.toolSetup.request(target, toolIds)
+                    (this@CodeTabFragment.activity as? HostTabSwitcher)?.showEngine(EngineId.SETTINGS)
+                }
+            },
+            engine.toolReadiness,
+            engine.checkRunner
+        )
+    }
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -334,6 +358,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             override fun onSearch() = openSearch()
             override fun onGoToLine() = promptGoToLine()
             override fun onStatistics() = showStatistics()
+            override fun onCheck() = checkController.start()
             override fun onShare() = shareText()
             override fun onSyntax() = chooseSyntax()
             override fun onEncoding() = showEncodingInfo()
