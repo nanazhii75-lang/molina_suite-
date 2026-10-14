@@ -97,6 +97,10 @@ internal class PlaylistDialog(
         class ViewHolder(private val parent: PlaylistDialog, view: View) :
             RecyclerView.ViewHolder(view) {
             private val textView: TextView
+            // latar bawaan baris vs latar item yang sedang diputar; baris didaur ulang, jadi selalu diset ulang
+            private val defaultBackground = view.background
+            private val playingBackground =
+                ContextCompat.getDrawable(view.context, R.drawable.playlist_item_playing)
 
             init {
                 textView = view.findViewById(android.R.id.text1)
@@ -108,6 +112,7 @@ internal class PlaylistDialog(
             fun bind(item: MPVView.PlaylistItem, selected: Boolean) {
                 textView.text = parent.titles[item.filename] ?: item.title ?: Utils.fileBasename(item.filename)
                 textView.setTypeface(null, if (selected) Typeface.BOLD else Typeface.NORMAL)
+                itemView.background = if (selected) playingBackground else defaultBackground
             }
         }
 

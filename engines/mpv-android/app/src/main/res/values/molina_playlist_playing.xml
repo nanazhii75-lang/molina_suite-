@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Item yang sedang diputar di panel playlist: latar biru transparan dan garis biru di kiri. -->
+    <color name="molina_playlist_playing_bg">#4D3D8BFF</color>
+    <color name="molina_playlist_playing_bar">#FF4D94FF</color>
+</resources>
