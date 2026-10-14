@@ -1,5 +1,7 @@
 package com.molina.suite.feature.settings.library
 
+import android.transition.AutoTransition
+import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,12 +12,17 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.molina.suite.feature.settings.R
 
+/**
+ * Kartu Library: saat tertutup hanya judul dan tombol jalankan; mengetuk kartu membuka isi, catatan,
+ * dan tombol Ubah. Entri yang terbuka diingat per id sehingga bertahan saat daftar dimuat ulang.
+ */
 internal class LibraryAdapter(
     private val onRun: (LibraryEntry) -> Unit,
     private val onEdit: (LibraryEntry) -> Unit
 ) : ListAdapter<LibraryEntry, LibraryAdapter.Holder>(LibraryDiff) {
 
     private var missingByEntry: Map<String, String> = emptyMap()
+    private val expandedIds = HashSet<String>()
 
     /** Id entri ke nama alat yang dibutuhkan tetapi belum terpasang. */
     fun submitMissing(missing: Map<String, String>) {
@@ -30,6 +37,9 @@ internal class LibraryAdapter(
         val note: TextView = view.findViewById(R.id.library_item_note)
         val run: ImageButton = view.findViewById(R.id.library_item_run)
         val requires: TextView = view.findViewById(R.id.library_item_requires)
+        val details: View = view.findViewById(R.id.library_item_details)
+        val chevron: View = view.findViewById(R.id.library_item_chevron)
+        val edit: View = view.findViewById(R.id.library_item_edit)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder =
@@ -46,14 +56,30 @@ internal class LibraryAdapter(
             } else {
                 preview
             }
+        // Isi entri IPTV hanya penanda; playlist-nya dibuka lewat dialog, bukan skrip.
+        holder.content.visibility = if (entry.id == IptvIndonesia.ENTRY_ID) View.GONE else View.VISIBLE
         holder.note.text = entry.note
         holder.note.visibility = if (entry.note.isEmpty()) View.GONE else View.VISIBLE
         val missing = missingByEntry[entry.id]
         holder.requires.text =
             if (missing == null) "" else holder.itemView.context.getString(R.string.library_requires, missing)
         holder.requires.visibility = if (missing == null) View.GONE else View.VISIBLE
-        holder.itemView.setOnClickListener { onEdit(entry) }
+        applyExpanded(holder, expandedIds.contains(entry.id))
+        holder.itemView.setOnClickListener { toggle(holder, entry.id) }
+        holder.edit.setOnClickListener { onEdit(entry) }
         holder.run.setOnClickListener { onRun(entry) }
+    }
+
+    private fun toggle(holder: Holder, id: String) {
+        val expand = expandedIds.add(id)
+        if (!expand) expandedIds.remove(id)
+        (holder.itemView.parent as? ViewGroup)?.let { TransitionManager.beginDelayedTransition(it, AutoTransition()) }
+        applyExpanded(holder, expand)
+    }
+
+    private fun applyExpanded(holder: Holder, expanded: Boolean) {
+        holder.details.visibility = if (expanded) View.VISIBLE else View.GONE
+        holder.chevron.rotation = if (expanded) 180f else 0f
     }
 }
 
