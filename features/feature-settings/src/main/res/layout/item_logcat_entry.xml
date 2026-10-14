@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-logcat-tahap2 -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Molina.Text.Mono"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:paddingStart="@dimen/ms_space_md"
+    android:paddingTop="1dp"
+    android:paddingEnd="@dimen/ms_space_md"
+    android:paddingBottom="1dp"
+    android:textSize="11sp" />

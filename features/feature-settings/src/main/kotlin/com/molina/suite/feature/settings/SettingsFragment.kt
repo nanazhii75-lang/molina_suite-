@@ -12,6 +12,7 @@ import com.molina.suite.core.common.ToolSetupRequest
 import com.molina.suite.core.common.ToolSetupTarget
 import com.molina.suite.feature.settings.debian.DebianFragment
 import com.molina.suite.feature.settings.library.LibraryFragment
+import com.molina.suite.feature.settings.logcat.LogcatFragment
 import com.molina.suite.feature.settings.packages.PackagesFragment
 import com.molina.suite.feature.settings.tools.ToolsFragment
 import kotlinx.coroutines.launch
@@ -38,6 +39,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         view.findViewById<View>(R.id.settings_row_library).setOnClickListener { openLibrary() }
         view.findViewById<View>(R.id.settings_row_debian).setOnClickListener { openDebian() }
         view.findViewById<View>(R.id.settings_row_packages).setOnClickListener { openPackages() }
+        view.findViewById<View>(R.id.settings_row_logcat).setOnClickListener { openLogcat() }
         observeToolSetup()
         sync()
     }
@@ -104,6 +106,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
             .commit()
     }
 
+    private fun openLogcat() {
+        if (childFragmentManager.backStackEntryCount > 0) return
+        childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.settings_child_container, LogcatFragment())
+            .addToBackStack(BACKSTACK_LOGCAT)
+            .commit()
+    }
+
     private fun openDebian() {
         if (childFragmentManager.backStackEntryCount > 0) return
         childFragmentManager.beginTransaction()
@@ -137,5 +148,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         const val BACKSTACK_LIBRARY = "library"
         const val BACKSTACK_DEBIAN = "debian"
         const val BACKSTACK_PACKAGES = "packages"
+        const val BACKSTACK_LOGCAT = "logcat"
     }
 }

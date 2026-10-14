@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-logcat-tahap2 -->
+<resources>
+    <color name="ms_log_verbose">#9E9E9E</color>
+    <color name="ms_log_debug">#4FC3F7</color>
+    <color name="ms_log_info">#66BB6A</color>
+    <color name="ms_log_warn">#FFB300</color>
+    <color name="ms_log_error">#EF5350</color>
+    <color name="ms_log_fatal">#FF1744</color>
+</resources>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-logcat-tahap2 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ms_bg"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/ms_space_md"
+        android:paddingTop="@dimen/ms_space_md"
+        android:paddingEnd="@dimen/ms_space_md">
+
+        <TextView
+            style="@style/Molina.Text.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_logcat_title" />
+
+        <TextView
+            android:id="@+id/logcat_status"
+            style="@style/Molina.Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/ms_space_xs" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/ms_space_md">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/logcat_level"
+            style="@style/Molina.Button.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/logcat_search"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="@dimen/ms_space_sm"
+            android:layout_weight="1"
+            android:background="@drawable/ms_bg_card"
+            android:hint="@string/logcat_search_hint"
+            android:imeOptions="actionDone"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:maxLines="1"
+            android:paddingStart="@dimen/ms_space_md"
+            android:paddingEnd="@dimen/ms_space_md"
+            android:textColor="@color/ms_text_primary"
+            android:textColorHint="@color/ms_text_secondary"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/logcat_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false" />
+
+        <TextView
+            android:id="@+id/logcat_empty"
+            style="@style/Molina.Text.Body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/logcat_empty" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/ms_space_md"
+        android:paddingTop="@dimen/ms_space_sm"
+        android:paddingEnd="@dimen/ms_space_md"
+        android:paddingBottom="@dimen/ms_space_sm">
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/logcat_autoscroll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:text="@string/logcat_autoscroll"
+            android:textColor="@color/ms_text_primary"
+            android:textSize="13sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/logcat_pause"
+            style="@style/Molina.Button.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/logcat_clear"
+            style="@style/Molina.Button.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/ms_space_sm"
+            android:text="@string/logcat_clear" />
+    </LinearLayout>
+</LinearLayout>
