@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-logcat-tahap3 -->
+<resources>
+    <string name="logcat_save">Simpan</string>
+    <string name="logcat_copy_recent">Salin</string>
+    <string name="logcat_last_crash">Crash terakhir</string>
+    <string name="logcat_saved">%1$d baris disimpan ke %2$s</string>
+    <string name="logcat_save_failed">Gagal menyimpan: %1$s</string>
+    <string name="logcat_nothing">Tidak ada baris untuk disimpan atau disalin</string>
+    <string name="logcat_recent_copied">%1$d baris terakhir disalin</string>
+    <string name="logcat_no_crash">Belum ada crash tercatat</string>
+    <string name="logcat_crash_title">Crash: %1$s</string>
+    <string name="logcat_crash_copy">Salin</string>
+    <string name="logcat_crash_copied">Laporan crash disalin</string>
+    <string name="logcat_close">Tutup</string>
+</resources>

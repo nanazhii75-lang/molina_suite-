@@ -34,6 +34,7 @@ private const val REFRESH_MS = 300L
 class LogcatFragment : Fragment(R.layout.fragment_logcat) {
 
     private val session = LogcatSession()
+    private val output by lazy(LazyThreadSafetyMode.NONE) { LogcatOutput(requireContext().applicationContext) }
 
     private var adapter: LogcatAdapter? = null
     private var list: RecyclerView? = null
@@ -67,6 +68,9 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
             it.setOnClickListener { togglePause() }
         }
         view.findViewById<View>(R.id.logcat_clear).setOnClickListener { clear() }
+        view.findViewById<View>(R.id.logcat_save).setOnClickListener { saveToFile() }
+        view.findViewById<View>(R.id.logcat_copy_recent).setOnClickListener { copyRecent() }
+        view.findViewById<View>(R.id.logcat_last_crash).setOnClickListener { showLastCrash() }
         view.findViewById<EditText>(R.id.logcat_search).doAfterTextChanged { text ->
             filter = filter.copy(query = text?.toString().orEmpty())
             refresh(false)
@@ -192,8 +196,23 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         toast(getString(R.string.logcat_copied))
     }
 
+    /** Menyimpan baris yang sedang tampil ke /sdcard/Molina/Logs. */
+    private fun saveToFile() {
+        val entries = session.buffer.snapshot(filter)
+        viewLifecycleOwner.lifecycleScope.launch { toast(output.save(entries)) }
+    }
+
+    /** Menyalin baris-baris terakhir yang sedang tampil ke papan klip. */
+    private fun copyRecent() {
+        toast(output.copyRecent(session.buffer.snapshot(filter)))
+    }
+
+    private fun showLastCrash() {
+        output.showLastCrash(requireContext())
+    }
+
     private fun toast(message: String) {
         val ctx = context ?: return
-        Toast.makeText(ctx.applicationContext, message, Toast.LENGTH_SHORT).show()
+        Toast.makeText(ctx.applicationContext, message, Toast.LENGTH_LONG).show()
     }
 }

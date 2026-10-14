@@ -80,6 +80,41 @@ internal class LogcatReader(
         val DEFAULT_COMMAND: List<String> = listOf("logcat", "-v", "threadtime")
 
         /**
+         * Mengambil [count] baris logcat terakhir milik aplikasi ini lalu berhenti (logcat -d),
+         * dengan batas waktu [timeoutMillis]. Dipakai pencatat crash, jadi tidak melempar; hasilnya
+         * kosong bila logcat tidak bisa dijalankan atau belum menghasilkan keluaran saat waktunya habis.
+         */
+        fun dumpTail(
+            count: Int,
+            timeoutMillis: Long,
+            command: List<String> = listOf("logcat", "-d", "-v", "threadtime", "-t", count.toString())
+        ): List<String> {
+            val lines = ArrayList<String>()
+            val worker = Thread({
+                try {
+                    val process = ProcessBuilder(command).redirectErrorStream(true).start()
+                    try {
+                        process.inputStream.bufferedReader(Charsets.UTF_8).forEachLine { line ->
+                            synchronized(lines) { lines.add(line) }
+                        }
+                    } finally {
+                        process.destroy()
+                    }
+                } catch (e: IOException) {
+                    // Tanpa logcat laporan crash tetap ditulis, hanya tanpa ekor log.
+                }
+            }, "LogcatDump")
+            worker.isDaemon = true
+            worker.start()
+            try {
+                worker.join(timeoutMillis)
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+            }
+            return synchronized(lines) { ArrayList(lines) }
+        }
+
+        /**
          * Mengosongkan buffer logcat milik aplikasi ini. Mengembalikan null bila berhasil, atau
          * alasan gagal; tidak melempar.
          */

@@ -83,6 +83,38 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/ms_space_md"
+        android:paddingEnd="@dimen/ms_space_md">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/logcat_save"
+            style="@style/Molina.Button.Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/logcat_save" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/logcat_copy_recent"
+            style="@style/Molina.Button.Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/logcat_copy_recent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/logcat_last_crash"
+            style="@style/Molina.Button.Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/logcat_last_crash" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="@dimen/ms_space_md"
