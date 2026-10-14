@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.molina.suite.feature.settings.R
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -27,13 +26,13 @@ private const val REFRESH_MS = 300L
 
 /**
  * Layar Logcat di Pengaturan: log aplikasi molina sendiri (mpv, Terminal, Code) dengan warna per
- * level, filter level, pencarian, jeda, bersihkan, dan gulir otomatis. Pembacaan ada di
- * [LogcatSession] dan dimulai saat layar dibuka, berhenti saat layar ditutup. Saat dijeda, tampilan
- * berhenti diperbarui tetapi log tetap terkumpul di buffer.
+ * level, filter level, pencarian, jeda, bersihkan, dan gulir otomatis. Pembacaan dan riwayat ada di
+ * [LogRecorder] yang berjalan sejak aplikasi dibuka, jadi layar ini langsung menampilkan log yang
+ * sudah terkumpul. Saat dijeda, tampilan berhenti diperbarui tetapi log tetap terkumpul di buffer.
  */
 class LogcatFragment : Fragment(R.layout.fragment_logcat) {
 
-    private val session = LogcatSession()
+    private val recorder by lazy(LazyThreadSafetyMode.NONE) { LogRecorder.get(requireContext()) }
     private val output by lazy(LazyThreadSafetyMode.NONE) { LogcatOutput(requireContext().applicationContext) }
 
     private var adapter: LogcatAdapter? = null
@@ -83,7 +82,6 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
 
         updateLevelLabel()
         updatePauseLabel()
-        session.start()
         refresh(true)
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -97,7 +95,6 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     }
 
     override fun onDestroyView() {
-        session.stop()
         adapter = null
         list = null
         statusView = null
@@ -113,9 +110,9 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     /** Menggambar ulang daftar bila isi buffer atau filter berubah (atau bila [force]). */
     private fun refresh(force: Boolean) {
         val target = adapter ?: return
-        val revision = session.buffer.revision
+        val revision = recorder.buffer.revision
         if (!force && revision == shownRevision && filter == shownFilter) return
-        val entries = session.buffer.snapshot(filter)
+        val entries = recorder.buffer.snapshot(filter)
         shownRevision = revision
         shownFilter = filter
         shownCount = entries.size
@@ -138,8 +135,8 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
 
     private fun updateStatus() {
         val view = statusView ?: return
-        val total = session.buffer.size
-        val ended = session.endMessage
+        val total = recorder.buffer.size
+        val ended = recorder.endMessage
         view.text = when {
             ended != null -> getString(R.string.logcat_ended, ended)
             paused -> getString(R.string.logcat_status_paused, shownCount, total)
@@ -175,14 +172,12 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     }
 
     /**
-     * Mengosongkan tampilan dan buffer, lalu mencoba mengosongkan buffer sistem supaya log lama
-     * tidak muncul lagi bila pembacaan dimulai ulang. Kegagalan langkah kedua tidak mengganggu
-     * tampilan, jadi hasilnya sengaja tidak dilaporkan.
+     * Mengosongkan tampilan, riwayat di disk, dan buffer sistem lewat [LogRecorder]. Kegagalan
+     * menghapus riwayat tidak mengganggu tampilan, jadi hasilnya sengaja tidak dilaporkan.
      */
     private fun clear() {
-        session.buffer.clear()
+        recorder.clear()
         refresh(true)
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) { LogcatReader.clearSystemBuffer() }
     }
 
     private fun copyLine(entry: LogcatEntry) {
@@ -198,13 +193,13 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
 
     /** Menyimpan baris yang sedang tampil ke /sdcard/Molina/Logs. */
     private fun saveToFile() {
-        val entries = session.buffer.snapshot(filter)
+        val entries = recorder.buffer.snapshot(filter)
         viewLifecycleOwner.lifecycleScope.launch { toast(output.save(entries)) }
     }
 
     /** Menyalin baris-baris terakhir yang sedang tampil ke papan klip. */
     private fun copyRecent() {
-        toast(output.copyRecent(session.buffer.snapshot(filter)))
+        toast(output.copyRecent(recorder.buffer.snapshot(filter)))
     }
 
     private fun showLastCrash() {
