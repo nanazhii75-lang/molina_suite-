@@ -114,7 +114,7 @@ internal class CodeEditorSession(
             return null
         }
         if (!tabs.canPlace()) return CodeFileLoad.Failed(tabLimitMessage())
-        val result = files.load(file)
+        val result = files.loadLogged(file)
         if (result !is CodeFileLoad.Loaded) return result
         tabs.findByFile(file)?.let {
             activateTab(it.id)
@@ -146,7 +146,7 @@ internal class CodeEditorSession(
         val tab = tabs.active
         val file = tab.document.file
             ?: return CodeFileLoad.Failed("Dokumen belum disimpan, jadi tidak ada berkas untuk dimuat ulang")
-        val result = files.load(file)
+        val result = files.loadLogged(file, "Muat ulang")
         if (result !is CodeFileLoad.Loaded) return result
         val target = editor
         val stillActive = tabs.activeId == tab.id
@@ -372,7 +372,7 @@ internal class CodeEditorSession(
     private suspend fun write(tab: CodeTab, target: File): CodeFileSave {
         val text = editor?.text?.toString() ?: tab.text
         val savedRevision = tab.revision
-        val result = files.save(target, text, tab.document.charset, tab.document.hasBom)
+        val result = files.saveLogged(target, text, tab.document.charset, tab.document.hasBom)
         if (result is CodeFileSave.Saved) {
             val latest = tabs.find(tab.id)
             if (latest != null && latest.document.file == tab.document.file) {

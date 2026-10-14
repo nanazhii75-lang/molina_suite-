@@ -1,10 +1,11 @@
 package com.molina.suite.feature.settings
 
 import android.app.Activity
-import android.util.Log
+import com.molina.suite.core.common.Activities
+import com.molina.suite.core.common.ActivityPriority
+import com.molina.suite.core.common.ActivitySource
 import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.HostTabSwitcher
-import com.molina.suite.core.common.LoggingShellCommandRunner
 import com.molina.suite.core.common.TerminalInputResult
 import kotlinx.coroutines.delay
 
@@ -19,22 +20,21 @@ internal object TerminalCommandRunner {
     private const val MAX_ATTEMPTS = 20
     private const val RETRY_DELAY_MS = 500L
     private const val MAX_LABEL_CHARS = 80
-    private const val LOG_TAG = LoggingShellCommandRunner.LOG_TAG
 
     /**
      * Mengetik [line] ke Terminal dan mencatat hasilnya dengan [label]. Mengembalikan null bila
      * terkirim, atau alasan kegagalan. Panggil dari main thread.
      */
-    suspend fun run(activity: Activity, label: String, line: String): String? {
-        val name = logName(label)
-        val reason = deliver(activity, line)
-        if (reason == null) {
-            Log.i(LOG_TAG, "[$name] diketik ke Terminal")
-        } else {
-            Log.w(LOG_TAG, "[$name] tidak terkirim ke Terminal: $reason")
+    suspend fun run(activity: Activity, label: String, line: String): String? =
+        Activities.log.track(ActivitySource.SETTING, logName(label)) { entry ->
+            val reason = deliver(activity, line)
+            if (reason == null) {
+                entry.note("diketik ke Terminal")
+            } else {
+                entry.end(false, "tidak terkirim ke Terminal: $reason", ActivityPriority.WARN)
+            }
+            reason
         }
-        return reason
-    }
 
     /** Label satu baris, dipotong, supaya log tetap rapi. */
     private fun logName(label: String): String =

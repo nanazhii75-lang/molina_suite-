@@ -24,6 +24,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.molina.suite.core.common.Activities
+import com.molina.suite.core.common.ActivitySource
 import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.EditorOpenRequest
 import com.molina.suite.core.common.HostBackPressHandler
@@ -567,13 +569,15 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
                 toast(getString(R.string.code_run_unreadable, file.name))
                 return@launch
             }
-            val outcome = CodeScriptRunner.run(
-                CodeEngineModule.requireEngine().terminalInput,
-                activity as? HostTabSwitcher,
-                file,
-                head,
-                target
-            )
+            val outcome = Activities.log.track(ActivitySource.CODE, "Jalankan ${file.name}") { entry ->
+                CodeScriptRunner.run(
+                    CodeEngineModule.requireEngine().terminalInput,
+                    activity as? HostTabSwitcher,
+                    file,
+                    head,
+                    target
+                ).also { entry.report(it) }
+            }
             when (outcome) {
                 CodeRunOutcome.Started -> Unit
                 CodeRunOutcome.Unsupported -> toast(getString(R.string.code_run_unsupported))
