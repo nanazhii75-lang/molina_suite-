@@ -5,6 +5,7 @@ import com.molina.suite.core.common.BackgroundKeepAlive
 import com.molina.suite.core.common.DaemonStatusBoard
 import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.EngineRegistry
+import com.molina.suite.core.common.LoggingShellCommandRunner
 import com.molina.suite.core.common.ShellCommandRunner
 import com.molina.suite.core.common.TerminalInputSender
 import com.molina.suite.core.common.ToolReadinessChecker
@@ -28,8 +29,10 @@ class MolinaApplication : Application() {
     /** Pemeriksa alat berbasis katalog menu Paket, dipakai modul mpv (Play by URL). */
     val toolReadiness: ToolReadinessChecker by lazy { SettingsEngineModule.createToolReadinessChecker(this) }
 
-    /** Pelaksana perintah shell untuk modul lain; dibuat saat pertama dipakai. */
-    val shell: ShellCommandRunner by lazy { TerminalEngineModule.createShellRunner(this) }
+    /** Pelaksana perintah shell untuk modul lain; dibuat saat pertama dipakai, setiap perintahnya dicatat ke logcat. */
+    val shell: ShellCommandRunner by lazy {
+        LoggingShellCommandRunner(TerminalEngineModule.createShellRunner(this))
+    }
 
     /** Pengetik teks ke sesi aktif tab Terminal, dipakai modul Settings (Library). */
     val terminalInput: TerminalInputSender by lazy { TerminalEngineModule.createInputSender() }
