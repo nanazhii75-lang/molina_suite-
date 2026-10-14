@@ -20,6 +20,9 @@ internal object LogcatExporter {
 
     private const val FILE_PREFIX = "logcat-"
 
+    /** Jumlah ekspor terbaru yang dipertahankan di folder; yang lebih lama dihapus. */
+    private const val KEEP = 20
+
     /** Nama berkas yang terurut menurut waktu, mis. "logcat-20261014-063000.txt". */
     fun fileName(time: Date, suffix: Int = 1): String =
         FILE_PREFIX + stamp(time) + (if (suffix > 1) "-$suffix" else "") + ".txt"
@@ -48,12 +51,22 @@ internal object LogcatExporter {
                 file = File(dir, fileName(time, suffix))
             }
             file.writeText(text(entries, time), Charsets.UTF_8)
+            prune(dir)
             Result.Saved(file, entries.size)
         } catch (e: IOException) {
             Result.Failed(e.message ?: e.javaClass.simpleName)
         } catch (e: SecurityException) {
             Result.Failed(e.message ?: "Izin ditolak.")
         }
+    }
+
+    private fun prune(dir: File) {
+        val exports = dir.listFiles { f -> f.isFile && f.name.startsWith(FILE_PREFIX) && f.name.endsWith(".txt") }
+            ?: return
+        exports
+            .sortedWith(compareByDescending<File> { it.lastModified() }.thenByDescending { it.name })
+            .drop(KEEP)
+            .forEach { it.delete() }
     }
 
     private fun stamp(time: Date): String = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(time)

@@ -5,15 +5,14 @@ import android.content.Context
 import android.os.Build
 import android.os.Process
 import android.util.Log
-import com.molina.suite.core.storage.MolinaStorage
 import java.io.File
 import java.util.Date
 
 /**
  * Mencatat crash Java/Kotlin yang tidak tertangani: stack trace plus ekor logcat aplikasi ditulis
- * ke folder privat aplikasi (selalu bisa ditulis) dan disalin ke /sdcard/Molina/Logs bila
- * penyimpanan bersama siap. Setelah itu crash diteruskan ke penangan sebelumnya, jadi perilaku
- * aplikasi tidak berubah. Crash native (mis. di libmpv) tidak lewat sini.
+ * ke folder privat aplikasi yang hanya bisa dibaca molina-suite. Setelah itu crash diteruskan
+ * ke penangan sebelumnya, jadi perilaku aplikasi tidak berubah. Crash native (mis. di libmpv)
+ * tidak lewat sini.
  */
 internal class CrashRecorder private constructor(
     private val context: Context,
@@ -44,19 +43,7 @@ internal class CrashRecorder private constructor(
             stackTrace = Log.getStackTraceString(throwable),
             logLines = LogcatReader.dumpTail(TAIL_LINES, DUMP_TIMEOUT_MS)
         )
-        val saved = CrashLogStore.write(crashDir(context), now, report)
-        copyToShared(saved?.name ?: CrashReport.fileName(now), report)
-    }
-
-    /** Salinan best-effort ke folder bersama supaya mudah diambil; kegagalannya tidak dilaporkan. */
-    private fun copyToShared(name: String, report: String) {
-        try {
-            if (MolinaStorage.ensureDirectories() is MolinaStorage.EnsureResult.Ready) {
-                File(MolinaStorage.logsDir(), name).writeText(report, Charsets.UTF_8)
-            }
-        } catch (ignored: Exception) {
-            // Berkas di folder privat sudah cukup.
-        }
+        CrashLogStore.write(crashDir(context), now, report)
     }
 
     private fun appVersion(): String = try {

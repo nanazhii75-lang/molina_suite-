@@ -191,7 +191,7 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         toast(getString(R.string.logcat_copied))
     }
 
-    /** Menyimpan baris yang sedang tampil ke /sdcard/Molina/Logs. */
+    /** Menyimpan baris yang sedang tampil ke folder log privat aplikasi. */
     private fun saveToFile() {
         val entries = recorder.buffer.snapshot(filter)
         viewLifecycleOwner.lifecycleScope.launch { toast(output.save(entries)) }

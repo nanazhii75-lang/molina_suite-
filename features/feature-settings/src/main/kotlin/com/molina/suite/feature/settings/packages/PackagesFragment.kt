@@ -55,8 +55,12 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
             val install = root.findViewById<ImageButton>(R.id.package_item_install)
             val update = root.findViewById<ImageButton>(R.id.package_item_update)
             val remove = root.findViewById<ImageButton>(R.id.package_item_remove)
-            install.setOnClickListener { runInTerminal(spec.installCommand()) }
-            update.setOnClickListener { runInTerminal(spec.updateCommand()) }
+            install.setOnClickListener {
+                runInTerminal("Paket: pasang " + getString(spec.title), spec.installCommand())
+            }
+            update.setOnClickListener {
+                runInTerminal("Paket: perbarui " + getString(spec.title), spec.updateCommand())
+            }
             remove.setOnClickListener { confirmRemove(spec) }
             container.addView(root)
             Row(spec, root, root.findViewById(R.id.package_item_status), install, update, remove)
@@ -176,7 +180,7 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
             .setMessage(message)
             .setNegativeButton(R.string.library_cancel, null)
             .setPositiveButton(R.string.packages_remove_confirm) { _, _ ->
-                runInTerminal(spec.removeCommand(protectedApt))
+                runInTerminal("Paket: hapus $name", spec.removeCommand(protectedApt))
             }
             .show()
     }
@@ -185,15 +189,15 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
         val ok = detection as? PackageDetection.Ok ?: return
         val missing = PackageCatalog.all.filter { !it.optional && ok.installed[it.id] == false }
         val command = PackageCatalog.installAllCommand(missing) ?: return
-        runInTerminal(command)
+        runInTerminal("Paket: pasang semua yang kurang", command)
     }
 
-    private fun runInTerminal(command: String) {
+    private fun runInTerminal(label: String, command: String) {
         if (runJob?.isActive == true) return
         val host = activity ?: return
         val line = ShellLine.wrapForDebianRoot(command)
         runJob = viewLifecycleOwner.lifecycleScope.launch {
-            val reason = TerminalCommandRunner.run(host, line)
+            val reason = TerminalCommandRunner.run(host, label, line)
             if (reason != null) toast(getString(R.string.library_run_failed, reason))
         }
     }

@@ -132,8 +132,9 @@ class DebianFragment : Fragment(R.layout.fragment_debian), Refreshable {
     private fun execute(action: DebianAction) {
         if (runJob?.isActive == true) return
         val host = activity ?: return
+        val label = getString(action.title)
         runJob = viewLifecycleOwner.lifecycleScope.launch {
-            val reason = TerminalCommandRunner.run(host, action.command)
+            val reason = TerminalCommandRunner.run(host, label, action.command)
             if (reason != null) toast(getString(R.string.library_run_failed, reason))
         }
     }

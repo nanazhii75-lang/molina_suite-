@@ -45,7 +45,7 @@ internal class ToolLauncher(private val fragment: Fragment) {
         fragment.viewLifecycleOwner.lifecycleScope.launch {
             when (val readiness = checker.check(requiredIds)) {
                 // Status tidak terbaca: jalankan saja, terminal akan menampilkan galat sebenarnya.
-                is ToolReadiness.Ready, is ToolReadiness.Unknown -> send(command, onStart, onFailed)
+                is ToolReadiness.Ready, is ToolReadiness.Unknown -> send(command, title, onStart, onFailed)
                 is ToolReadiness.NoDebian -> askOpenDebian(title)
                 is ToolReadiness.Missing ->
                     askInstall(command, readiness.tools, title, onStart, onFailed, installWrapper)
@@ -70,7 +70,7 @@ internal class ToolLauncher(private val fragment: Fragment) {
             .setTitle(title)
             .setMessage(fragment.getString(R.string.tools_gap_message, names))
             .setPositiveButton(R.string.tools_install_and_run) { _, _ ->
-                send(installWrapper?.invoke(install) ?: "$install && $command", onStart, onFailed)
+                send(installWrapper?.invoke(install) ?: "$install && $command", title, onStart, onFailed)
             }
             .setNeutralButton(R.string.tools_open_packages) { _, _ ->
                 openSetup(ToolSetupTarget.PACKAGES, missing.map { it.id })
@@ -106,13 +106,19 @@ internal class ToolLauncher(private val fragment: Fragment) {
     }
 
     /** Mengetik [inner] di dalam Debian pada sesi aktif tab Terminal. */
-    private fun send(inner: String, onStart: (() -> Unit)?, onFailed: (() -> Unit)?) {
+    private fun send(
+        inner: String,
+        @StringRes title: Int,
+        onStart: (() -> Unit)?,
+        onFailed: (() -> Unit)?
+    ) {
         if (runJob?.isActive == true) return
         val host = fragment.activity ?: return
+        val label = fragment.getString(title)
         val line = ShellLine.wrapForDebian(inner)
         runJob = fragment.viewLifecycleOwner.lifecycleScope.launch {
             onStart?.invoke()
-            val reason = TerminalCommandRunner.run(host, line)
+            val reason = TerminalCommandRunner.run(host, label, line)
             if (reason != null) {
                 fragment.toolsToast(fragment.getString(R.string.tools_run_failed, reason))
                 onFailed?.invoke()

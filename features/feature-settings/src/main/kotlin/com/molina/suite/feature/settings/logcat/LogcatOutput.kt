@@ -8,32 +8,28 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.molina.suite.core.storage.MolinaStorage
 import com.molina.suite.feature.settings.R
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Keluaran layar Logcat: menyimpan ke /sdcard/Molina/Logs, menyalin baris terakhir, dan menampilkan
- * crash terakhir. Layar hanya memanggil metode di sini dan menampilkan pesan yang dikembalikan.
+ * Keluaran layar Logcat: menyimpan ke folder log privat aplikasi (files/logs, hanya bisa dibaca
+ * molina-suite), menyalin baris terakhir, dan menampilkan crash terakhir. Layar hanya memanggil
+ * metode di sini dan menampilkan pesan yang dikembalikan.
  */
 internal class LogcatOutput(private val appContext: Context) {
 
     /** Menyimpan [entries] ke berkas; mengembalikan pesan hasil untuk pengguna. */
     suspend fun save(entries: List<LogcatEntry>): String = withContext(Dispatchers.IO) {
-        when (val ensured = MolinaStorage.ensureDirectories()) {
-            is MolinaStorage.EnsureResult.Failed ->
-                appContext.getString(R.string.logcat_save_failed, ensured.reason)
-            is MolinaStorage.EnsureResult.Ready ->
-                when (val result = LogcatExporter.save(entries, MolinaStorage.logsDir())) {
-                    is LogcatExporter.Result.Saved -> appContext.getString(
-                        R.string.logcat_saved,
-                        result.lines,
-                        MolinaStorage.SHARED_DIR_NAME + "/" + MolinaStorage.LOGS_DIR_NAME + "/" + result.file.name
-                    )
-                    is LogcatExporter.Result.Failed ->
-                        appContext.getString(R.string.logcat_save_failed, result.reason)
-                }
+        when (val result = LogcatExporter.save(entries, File(appContext.filesDir, EXPORT_DIR_NAME))) {
+            is LogcatExporter.Result.Saved -> appContext.getString(
+                R.string.logcat_saved,
+                result.lines,
+                result.file.absolutePath
+            )
+            is LogcatExporter.Result.Failed ->
+                appContext.getString(R.string.logcat_save_failed, result.reason)
         }
     }
 
@@ -83,6 +79,7 @@ internal class LogcatOutput(private val appContext: Context) {
 
     private companion object {
         const val RECENT_LINES = 200
+        const val EXPORT_DIR_NAME = "logs"
         const val DIALOG_PADDING_DP = 16
         const val DIALOG_TEXT_SP = 11f
     }

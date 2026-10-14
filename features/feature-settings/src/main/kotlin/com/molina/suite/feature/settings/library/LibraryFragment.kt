@@ -381,7 +381,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
             } else {
                 ShellLine.build(entry, values)
             }
-            val reason = TerminalCommandRunner.run(host, line)
+            val reason = TerminalCommandRunner.run(host, "Library: " + entry.name, line)
             if (reason != null) toast(getString(R.string.library_run_failed, reason))
         }
     }

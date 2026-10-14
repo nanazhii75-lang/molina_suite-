@@ -19,9 +19,6 @@ object MolinaStorage {
     /** Sub-folder unduhan: /sdcard/Molina/Downloads/. */
     const val DOWNLOADS_DIR_NAME = "Downloads"
 
-    /** Sub-folder log: /sdcard/Molina/Logs/ (ekspor logcat dan salinan laporan crash). */
-    const val LOGS_DIR_NAME = "Logs"
-
     sealed interface EnsureResult {
         data class Ready(val root: File) : EnsureResult
         data class Failed(val dir: File, val reason: String) : EnsureResult
@@ -32,8 +29,6 @@ object MolinaStorage {
 
     fun downloadsDir(): File = File(sharedRoot(), DOWNLOADS_DIR_NAME)
 
-    fun logsDir(): File = File(sharedRoot(), LOGS_DIR_NAME)
-
     /** Membuat folder bersama beserta sub-foldernya bila belum ada. */
     fun ensureDirectories(): EnsureResult {
         val state = Environment.getExternalStorageState()
@@ -43,7 +38,7 @@ object MolinaStorage {
                 "Penyimpanan eksternal tidak terpasang (status: $state)"
             )
         }
-        for (dir in listOf(sharedRoot(), downloadsDir(), logsDir())) {
+        for (dir in listOf(sharedRoot(), downloadsDir())) {
             if (dir.isDirectory) continue
             val created = try {
                 dir.mkdirs()
