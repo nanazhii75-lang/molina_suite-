@@ -31,6 +31,8 @@ internal object IptvSource {
     private const val DIR_NAME = "iptv"
     private const val FILE_NAME = "indonesia.m3u"
     private const val MPV_ACTIVITY = "com.molina.suite.mpv.MPVActivity"
+    /** Kontrak dengan engine mpv lewat ekstra Intent; nilainya harus sama dengan MolinaReferences. */
+    private const val EXTRA_LOCK_REFERENCES = "molina_lock_references"
     private const val USER_AGENT = "MolinaSuite/1.0 (Android)"
     private const val CONNECT_TIMEOUT_MS = 10_000
     private const val READ_TIMEOUT_MS = 15_000
@@ -109,6 +111,7 @@ internal object IptvSource {
     fun play(context: Context, file: File): String? {
         val intent = Intent(Intent.ACTION_VIEW, Uri.fromFile(file)).apply {
             component = ComponentName(context.packageName, MPV_ACTIVITY)
+            putExtra(EXTRA_LOCK_REFERENCES, true)
             if (context !is Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         return try {
