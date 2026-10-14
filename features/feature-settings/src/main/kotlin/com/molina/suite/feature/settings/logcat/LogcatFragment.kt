@@ -20,8 +20,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.molina.suite.feature.settings.R
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val REFRESH_MS = 300L
 
@@ -43,6 +45,7 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     private var emptyView: TextView? = null
     private var levelButton: MaterialButton? = null
     private var pauseButton: MaterialButton? = null
+    private var lastCrashButton: MaterialButton? = null
     private var autoScroll: MaterialCheckBox? = null
     private var categoryBar: LinearLayout? = null
     private val categoryChips = LinkedHashMap<LogCategory, TextView>()
@@ -89,7 +92,9 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         }
         view.findViewById<View>(R.id.logcat_save).setOnClickListener { saveToFile() }
         view.findViewById<View>(R.id.logcat_copy_recent).setOnClickListener { copyRecent() }
-        view.findViewById<View>(R.id.logcat_last_crash).setOnClickListener { showLastCrash() }
+        lastCrashButton = view.findViewById<MaterialButton>(R.id.logcat_last_crash).also {
+            it.setOnClickListener { showLastCrash() }
+        }
         view.findViewById<EditText>(R.id.logcat_search).doAfterTextChanged { text ->
             filter = filter.copy(query = text?.toString().orEmpty())
             refresh(false)
@@ -114,6 +119,21 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateCrashButton()
+    }
+
+    /** Menandai tombol Crash terakhir bila ada laporan yang belum dibuka. */
+    private fun updateCrashButton() {
+        val button = lastCrashButton ?: return
+        val appContext = requireContext().applicationContext
+        viewLifecycleOwner.lifecycleScope.launch {
+            val unseen = withContext(Dispatchers.IO) { ProcessTracking.crashNotice(appContext).unseen() }
+            button.setText(if (unseen > 0) R.string.logcat_last_crash_new else R.string.logcat_last_crash)
+        }
+    }
+
     override fun onDestroyView() {
         adapter = null
         list = null
@@ -121,6 +141,7 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         emptyView = null
         levelButton = null
         pauseButton = null
+        lastCrashButton = null
         autoScroll = null
         shownRevision = -1L
         shownFilter = null
@@ -263,6 +284,7 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
 
     private fun showLastCrash() {
         output.showLastCrash(requireContext())
+        updateCrashButton()
     }
 
     /** Membuat satu tombol per [LogCategory]; pilihan dan jumlah masalahnya diperbarui di [updateChips]. */

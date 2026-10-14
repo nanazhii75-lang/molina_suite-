@@ -52,6 +52,7 @@ internal class LogcatOutput(private val appContext: Context) {
             Toast.makeText(appContext, R.string.logcat_no_crash, Toast.LENGTH_LONG).show()
             return
         }
+        ProcessTracking.crashNotice(appContext).markSeen()
         val padding = (DIALOG_PADDING_DP * host.resources.displayMetrics.density).toInt()
         val body = TextView(host).apply {
             this.text = text

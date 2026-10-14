@@ -2,7 +2,6 @@ package com.molina.suite.feature.settings.logcat
 
 import android.app.Application
 import android.content.Context
-import android.os.Build
 import android.os.Process
 import android.util.Log
 import java.io.File
@@ -21,6 +20,11 @@ internal class CrashRecorder private constructor(
 
     override fun uncaughtException(thread: Thread, throwable: Throwable) {
         try {
+            ProcessTracking.get(context).markJavaCrash()
+        } catch (ignored: Throwable) {
+            // Penanda untuk proses berikutnya; kegagalannya tidak boleh menutupi crash aslinya.
+        }
+        try {
             record(thread, throwable)
         } catch (ignored: Throwable) {
             // Pencatat tidak boleh menutupi atau mengubah crash aslinya.
@@ -38,23 +42,13 @@ internal class CrashRecorder private constructor(
         val report = CrashReport.build(
             time = now,
             threadName = thread.name,
-            appVersion = appVersion(),
-            device = deviceSummary(),
+            appVersion = DeviceInfo.appVersion(context),
+            device = DeviceInfo.summary(),
             stackTrace = Log.getStackTraceString(throwable),
             logLines = LogcatReader.dumpTail(TAIL_LINES, DUMP_TIMEOUT_MS)
         )
         CrashLogStore.write(crashDir(context), now, report)
     }
-
-    private fun appVersion(): String = try {
-        context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "tidak diketahui"
-    } catch (e: Exception) {
-        "tidak diketahui"
-    }
-
-    private fun deviceSummary(): String =
-        "${Build.MANUFACTURER} ${Build.MODEL}, Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}), " +
-            (Build.SUPPORTED_ABIS.firstOrNull() ?: "abi tidak diketahui")
 
     companion object {
         private const val TAIL_LINES = 400

@@ -28,6 +28,7 @@ internal class LogRecorder(
     val buffer: LogcatBuffer = LogcatBuffer(),
     private val readerFactory: (List<String>) -> LogcatReader = { command -> LogcatReader(command) },
     private val now: () -> String = { currentStamp() },
+    private val restartNote: (String) -> LogcatEntry? = { null },
     private val worker: ScheduledExecutorService = newWorker()
 ) {
 
@@ -39,6 +40,10 @@ internal class LogRecorder(
     private val pendingLock = Any()
     private val pending = ArrayList<String>()
     private var flushPending = false
+
+    private val ownPid = android.os.Process.myPid()
+    private val markerLock = Any()
+    private var pendingMarker: LogcatEntry? = null
 
     private var started = false
     @Volatile private var failures = 0
@@ -52,7 +57,7 @@ internal class LogRecorder(
             if (started) return
             started = true
         }
-        worker.execute(launching { loadHistory(); launchReader() })
+        worker.execute(launching { loadHistory(); noteRestart(); launchReader() })
     }
 
     /** Mengosongkan tampilan, riwayat di disk, dan buffer logcat sistem. */
@@ -69,8 +74,30 @@ internal class LogRecorder(
         for (line in store.readTail(buffer.capacity)) {
             val entry = LogcatParser.parse(line) ?: continue
             buffer.add(entry)
-            resume.record(entry)
+            if (entry.tag != ProcessMarker.TAG) resume.record(entry)
         }
+    }
+
+    /**
+     * Bila proses sebelumnya berhenti, menyiapkan penanda "proses berhenti, dimulai ulang". Penanda
+     * baru dipasang tepat sebelum baris pertama proses ini ([releaseMarker]) supaya baris terakhir
+     * proses lama, yang dibaca belakangan dari logcat, tetap berada di atasnya. Penanda tidak ikut
+     * titik lanjut logcat, jadi tidak ada baris proses lama yang terlewat.
+     */
+    private fun noteRestart() {
+        val entry = restartNote(now()) ?: return
+        synchronized(markerLock) { pendingMarker = entry }
+        worker.schedule(safely { releaseMarker() }, MARKER_WAIT_MS, TimeUnit.MILLISECONDS)
+    }
+
+    private fun releaseMarker() {
+        val entry = synchronized(markerLock) {
+            val waiting = pendingMarker
+            pendingMarker = null
+            waiting
+        } ?: return
+        buffer.add(entry)
+        enqueue(entry.toLine())
     }
 
     private fun launchReader() {
@@ -80,6 +107,7 @@ internal class LogRecorder(
             override fun onEntry(entry: LogcatEntry) {
                 produced = true
                 if (!resume.accept(entry)) return
+                if (entry.pid == ownPid) releaseMarker()
                 buffer.add(entry)
                 if (entry.level >= PERSIST_MIN_LEVEL) enqueue(entry.toLine())
             }
@@ -178,6 +206,7 @@ internal class LogRecorder(
         private const val FLUSH_DELAY_MS = 3000L
         private const val FLUSH_LINES = 200
         private const val MAX_FAILURES = 8
+        private const val MARKER_WAIT_MS = 4000L
         private const val RESTART_BASE_MS = 1000L
         private const val RESTART_MAX_MS = 30000L
         private const val BACKOFF_MAX_SHIFT = 5
@@ -192,7 +221,10 @@ internal class LogRecorder(
                 instance?.let { return it }
                 val appContext = context.applicationContext
                 val history = File(appContext.noBackupFilesDir, HISTORY_DIR_NAME)
-                val recorder = LogRecorder(LogFileStore(history))
+                val recorder = LogRecorder(
+                    LogFileStore(history),
+                    restartNote = { stamp -> RestartNotice.detect(appContext, stamp) }
+                )
                 instance = recorder
                 recorder.start()
                 return recorder

@@ -2,6 +2,7 @@ package com.molina.suite.feature.settings
 
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
@@ -13,14 +14,19 @@ import com.molina.suite.core.common.ToolSetupTarget
 import com.molina.suite.feature.settings.debian.DebianFragment
 import com.molina.suite.feature.settings.library.LibraryFragment
 import com.molina.suite.feature.settings.logcat.LogcatFragment
+import com.molina.suite.feature.settings.logcat.ProcessTracking
 import com.molina.suite.feature.settings.packages.PackagesFragment
 import com.molina.suite.feature.settings.tools.ToolsFragment
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Layar utama Settings: daftar submenu. Submenu dibuka sebagai child fragment. */
 class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHandler {
 
     private var backStackListener: FragmentManager.OnBackStackChangedListener? = null
+    private var logcatSubtitle: TextView? = null
+    private var logcatSubtitleColor: Int = 0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val menu = view.findViewById<View>(R.id.settings_menu)
@@ -31,7 +37,10 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
             container.visibility = if (open) View.VISIBLE else View.GONE
             menu.visibility = if (open) View.GONE else View.VISIBLE
         }
-        val listener = FragmentManager.OnBackStackChangedListener { sync() }
+        val listener = FragmentManager.OnBackStackChangedListener {
+            sync()
+            if (childFragmentManager.backStackEntryCount == 0) updateCrashNotice()
+        }
         childFragmentManager.addOnBackStackChangedListener(listener)
         backStackListener = listener
 
@@ -40,6 +49,10 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         view.findViewById<View>(R.id.settings_row_debian).setOnClickListener { openDebian() }
         view.findViewById<View>(R.id.settings_row_packages).setOnClickListener { openPackages() }
         view.findViewById<View>(R.id.settings_row_logcat).setOnClickListener { openLogcat() }
+        logcatSubtitle = view.findViewById<TextView>(R.id.settings_logcat_subtitle).also {
+            logcatSubtitleColor = it.currentTextColor
+        }
+        updateCrashNotice()
         observeToolSetup()
         sync()
     }
@@ -124,6 +137,23 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
             .commit()
     }
 
+    /** Menandai baris Logcat dengan jumlah laporan crash yang belum dibuka. */
+    private fun updateCrashNotice() {
+        if (view == null) return
+        val appContext = context?.applicationContext ?: return
+        viewLifecycleOwner.lifecycleScope.launch {
+            val unseen = withContext(Dispatchers.IO) { ProcessTracking.crashNotice(appContext).unseen() }
+            val subtitle = logcatSubtitle ?: return@launch
+            if (unseen > 0) {
+                subtitle.text = getString(R.string.settings_logcat_unseen, unseen)
+                subtitle.setTextColor(subtitle.context.getColor(R.color.ms_log_error))
+            } else {
+                subtitle.setText(R.string.settings_logcat_subtitle)
+                subtitle.setTextColor(logcatSubtitleColor)
+            }
+        }
+    }
+
     override fun onHostBackPressed(): Boolean {
         if (childFragmentManager.backStackEntryCount == 0) return false
         childFragmentManager.popBackStack()
@@ -133,6 +163,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
         if (!hidden) {
+            updateCrashNotice()
             (childFragmentManager.findFragmentById(R.id.settings_child_container) as? Refreshable)?.refresh()
         }
     }
@@ -140,6 +171,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
     override fun onDestroyView() {
         backStackListener?.let { childFragmentManager.removeOnBackStackChangedListener(it) }
         backStackListener = null
+        logcatSubtitle = null
         super.onDestroyView()
     }
 

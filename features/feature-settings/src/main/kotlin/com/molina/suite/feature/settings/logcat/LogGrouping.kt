@@ -230,7 +230,8 @@ internal object LogGrouping {
                 Item(
                     first = head.index,
                     category = ownerOf(head),
-                    problem = entry.severity >= LogcatLevel.ERROR,
+                    problem = entry.severity >= LogcatLevel.ERROR ||
+                        (entry.tag == ProcessMarker.TAG && entry.severity >= LogcatLevel.WARN),
                     shown = shown
                 ) { listOf(LogRow.Line(entry, false)) }
             )

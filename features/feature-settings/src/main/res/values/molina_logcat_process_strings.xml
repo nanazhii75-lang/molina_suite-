@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_logcat_unseen">%1$d crash baru belum dilihat · ketuk untuk membuka</string>
+    <string name="logcat_last_crash_new">Crash terakhir (baru)</string>
+</resources>

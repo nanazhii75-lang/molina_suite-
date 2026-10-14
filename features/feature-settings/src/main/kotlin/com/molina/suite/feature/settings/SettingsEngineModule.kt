@@ -10,6 +10,7 @@ import com.molina.suite.core.common.ToolSetupBoard
 import com.molina.suite.feature.settings.library.JsonLibraryRepository
 import com.molina.suite.feature.settings.logcat.CrashRecorder
 import com.molina.suite.feature.settings.logcat.LogRecorder
+import com.molina.suite.feature.settings.logcat.ProcessTracking
 import com.molina.suite.feature.settings.packages.PackageToolReadinessChecker
 
 /** Titik masuk shell ke modul Settings: menyiapkan dependensi lalu mendaftarkan fitur. */
@@ -29,7 +30,10 @@ object SettingsEngineModule {
     fun installCrashRecorder(application: Application) = CrashRecorder.install(application)
 
     /** Memulai perekam log latar: log mpv, Terminal, dan Code terkumpul sejak aplikasi dibuka. */
-    fun installLogRecorder(application: Application) = LogRecorder.install(application)
+    fun installLogRecorder(application: Application) {
+        ProcessTracking.install(application)
+        LogRecorder.install(application)
+    }
 
     /** Pemeriksa alat yang memakai katalog dan detektor menu Paket, untuk modul fitur lain. */
     fun createToolReadinessChecker(context: Context): ToolReadinessChecker =

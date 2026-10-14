@@ -71,9 +71,14 @@ internal class LogcatAdapter(
         val entry = row.entry
         val view = holder.text
         val repeats = if (entry.repeat > 1) "  \u00D7${entry.repeat}" else ""
-        view.text = "${entry.time} ${entry.level.symbol}/${entry.tag}: ${entry.message}$repeats"
+        view.text = if (entry.tag == ProcessMarker.TAG) {
+            "\u2500\u2500 ${entry.time} ${entry.message}"
+        } else {
+            "${entry.time} ${entry.level.symbol}/${entry.tag}: ${entry.message}$repeats"
+        }
         view.setTextColor(view.context.getColor(colorOf(entry.severity)))
-        view.setTypeface(Typeface.MONOSPACE, if (entry.severity >= LogcatLevel.ERROR) Typeface.BOLD else Typeface.NORMAL)
+        val bold = entry.severity >= LogcatLevel.ERROR || entry.tag == ProcessMarker.TAG
+        view.setTypeface(Typeface.MONOSPACE, if (bold) Typeface.BOLD else Typeface.NORMAL)
         val base = view.resources.getDimensionPixelSize(R.dimen.ms_space_md)
         val start = if (row.indented) base + (view.resources.displayMetrics.density * INDENT_DP).toInt() else base
         view.setPaddingRelative(start, view.paddingTop, base, view.paddingBottom)
