@@ -11,7 +11,7 @@ internal data class LogcatFilter(
     private val terms: List<String> = query.lowercase().split(' ').filter { it.isNotEmpty() }
 
     fun matches(entry: LogcatEntry): Boolean {
-        if (entry.level < minLevel) return false
+        if (entry.severity < minLevel) return false
         if (terms.isEmpty()) return true
         val haystack = (entry.tag + ' ' + entry.message).lowercase()
         return terms.all { haystack.contains(it) }

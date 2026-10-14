@@ -82,6 +82,9 @@ internal object LogGrouping {
         val lines = ArrayList<Indexed>()
     }
 
+    /** Rentang baris sebuah aktivitas yang pemiliknya jelas; [end] terbesar bila aktivitas belum selesai. */
+    private class Window(val category: LogCategory, val start: Int, val end: Int)
+
     private class Item(
         val first: Int,
         val category: LogCategory,
@@ -124,7 +127,7 @@ internal object LogGrouping {
 
         val items = ArrayList<Item>()
         for (group in groups.values) groupItem(group, firstVisible, filter)?.let { items.add(it) }
-        looseItems(loose, firstVisible, filter, items)
+        looseItems(loose, firstVisible, filter, ownerWindows(groups.values), items)
 
         val counts = HashMap<LogCategory, CategoryCount>()
         for (cat in LogCategory.values()) {
@@ -138,6 +141,24 @@ internal object LogGrouping {
         for (item in picked) rows.addAll(item.rows(expanded))
         val entries = picked.flatMap { it.shown }.sortedBy { it.index }.map { it.entry }
         return LogView(rows, entries, counts)
+    }
+
+    /** Rentang tiap aktivitas yang awalnya terlihat di buffer dan sumbernya modul (bukan aplikasi umum). */
+    private fun ownerWindows(groups: Collection<Group>): List<Window> {
+        val windows = ArrayList<Window>()
+        for (group in groups) {
+            val source = group.source ?: continue
+            val category = LogCategory.of(source)
+            if (category == LogCategory.OTHER) continue
+            val start = group.lines.first().index
+            val end = if (group.end == null) {
+                Int.MAX_VALUE
+            } else {
+                group.lines.last { it.line is ActivityLine.End }.index
+            }
+            windows.add(Window(category, start, end))
+        }
+        return windows.sortedBy { it.start }
     }
 
     private fun groupItem(group: Group, firstVisible: Int, filter: LogcatFilter): Item? {
@@ -185,8 +206,20 @@ internal object LogGrouping {
     }
 
     /** Baris non-aktivitas yang lolos filter; baris identik berurutan digabung seperti sebelumnya. */
-    private fun looseItems(loose: List<Indexed>, firstVisible: Int, filter: LogcatFilter, out: MutableList<Item>) {
+    private fun looseItems(
+        loose: List<Indexed>,
+        firstVisible: Int,
+        filter: LogcatFilter,
+        windows: List<Window>,
+        out: MutableList<Item>
+    ) {
         val visible = loose.filter { it.index >= firstVisible && filter.matches(it.entry) }
+        /** Proses anak dimiliki aktivitas terbaru yang sedang berjalan saat barisnya muncul; selain itu menurut tag. */
+        fun ownerOf(item: Indexed): LogCategory {
+            val base = LogSignals.category(item.entry)
+            if (!LogSignals.isSubprocess(item.entry)) return base
+            return windows.lastOrNull { it.start <= item.index && item.index <= it.end }?.category ?: base
+        }
         var run = ArrayList<Indexed>()
         fun flush() {
             if (run.isEmpty()) return
@@ -196,8 +229,8 @@ internal object LogGrouping {
             out.add(
                 Item(
                     first = head.index,
-                    category = LogCategory.OTHER,
-                    problem = entry.level >= LogcatLevel.ERROR,
+                    category = ownerOf(head),
+                    problem = entry.severity >= LogcatLevel.ERROR,
                     shown = shown
                 ) { listOf(LogRow.Line(entry, false)) }
             )
@@ -205,7 +238,7 @@ internal object LogGrouping {
         }
         for (item in visible) {
             val last = run.lastOrNull()
-            if (last != null && !same(last.entry, item.entry)) flush()
+            if (last != null && (!same(last.entry, item.entry) || ownerOf(last) != ownerOf(item))) flush()
             run.add(item)
         }
         flush()

@@ -12,6 +12,9 @@ internal data class LogcatEntry(
     /** Jumlah baris identik berurutan yang digabung; 1 untuk baris biasa. */
     val repeat: Int = 1
 ) {
+    /** Tingkat sebenarnya (lihat [LogSignals.severity]); untuk penyaring, warna, dan hitungan masalah. */
+    val severity: LogcatLevel get() = LogSignals.severity(this)
+
     /** Bentuk teks satu baris untuk ekspor atau salin; bila dibaca ulang parser hasilnya sama. */
     fun toLine(): String = "$date $time ${pid.toString().padStart(5)} ${tid.toString().padStart(5)} " +
         "${level.symbol} $tag: $message"
