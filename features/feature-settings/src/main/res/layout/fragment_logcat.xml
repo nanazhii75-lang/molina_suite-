@@ -75,6 +75,22 @@
             android:textSize="14sp" />
     </LinearLayout>
 
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:paddingStart="@dimen/ms_space_md"
+        android:paddingEnd="@dimen/ms_space_md"
+        android:paddingBottom="@dimen/ms_space_sm"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/logcat_category_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

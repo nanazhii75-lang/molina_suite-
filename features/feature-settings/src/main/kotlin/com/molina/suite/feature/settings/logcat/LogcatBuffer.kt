@@ -55,6 +55,17 @@ internal class LogcatBuffer(val capacity: Int = DEFAULT_CAPACITY) {
             if (collapse) picked.collapseRepeats() else picked
         }
 
+    /**
+     * Seluruh entri apa adanya (tanpa penyaring dan penggabungan) dan indeks entri pertama yang
+     * terlihat sejak [since] (aturan [since] sama dengan [snapshot]). Pengelompokan butuh bagian
+     * sebelum [since] untuk mengenali awal sebuah aktivitas.
+     */
+    fun snapshotFrom(since: Long): Pair<List<LogcatEntry>, Int> =
+        synchronized(lock) {
+            val skip = (since - (added - entries.size)).coerceIn(0L, entries.size.toLong()).toInt()
+            ArrayList(entries) to skip
+        }
+
     companion object {
         const val DEFAULT_CAPACITY = 3000
     }

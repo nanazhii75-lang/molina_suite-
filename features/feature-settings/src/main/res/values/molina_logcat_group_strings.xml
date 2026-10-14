@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="logcat_category_problems">%1$s · %2$d masalah</string>
+    <string name="logcat_group_copied">Aktivitas disalin</string>
+    <string name="logcat_group_status_ok">ok</string>
+    <string name="logcat_group_status_failed">gagal</string>
+    <string name="logcat_group_status_warn">perlu dicek</string>
+    <string name="logcat_group_status_open">belum selesai</string>
+    <string name="logcat_group_errors">%1$d error</string>
+    <string name="logcat_group_warns">%1$d peringatan</string>
+</resources>

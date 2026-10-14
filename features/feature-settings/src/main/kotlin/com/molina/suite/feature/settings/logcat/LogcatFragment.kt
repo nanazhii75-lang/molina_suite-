@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
@@ -25,8 +26,9 @@ import kotlinx.coroutines.launch
 private const val REFRESH_MS = 300L
 
 /**
- * Layar Logcat di Pengaturan: log aplikasi molina sendiri (mpv, Terminal, Code) dengan warna per
- * level, filter level, pencarian, jeda, bersihkan, dan gulir otomatis. Pembacaan dan riwayat ada di
+ * Layar Logcat di Pengaturan: log aplikasi molina sendiri, dikelompokkan per aktivitas (terbaru
+ * di atas) dan per kategori (mpv, Terminal, Code, Setting, Lainnya), dengan warna per level, filter
+ * level, pencarian, jeda, bersihkan, dan gulir otomatis. Pembacaan dan riwayat ada di
  * [LogRecorder] yang berjalan sejak aplikasi dibuka, jadi layar ini langsung menampilkan log yang
  * sudah terkumpul. Saat dijeda, tampilan berhenti diperbarui tetapi log tetap terkumpul di buffer.
  */
@@ -42,6 +44,12 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     private var levelButton: MaterialButton? = null
     private var pauseButton: MaterialButton? = null
     private var autoScroll: MaterialCheckBox? = null
+    private var categoryBar: LinearLayout? = null
+    private val categoryChips = LinkedHashMap<LogCategory, TextView>()
+    private var category = LogCategory.ALL
+    private var shownCategory: LogCategory? = null
+    private var shownEntries: List<LogcatEntry> = emptyList()
+    private val expandedOverrides = HashMap<String, Boolean>()
 
     private var filter = LogcatFilter()
     private var paused = false
@@ -52,7 +60,11 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     private var shownSince = -1L
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val entries = LogcatAdapter { entry -> copyLine(entry) }
+        val entries = LogcatAdapter(
+            onLine = { entry -> copyLine(entry) },
+            onToggle = { header -> toggleGroup(header) },
+            onCopyGroup = { header -> copyGroup(header) }
+        )
         adapter = entries
         list = view.findViewById<RecyclerView>(R.id.logcat_list).also {
             it.layoutManager = LinearLayoutManager(requireContext())
@@ -62,6 +74,8 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         statusView = view.findViewById(R.id.logcat_status)
         emptyView = view.findViewById(R.id.logcat_empty)
         autoScroll = view.findViewById(R.id.logcat_autoscroll)
+        categoryBar = view.findViewById(R.id.logcat_category_bar)
+        buildCategoryChips()
         levelButton = view.findViewById<MaterialButton>(R.id.logcat_level).also { button ->
             button.setOnClickListener { showLevelMenu(button) }
         }
@@ -111,6 +125,9 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         shownRevision = -1L
         shownFilter = null
         shownSince = -1L
+        categoryBar = null
+        categoryChips.clear()
+        shownCategory = null
         super.onDestroyView()
     }
 
@@ -118,15 +135,22 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     private fun refresh(force: Boolean) {
         val target = adapter ?: return
         val revision = recorder.buffer.revision
-        if (!force && revision == shownRevision && filter == shownFilter && viewSince == shownSince) return
-        val entries = recorder.buffer.snapshot(filter, viewSince)
+        val unchanged = revision == shownRevision && filter == shownFilter &&
+            viewSince == shownSince && category == shownCategory
+        if (!force && unchanged) return
+        val (full, firstVisible) = recorder.buffer.snapshotFrom(viewSince)
+        val view = LogGrouping.build(full, firstVisible, filter, category, expandedOverrides)
         shownRevision = revision
         shownFilter = filter
         shownSince = viewSince
-        shownCount = entries.size
-        target.submit(entries)
-        emptyView?.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
-        if (entries.isNotEmpty() && autoScroll?.isChecked == true) list?.scrollToPosition(entries.lastIndex)
+        shownCategory = category
+        shownEntries = view.entries
+        shownCount = view.entries.size
+        target.submit(view.rows)
+        updateChips(view.counts)
+        emptyView?.visibility = if (view.rows.isEmpty()) View.VISIBLE else View.GONE
+        // Yang terbaru ada di atas, jadi gulir otomatis mengikuti bagian atas daftar.
+        if (view.rows.isNotEmpty() && autoScroll?.isChecked == true) list?.scrollToPosition(0)
         updateStatus()
     }
 
@@ -154,13 +178,13 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         return true
     }
 
-    /** Gulir otomatis mati saat pengguna menggeser menjauhi dasar dan hidup lagi saat tiba di dasar. */
+    /** Gulir otomatis mati saat pengguna menggeser menjauhi atas dan hidup lagi saat tiba di atas. */
     private fun followScrollState(recyclerView: RecyclerView, newState: Int) {
         val box = autoScroll ?: return
-        val canScrollDown = recyclerView.canScrollVertically(1)
-        if (newState == RecyclerView.SCROLL_STATE_DRAGGING && canScrollDown) {
+        val canScrollUp = recyclerView.canScrollVertically(-1)
+        if (newState == RecyclerView.SCROLL_STATE_DRAGGING && canScrollUp) {
             box.isChecked = false
-        } else if (newState == RecyclerView.SCROLL_STATE_IDLE && !canScrollDown) {
+        } else if (newState == RecyclerView.SCROLL_STATE_IDLE && !canScrollUp) {
             box.isChecked = true
         }
     }
@@ -210,6 +234,7 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
      */
     private fun clear() {
         viewSince = 0L
+        expandedOverrides.clear()
         recorder.clear()
         refresh(true)
     }
@@ -227,17 +252,72 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
 
     /** Menyimpan baris yang sedang tampil ke folder log privat aplikasi. */
     private fun saveToFile() {
-        val entries = recorder.buffer.snapshot(filter, viewSince, collapse = false)
+        val entries = shownEntries
         viewLifecycleOwner.lifecycleScope.launch { toast(output.save(entries)) }
     }
 
     /** Menyalin baris-baris terakhir yang sedang tampil ke papan klip. */
     private fun copyRecent() {
-        toast(output.copyRecent(recorder.buffer.snapshot(filter, viewSince, collapse = false)))
+        toast(output.copyRecent(shownEntries))
     }
 
     private fun showLastCrash() {
         output.showLastCrash(requireContext())
+    }
+
+    /** Membuat satu tombol per [LogCategory]; pilihan dan jumlah masalahnya diperbarui di [updateChips]. */
+    private fun buildCategoryChips() {
+        val bar = categoryBar ?: return
+        bar.removeAllViews()
+        categoryChips.clear()
+        for (item in LogCategory.values()) {
+            val chip = layoutInflater.inflate(R.layout.item_logcat_category, bar, false) as TextView
+            chip.setOnClickListener { selectCategory(item) }
+            bar.addView(chip)
+            categoryChips[item] = chip
+        }
+    }
+
+    private fun selectCategory(item: LogCategory) {
+        if (category == item) return
+        category = item
+        refresh(true)
+    }
+
+    private fun updateChips(counts: Map<LogCategory, CategoryCount>) {
+        for ((item, chip) in categoryChips) {
+            val problems = counts[item]?.problems ?: 0
+            chip.text = if (problems > 0) {
+                getString(R.string.logcat_category_problems, item.label, problems)
+            } else {
+                item.label
+            }
+            val selected = item == category
+            chip.setBackgroundResource(if (selected) R.drawable.ms_bg_chip_on else R.drawable.ms_bg_chip_off)
+            val color = when {
+                problems > 0 -> R.color.ms_log_warn
+                selected -> R.color.ms_text_primary
+                else -> R.color.ms_text_secondary
+            }
+            chip.setTextColor(chip.context.getColor(color))
+        }
+    }
+
+    private fun toggleGroup(header: LogRow.Header) {
+        expandedOverrides[header.id] = !header.expanded
+        refresh(true)
+    }
+
+    /** Menyalin seluruh baris satu aktivitas, apa adanya dan urut waktu, untuk dilaporkan. */
+    private fun copyGroup(header: LogRow.Header) {
+        val ctx = context ?: return
+        val clipboard = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        if (clipboard == null) {
+            toast(getString(R.string.logcat_copy_failed))
+            return
+        }
+        clipboard.setPrimaryClip(ClipData.newPlainText("molina", header.entries.joinToString("\n") { it.toLine() }))
+        toast(getString(R.string.logcat_group_copied))
     }
 
     private fun toast(message: String) {
