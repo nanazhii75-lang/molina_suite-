@@ -325,7 +325,6 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         val bar = actionBar ?: return
         val file = doc.file
         bar.setEnabled(R.drawable.ic_code_save, hasContent || file != null)
-        bar.setEnabled(R.drawable.ic_code_library, hasContent)
         bar.setEnabled(R.drawable.ic_code_search, hasContent)
         bar.setEnabled(R.drawable.ic_code_arrow_left, hasContent)
         bar.setEnabled(R.drawable.ic_code_arrow_right, hasContent)
@@ -339,7 +338,6 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         context,
         listOf(
             CodeAction(R.drawable.ic_code_save, R.string.code_key_save, CodePalette.TOOL_SAVE) { showSaveChoice() },
-            CodeAction(R.drawable.ic_code_library, R.string.code_key_library, CodePalette.TOOL_LIBRARY) { sendToLibrary() },
             CodeAction(R.drawable.ic_code_paste, R.string.code_key_paste, CodePalette.TOOL_PASTE) { session.paste() },
             CodeAction(R.drawable.ic_code_undo, R.string.code_key_undo, CodePalette.TOOL_UNDO) { session.undo() },
             CodeAction(R.drawable.ic_code_redo, R.string.code_key_redo, CodePalette.TOOL_REDO) { session.redo() },
@@ -362,6 +360,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             override fun onStatistics() = showStatistics()
             override fun onCheck() = checkController.start()
             override fun onShare() = shareText()
+            override fun onSendToLibrary() = sendToLibrary()
             override fun onSyntax() = chooseSyntax()
             override fun onEncoding() = showEncodingInfo()
             override fun onAppearance() = showAppearance()
@@ -373,6 +372,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             anchor,
             session.document.value,
             session.options.value,
+            session.hasContent.value,
             menuListener
         )
     }

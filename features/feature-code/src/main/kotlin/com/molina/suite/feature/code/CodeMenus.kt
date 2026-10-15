@@ -13,6 +13,7 @@ internal interface CodeActionMenuListener {
     fun onReload()
     fun onSearch()
     fun onShare()
+    fun onSendToLibrary()
     fun onGoToLine()
     fun onSyntax()
     fun onEncoding()
@@ -43,12 +44,14 @@ internal object CodeMenus {
     private const val ID_APPEARANCE = 18
     private const val ID_SHARE = 19
     private const val ID_CHECK = 20
+    private const val ID_LIBRARY = 21
 
     fun showActionMenu(
         context: Context,
         anchor: View,
         document: CodeDocument,
         options: CodeViewOptions,
+        hasContent: Boolean,
         listener: CodeActionMenuListener
     ) {
         val popup = PopupMenu(context, anchor, Gravity.END)
@@ -58,6 +61,7 @@ internal object CodeMenus {
         menu.add(Menu.NONE, ID_RELOAD, 2, R.string.code_menu_reload).isEnabled = document.file != null
         menu.add(Menu.NONE, ID_SEARCH, 3, R.string.code_menu_search)
         menu.add(Menu.NONE, ID_SHARE, 4, R.string.code_menu_share)
+        menu.add(Menu.NONE, ID_LIBRARY, 4, R.string.code_menu_library).isEnabled = hasContent
         menu.add(Menu.NONE, ID_GOTO, 5, R.string.code_menu_goto)
         menu.add(Menu.NONE, ID_SYNTAX, 6, R.string.code_menu_syntax)
         menu.add(Menu.NONE, ID_ENCODING, 7, R.string.code_menu_encoding)
@@ -73,6 +77,7 @@ internal object CodeMenus {
                 ID_RELOAD -> listener.onReload()
                 ID_SEARCH -> listener.onSearch()
                 ID_SHARE -> listener.onShare()
+                ID_LIBRARY -> listener.onSendToLibrary()
                 ID_GOTO -> listener.onGoToLine()
                 ID_SYNTAX -> listener.onSyntax()
                 ID_ENCODING -> listener.onEncoding()

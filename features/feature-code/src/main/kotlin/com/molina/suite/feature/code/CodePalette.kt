@@ -32,7 +32,6 @@ internal object CodePalette {
     val TOOL_COPY_ALL: Int = 0xFFF06292.toInt()
     val TOOL_RUN: Int = 0xFF4CAF50.toInt()
     val TOOL_CLOSE: Int = 0xFFEF5350.toInt()
-    val TOOL_LIBRARY: Int = 0xFF4DB6AC.toInt()
 
     /** Ikon toolbar yang tidak bisa dipakai pada keadaan sekarang. */
     val TOOL_DISABLED: Int = 0xFF5A5D5F.toInt()
