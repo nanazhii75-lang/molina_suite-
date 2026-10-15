@@ -159,6 +159,8 @@ internal class CodeExportController(
             DocumentFormat.RST -> R.string.code_export_format_rst
             DocumentFormat.PDF -> R.string.code_export_format_pdf
             DocumentFormat.XLSX -> R.string.code_export_format_xlsx
+            DocumentFormat.ODS -> R.string.code_export_format_ods
+            DocumentFormat.PPTX -> R.string.code_export_format_pptx
             DocumentFormat.PLAIN -> R.string.code_export_format_plain
         }
     )

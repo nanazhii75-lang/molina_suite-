@@ -6,9 +6,9 @@ package com.molina.suite.core.common
  * [reader] dan [writer] adalah nama format di konverter; [reader] null berarti
  * format ini hanya bisa menjadi hasil, bukan sumber, dan [writer] null berarti sebaliknya.
  *
- * PDF dan XLSX bisa menjadi sumber, tetapi tidak dibaca pandoc: PDF hanya ke [MARKDOWN] dan
- * [PLAIN], XLSX hanya ke [MARKDOWN]. Nama reader keduanya hanya penanda; pembacanya pelaksana
- * konversi khusus masing-masing, bukan pandoc.
+ * PDF, XLSX, ODS, dan PPTX bisa menjadi sumber, tetapi tidak dibaca pandoc: lihat
+ * [restrictedTargets] untuk hasil yang boleh. Nama reader keempatnya hanya penanda; pembacanya
+ * pelaksana konversi khusus masing-masing, bukan pandoc.
  */
 enum class DocumentFormat(
     val extension: String,
@@ -22,11 +22,23 @@ enum class DocumentFormat(
     RST("rst", "rst", "rst"),
     PDF("pdf", "pdf", "pdf"),
     XLSX("xlsx", "xlsx", null),
+    ODS("ods", "ods", null),
+    PPTX("pptx", "pptx", null),
     PLAIN("txt", null, "plain");
 
     val canBeSource: Boolean get() = reader != null
 
     val canBeTarget: Boolean get() = writer != null
+
+    /**
+     * Hasil yang boleh untuk sumber yang dibaca pelaksana khusus (bukan pandoc), atau null untuk
+     * sumber biasa yang bebas memilih hasil.
+     */
+    val restrictedTargets: Set<DocumentFormat>? get() = when (this) {
+        PDF -> setOf(MARKDOWN, PLAIN)
+        XLSX, ODS, PPTX -> setOf(MARKDOWN)
+        else -> null
+    }
 
     companion object {
         private val aliases = mapOf("markdown" to MARKDOWN, "htm" to HTML)
@@ -53,8 +65,8 @@ data class ConversionOptions(
 
 /**
  * Permintaan konversi. Path harus absolut; sumber harus format yang bisa dibaca
- * dan target tidak boleh sama dengan sumber dan harus format yang bisa dihasilkan. Sumber PDF
- * hanya boleh ke Markdown atau teks biasa, sumber XLSX hanya ke Markdown.
+ * dan target tidak boleh sama dengan sumber dan harus format yang bisa dihasilkan. Sumber yang
+ * punya [DocumentFormat.restrictedTargets] (PDF, XLSX, ODS, PPTX) hanya boleh ke hasil itu.
  */
 data class ConversionRequest(
     val inputPath: String,
@@ -69,11 +81,9 @@ data class ConversionRequest(
         require(source.canBeSource) { "Format ${source.name} tidak bisa dijadikan sumber" }
         require(source != target) { "Sumber dan target sama: ${source.name}" }
         require(target.canBeTarget) { "${target.name} tidak bisa menjadi hasil konversi" }
-        require(source != DocumentFormat.PDF || target == DocumentFormat.MARKDOWN || target == DocumentFormat.PLAIN) {
-            "PDF hanya bisa dikonversi ke Markdown atau teks, bukan ${target.name}"
-        }
-        require(source != DocumentFormat.XLSX || target == DocumentFormat.MARKDOWN) {
-            "XLSX hanya bisa dikonversi ke Markdown, bukan ${target.name}"
+        val allowed = source.restrictedTargets
+        require(allowed == null || target in allowed) {
+            "${source.name} hanya bisa dikonversi ke ${allowed?.joinToString { it.name }}, bukan ${target.name}"
         }
     }
 }

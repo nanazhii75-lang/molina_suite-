@@ -24,4 +24,6 @@
     <string name="code_export_format_pdf">PDF (.pdf)</string>
     <string name="code_export_format_plain">Teks polos (.txt)</string>
     <string name="code_export_format_xlsx">Excel (.xlsx)</string>
+    <string name="code_export_format_ods">LibreOffice Calc (.ods)</string>
+    <string name="code_export_format_pptx">PowerPoint (.pptx)</string>
 </resources>

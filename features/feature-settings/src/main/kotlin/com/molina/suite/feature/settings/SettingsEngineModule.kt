@@ -14,7 +14,8 @@ import com.molina.suite.core.common.ToolSetupBoard
 import com.molina.suite.feature.settings.export.PandocDocumentConverter
 import com.molina.suite.feature.settings.export.PdfDocumentConverter
 import com.molina.suite.feature.settings.export.RoutingDocumentConverter
-import com.molina.suite.feature.settings.export.XlsxDocumentConverter
+import com.molina.suite.feature.settings.export.PythonMarkdownConverter
+import com.molina.suite.feature.settings.export.PythonMarkdownSpec
 import com.molina.suite.feature.settings.library.JsonLibraryRepository
 import com.molina.suite.feature.settings.logcat.CrashNotifier
 import com.molina.suite.feature.settings.logcat.CrashRecorder
@@ -64,13 +65,20 @@ object SettingsEngineModule {
     fun createToolReadinessChecker(context: Context): ToolReadinessChecker =
         PackageToolReadinessChecker(context)
 
-    /** Pelaksana konversi dokumen (pandoc, Typst, dan poppler di Debian) yang memakai [shell] untuk menjalankan perintah. */
-    fun createDocumentConverter(context: Context, shell: ShellCommandRunner): DocumentConverter =
-        RoutingDocumentConverter(
+    /**
+     * Pelaksana konversi dokumen yang memakai [shell] untuk menjalankan perintah di Debian: pandoc
+     * dan Typst untuk dokumen biasa, poppler untuk PDF, python3 untuk spreadsheet dan presentasi.
+     */
+    fun createDocumentConverter(context: Context, shell: ShellCommandRunner): DocumentConverter {
+        val spreadsheet = PythonMarkdownConverter(context, shell, PythonMarkdownSpec.SPREADSHEET)
+        return RoutingDocumentConverter(
             specialized = mapOf(
                 DocumentFormat.PDF to PdfDocumentConverter(context, shell),
-                DocumentFormat.XLSX to XlsxDocumentConverter(context, shell)
+                DocumentFormat.XLSX to spreadsheet,
+                DocumentFormat.ODS to spreadsheet,
+                DocumentFormat.PPTX to PythonMarkdownConverter(context, shell, PythonMarkdownSpec.PRESENTATION)
             ),
             general = PandocDocumentConverter(context, shell)
         )
+    }
 }
