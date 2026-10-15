@@ -53,6 +53,18 @@
     <string name="placeholder_url">URL</string>
     <string name="placeholder_file">Path file (mis. /sdcard/Molina/Downloads/a.mp4)</string>
     <string name="placeholder_out">Path hasil</string>
+    <string name="placeholder_dir">Folder project (mis. /sdcard/molina-suite)</string>
+    <string name="folder_picker_title">Pilih folder project</string>
+    <string name="folder_picker_up">Naik satu folder</string>
+    <string name="folder_picker_new_folder">Folder baru</string>
+    <string name="folder_picker_use_folder">Pilih folder ini</string>
+    <string name="folder_picker_cancel">Batal</string>
+    <string name="folder_picker_empty">Tidak ada subfolder</string>
+    <string name="folder_picker_unreadable">Folder tidak bisa dibaca</string>
+    <string name="folder_picker_folder_hint">Nama folder</string>
+    <string name="folder_picker_name_invalid">Nama folder tidak valid.</string>
+    <string name="folder_picker_folder_failed">Gagal membuat folder %1$s.</string>
+    <string name="folder_picker_choose">Pilih folder</string>
     <string name="placeholder_generic">Nilai untuk %1$s</string>
 
     <string name="settings_packages_title">Paket</string>

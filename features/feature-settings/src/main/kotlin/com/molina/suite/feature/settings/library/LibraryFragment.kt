@@ -431,6 +431,18 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
                 layout,
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             )
+            if (name == "DIR") {
+                layout.endIconMode = TextInputLayout.END_ICON_CUSTOM
+                layout.setEndIconDrawable(R.drawable.ic_folder_picker_folder)
+                layout.endIconContentDescription = getString(R.string.folder_picker_choose)
+                layout.setEndIconOnClickListener {
+                    FolderPicker(ctx, FolderPicker.startFrom(input.text?.toString().orEmpty())) { picked ->
+                        val path = picked.absolutePath
+                        input.setText(path)
+                        input.setSelection(path.length)
+                    }.show()
+                }
+            }
             fields[name] = layout to input
         }
 
@@ -465,11 +477,13 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
         "URL" -> getString(R.string.placeholder_url)
         "FILE" -> getString(R.string.placeholder_file)
         "OUT" -> getString(R.string.placeholder_out)
+        "DIR" -> getString(R.string.placeholder_dir)
         else -> getString(R.string.placeholder_generic, name)
     }
 
     private fun defaultValue(name: String): String? = when (name) {
         "FILE", "OUT" -> "/sdcard/${MolinaStorage.SHARED_DIR_NAME}/${MolinaStorage.DOWNLOADS_DIR_NAME}/"
+        "DIR" -> "/sdcard/"
         else -> null
     }
 

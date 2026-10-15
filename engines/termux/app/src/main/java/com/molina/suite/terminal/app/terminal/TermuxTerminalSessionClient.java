@@ -71,8 +71,13 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
         // The service has connected, but data may have changed since we were last in the foreground.
         // Get the session stored in shared preferences stored by {@link #onStop} if its valid,
         // otherwise get the last session currently running.
-        if (mHost.getTermuxService() != null) {
-            setCurrentSession(getCurrentStoredSessionOrLast());
+        TermuxService service = mHost.getTermuxService();
+        if (service != null) {
+            // molina-suite: sesi yang sedang tampil dan masih ada di daftar dipertahankan (mis. tab
+            // baru dari editor Code); sesi tersimpan/terakhir hanya dipakai bila belum ada yang tampil.
+            TerminalSession displayed = mHost.getCurrentSession();
+            boolean displayedAlive = displayed != null && service.getIndexOfSession(displayed) >= 0;
+            setCurrentSession(displayedAlive ? displayed : getCurrentStoredSessionOrLast());
             termuxSessionListNotifyUpdated();
         }
 

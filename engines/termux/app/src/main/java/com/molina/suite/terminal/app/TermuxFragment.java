@@ -197,8 +197,9 @@ public class TermuxFragment extends Fragment {
         }
         if (reusable == null && pendingStart) return "Tab terminal baru belum siap";
         if (reusable == null && busy != null) {
-            // Folder sama: tetap di tab ini. Hentikan proses lama (Ctrl+C), lalu pemanggil mengulang.
-            mTermuxTerminalSessionClient.setCurrentSession(busy);
+            // Folder sama: hentikan proses lama (Ctrl+C), lalu pemanggil mengulang. Tab tidak
+            // dipaksa tampil di sini (tidak memaksa pindah tab saat menunggu) supaya pengguna
+            // tetap bisa memilih tab lain; tab dipilih saat perintah benar-benar diketik.
             busy.write(new byte[]{3}, 0, 1);
             return "Menghentikan proses di tab ini";
         }
@@ -214,8 +215,8 @@ public class TermuxFragment extends Fragment {
             }
         }
 
-        mTermuxTerminalSessionClient.setCurrentSession(target);
         if (target.getPid() <= 0) return "Tab terminal baru belum siap";
+        mTermuxTerminalSessionClient.setCurrentSession(target);
         byte[] data = (line + "\r").getBytes(java.nio.charset.StandardCharsets.UTF_8);
         target.write(data, 0, data.length);
         return null;

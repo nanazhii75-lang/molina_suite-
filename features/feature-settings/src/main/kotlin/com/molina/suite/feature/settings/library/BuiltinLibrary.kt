@@ -25,6 +25,7 @@ internal object BuiltinLibrary {
     val entries: List<LibraryEntry> = listOf(
         IptvIndonesia.entry,
         DocumentConvertLibrary.entry,
+        KotlinCheckLibrary.entry,
         entry(
             "builtin-ytdlp-playlist", "Unduh playlist (yt-dlp)",
             "yt-dlp -P $downloads -o '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' {URL}",
