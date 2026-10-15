@@ -11,6 +11,13 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Hanya untuk NewPipeExtractor dan nanojson (dependensinya); grup lain tidak diambil dari sini.
+        maven(url = "https://jitpack.io") {
+            content {
+                includeGroup("com.github.teamnewpipe")
+                includeGroup("com.github.TeamNewPipe")
+            }
+        }
     }
 }
 

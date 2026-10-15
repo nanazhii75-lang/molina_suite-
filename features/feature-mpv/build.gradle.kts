@@ -28,4 +28,6 @@ dependencies {
     implementation("androidx.fragment:fragment:1.5.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
     implementation("com.google.android.material:material:1.12.0")
+    implementation("com.github.teamnewpipe:NewPipeExtractor:v0.26.5")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }

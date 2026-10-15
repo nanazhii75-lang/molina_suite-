@@ -21,7 +21,12 @@ object MpvEngineModule {
         toolSetup: ToolSetupBoard
     ) {
         MpvYtdlBridge.install(application)
-        YoutubeSearch.install(YtdlpSearchSource(MpvYtdlBridge.wrapperFile(application)))
+        YoutubeSearch.install(
+            FallbackSearchSource(
+                primary = NewPipeSearchSource(),
+                secondary = YtdlpSearchSource(MpvYtdlBridge.wrapperFile(application))
+            )
+        )
         MpvActivityReporter.install(MpvActivityLogger())
         UrlPlayback.install(MpvToolGate(toolReadiness, toolSetup))
         engines.register(MpvFeature())

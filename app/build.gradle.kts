@@ -69,7 +69,7 @@ configurations.configureEach {
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.0.4")
     implementation(project(":core:core-common"))
     implementation(project(":core:core-storage"))
     implementation(project(":features:feature-terminal"))
