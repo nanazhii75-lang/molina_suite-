@@ -5,150 +5,156 @@
     android:layout_height="match_parent"
     android:background="@color/ms_bg">
 
-    <LinearLayout
+    <ScrollView
         android:id="@+id/settings_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="@dimen/ms_space_md">
-
-        <TextView
-            style="@style/Molina.Text.Title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/ms_space_md"
-            android:text="@string/settings_menu_title" />
+        android:fillViewport="true">
 
         <LinearLayout
-            android:id="@+id/settings_row_tools"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/ms_card_gap"
-            android:background="@drawable/ms_bg_card_ripple"
-            android:clickable="true"
-            android:focusable="true"
-            android:minHeight="64dp"
             android:orientation="vertical"
             android:padding="@dimen/ms_space_md">
 
             <TextView
-                style="@style/Molina.Text.Item"
+                style="@style/Molina.Text.Title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_tools_title" />
+                android:layout_marginBottom="@dimen/ms_space_md"
+                android:text="@string/settings_menu_title" />
 
-            <TextView
-                style="@style/Molina.Text.Body"
+            <LinearLayout
+                android:id="@+id/settings_row_tools"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ms_space_xs"
-                android:text="@string/settings_tools_subtitle" />
+                android:layout_marginBottom="@dimen/ms_card_gap"
+                android:background="@drawable/ms_bg_card_ripple"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="64dp"
+                android:orientation="vertical"
+                android:padding="@dimen/ms_space_md">
+
+                <TextView
+                    style="@style/Molina.Text.Item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_tools_title" />
+
+                <TextView
+                    style="@style/Molina.Text.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_xs"
+                    android:text="@string/settings_tools_subtitle" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/settings_row_library"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/ms_card_gap"
+                android:background="@drawable/ms_bg_card_ripple"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="64dp"
+                android:orientation="vertical"
+                android:padding="@dimen/ms_space_md">
+
+                <TextView
+                    style="@style/Molina.Text.Item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_library_title" />
+
+                <TextView
+                    style="@style/Molina.Text.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_xs"
+                    android:text="@string/settings_library_subtitle" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/settings_row_debian"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/ms_card_gap"
+                android:background="@drawable/ms_bg_card_ripple"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="64dp"
+                android:orientation="vertical"
+                android:padding="@dimen/ms_space_md">
+
+                <TextView
+                    style="@style/Molina.Text.Item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_debian_title" />
+
+                <TextView
+                    style="@style/Molina.Text.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_xs"
+                    android:text="@string/settings_debian_subtitle" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/settings_row_packages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/ms_card_gap"
+                android:background="@drawable/ms_bg_card_ripple"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="64dp"
+                android:orientation="vertical"
+                android:padding="@dimen/ms_space_md">
+
+                <TextView
+                    style="@style/Molina.Text.Item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_packages_title" />
+
+                <TextView
+                    style="@style/Molina.Text.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_xs"
+                    android:text="@string/settings_packages_subtitle" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/settings_row_logcat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/ms_card_gap"
+                android:background="@drawable/ms_bg_card_ripple"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="64dp"
+                android:orientation="vertical"
+                android:padding="@dimen/ms_space_md">
+
+                <TextView
+                    style="@style/Molina.Text.Item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_logcat_title" />
+
+                <TextView
+                    style="@style/Molina.Text.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_xs"
+                    android:id="@+id/settings_logcat_subtitle"
+                    android:text="@string/settings_logcat_subtitle" />
+            </LinearLayout>
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/settings_row_library"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/ms_card_gap"
-            android:background="@drawable/ms_bg_card_ripple"
-            android:clickable="true"
-            android:focusable="true"
-            android:minHeight="64dp"
-            android:orientation="vertical"
-            android:padding="@dimen/ms_space_md">
-
-            <TextView
-                style="@style/Molina.Text.Item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_library_title" />
-
-            <TextView
-                style="@style/Molina.Text.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ms_space_xs"
-                android:text="@string/settings_library_subtitle" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/settings_row_debian"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/ms_card_gap"
-            android:background="@drawable/ms_bg_card_ripple"
-            android:clickable="true"
-            android:focusable="true"
-            android:minHeight="64dp"
-            android:orientation="vertical"
-            android:padding="@dimen/ms_space_md">
-
-            <TextView
-                style="@style/Molina.Text.Item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_debian_title" />
-
-            <TextView
-                style="@style/Molina.Text.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ms_space_xs"
-                android:text="@string/settings_debian_subtitle" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/settings_row_packages"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/ms_card_gap"
-            android:background="@drawable/ms_bg_card_ripple"
-            android:clickable="true"
-            android:focusable="true"
-            android:minHeight="64dp"
-            android:orientation="vertical"
-            android:padding="@dimen/ms_space_md">
-
-            <TextView
-                style="@style/Molina.Text.Item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_packages_title" />
-
-            <TextView
-                style="@style/Molina.Text.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ms_space_xs"
-                android:text="@string/settings_packages_subtitle" />
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/settings_row_logcat"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/ms_card_gap"
-            android:background="@drawable/ms_bg_card_ripple"
-            android:clickable="true"
-            android:focusable="true"
-            android:minHeight="64dp"
-            android:orientation="vertical"
-            android:padding="@dimen/ms_space_md">
-
-            <TextView
-                style="@style/Molina.Text.Item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_logcat_title" />
-
-            <TextView
-                style="@style/Molina.Text.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ms_space_xs"
-                android:id="@+id/settings_logcat_subtitle"
-                android:text="@string/settings_logcat_subtitle" />
-        </LinearLayout>
-    </LinearLayout>
+    </ScrollView>
 
     <FrameLayout
         android:id="@+id/settings_child_container"
