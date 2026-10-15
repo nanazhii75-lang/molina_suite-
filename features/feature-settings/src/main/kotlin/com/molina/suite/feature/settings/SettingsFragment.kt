@@ -54,6 +54,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         }
         updateCrashNotice()
         observeToolSetup()
+        observeLibraryDraft()
         sync()
     }
 
@@ -74,6 +75,31 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
                 }
             }
         }
+    }
+
+    /**
+     * Menangani kiriman skrip dari tab Code: membuka Library bila belum terbuka. Dialog "Entri baru"
+     * ditampilkan oleh LibraryFragment, yang juga mengonsumsi kirimannya.
+     */
+    private fun observeLibraryDraft() {
+        val board = SettingsDependencies.libraryDraft()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                board.pending.collect { draft ->
+                    if (draft != null) openLibraryForDraft()
+                }
+            }
+        }
+    }
+
+    private fun openLibraryForDraft() {
+        if (childFragmentManager.findFragmentById(R.id.settings_child_container) is LibraryFragment) return
+        childFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.settings_child_container, LibraryFragment())
+            .addToBackStack(BACKSTACK_LIBRARY)
+            .commit()
     }
 
     /** Menutup submenu yang terbuka lalu membuka Paket (paket yang kurang disorot) atau Debian. */

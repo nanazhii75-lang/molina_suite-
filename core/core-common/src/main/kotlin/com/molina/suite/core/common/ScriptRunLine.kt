@@ -89,6 +89,17 @@ object ScriptRunLine {
         }
     }
 
+    /**
+     * Isi skrip untuk entri Library. Library menjalankan skrip multi-baris dengan bash kecuali
+     * ada shebang, jadi skrip Python tanpa shebang diberi baris #!/usr/bin/env python3 supaya
+     * tetap dijalankan python3. Skrip lain dikembalikan apa adanya.
+     */
+    fun withLibraryShebang(fileName: String?, text: String): String {
+        if (fileName == null || hasShebang(text)) return text
+        if (interpreterFor(fileName) != "python3") return text
+        return "#!/usr/bin/env python3\n" + text.trimStart('\uFEFF')
+    }
+
     private fun interpreterFor(fileName: String): String? =
         when (fileName.substringAfterLast('.', "").lowercase()) {
             "sh", "bash" -> "bash"

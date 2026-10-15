@@ -15,7 +15,9 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
@@ -25,6 +27,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.HostTabSwitcher
+import com.molina.suite.core.common.LibraryDraft
 import com.molina.suite.core.storage.MolinaStorage
 import com.molina.suite.feature.settings.PlaceholderTemplate
 import com.molina.suite.feature.settings.Refreshable
@@ -73,6 +76,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
         )
         view.findViewById<View>(R.id.library_add).setOnClickListener { showEditor(null) }
         view.findViewById<View>(R.id.library_restore).setOnClickListener { restoreBuiltins() }
+        observeDraft()
         load()
     }
 
@@ -158,6 +162,21 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
                 v.empty.visibility = View.GONE
                 v.error.text = getString(R.string.library_load_failed, result.reason)
                 v.error.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    /** Skrip kiriman tab Code: membuka dialog "Entri baru" yang sudah terisi nama dan isinya. */
+    private fun observeDraft() {
+        val board = SettingsDependencies.libraryDraft()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                board.pending.collect { draft ->
+                    if (draft != null) {
+                        board.consume(draft)
+                        showEditor(null, draft)
+                    }
+                }
             }
         }
     }
@@ -454,7 +473,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
         else -> null
     }
 
-    private fun showEditor(entry: LibraryEntry?) {
+    private fun showEditor(entry: LibraryEntry?, draft: LibraryDraft? = null) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_library_entry, null)
         val nameLayout = dialogView.findViewById<TextInputLayout>(R.id.library_layout_name)
         val contentLayout = dialogView.findViewById<TextInputLayout>(R.id.library_layout_content)
@@ -470,6 +489,10 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
         } else {
             // Alat Library (python3, git, apt, ffmpeg) hanya ada di Debian; shell host minimal.
             debianCheck.isChecked = true
+            if (draft != null) {
+                nameInput.setText(draft.name)
+                contentInput.setText(draft.content)
+            }
         }
 
         val updateCounter = {
@@ -492,6 +515,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
             .setNegativeButton(R.string.library_cancel, null)
         if (entry != null) builder.setNeutralButton(R.string.library_delete, null)
         val dialog = builder.create()
+        if (draft != null) dialog.setCanceledOnTouchOutside(false)
 
         dialog.setOnShowListener {
             dialogView.findViewById<MaterialButton>(R.id.library_edit_in_editor).setOnClickListener {

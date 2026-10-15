@@ -118,6 +118,9 @@
     <string name="code_run_unsupported">Berkas ini belum bisa dijalankan. Yang didukung: .sh, .py, atau skrip berawalan #!.</string>
     <string name="code_run_unreadable">Gagal membaca %1$s</string>
     <string name="code_run_no_switcher">Tidak bisa berpindah ke tab Terminal.</string>
+    <string name="code_key_library">Kirim ke Library</string>
+    <string name="code_library_no_switcher">Tidak bisa berpindah ke tab Settings.</string>
+    <string name="code_library_too_big">Isi terlalu besar untuk Library (maks. 1 juta karakter).</string>
     <string name="code_run_failed">Gagal menjalankan: %1$s</string>
     <string name="code_tree_more">… dan %1$d lainnya</string>
     <string name="code_tree_unreadable">Folder tidak bisa dibaca</string>

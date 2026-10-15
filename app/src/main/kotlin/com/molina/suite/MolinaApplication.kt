@@ -7,6 +7,7 @@ import com.molina.suite.core.common.AppExitBoard
 import com.molina.suite.core.common.BackgroundKeepAlive
 import com.molina.suite.core.common.DaemonStatusBoard
 import com.molina.suite.core.common.EditorOpenBoard
+import com.molina.suite.core.common.LibraryDraftBoard
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.LoggingShellCommandRunner
 import com.molina.suite.core.common.ShellCommandRunner
@@ -29,6 +30,9 @@ class MolinaApplication : Application() {
 
     /** Papan permintaan membuka berkas di tab Code; Library meminta, tab Code yang menangani. */
     val editorOpen = EditorOpenBoard()
+
+    /** Papan kiriman skrip dari tab Code ke Library; Code mengirim, Library yang menangani. */
+    val libraryDraft = LibraryDraftBoard()
 
     /** Pemeriksa alat berbasis katalog menu Paket, dipakai modul mpv (Play by URL). */
     val toolReadiness: ToolReadinessChecker by lazy { SettingsEngineModule.createToolReadinessChecker(this) }
@@ -53,9 +57,9 @@ class MolinaApplication : Application() {
         SettingsEngineModule.installLogRecorder(this)
         appExit.setHandler { exitApp() }
         TerminalEngineModule.install(this, engines, appExit)
-        CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell)
+        CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft)
         MpvEngineModule.install(this, engines, toolReadiness, toolSetup)
-        SettingsEngineModule.install(engines, terminalInput, toolSetup, editorOpen)
+        SettingsEngineModule.install(engines, terminalInput, toolSetup, editorOpen, libraryDraft)
         DaemonStatusBridge.start(engines, daemons)
     }
 

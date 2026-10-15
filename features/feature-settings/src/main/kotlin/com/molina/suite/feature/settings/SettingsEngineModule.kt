@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.EngineRegistry
+import com.molina.suite.core.common.LibraryDraftBoard
 import com.molina.suite.core.common.TerminalInputSender
 import com.molina.suite.core.common.ToolReadinessChecker
 import com.molina.suite.core.common.ToolSetupBoard
@@ -21,9 +22,16 @@ object SettingsEngineModule {
         engines: EngineRegistry,
         terminalInput: TerminalInputSender,
         toolSetup: ToolSetupBoard,
-        editorOpen: EditorOpenBoard
+        editorOpen: EditorOpenBoard,
+        libraryDraft: LibraryDraftBoard
     ) {
-        SettingsDependencies.install(terminalInput, JsonLibraryRepository.createDefault(), toolSetup, editorOpen)
+        SettingsDependencies.install(
+            terminalInput,
+            JsonLibraryRepository.createDefault(),
+            toolSetup,
+            editorOpen,
+            libraryDraft
+        )
         engines.register(SettingsFeature())
     }
 

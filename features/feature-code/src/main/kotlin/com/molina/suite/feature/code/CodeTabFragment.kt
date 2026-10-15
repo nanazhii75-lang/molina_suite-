@@ -31,6 +31,7 @@ import com.molina.suite.core.common.EditorOpenRequest
 import com.molina.suite.core.common.HostBackPressHandler
 import com.molina.suite.core.common.HostChromeController
 import com.molina.suite.core.common.HostTabSwitcher
+import com.molina.suite.core.common.LibraryDraftBoard
 import com.molina.suite.core.common.ScriptRunLine
 import com.molina.suite.core.common.ScriptRunTarget
 import com.molina.suite.core.common.EngineId
@@ -324,6 +325,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         val bar = actionBar ?: return
         val file = doc.file
         bar.setEnabled(R.drawable.ic_code_save, hasContent || file != null)
+        bar.setEnabled(R.drawable.ic_code_library, hasContent)
         bar.setEnabled(R.drawable.ic_code_search, hasContent)
         bar.setEnabled(R.drawable.ic_code_arrow_left, hasContent)
         bar.setEnabled(R.drawable.ic_code_arrow_right, hasContent)
@@ -337,6 +339,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         context,
         listOf(
             CodeAction(R.drawable.ic_code_save, R.string.code_key_save, CodePalette.TOOL_SAVE) { showSaveChoice() },
+            CodeAction(R.drawable.ic_code_library, R.string.code_key_library, CodePalette.TOOL_LIBRARY) { sendToLibrary() },
             CodeAction(R.drawable.ic_code_paste, R.string.code_key_paste, CodePalette.TOOL_PASTE) { session.paste() },
             CodeAction(R.drawable.ic_code_undo, R.string.code_key_undo, CodePalette.TOOL_UNDO) { session.undo() },
             CodeAction(R.drawable.ic_code_redo, R.string.code_key_redo, CodePalette.TOOL_REDO) { session.redo() },
@@ -539,6 +542,30 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             }
             else -> runFile(file, ScriptRunTarget.DEBIAN)
         }
+    }
+
+    /**
+     * Mengirim isi editor ke Library sebagai entri baru: isi dan nama berkas (tanpa ekstensi)
+     * ditaruh di papan Library, lalu tab Settings dibuka. Yang menyimpan adalah dialog "Entri
+     * baru" di Library; di sini tidak ada yang ditulis ke Library, dan berkas di disk tidak berubah.
+     */
+    private fun sendToLibrary() {
+        val host = activity as? HostTabSwitcher
+        if (host == null) {
+            toast(getString(R.string.code_library_no_switcher))
+            return
+        }
+        val text = session.currentText()
+        if (text.isBlank()) return
+        if (text.length > LibraryDraftBoard.MAX_CONTENT_CHARS) {
+            toast(getString(R.string.code_library_too_big))
+            return
+        }
+        val fileName = session.document.value.file?.name
+        val name = if (fileName == null) "" else fileName.substringBeforeLast('.', "").ifEmpty { fileName }
+        val content = ScriptRunLine.withLibraryShebang(fileName, text)
+        CodeEngineModule.requireEngine().libraryDraft.request(name, content)
+        host.showEngine(EngineId.SETTINGS)
     }
 
     private fun openPreview(file: File) {
