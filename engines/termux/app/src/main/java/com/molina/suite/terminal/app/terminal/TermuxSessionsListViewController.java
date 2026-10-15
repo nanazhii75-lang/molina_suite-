@@ -70,6 +70,15 @@ public class TermuxSessionsListViewController extends ArrayAdapter<TermuxSession
         closeButton.setColorFilter(isUsingBlackUI ? Color.WHITE : Color.BLACK);
         closeButton.setOnClickListener(v -> confirmAndCloseSession(sessionAtRow));
 
+        // Klik dan tahan ditangani langsung oleh baris, bukan lewat ListView.onItemClick yang
+        // dibatalkan Android bila data daftar berubah saat jari menyentuh (sesi baru masih
+        // mencetak output), sehingga baris ke-2 dan seterusnya tidak bisa dipilih.
+        sessionTitleView.setOnClickListener(v -> selectSessionRow(sessionAtRow, position));
+        sessionTitleView.setOnLongClickListener(v -> {
+            mHost.getTermuxTerminalSessionClient().renameSession(sessionAtRow);
+            return true;
+        });
+
         if (isUsingBlackUI) {
             sessionTitleView.setBackground(
                 ContextCompat.getDrawable(mActivity, R.drawable.session_background_black_selected)
@@ -101,6 +110,13 @@ public class TermuxSessionsListViewController extends ArrayAdapter<TermuxSession
         int color = sessionRunning || sessionAtRow.getExitStatus() == 0 ? defaultColor : Color.RED;
         sessionTitleView.setTextColor(color);
         return sessionRowView;
+    }
+
+    private void selectSessionRow(TerminalSession session, int position) {
+        android.util.Log.i("TermuxSessions", "klik baris sesi: posisi=" + position + " dari " + getCount()
+            + ", sesi=" + (session.isRunning() ? "berjalan" : "selesai"));
+        mHost.getTermuxTerminalSessionClient().setCurrentSession(session);
+        mHost.getDrawer().closeDrawers();
     }
 
     /**
