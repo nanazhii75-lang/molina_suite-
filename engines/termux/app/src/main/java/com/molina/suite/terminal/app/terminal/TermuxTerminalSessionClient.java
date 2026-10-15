@@ -289,7 +289,10 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
     public void setCurrentSession(TerminalSession session) {
         if (session == null) return;
 
-        if (mHost.getTerminalView().attachSession(session)) {
+        final boolean attached = mHost.getTerminalView().attachSession(session);
+        android.util.Log.i("TermuxSessions", "setCurrentSession: attach=" + attached
+            + ", tabTampil=" + mHost.isVisible() + ", berjalan=" + session.isRunning());
+        if (attached) {
             // notify about switched session if not already displaying the session
             notifyOfSessionChange();
         }

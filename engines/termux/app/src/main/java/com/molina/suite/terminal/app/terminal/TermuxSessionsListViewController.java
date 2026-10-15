@@ -127,6 +127,9 @@ public class TermuxSessionsListViewController extends ArrayAdapter<TermuxSession
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         TermuxSession clickedSession = getItem(position);
+        TerminalSession clickedTerminal = clickedSession == null ? null : clickedSession.getTerminalSession();
+        android.util.Log.i("TermuxSessions", "klik daftar sesi: posisi=" + position + " dari " + getCount()
+            + ", sesi=" + (clickedTerminal == null ? "null" : (clickedTerminal.isRunning() ? "berjalan" : "selesai")));
         mHost.getTermuxTerminalSessionClient().setCurrentSession(clickedSession.getTerminalSession());
         mHost.getDrawer().closeDrawers();
     }
