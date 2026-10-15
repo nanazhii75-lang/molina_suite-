@@ -53,17 +53,16 @@ internal object CodeScriptRunner {
         val line = CodeRunCommand.lineFor(file.absolutePath, head, target) ?: return CodeRunOutcome.Unsupported
         val host = switcher ?: return CodeRunOutcome.NoSwitcher
 
-        // Tab terminal mengikuti folder berkas: folder sama dipakai ulang bila idle, folder
-        // lain atau tab yang sibuk membuka tab baru tanpa menimpa tab sebelumnya.
+        // Perintah selalu diketik ke sesi Terminal yang sudah ada (tidak membuat tab baru);
+        // folder berkas dicapai lewat cd di baris yang sama.
         val workdir = ScriptRunLine.normalizePath(file.absolutePath).substringBeforeLast('/', "").ifEmpty { "/" }
-        val label = workdir.substringAfterLast('/').ifEmpty { "/" }
         val typed = "cd " + ScriptRunLine.quote(workdir) + " 2>/dev/null; " + line
-        var result = sender.sendLineInWorkdir(workdir, label, typed)
+        var result = sender.sendLine(typed)
         host.showEngine(EngineId.TERMINAL)
         var attempts = 0
         while (result is TerminalInputResult.Rejected && attempts < MAX_ATTEMPTS) {
             delay(RETRY_DELAY_MS)
-            result = sender.sendLineInWorkdir(workdir, label, typed)
+            result = sender.sendLine(typed)
             attempts++
         }
         return when (result) {
