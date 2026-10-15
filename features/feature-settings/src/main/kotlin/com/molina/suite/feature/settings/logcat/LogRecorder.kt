@@ -70,6 +70,15 @@ internal class LogRecorder(
         })
     }
 
+    /** Menulis sisa baris yang belum tersimpan ke riwayat sekarang juga, mis. sebelum aplikasi sengaja ditutup. */
+    fun flushNow() {
+        try {
+            flush()
+        } catch (e: Exception) {
+            // Gagal menulis hanya berarti sisa baris terakhir tidak tersimpan.
+        }
+    }
+
     private fun loadHistory() {
         for (line in store.readTail(buffer.capacity)) {
             val entry = LogcatParser.parse(line) ?: continue

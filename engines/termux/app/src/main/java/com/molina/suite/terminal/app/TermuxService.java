@@ -31,6 +31,7 @@ import com.molina.suite.terminal.shared.shell.ShellUtils;
 import com.molina.suite.terminal.shared.shell.TermuxShellEnvironmentClient;
 import com.molina.suite.terminal.shared.shell.TermuxShellUtils;
 import com.molina.suite.terminal.shared.termux.TermuxConstants;
+import com.molina.suite.terminal.shared.termux.TermuxExitHook;
 import com.molina.suite.terminal.shared.termux.TermuxConstants.TERMUX_APP.TERMUX_ACTIVITY;
 import com.molina.suite.terminal.shared.termux.TermuxConstants.TERMUX_APP.TERMUX_SERVICE;
 import com.molina.suite.terminal.shared.settings.preferences.TermuxAppSharedPreferences;
@@ -213,6 +214,20 @@ public final class TermuxService extends Service implements TermuxTask.TermuxTas
         mWantsToStop = true;
         killAllTermuxExecutionCommands();
         requestStopService();
+        exitApplicationIfHosted();
+    }
+
+    /**
+     * Tombol Exit di notifikasi: bila aplikasi induk memasang kait keluar, seluruh proses aplikasi
+     * ditutup seperti Termux asli. Tab Terminal tetap terikat ke service, jadi onDestroy tidak akan
+     * jalan sesudah stopSelf(); pembersihan yang biasanya ada di sana dilakukan di sini lebih dulu.
+     * Tanpa kait (engine dipakai sendiri), Exit tetap hanya menghentikan service.
+     */
+    private void exitApplicationIfHosted() {
+        if (!TermuxExitHook.isInstalled()) return;
+        TermuxShellUtils.clearTermuxTMPDIR(true);
+        actionReleaseWakeLock(false);
+        TermuxExitHook.request();
     }
 
     /** Kill all TermuxSessions and TermuxTasks by sending SIGKILL to their processes.

@@ -45,6 +45,11 @@ internal object ProcessTracking {
         return CrashNotice(CrashRecorder.crashDir(app), File(stateDir(app), SEEN_FILE_NAME))
     }
 
+    /** Mencatat bahwa proses ini sengaja ditutup (tombol Exit), supaya proses berikutnya tidak menilainya mati mendadak. */
+    fun markCleanExit(context: Context) {
+        get(context).markCleanExit()
+    }
+
     /** Mulai melacak sejak aplikasi dibuka; aman dipanggil berulang. */
     fun install(application: Application) {
         val tracker = get(application)

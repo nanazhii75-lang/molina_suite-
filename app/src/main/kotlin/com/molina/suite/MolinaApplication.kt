@@ -1,6 +1,9 @@
 package com.molina.suite
 
+import android.app.ActivityManager
 import android.app.Application
+import android.os.Process
+import com.molina.suite.core.common.AppExitBoard
 import com.molina.suite.core.common.BackgroundKeepAlive
 import com.molina.suite.core.common.DaemonStatusBoard
 import com.molina.suite.core.common.EditorOpenBoard
@@ -15,6 +18,7 @@ import com.molina.suite.feature.mpv.MpvEngineModule
 import com.molina.suite.feature.settings.SettingsEngineModule
 import com.molina.suite.feature.terminal.TerminalEngineModule
 import com.molina.suite.feature.terminal.TermuxBackgroundKeepAlive
+import kotlin.system.exitProcess
 
 class MolinaApplication : Application() {
     val engines = EngineRegistry()
@@ -40,14 +44,34 @@ class MolinaApplication : Application() {
     /** Penjaga CPU untuk proses latar belakang berumur panjang (server code-server). */
     val keepAlive: BackgroundKeepAlive by lazy { TermuxBackgroundKeepAlive(this) }
 
+    /** Papan permintaan keluar; fitur (mis. Exit di notifikasi Terminal) meminta, shell menutup aplikasi. */
+    val appExit = AppExitBoard()
+
     override fun onCreate() {
         super.onCreate()
         SettingsEngineModule.installCrashRecorder(this)
         SettingsEngineModule.installLogRecorder(this)
-        TerminalEngineModule.install(this, engines)
+        appExit.setHandler { exitApp() }
+        TerminalEngineModule.install(this, engines, appExit)
         CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell)
         MpvEngineModule.install(this, engines, toolReadiness, toolSetup)
         SettingsEngineModule.install(engines, terminalInput, toolSetup, editorOpen)
         DaemonStatusBridge.start(engines, daemons)
+    }
+
+    /**
+     * Menutup seluruh aplikasi: mencatat keluar sengaja dan menyimpan sisa log lebih dulu supaya
+     * proses berikutnya tidak menilainya mati mendadak, menutup semua task (hilang dari recents),
+     * lalu mematikan proses dengan SIGKILL seperti `kill -9`.
+     */
+    private fun exitApp() {
+        SettingsEngineModule.prepareExit(this)
+        try {
+            getSystemService(ActivityManager::class.java)?.appTasks?.forEach { it.finishAndRemoveTask() }
+        } catch (e: RuntimeException) {
+            // Tugas tidak bisa ditutup; proses tetap dimatikan di bawah.
+        }
+        Process.killProcess(Process.myPid())
+        exitProcess(0)
     }
 }

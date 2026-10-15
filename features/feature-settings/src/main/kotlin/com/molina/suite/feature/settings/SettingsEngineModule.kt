@@ -35,6 +35,12 @@ object SettingsEngineModule {
         LogRecorder.install(application)
     }
 
+    /** Dipanggil sebelum aplikasi sengaja ditutup: mencatat keluar normal dan menyimpan sisa log ke riwayat. */
+    fun prepareExit(application: Application) {
+        ProcessTracking.markCleanExit(application)
+        LogRecorder.get(application).flushNow()
+    }
+
     /** Pemeriksa alat yang memakai katalog dan detektor menu Paket, untuk modul fitur lain. */
     fun createToolReadinessChecker(context: Context): ToolReadinessChecker =
         PackageToolReadinessChecker(context)

@@ -50,4 +50,13 @@ internal class ProcessTracker(
             store.write(current)
         }
     }
+
+    /** Menandai bahwa proses ini sengaja ditutup (tombol Exit), supaya proses berikutnya tidak menilainya mati mendadak. */
+    fun markCleanExit() {
+        synchronized(lock) {
+            if (current.cleanExit) return
+            current = current.copy(cleanExit = true)
+            store.write(current)
+        }
+    }
 }

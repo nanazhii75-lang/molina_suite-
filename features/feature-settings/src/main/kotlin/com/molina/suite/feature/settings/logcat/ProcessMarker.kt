@@ -33,6 +33,9 @@ internal object ProcessMarker {
         if (previous == null || previous.pid == currentPid) return null
         val head = "Proses berhenti, aplikasi dimulai ulang (PID ${previous.pid} \u2192 $currentPid)"
         val detail = cause?.detail?.takeIf { it.isNotBlank() }
+        if (previous.cleanExit && !previous.javaCrash) {
+            return event(head, LogcatLevel.INFO, "ditutup lewat tombol Exit", null, abnormal = false, report = false)
+        }
         val kind = when {
             previous.javaCrash -> ExitKind.JAVA_CRASH
             cause != null && cause.kind != ExitKind.OTHER -> cause.kind
