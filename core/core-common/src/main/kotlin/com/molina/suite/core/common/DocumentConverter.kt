@@ -55,8 +55,11 @@ sealed interface ConversionResult {
     /** Berkas hasil sudah ditulis di [outputPath]. */
     data class Success(val outputPath: String) : ConversionResult
 
-    /** Alat yang dibutuhkan ([tool]) belum terpasang; arahkan pengguna ke menu Paket. */
-    data class ToolMissing(val tool: String) : ConversionResult
+    /** Alat di [toolIds] (id katalog Paket) belum terpasang; arahkan pengguna ke menu Paket. */
+    data class ToolMissing(val toolIds: List<String>) : ConversionResult
+
+    /** Debian belum terpasang, jadi belum ada alat yang bisa dipakai; arahkan pengguna ke menu Debian. */
+    object NoDebian : ConversionResult
 
     /** Konversi gagal. [exitCode] null bila proses tidak sempat melapor. */
     data class Failure(val reason: String, val exitCode: Int? = null) : ConversionResult

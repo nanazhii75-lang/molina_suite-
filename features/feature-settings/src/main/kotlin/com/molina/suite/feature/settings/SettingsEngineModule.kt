@@ -2,12 +2,15 @@ package com.molina.suite.feature.settings
 
 import android.app.Application
 import android.content.Context
+import com.molina.suite.core.common.DocumentConverter
 import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.LibraryDraftBoard
+import com.molina.suite.core.common.ShellCommandRunner
 import com.molina.suite.core.common.TerminalInputSender
 import com.molina.suite.core.common.ToolReadinessChecker
 import com.molina.suite.core.common.ToolSetupBoard
+import com.molina.suite.feature.settings.export.PandocDocumentConverter
 import com.molina.suite.feature.settings.library.JsonLibraryRepository
 import com.molina.suite.feature.settings.logcat.CrashNotifier
 import com.molina.suite.feature.settings.logcat.CrashRecorder
@@ -56,4 +59,8 @@ object SettingsEngineModule {
     /** Pemeriksa alat yang memakai katalog dan detektor menu Paket, untuk modul fitur lain. */
     fun createToolReadinessChecker(context: Context): ToolReadinessChecker =
         PackageToolReadinessChecker(context)
+
+    /** Pelaksana konversi dokumen (pandoc dan Typst di Debian) yang memakai [shell] untuk menjalankan perintah. */
+    fun createDocumentConverter(context: Context, shell: ShellCommandRunner): DocumentConverter =
+        PandocDocumentConverter(context, shell)
 }
