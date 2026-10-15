@@ -71,6 +71,8 @@ jobs:
           path: engines/mpv-android/app/src/main/libs
       - name: Build APK debug
         run: gradle :app:assembleDebug --stacktrace
+      - name: Unit test feature-code
+        run: gradle :features:feature-code:testDebugUnitTest --stacktrace
       - name: Verifikasi library mpv ada di APK
         run: |
           set -eo pipefail

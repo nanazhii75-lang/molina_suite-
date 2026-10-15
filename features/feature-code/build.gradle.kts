@@ -22,6 +22,7 @@ android {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     implementation(project(":engines:sora-core"))
     implementation(project(":engines:sora-textmate"))
     implementation(project(":core:core-common"))
