@@ -317,8 +317,8 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
 
     /**
      * Ikon yang butuh isi (Simpan, Cari, kursor, Salin semua) abu-abu di lembar kosong. Jalankan
-     * hanya aktif untuk berkas berekstensi yang bisa dijalankan atau ditinjau, atau untuk lembar
-     * tanpa nama yang sudah berisi (Jalankan lalu meminta nama berkas).
+     * hanya aktif untuk berkas bernama dengan ekstensi yang bisa dijalankan atau ditinjau; lembar
+     * tanpa nama abu-abu karena memberi nama adalah tugas Simpan.
      */
     private fun renderActions(doc: CodeDocument, hasContent: Boolean) {
         val bar = actionBar ?: return
@@ -328,11 +328,8 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         bar.setEnabled(R.drawable.ic_code_arrow_left, hasContent)
         bar.setEnabled(R.drawable.ic_code_arrow_right, hasContent)
         bar.setEnabled(R.drawable.ic_code_copy_all, hasContent)
-        val canRun = if (file == null) {
-            hasContent
-        } else {
-            CodePreviewKind.of(file.name) != null || ScriptRunLine.isRunnableName(file.name)
-        }
+        val canRun = file != null &&
+            (CodePreviewKind.of(file.name) != null || ScriptRunLine.isRunnableName(file.name))
         bar.setEnabled(R.drawable.ic_code_run, canRun)
     }
 
@@ -534,22 +531,14 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
      */
     private fun runCurrent() {
         val doc = session.document.value
-        val file = doc.file
+        val file = doc.file ?: return
         when {
-            file == null && !session.hasContent.value -> Unit
-            file == null -> requestSaveAs {
-                session.document.value.file?.let { dispatchRun(it) }
-            }
             CodePreviewKind.of(file.name) != null -> openPreview(file)
             doc.dirty -> viewLifecycleOwner.lifecycleScope.launch {
                 if (save()) runFile(file, ScriptRunTarget.DEBIAN)
             }
             else -> runFile(file, ScriptRunTarget.DEBIAN)
         }
-    }
-
-    private fun dispatchRun(file: File) {
-        if (CodePreviewKind.of(file.name) != null) openPreview(file) else runFile(file, ScriptRunTarget.DEBIAN)
     }
 
     private fun openPreview(file: File) {
