@@ -8,6 +8,7 @@ import com.molina.suite.core.common.TerminalInputSender
 import com.molina.suite.core.common.ToolReadinessChecker
 import com.molina.suite.core.common.ToolSetupBoard
 import com.molina.suite.feature.settings.library.JsonLibraryRepository
+import com.molina.suite.feature.settings.logcat.CrashNotifier
 import com.molina.suite.feature.settings.logcat.CrashRecorder
 import com.molina.suite.feature.settings.logcat.LogRecorder
 import com.molina.suite.feature.settings.logcat.ProcessTracking
@@ -33,6 +34,9 @@ object SettingsEngineModule {
     fun installLogRecorder(application: Application) {
         ProcessTracking.install(application)
         LogRecorder.install(application)
+        // Crash yang belum sempat diberitahukan (proses mati sebelum notifikasi terkirim, atau crash
+        // native yang baru terdeteksi sekarang) ditampilkan di bilah notifikasi.
+        Thread({ CrashNotifier.notifyPending(application) }, "CrashNotify").apply { isDaemon = true }.start()
     }
 
     /** Dipanggil sebelum aplikasi sengaja ditutup: mencatat keluar normal dan menyimpan sisa log ke riwayat. */

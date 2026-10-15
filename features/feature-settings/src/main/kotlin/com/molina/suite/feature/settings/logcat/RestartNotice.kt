@@ -39,6 +39,7 @@ internal object RestartNotice {
                 logLines = LogcatReader.dumpTail(TAIL_LINES, DUMP_TIMEOUT_MS)
             )
             CrashLogStore.write(CrashRecorder.crashDir(context.applicationContext), now, report)
+                ?.let { CrashDelivery.deliver(context, it) }
         } catch (e: Exception) {
             // Penanda di daftar Logcat tetap dibuat.
         }

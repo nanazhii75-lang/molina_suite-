@@ -25,7 +25,8 @@ internal class CrashRecorder private constructor(
             // Penanda untuk proses berikutnya; kegagalannya tidak boleh menutupi crash aslinya.
         }
         try {
-            record(thread, throwable)
+            val report = record(thread, throwable)
+            if (report != null) CrashDelivery.deliver(context, report)
         } catch (ignored: Throwable) {
             // Pencatat tidak boleh menutupi atau mengubah crash aslinya.
         }
@@ -37,7 +38,7 @@ internal class CrashRecorder private constructor(
         }
     }
 
-    private fun record(thread: Thread, throwable: Throwable) {
+    private fun record(thread: Thread, throwable: Throwable): File? {
         val now = Date()
         val report = CrashReport.build(
             time = now,
@@ -47,7 +48,7 @@ internal class CrashRecorder private constructor(
             stackTrace = Log.getStackTraceString(throwable),
             logLines = LogcatReader.dumpTail(TAIL_LINES, DUMP_TIMEOUT_MS)
         )
-        CrashLogStore.write(crashDir(context), now, report)
+        return CrashLogStore.write(crashDir(context), now, report)
     }
 
     companion object {
