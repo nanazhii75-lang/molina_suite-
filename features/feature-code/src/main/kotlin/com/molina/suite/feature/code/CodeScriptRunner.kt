@@ -50,7 +50,7 @@ internal object CodeScriptRunner {
         head: String,
         target: ScriptRunTarget
     ): CodeRunOutcome {
-        val line = ScriptRunLine.forFile(file.absolutePath, head, target) ?: return CodeRunOutcome.Unsupported
+        val line = CodeRunCommand.lineFor(file.absolutePath, head, target) ?: return CodeRunOutcome.Unsupported
         val host = switcher ?: return CodeRunOutcome.NoSwitcher
 
         var result = sender.sendLine(line)

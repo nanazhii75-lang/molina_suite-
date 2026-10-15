@@ -115,7 +115,7 @@
     <string name="code_tree_run_debian">Jalankan di Debian</string>
     <string name="code_tree_run_host">Jalankan di Host</string>
     <string name="code_key_run">Jalankan</string>
-    <string name="code_run_unsupported">Berkas ini belum bisa dijalankan. Yang didukung: .sh, .py, atau skrip berawalan #!.</string>
+    <string name="code_run_unsupported">Berkas ini belum bisa dijalankan. Yang didukung: .sh, .py, .js, .php, .rb, .lua, .java, .kt, .c, .cpp, .go, .rs, atau skrip berawalan #!.</string>
     <string name="code_run_unreadable">Gagal membaca %1$s</string>
     <string name="code_run_no_switcher">Tidak bisa berpindah ke tab Terminal.</string>
     <string name="code_menu_library">Kirim ke Library</string>

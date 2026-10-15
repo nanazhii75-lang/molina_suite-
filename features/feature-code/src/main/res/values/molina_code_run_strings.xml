@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="code_menu_actions">Aksi file</string>
+    <string name="code_actions_title">Aksi file</string>
+    <string name="code_actions_none">Tidak ada aksi untuk berkas ini.</string>
+    <string name="code_action_preview">Tinjau</string>
+    <string name="code_action_check">Periksa (Lakukan)</string>
+    <string name="code_run_missing_title">Alat belum terpasang</string>
+    <string name="code_run_missing_message">Untuk menjalankan %1$s dibutuhkan: %2$s.</string>
+    <string name="code_run_no_debian">Debian belum terpasang, jadi berkas belum bisa dijalankan.</string>
+    <string name="code_run_open_packages">Buka Paket</string>
+    <string name="code_run_open_debian">Buka Debian</string>
+    <string name="code_run_anyway">Tetap jalankan</string>
+</resources>

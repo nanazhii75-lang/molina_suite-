@@ -106,6 +106,21 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         )
     }
 
+    /** Cek alat sebelum Jalankan; logikanya di [CodeRunGate], tab hanya menyediakan [CodeRunGate.Host]. */
+    private val runGate: CodeRunGate by lazy {
+        val engine = CodeEngineModule.requireEngine()
+        CodeRunGate(
+            object : CodeRunGate.Host {
+                override val context: Context? get() = this@CodeTabFragment.context
+                override fun openSetup(target: ToolSetupTarget, toolIds: List<String>) {
+                    engine.toolSetup.request(target, toolIds)
+                    (this@CodeTabFragment.activity as? HostTabSwitcher)?.showEngine(EngineId.SETTINGS)
+                }
+            },
+            engine.toolReadiness
+        )
+    }
+
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -349,7 +364,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         bar.setEnabled(R.drawable.ic_code_arrow_right, hasContent)
         bar.setEnabled(R.drawable.ic_code_copy_all, hasContent)
         val canRun = file != null &&
-            (CodePreviewKind.of(file.name) != null || ScriptRunLine.isRunnableName(file.name))
+            (CodePreviewKind.of(file.name) != null || CodeRunCommand.isRunnable(file.name))
         bar.setEnabled(R.drawable.ic_code_run, canRun)
     }
 
@@ -378,6 +393,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             override fun onGoToLine() = promptGoToLine()
             override fun onStatistics() = showStatistics()
             override fun onCheck() = checkController.start()
+            override fun onFileActions() = showFileActions()
             override fun onShare() = shareText()
             override fun onSendToLibrary() = sendToLibrary()
             override fun onExport() = ensureStorage { exportController.start() }
@@ -589,6 +605,39 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         host.showEngine(EngineId.SETTINGS)
     }
 
+    /** Lembar aksi satu pintu: semua aksi yang berlaku untuk berkas aktif, dari ekstensinya. */
+    private fun showFileActions() {
+        val file = session.document.value.file ?: return
+        val actions = CodeFileActions.available(
+            file,
+            exportController.isAvailableFor(file),
+            session.hasContent.value
+        )
+        if (actions.isEmpty()) {
+            toast(getString(R.string.code_actions_none))
+            return
+        }
+        CodeFileActions.show(requireContext(), actions) { action ->
+            when (action) {
+                CodeFileAction.RUN_DEBIAN -> saveThenRun(file, ScriptRunTarget.DEBIAN)
+                CodeFileAction.RUN_HOST -> saveThenRun(file, ScriptRunTarget.HOST)
+                CodeFileAction.PREVIEW -> openPreview(file)
+                CodeFileAction.CHECK -> checkController.start()
+                CodeFileAction.EXPORT -> ensureStorage { exportController.start() }
+                CodeFileAction.LIBRARY -> sendToLibrary()
+            }
+        }
+    }
+
+    /** Menyimpan dulu bila ada perubahan, lalu menjalankan [file]; gagal simpan berarti tidak jalan. */
+    private fun saveThenRun(file: File, target: ScriptRunTarget) {
+        if (!session.document.value.dirty) {
+            runFile(file, target)
+            return
+        }
+        viewLifecycleOwner.lifecycleScope.launch { if (save()) runFile(file, target) }
+    }
+
     private fun openPreview(file: File) {
         val kind = CodePreviewKind.of(file.name) ?: return
         val context = requireContext()
@@ -606,6 +655,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
                 toast(getString(R.string.code_run_unreadable, file.name))
                 return@launch
             }
+            if (!runGate.allowRun(file, head, target)) return@launch
             val outcome = Activities.log.track(ActivitySource.CODE, "Jalankan ${file.name}") { entry ->
                 CodeScriptRunner.run(
                     CodeEngineModule.requireEngine().terminalInput,

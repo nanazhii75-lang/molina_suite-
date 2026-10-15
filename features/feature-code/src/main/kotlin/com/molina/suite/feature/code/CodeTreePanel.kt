@@ -182,7 +182,7 @@ internal class CodeTreePanel(
             }
             setOnItemLongClickListener { _, itemView, position, _ ->
                 val entry = rows.getOrNull(position) as? CodeTreeRow.Entry
-                if (entry == null || entry.isDirectory || !ScriptRunLine.isRunnableName(entry.file.name)) {
+                if (entry == null || entry.isDirectory || !CodeRunCommand.isRunnable(entry.file.name)) {
                     false
                 } else {
                     showRunMenu(itemView, entry.file)
@@ -242,7 +242,9 @@ internal class CodeTreePanel(
     private fun showRunMenu(anchor: View, file: File) {
         val popup = PopupMenu(context, anchor, Gravity.END)
         popup.menu.add(Menu.NONE, MENU_RUN_DEBIAN, 0, R.string.code_tree_run_debian)
-        popup.menu.add(Menu.NONE, MENU_RUN_HOST, 1, R.string.code_tree_run_host)
+        if (ScriptRunLine.isRunnableName(file.name)) {
+            popup.menu.add(Menu.NONE, MENU_RUN_HOST, 1, R.string.code_tree_run_host)
+        }
         popup.setOnMenuItemClickListener { item ->
             val target = when (item.itemId) {
                 MENU_RUN_DEBIAN -> ScriptRunTarget.DEBIAN

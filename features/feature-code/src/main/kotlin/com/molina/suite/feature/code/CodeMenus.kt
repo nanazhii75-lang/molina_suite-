@@ -15,6 +15,7 @@ internal interface CodeActionMenuListener {
     fun onShare()
     fun onSendToLibrary()
     fun onExport()
+    fun onFileActions()
     fun onGoToLine()
     fun onSyntax()
     fun onEncoding()
@@ -47,6 +48,7 @@ internal object CodeMenus {
     private const val ID_CHECK = 20
     private const val ID_LIBRARY = 21
     private const val ID_EXPORT = 22
+    private const val ID_ACTIONS = 23
 
     fun showActionMenu(
         context: Context,
@@ -62,6 +64,7 @@ internal object CodeMenus {
         menu.add(Menu.NONE, ID_NEW, 0, R.string.code_menu_new)
         menu.add(Menu.NONE, ID_OPEN, 1, R.string.code_menu_open)
         menu.add(Menu.NONE, ID_RELOAD, 2, R.string.code_menu_reload).isEnabled = document.file != null
+        menu.add(Menu.NONE, ID_ACTIONS, 2, R.string.code_menu_actions).isEnabled = document.file != null
         menu.add(Menu.NONE, ID_SEARCH, 3, R.string.code_menu_search)
         menu.add(Menu.NONE, ID_SHARE, 4, R.string.code_menu_share)
         menu.add(Menu.NONE, ID_LIBRARY, 4, R.string.code_menu_library).isEnabled = hasContent
@@ -83,6 +86,7 @@ internal object CodeMenus {
                 ID_SHARE -> listener.onShare()
                 ID_LIBRARY -> listener.onSendToLibrary()
                 ID_EXPORT -> listener.onExport()
+                ID_ACTIONS -> listener.onFileActions()
                 ID_GOTO -> listener.onGoToLine()
                 ID_SYNTAX -> listener.onSyntax()
                 ID_ENCODING -> listener.onEncoding()
