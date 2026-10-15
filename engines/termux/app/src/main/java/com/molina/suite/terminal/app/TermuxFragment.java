@@ -54,6 +54,7 @@ import com.molina.suite.terminal.shared.interact.TextInputDialogUtils;
 import com.molina.suite.terminal.shared.logger.Logger;
 import com.molina.suite.terminal.shared.packages.PermissionUtils;
 import com.molina.suite.terminal.shared.settings.preferences.TermuxAppSharedPreferences;
+import com.molina.suite.terminal.shared.shell.TermuxSession;
 import com.molina.suite.terminal.shared.termux.TermuxConstants;
 import com.molina.suite.terminal.shared.termux.TermuxConstants.TERMUX_APP.TERMUX_ACTIVITY;
 import com.molina.suite.terminal.shared.termux.TermuxUtils;
@@ -151,6 +152,86 @@ public class TermuxFragment extends Fragment {
         byte[] data = (line + "\r").getBytes(java.nio.charset.StandardCharsets.UTF_8);
         session.write(data, 0, data.length);
         return null;
+    }
+
+    /** Batas tab; sama dengan batas di TermuxTerminalSessionClient. */
+    private static final int MAX_WORKDIR_SESSIONS = 8;
+
+    /** Handle sesi ke folder kerja yang mengikatnya. Hidup selama proses, seperti sesi di service. */
+    private static final java.util.Map<String, String> WORKDIR_BY_HANDLE = new java.util.HashMap<>();
+
+    /**
+     * Mengetik [line] ke tab untuk folder [workdir]. Tab itu dipakai ulang bila shell-nya idle;
+     * jika belum ada atau sedang menjalankan proses, tab baru dibuat di [workdir] dan tab lain
+     * tidak disentuh. Hanya dipanggil dari main thread. Null bila berhasil, atau alasan gagal;
+     * pemanggil boleh mengulang bila sesi baru belum siap.
+     */
+    @Nullable
+    public String writeLineInWorkdir(@NonNull String workdir, @NonNull String label, @NonNull String line) {
+        if (mTerminalView == null || mTermuxService == null || mTermuxTerminalSessionClient == null) {
+            return "Terminal belum siap";
+        }
+
+        java.util.List<TermuxSession> sessions = new java.util.ArrayList<>(mTermuxService.getTermuxSessions());
+        java.util.Set<String> liveHandles = new java.util.HashSet<>();
+        TerminalSession reusable = null;
+        boolean pendingStart = false;
+        synchronized (WORKDIR_BY_HANDLE) {
+            for (TermuxSession termuxSession : sessions) {
+                liveHandles.add(termuxSession.getTerminalSession().mHandle);
+            }
+            WORKDIR_BY_HANDLE.keySet().retainAll(liveHandles);
+            for (TermuxSession termuxSession : sessions) {
+                TerminalSession candidate = termuxSession.getTerminalSession();
+                if (!workdir.equals(WORKDIR_BY_HANDLE.get(candidate.mHandle))) continue;
+                if (!candidate.isRunning()) continue;
+                if (candidate.getPid() <= 0) {
+                    pendingStart = true; // tab sudah dibuat, shell belum mulai
+                } else if (reusable == null && isShellInForeground(candidate.getPid())) {
+                    reusable = candidate;
+                }
+            }
+        }
+        if (reusable == null && pendingStart) return "Tab terminal baru belum siap";
+
+        TerminalSession target = reusable;
+        if (target == null) {
+            if (sessions.size() >= MAX_WORKDIR_SESSIONS) return "Batas 8 tab terminal tercapai";
+            TermuxSession created = mTermuxService.createTermuxSession(null, null, null, workdir, false, label);
+            if (created == null) return "Gagal membuat tab terminal baru";
+            target = created.getTerminalSession();
+            synchronized (WORKDIR_BY_HANDLE) {
+                WORKDIR_BY_HANDLE.put(target.mHandle, workdir);
+            }
+        }
+
+        mTermuxTerminalSessionClient.setCurrentSession(target);
+        if (target.getPid() <= 0) return "Tab terminal baru belum siap";
+        byte[] data = (line + "\r").getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        target.write(data, 0, data.length);
+        return null;
+    }
+
+    /**
+     * True bila shell [pid] sedang menjadi proses foreground di terminalnya (tidak ada perintah
+     * yang berjalan): grup proses shell sama dengan grup foreground tty. Gagal baca dianggap
+     * sibuk supaya perintah tidak pernah diketik ke program yang sedang berjalan.
+     */
+    private static boolean isShellInForeground(int pid) {
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                new java.io.InputStreamReader(new java.io.FileInputStream("/proc/" + pid + "/stat"),
+                    java.nio.charset.StandardCharsets.UTF_8))) {
+            String stat = reader.readLine();
+            if (stat == null) return false;
+            int close = stat.lastIndexOf(')');
+            if (close < 0 || close + 2 > stat.length()) return false;
+            // Setelah ")": state ppid pgrp session tty_nr tpgid
+            String[] fields = stat.substring(close + 2).split(" ");
+            if (fields.length < 6) return false;
+            return fields[2].equals(fields[5]);
+        } catch (java.io.IOException | RuntimeException e) {
+            return false;
+        }
     }
 
     @Override

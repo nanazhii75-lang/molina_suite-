@@ -13,4 +13,13 @@ sealed interface TerminalInputResult {
  */
 interface TerminalInputSender {
     fun sendLine(line: String): TerminalInputResult
+
+    /**
+     * Mengetik [line] ke tab terminal yang terikat ke folder [workdir]. Bila sudah ada tab
+     * untuk folder itu dan shell-nya idle, tab itu dipakai ulang; bila tidak ada, atau sedang
+     * menjalankan proses, tab baru berlabel [label] dibuat di [workdir] tanpa menyentuh tab
+     * lain. Implementasi bawaan jatuh ke [sendLine] (sesi aktif).
+     */
+    fun sendLineInWorkdir(workdir: String, label: String, line: String): TerminalInputResult =
+        sendLine(line)
 }
