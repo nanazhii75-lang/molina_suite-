@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-settings-dropdown -->
+<resources>
+    <string name="logcat_controls_toggle">Tampilkan atau sembunyikan filter dan aksi</string>
+    <string name="logcat_filter_active">Filter aktif: %1$s</string>
+</resources>

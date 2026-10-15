@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.molina.suite.feature.settings.ExpandableCard
 import com.molina.suite.feature.settings.R
 import com.molina.suite.feature.settings.Refreshable
 import com.molina.suite.feature.settings.TerminalCommandRunner
@@ -38,6 +39,9 @@ class DebianFragment : Fragment(R.layout.fragment_debian), Refreshable {
     private var insideDebian = false
     private var runJob: Job? = null
 
+    /** Judul (id string) kartu yang sedang terbuka; bertahan saat layar dibuat ulang dari back stack. */
+    private val expandedTitles = HashSet<Int>()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         statusView = view.findViewById(R.id.debian_status)
         view.findViewById<View>(R.id.debian_refresh).setOnClickListener { refresh() }
@@ -51,6 +55,15 @@ class DebianFragment : Fragment(R.layout.fragment_debian), Refreshable {
             root.findViewById<TextView>(R.id.debian_item_command).text = action.preview ?: action.command
             root.findViewById<MaterialButton>(R.id.debian_item_copy)
                 .setOnClickListener { copy(action.command) }
+            ExpandableCard(
+                trigger = root.findViewById(R.id.debian_item_card),
+                details = listOf(root.findViewById(R.id.debian_item_details)),
+                chevron = root.findViewById(R.id.debian_item_chevron),
+                expanded = action.title in expandedTitles,
+                onChanged = { open ->
+                    if (open) expandedTitles.add(action.title) else expandedTitles.remove(action.title)
+                }
+            )
             val run = root.findViewById<ImageButton>(R.id.debian_item_run)
             if (action.runnable) {
                 run.setOnClickListener { runAction(action) }

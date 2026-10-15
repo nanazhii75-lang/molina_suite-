@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.PopupMenu
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
+import com.molina.suite.feature.settings.ExpandableCard
 import com.molina.suite.feature.settings.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -53,6 +55,11 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     private var shownCategory: LogCategory? = null
     private var shownEntries: List<LogcatEntry> = emptyList()
     private val expandedOverrides = HashMap<String, Boolean>()
+    private var controls: ExpandableCard? = null
+    private var filterHint: TextView? = null
+
+    /** Filter dan aksi tertutup secara default; pilihan bertahan saat layar dibuat ulang dari back stack. */
+    private var controlsExpanded = false
 
     private var filter = LogcatFilter()
     private var paused = false
@@ -76,6 +83,22 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         }
         statusView = view.findViewById(R.id.logcat_status)
         emptyView = view.findViewById(R.id.logcat_empty)
+        filterHint = view.findViewById(R.id.logcat_filter_hint)
+        val toggle = view.findViewById<View>(R.id.logcat_controls_toggle)
+        controls = ExpandableCard(
+            trigger = toggle,
+            details = listOf(
+                view.findViewById(R.id.logcat_controls_filters),
+                view.findViewById(R.id.logcat_controls_actions)
+            ),
+            chevron = toggle,
+            transitionRoot = view as? ViewGroup,
+            expanded = controlsExpanded,
+            onChanged = { open ->
+                controlsExpanded = open
+                updateFilterHint()
+            }
+        )
         autoScroll = view.findViewById(R.id.logcat_autoscroll)
         categoryBar = view.findViewById(R.id.logcat_category_bar)
         buildCategoryChips()
@@ -140,6 +163,8 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         statusView = null
         emptyView = null
         levelButton = null
+        controls = null
+        filterHint = null
         pauseButton = null
         lastCrashButton = null
         autoScroll = null
@@ -169,6 +194,7 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         shownCount = view.entries.size
         target.submit(view.rows)
         updateChips(view.counts)
+        updateFilterHint()
         emptyView?.visibility = if (view.rows.isEmpty()) View.VISIBLE else View.GONE
         // Yang terbaru ada di atas, jadi gulir otomatis mengikuti bagian atas daftar.
         if (view.rows.isNotEmpty() && autoScroll?.isChecked == true) list?.scrollToPosition(0)
@@ -220,6 +246,27 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
             viewSince > 0L -> getString(R.string.logcat_status_since, shownCount, total)
             else -> getString(R.string.logcat_status, shownCount, total)
         }
+    }
+
+    /**
+     * Saat filter dan aksi tertutup, filter yang masih berlaku ditulis satu baris di bawah status
+     * supaya daftar yang tersaring tidak disangka kosong atau hilang.
+     */
+    private fun updateFilterHint() {
+        val hint = filterHint ?: return
+        val parts = ArrayList<String>(3)
+        if (filter.minLevel != LogcatLevel.VERBOSE) {
+            parts.add(getString(R.string.logcat_level_label, filter.minLevel.label))
+        }
+        val query = filter.query.trim()
+        if (query.isNotEmpty()) parts.add("\"" + query + "\"")
+        if (category != LogCategory.ALL) parts.add(category.label)
+        if (controlsExpanded || parts.isEmpty()) {
+            hint.visibility = View.GONE
+            return
+        }
+        hint.text = getString(R.string.logcat_filter_active, parts.joinToString(" \u2022 "))
+        hint.visibility = View.VISIBLE
     }
 
     private fun showLevelMenu(anchor: View) {

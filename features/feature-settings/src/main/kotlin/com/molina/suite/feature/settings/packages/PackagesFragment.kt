@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.molina.suite.feature.settings.ExpandableCard
 import com.molina.suite.feature.settings.R
 import com.molina.suite.feature.settings.Refreshable
 import com.molina.suite.feature.settings.ShellLine
@@ -30,7 +31,8 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
         val status: TextView,
         val install: ImageButton,
         val update: ImageButton,
-        val remove: ImageButton
+        val remove: ImageButton,
+        val card: ExpandableCard
     )
 
     private var statusView: TextView? = null
@@ -38,6 +40,9 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
     private var rows: List<Row> = emptyList()
     private var detection: PackageDetection? = null
     private var runJob: Job? = null
+
+    /** Id paket yang kartunya sedang terbuka; bertahan saat layar dibuat ulang dari back stack. */
+    private val expandedIds = HashSet<String>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         statusView = view.findViewById(R.id.packages_status)
@@ -62,8 +67,15 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
                 runInTerminal("Paket: perbarui " + getString(spec.title), spec.updateCommand())
             }
             remove.setOnClickListener { confirmRemove(spec) }
+            val card = ExpandableCard(
+                trigger = root.findViewById(R.id.package_item_card),
+                details = listOf(root.findViewById(R.id.package_item_details)),
+                chevron = root.findViewById(R.id.package_item_chevron),
+                expanded = spec.id in expandedIds,
+                onChanged = { open -> if (open) expandedIds.add(spec.id) else expandedIds.remove(spec.id) }
+            )
             container.addView(root)
-            Row(spec, root, root.findViewById(R.id.package_item_status), install, update, remove)
+            Row(spec, root, root.findViewById(R.id.package_item_status), install, update, remove, card)
         }
         highlightRequested(announce = savedInstanceState == null)
         refresh()
@@ -80,6 +92,8 @@ class PackagesFragment : Fragment(R.layout.fragment_packages), Refreshable {
         for (row in marked) {
             row.root.findViewById<View>(R.id.package_item_card)
                 .setBackgroundResource(R.drawable.ms_bg_card_highlight)
+            // Paket yang diminta fitur lain langsung terbuka agar deskripsinya terbaca.
+            row.card.set(true, animate = false)
         }
         val first = marked.first().root
         first.post { first.requestRectangleOnScreen(Rect(0, 0, first.width, first.height), false) }
