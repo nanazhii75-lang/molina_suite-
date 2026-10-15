@@ -585,8 +585,12 @@ public class TermuxFragment extends Fragment {
         termuxSessionsListView.setOnItemClickListener(mTermuxSessionListViewController);
         termuxSessionsListView.setOnItemLongClickListener(mTermuxSessionListViewController);
         termuxSessionsListView.setOnTouchListener((touched, event) -> {
-            if (event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN) {
-                android.util.Log.i("TermuxSessions", "sentuh daftar sesi: posisi="
+            final int action = event.getActionMasked();
+            if (action == android.view.MotionEvent.ACTION_DOWN || action == android.view.MotionEvent.ACTION_UP
+                || action == android.view.MotionEvent.ACTION_CANCEL) {
+                final String name = action == android.view.MotionEvent.ACTION_DOWN ? "DOWN"
+                    : (action == android.view.MotionEvent.ACTION_UP ? "UP" : "CANCEL");
+                android.util.Log.i("TermuxSessions", "sentuh daftar sesi: aksi=" + name + ", posisi="
                     + termuxSessionsListView.pointToPosition((int) event.getX(), (int) event.getY())
                     + ", jumlah=" + termuxSessionsListView.getCount());
             }
@@ -1085,6 +1089,7 @@ public class TermuxFragment extends Fragment {
 
         @Override
         public void termuxSessionListNotifyUpdated() {
+            android.util.Log.i("TermuxSessions", "daftar sesi diperbarui");
             if (mTermuxSessionListViewController != null)
                 mTermuxSessionListViewController.notifyDataSetChanged();
         }
