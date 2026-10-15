@@ -215,8 +215,9 @@ public class TermuxFragment extends Fragment {
             }
         }
 
-        if (target.getPid() <= 0) return "Tab terminal baru belum siap";
+        // Sesi baru harus dipasang ke tampilan dulu supaya shell mulai (pid baru ada setelah itu).
         mTermuxTerminalSessionClient.setCurrentSession(target);
+        if (target.getPid() <= 0) return "Tab terminal baru belum siap";
         byte[] data = (line + "\r").getBytes(java.nio.charset.StandardCharsets.UTF_8);
         target.write(data, 0, data.length);
         return null;
