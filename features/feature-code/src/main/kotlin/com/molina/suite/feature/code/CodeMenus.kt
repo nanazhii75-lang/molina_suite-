@@ -14,6 +14,7 @@ internal interface CodeActionMenuListener {
     fun onSearch()
     fun onShare()
     fun onSendToLibrary()
+    fun onExport()
     fun onGoToLine()
     fun onSyntax()
     fun onEncoding()
@@ -45,6 +46,7 @@ internal object CodeMenus {
     private const val ID_SHARE = 19
     private const val ID_CHECK = 20
     private const val ID_LIBRARY = 21
+    private const val ID_EXPORT = 22
 
     fun showActionMenu(
         context: Context,
@@ -52,6 +54,7 @@ internal object CodeMenus {
         document: CodeDocument,
         options: CodeViewOptions,
         hasContent: Boolean,
+        canExport: Boolean,
         listener: CodeActionMenuListener
     ) {
         val popup = PopupMenu(context, anchor, Gravity.END)
@@ -62,6 +65,7 @@ internal object CodeMenus {
         menu.add(Menu.NONE, ID_SEARCH, 3, R.string.code_menu_search)
         menu.add(Menu.NONE, ID_SHARE, 4, R.string.code_menu_share)
         menu.add(Menu.NONE, ID_LIBRARY, 4, R.string.code_menu_library).isEnabled = hasContent
+        menu.add(Menu.NONE, ID_EXPORT, 4, R.string.code_menu_export).isEnabled = canExport
         menu.add(Menu.NONE, ID_GOTO, 5, R.string.code_menu_goto)
         menu.add(Menu.NONE, ID_SYNTAX, 6, R.string.code_menu_syntax)
         menu.add(Menu.NONE, ID_ENCODING, 7, R.string.code_menu_encoding)
@@ -78,6 +82,7 @@ internal object CodeMenus {
                 ID_SEARCH -> listener.onSearch()
                 ID_SHARE -> listener.onShare()
                 ID_LIBRARY -> listener.onSendToLibrary()
+                ID_EXPORT -> listener.onExport()
                 ID_GOTO -> listener.onGoToLine()
                 ID_SYNTAX -> listener.onSyntax()
                 ID_ENCODING -> listener.onEncoding()

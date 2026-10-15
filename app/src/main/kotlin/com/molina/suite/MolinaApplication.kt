@@ -6,6 +6,7 @@ import android.os.Process
 import com.molina.suite.core.common.AppExitBoard
 import com.molina.suite.core.common.BackgroundKeepAlive
 import com.molina.suite.core.common.DaemonStatusBoard
+import com.molina.suite.core.common.DocumentConverter
 import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.LibraryDraftBoard
 import com.molina.suite.core.common.EngineRegistry
@@ -42,6 +43,9 @@ class MolinaApplication : Application() {
         LoggingShellCommandRunner(TerminalEngineModule.createShellRunner(this))
     }
 
+    /** Pelaksana konversi dokumen (pandoc dan Typst di Debian) untuk modul lain, mis. Ekspor di tab Code. */
+    val documents: DocumentConverter by lazy { SettingsEngineModule.createDocumentConverter(this, shell) }
+
     /** Pengetik teks ke sesi aktif tab Terminal, dipakai modul Settings (Library). */
     val terminalInput: TerminalInputSender by lazy { TerminalEngineModule.createInputSender() }
 
@@ -57,7 +61,7 @@ class MolinaApplication : Application() {
         SettingsEngineModule.installLogRecorder(this)
         appExit.setHandler { exitApp() }
         TerminalEngineModule.install(this, engines, appExit)
-        CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft)
+        CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft, documents)
         MpvEngineModule.install(this, engines, toolReadiness, toolSetup)
         SettingsEngineModule.install(engines, terminalInput, toolSetup, editorOpen, libraryDraft)
         DaemonStatusBridge.start(engines, daemons)

@@ -87,6 +87,25 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         )
     }
 
+    /** Alur Ekspor dokumen; logikanya di [CodeExportController], tab hanya menyediakan [CodeExportController.Host]. */
+    private val exportController: CodeExportController by lazy {
+        val engine = CodeEngineModule.requireEngine()
+        CodeExportController(
+            object : CodeExportController.Host {
+                override val context: Context? get() = this@CodeTabFragment.context
+                override val scope: CoroutineScope get() = viewLifecycleOwner.lifecycleScope
+                override fun currentFile(): File? = session.document.value.file
+                override fun isDirty(): Boolean = session.document.value.dirty
+                override suspend fun save(): Boolean = this@CodeTabFragment.save()
+                override fun openSetup(target: ToolSetupTarget, toolIds: List<String>) {
+                    engine.toolSetup.request(target, toolIds)
+                    (this@CodeTabFragment.activity as? HostTabSwitcher)?.showEngine(EngineId.SETTINGS)
+                }
+            },
+            engine.documents
+        )
+    }
+
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -361,6 +380,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             override fun onCheck() = checkController.start()
             override fun onShare() = shareText()
             override fun onSendToLibrary() = sendToLibrary()
+            override fun onExport() = ensureStorage { exportController.start() }
             override fun onSyntax() = chooseSyntax()
             override fun onEncoding() = showEncodingInfo()
             override fun onAppearance() = showAppearance()
@@ -373,6 +393,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             session.document.value,
             session.options.value,
             session.hasContent.value,
+            exportController.isAvailableFor(session.document.value.file),
             menuListener
         )
     }

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="code_menu_export">Ekspor</string>
+    <string name="code_export_title">Ekspor ke</string>
+    <string name="code_export_untitled">Simpan dokumen dulu supaya ada berkas yang bisa diekspor.</string>
+    <string name="code_export_unsupported">Ekspor tidak tersedia untuk jenis berkas ini. Sumber yang didukung: .md, .html, .docx, .epub, dan .rst.</string>
+    <string name="code_export_overwrite_title">Timpa berkas?</string>
+    <string name="code_export_overwrite_message">%1$s sudah ada di folder Export dan akan diganti.</string>
+    <string name="code_export_overwrite_confirm">Timpa</string>
+    <string name="code_export_running_title">Ekspor</string>
+    <string name="code_export_running">Mengekspor %1$s ke %2$s…</string>
+    <string name="code_export_ok_title">Ekspor selesai</string>
+    <string name="code_export_ok_message">Disimpan di:\n%1$s</string>
+    <string name="code_export_failed_title">Ekspor gagal</string>
+    <string name="code_export_missing">Alat belum terpasang: %1$s. Pasang lewat Setting, bagian Paket.</string>
+    <string name="code_export_no_debian">Debian belum terpasang. Pasang dulu lewat Setting, bagian Debian.</string>
+    <string name="code_export_open_packages">Buka Paket</string>
+    <string name="code_export_open_debian">Buka Debian</string>
+    <string name="code_export_format_markdown">Markdown (.md)</string>
+    <string name="code_export_format_html">HTML (.html)</string>
+    <string name="code_export_format_docx">Word (.docx)</string>
+    <string name="code_export_format_epub">EPUB (.epub)</string>
+    <string name="code_export_format_rst">reStructuredText (.rst)</string>
+    <string name="code_export_format_pdf">PDF (.pdf)</string>
+    <string name="code_export_format_plain">Teks polos (.txt)</string>
+</resources>

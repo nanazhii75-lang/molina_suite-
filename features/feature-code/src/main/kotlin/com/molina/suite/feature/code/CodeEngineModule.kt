@@ -1,6 +1,7 @@
 package com.molina.suite.feature.code
 
 import android.app.Application
+import com.molina.suite.core.common.DocumentConverter
 import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.LibraryDraftBoard
@@ -17,7 +18,8 @@ internal class CodeEngine(
     val toolReadiness: ToolReadinessChecker,
     val toolSetup: ToolSetupBoard,
     shell: ShellCommandRunner,
-    val libraryDraft: LibraryDraftBoard
+    val libraryDraft: LibraryDraftBoard,
+    val documents: DocumentConverter
 ) {
     val textMate = CodeTextMate(application.assets)
     val session = CodeEditorSession(CodeFileRepository(), textMate)
@@ -42,9 +44,10 @@ object CodeEngineModule {
         toolReadiness: ToolReadinessChecker,
         toolSetup: ToolSetupBoard,
         shell: ShellCommandRunner,
-        libraryDraft: LibraryDraftBoard
+        libraryDraft: LibraryDraftBoard,
+        documents: DocumentConverter
     ) {
-        engine = CodeEngine(application, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft)
+        engine = CodeEngine(application, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft, documents)
         engines.register(CodeFeature())
     }
 
