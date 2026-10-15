@@ -139,7 +139,8 @@ internal class NewPipeSearchSource : YoutubeSearchSource {
     }
 
     private companion object {
-        const val POOL_TARGET = 40
+        // Seluruh halaman UI terlayani dari satu kolam hasil.
+        const val POOL_TARGET = YoutubeSearchController.PAGE_SIZE * YoutubeSearchController.MAX_PAGES
         const val MAX_FETCH_PAGES = 3
         const val MAX_RESULTS = 20
         const val POOL_TTL_MS = 5 * 60 * 1000L

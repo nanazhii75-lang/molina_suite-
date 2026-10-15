@@ -13,8 +13,8 @@ import android.util.Log
  */
 object YoutubeSearchController {
 
-    const val PAGE_SIZE = 5
-    const val MAX_PAGES = 6
+    const val PAGE_SIZE = 10
+    const val MAX_PAGES = 4
     private const val TAG = "YoutubeSearchCtl"
 
     private class PageData(val items: List<YoutubeResult>, val hasNext: Boolean)
