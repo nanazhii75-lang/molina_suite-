@@ -11,6 +11,8 @@ import com.molina.suite.core.common.TerminalInputSender
 import com.molina.suite.core.common.ToolReadinessChecker
 import com.molina.suite.core.common.ToolSetupBoard
 import com.molina.suite.feature.settings.export.PandocDocumentConverter
+import com.molina.suite.feature.settings.export.PdfDocumentConverter
+import com.molina.suite.feature.settings.export.RoutingDocumentConverter
 import com.molina.suite.feature.settings.library.JsonLibraryRepository
 import com.molina.suite.feature.settings.logcat.CrashNotifier
 import com.molina.suite.feature.settings.logcat.CrashRecorder
@@ -60,7 +62,10 @@ object SettingsEngineModule {
     fun createToolReadinessChecker(context: Context): ToolReadinessChecker =
         PackageToolReadinessChecker(context)
 
-    /** Pelaksana konversi dokumen (pandoc dan Typst di Debian) yang memakai [shell] untuk menjalankan perintah. */
+    /** Pelaksana konversi dokumen (pandoc, Typst, dan poppler di Debian) yang memakai [shell] untuk menjalankan perintah. */
     fun createDocumentConverter(context: Context, shell: ShellCommandRunner): DocumentConverter =
-        PandocDocumentConverter(context, shell)
+        RoutingDocumentConverter(
+            pdf = PdfDocumentConverter(context, shell),
+            general = PandocDocumentConverter(context, shell)
+        )
 }

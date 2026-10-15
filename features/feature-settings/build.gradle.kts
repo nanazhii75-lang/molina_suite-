@@ -22,6 +22,7 @@ android {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     implementation(project(":core:core-common"))
     implementation(project(":core:core-storage"))
     implementation("androidx.core:core-ktx:1.13.1")

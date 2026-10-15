@@ -5,6 +5,9 @@ package com.molina.suite.core.common
  *
  * [reader] dan [writer] adalah nama format di konverter; [reader] null berarti
  * format ini hanya bisa menjadi hasil, bukan sumber.
+ *
+ * PDF bisa menjadi sumber, tetapi hanya ke [MARKDOWN] dan [PLAIN]: pandoc tidak membaca PDF,
+ * jadi nama reader "pdf" hanya penanda dan dibaca oleh pelaksana konversi PDF, bukan pandoc.
  */
 enum class DocumentFormat(
     val extension: String,
@@ -16,7 +19,7 @@ enum class DocumentFormat(
     DOCX("docx", "docx", "docx"),
     EPUB("epub", "epub", "epub"),
     RST("rst", "rst", "rst"),
-    PDF("pdf", null, "pdf"),
+    PDF("pdf", "pdf", "pdf"),
     PLAIN("txt", null, "plain");
 
     val canBeSource: Boolean get() = reader != null
@@ -33,20 +36,36 @@ enum class DocumentFormat(
 }
 
 /**
+ * Pilihan konversi di luar pasangan format sumber dan target. Hanya berlaku untuk sumber PDF;
+ * konversi lain mengabaikannya.
+ *
+ * [stripRepeatedHeaders] membuang nomor halaman serta header/footer yang berulang di tiap halaman.
+ * [pageBreaks] menandai pergantian halaman dengan garis pemisah `---` di hasil Markdown.
+ */
+data class ConversionOptions(
+    val stripRepeatedHeaders: Boolean = true,
+    val pageBreaks: Boolean = false
+)
+
+/**
  * Permintaan konversi. Path harus absolut; sumber harus format yang bisa dibaca
- * dan target tidak boleh sama dengan sumber.
+ * dan target tidak boleh sama dengan sumber. Sumber PDF hanya boleh ke Markdown atau teks biasa.
  */
 data class ConversionRequest(
     val inputPath: String,
     val outputPath: String,
     val source: DocumentFormat,
-    val target: DocumentFormat
+    val target: DocumentFormat,
+    val options: ConversionOptions = ConversionOptions()
 ) {
     init {
         require(inputPath.startsWith("/")) { "inputPath harus absolut: $inputPath" }
         require(outputPath.startsWith("/")) { "outputPath harus absolut: $outputPath" }
         require(source.canBeSource) { "Format ${source.name} tidak bisa dijadikan sumber" }
         require(source != target) { "Sumber dan target sama: ${source.name}" }
+        require(source != DocumentFormat.PDF || target == DocumentFormat.MARKDOWN || target == DocumentFormat.PLAIN) {
+            "PDF hanya bisa dikonversi ke Markdown atau teks, bukan ${target.name}"
+        }
     }
 }
 

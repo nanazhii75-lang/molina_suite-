@@ -17,7 +17,6 @@ internal object PandocCommandBuilder {
     /** Kode keluar `timeout` bila perintah dihentikan karena melewati batas waktu. */
     const val TIMEOUT_EXIT_CODE = 124
 
-    private const val SHARED_PREFIX = "/sdcard/"
     private const val DEFAULT_TIMEOUT_SECONDS = 180
     private const val PDF_TIMEOUT_SECONDS = 300
 
@@ -38,8 +37,8 @@ internal object PandocCommandBuilder {
      * dari folder berkas sumber supaya gambar dan tautan relatif ikut terbaca.
      */
     fun script(request: ConversionRequest): String? {
-        val input = sharedPath(request.inputPath) ?: return null
-        val output = sharedPath(request.outputPath) ?: return null
+        val input = SharedPaths.resolve(request.inputPath) ?: return null
+        val output = SharedPaths.resolve(request.outputPath) ?: return null
         val extension = "." + request.target.extension
         if (!output.endsWith(extension, ignoreCase = true) || output == input) return null
 
@@ -67,14 +66,5 @@ internal object PandocCommandBuilder {
             " && timeout " + timeoutSeconds(request.target) + " pandoc " + options.joinToString(" ") +
             " -o \"\$P\" " + argument +
             " && mv -f \"\$P\" " + ScriptRunLine.quote(output)
-    }
-
-    /** Jalur di penyimpanan bersama dalam bentuk yang terlihat dari Debian, atau null bila tidak valid. */
-    private fun sharedPath(path: String): String? {
-        if (path.any { it == '\n' || it == '\r' || it == '\u0000' }) return null
-        val normalized = ScriptRunLine.normalizePath(path)
-        if (!normalized.startsWith(SHARED_PREFIX) || normalized.endsWith("/")) return null
-        if (normalized.split('/').any { it == ".." }) return null
-        return normalized
     }
 }
