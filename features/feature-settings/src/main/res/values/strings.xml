@@ -54,6 +54,7 @@
     <string name="placeholder_file">Path file (mis. /sdcard/Molina/Downloads/a.mp4)</string>
     <string name="placeholder_out">Path hasil</string>
     <string name="placeholder_dir">Folder project (mis. /sdcard/molina-suite)</string>
+    <string name="placeholder_task">Task Gradle (mis. compileDebugKotlin, assembleDebug)</string>
     <string name="folder_picker_title">Pilih folder project</string>
     <string name="folder_picker_up">Naik satu folder</string>
     <string name="folder_picker_new_folder">Folder baru</string>

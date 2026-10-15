@@ -478,12 +478,14 @@ class LibraryFragment : Fragment(R.layout.fragment_library), Refreshable {
         "FILE" -> getString(R.string.placeholder_file)
         "OUT" -> getString(R.string.placeholder_out)
         "DIR" -> getString(R.string.placeholder_dir)
+        "TASK" -> getString(R.string.placeholder_task)
         else -> getString(R.string.placeholder_generic, name)
     }
 
     private fun defaultValue(name: String): String? = when (name) {
         "FILE", "OUT" -> "/sdcard/${MolinaStorage.SHARED_DIR_NAME}/${MolinaStorage.DOWNLOADS_DIR_NAME}/"
         "DIR" -> "/sdcard/"
+        "TASK" -> "compileDebugKotlin"
         else -> null
     }
 

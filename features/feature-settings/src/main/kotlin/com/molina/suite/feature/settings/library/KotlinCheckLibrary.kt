@@ -1,9 +1,9 @@
 package com.molina.suite.feature.settings.library
 
 /**
- * Entri Library bawaan "Cek kompilasi Kotlin (project)". Memeriksa semua berkas .kt di satu
- * folder project dengan kotlinc langsung (tanpa Gradle), karena assemble/compileDebugKotlin
- * butuh aapt2 yang tidak jalan di perangkat ini. Hasil kompilasi dibuang ke folder sementara.
+ * Entri Library bawaan "Cek kompilasi Kotlin (project)": menjalankan task Gradle (default
+ * compileDebugKotlin) lewat gradlew milik project di folder {DIR}; nama task diisi lewat {TASK}.
+ * Skrip lama (kotlinc langsung) disimpan sebagai [legacyScript] hanya untuk pembaruan otomatis.
  *
  * Skrip memakai tanda [DOLLAR_MARK] sebagai pengganti tanda dolar supaya tidak dianggap
  * template Kotlin. {DIR} diisi lewat dialog Library dan di-quote otomatis. Isi skrip bisa
@@ -15,7 +15,8 @@ internal object KotlinCheckLibrary {
 
     private const val DOLLAR_MARK = '§'
 
-    private val script: String = """
+    /** Isi entri versi lama (kotlinc langsung); dipakai [BuiltinUpgrader] untuk memperbarui entri yang belum diubah. */
+    val legacyScript: String = """
 # Cek kompilasi Kotlin satu project tanpa Gradle. Hasil kompilasi dibuang.
 DIR={DIR}
 cd "§DIR" 2>/dev/null || { echo "GAGAL: folder tidak ditemukan: §DIR"; exit 1; }
@@ -47,13 +48,31 @@ if [ "§RC" -eq 0 ]; then echo "SELESAI: tidak ada error kompilasi."; else echo 
 exit §RC
 """.trimIndent().replace(DOLLAR_MARK, '$')
 
+    private val script: String = """
+# Kompilasi project lewat Gradle wrapper milik project. Ganti TASK sesuai kebutuhan
+# (mis. compileDebugKotlin, assembleDebug, atau beberapa task dipisah spasi).
+DIR={DIR}
+TASK={TASK}
+cd "§DIR" 2>/dev/null || { echo "GAGAL: folder tidak ditemukan: §DIR"; exit 1; }
+[ -f gradlew ] || { echo "GAGAL: gradlew tidak ada di §DIR"; exit 1; }
+command -v java >/dev/null 2>&1 || { echo "GAGAL: Java belum terpasang. Pasang JDK 17 di Setting, menu Paket."; exit 1; }
+if [ -z "§{ANDROID_HOME:-}§{ANDROID_SDK_ROOT:-}" ] && ! grep -qs "^sdk.dir" local.properties; then
+  echo "Catatan: ANDROID_HOME dan sdk.dir di local.properties tidak ada; Gradle mungkin tidak menemukan Android SDK."
+fi
+echo "Menjalankan: ./gradlew §TASK di §DIR"
+bash ./gradlew §TASK --console=plain --no-daemon 2>&1
+RC=§?
+if [ "§RC" -eq 0 ]; then echo "SELESAI: Gradle berhasil."; else echo "SELESAI: Gradle gagal (kode §RC)."; fi
+exit §RC
+""".trimIndent().replace(DOLLAR_MARK, '$')
+
     val entry: LibraryEntry = LibraryEntry(
         id = ENTRY_ID,
         name = "Cek kompilasi Kotlin (project)",
         content = script,
-        note = "Isi DIR dengan folder project (mis. /sdcard/molina-suite). Semua berkas .kt di dalamnya " +
-            "diperiksa dengan kotlinc, tanpa Gradle/aapt2. Butuh Kotlin dari menu Paket. Untuk project " +
-            "Android letakkan android.jar di /sdcard/Molina/android.jar.",
+        note = "Isi DIR dengan folder project yang punya gradlew, dan TASK Gradle (default " +
+            "compileDebugKotlin; bisa diganti mis. assembleDebug). Butuh JDK 17 dari menu Paket dan " +
+            "Android SDK untuk project Android.",
         runIn = RunMode.DEBIAN,
         builtin = true
     )
