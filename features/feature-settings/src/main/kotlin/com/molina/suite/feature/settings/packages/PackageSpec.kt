@@ -271,6 +271,10 @@ internal object PackageCatalog {
             PackageKind.APT, listOf("mediainfo")
         ),
         PackageSpec(
+            "poppler", R.string.pkg_poppler_title, R.string.pkg_poppler_desc,
+            PackageKind.APT, listOf("poppler-utils")
+        ),
+        PackageSpec(
             "pandoc", R.string.pkg_pandoc_title, R.string.pkg_pandoc_desc,
             PackageKind.PANDOC_RUNTIME, listOf("curl", "ca-certificates"), optional = true
         ),
