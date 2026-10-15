@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
@@ -84,4 +85,16 @@
             android:textColor="@color/molina_text_muted"
             android:textSize="11.5sp" />
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/queueBtn"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_gravity="center_vertical"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/molina_queue_add"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        app:srcCompat="@drawable/ic_molina_queue_add_24dp"
+        app:tint="@color/molina_youtube" />
 </LinearLayout>

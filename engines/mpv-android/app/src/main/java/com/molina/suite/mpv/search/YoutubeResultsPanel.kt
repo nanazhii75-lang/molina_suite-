@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.molina.suite.mpv.R
@@ -33,9 +34,14 @@ internal class YoutubeResultsPanel(
     private val pagerNext: View = root.findViewById(R.id.pagerNext)
     private val pagerLabel: TextView = root.findViewById(R.id.pagerLabel)
 
-    private val adapter = YoutubeResultAdapter(onPlay)
+    private val adapter = YoutubeResultAdapter(
+        onPlay = onPlay,
+        isQueued = { id -> MolinaQueue.contains(id) },
+        onToggleQueue = { item -> toggleQueue(item) }
+    )
     private val idleBackground: Drawable? = highlight.background
     private val observer: (SearchState) -> Unit = { render(it) }
+    private val queueObserver: () -> Unit = { adapter.refreshQueueState() }
 
     fun attach() {
         list.layoutManager = LinearLayoutManager(context)
@@ -45,10 +51,12 @@ internal class YoutubeResultsPanel(
         pagerNext.setOnClickListener { YoutubeSearchController.nextPage() }
         resetButton.setOnClickListener { YoutubeSearchController.reset() }
         YoutubeSearchController.observe(observer)
+        MolinaQueue.observe(queueObserver)
     }
 
     fun detach() {
         YoutubeSearchController.removeObserver(observer)
+        MolinaQueue.removeObserver(queueObserver)
         list.adapter = null
         retry.setOnClickListener(null)
         pagerPrev.setOnClickListener(null)
@@ -110,6 +118,14 @@ internal class YoutubeResultsPanel(
                 order.visibility = View.GONE
                 showOnly(errorView)
             }
+        }
+    }
+
+    private fun toggleQueue(item: YoutubeResult) {
+        if (MolinaQueue.toggle(item) == MolinaQueue.Outcome.FULL) {
+            Toast.makeText(
+                context, context.getString(R.string.molina_queue_full, MolinaQueue.MAX_ITEMS), Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

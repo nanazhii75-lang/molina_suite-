@@ -6,7 +6,7 @@
     <string name="molina_results_empty_hint">Ketuk ikon pencarian di bawah untuk mencari video di YouTube.</string>
     <string name="molina_results_loading_start">Mencari di YouTube…</string>
     <string name="molina_results_loading">Mengambil %1$d dari %2$d…</string>
-    <string name="molina_results_loading_note">Ini bisa memakan waktu hingga satu menit.</string>
+    <string name="molina_results_loading_note">Biasanya beberapa detik; lebih lama bila memakai cadangan yt-dlp.</string>
     <string name="molina_results_none">Tidak ada hasil untuk %1$s.</string>
     <string name="molina_results_retry">Coba lagi</string>
     <string name="molina_results_error_unavailable">yt-dlp belum siap. Pastikan Debian di tab Terminal sudah terpasang.</string>
@@ -24,4 +24,10 @@
     <string name="molina_results_page">Halaman %1$d</string>
     <string name="molina_results_prev">Halaman sebelumnya</string>
     <string name="molina_results_next">Halaman berikutnya</string>
+    <string name="molina_queue_add">Tambah ke antrean</string>
+    <string name="molina_queue_remove">Hapus dari antrean</string>
+    <string name="molina_queue_count">Antrean: %1$d video</string>
+    <string name="molina_queue_play">Putar</string>
+    <string name="molina_queue_clear">Kosongkan</string>
+    <string name="molina_queue_full">Antrean penuh (maksimal %1$d video)</string>
 </resources>

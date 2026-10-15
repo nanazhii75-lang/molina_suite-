@@ -16,7 +16,7 @@ object MolinaPlaylist {
     private const val MAX_TITLE_LENGTH = 200
     private const val WATCH_PREFIX = "https://www.youtube.com/watch?v="
     // Sama dengan jumlah hasil maksimum pencarian: seluruh halaman yang dibuka masuk playlist.
-    private const val MAX_ITEMS = YoutubeSearchController.PAGE_SIZE * YoutubeSearchController.MAX_PAGES
+    const val MAX_ITEMS = YoutubeSearchController.PAGE_SIZE * YoutubeSearchController.MAX_PAGES
 
     fun put(intent: Intent, urls: List<String>, titles: List<String>, index: Int) {
         intent.putStringArrayListExtra(EXTRA_URLS, ArrayList(urls))

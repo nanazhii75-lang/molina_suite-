@@ -22,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.molina.suite.mpv.search.QueueBar
 import com.molina.suite.mpv.search.YoutubeResultsPanel
 import com.molina.suite.mpv.search.MolinaPlaylist
 import com.molina.suite.mpv.search.YoutubeResult
@@ -41,6 +42,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
     private var prevData: String? = null
     private var lastPath = ""
     private var resultsPanel: YoutubeResultsPanel? = null
+    private var queueBar: QueueBar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,6 +106,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         resultsPanel = YoutubeResultsPanel(binding.resultsPanel, binding.ytBtn, binding.resetBtn) { result ->
             playResults(result)
         }.also { it.attach() }
+        queueBar = QueueBar(binding.queueBar) { items -> launchPlaylist(items, 0) }.also { it.attach() }
         // Ikon tanpa teks: tekan lama menampilkan labelnya.
         listOf(binding.urlBtn, binding.ytBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
             TooltipCompat.setTooltipText(it, it.contentDescription)
@@ -123,6 +126,8 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
     override fun onDestroyView() {
         resultsPanel?.detach()
         resultsPanel = null
+        queueBar?.detach()
+        queueBar = null
         super.onDestroyView()
     }
 
@@ -248,6 +253,14 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             playFile(selected.watchUrl, MpvOpenKind.SEARCH)
             return
         }
+        launchPlaylist(items, index)
+    }
+
+    /**
+     * Memutar [items] sebagai playlist mulai dari [index]; Next/Previous di pemutar mengikuti
+     * urutan [items]. Satu item saja diputar biasa (MolinaPlaylist menolak playlist < 2 item).
+     */
+    private fun launchPlaylist(items: List<YoutubeResult>, index: Int) {
         val intent = Intent()
         intent.putExtra("filepath", items[index].watchUrl)
         intent.putExtra(MpvOpenKind.EXTRA, MpvOpenKind.SEARCH.name)
