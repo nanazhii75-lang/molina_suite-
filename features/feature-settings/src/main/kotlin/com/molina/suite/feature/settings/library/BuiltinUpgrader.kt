@@ -9,7 +9,7 @@ internal object BuiltinUpgrader {
 
     /** Isi lama yang boleh diganti otomatis, dikunci dengan id entri. */
     private val superseded: Map<String, List<String>> = mapOf(
-        "builtin-kotlin-check" to listOf(KotlinCheckLibrary.legacyScript),
+        "builtin-kotlin-check" to listOf(KotlinCheckLibrary.legacyScript, KotlinCheckLibrary.legacyGradleScript),
         "builtin-tool-versions" to listOf(
             "python3 --version; ffmpeg -version | head -n 1; aria2c --version | head -n 1; " +
                 "yt-dlp --version; java -version 2>&1 | head -n 1"
