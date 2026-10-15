@@ -36,6 +36,11 @@ internal object PackageDetector {
     private const val NODE_VERSION_HEADER = "opt/node/include/node/node_version.h"
     private const val KOTLIN_BIN = "opt/kotlinc/bin/kotlinc"
     private const val KOTLIN_BUILD = "opt/kotlinc/build.txt"
+    private const val PANDOC_BIN = "opt/pandoc/bin/pandoc"
+    private const val PANDOC_VERSION_FILE = "opt/pandoc/.molina-version"
+    private const val TYPST_BIN = "opt/typst/typst"
+    private const val TYPST_VERSION_FILE = "opt/typst/.molina-version"
+    private const val MAX_MARKER_LENGTH = 32
     private const val PACKAGE_PREFIX = "Package: "
     private const val VERSION_PREFIX = "Version: "
     private const val STATUS_INSTALLED = "Status: install ok installed"
@@ -60,6 +65,8 @@ internal object PackageDetector {
             val venvPresent = Files.exists(File(root, YTDLP_VENV_BIN).toPath(), LinkOption.NOFOLLOW_LINKS)
             val nodePresent = Files.exists(File(root, NODE_BIN).toPath(), LinkOption.NOFOLLOW_LINKS)
             val kotlinPresent = Files.exists(File(root, KOTLIN_BIN).toPath(), LinkOption.NOFOLLOW_LINKS)
+            val pandocPresent = Files.exists(File(root, PANDOC_BIN).toPath(), LinkOption.NOFOLLOW_LINKS)
+            val typstPresent = Files.exists(File(root, TYPST_BIN).toPath(), LinkOption.NOFOLLOW_LINKS)
             val installed = LinkedHashMap<String, Boolean>()
             val versions = LinkedHashMap<String, String>()
             for (spec in PackageCatalog.all) {
@@ -68,6 +75,8 @@ internal object PackageDetector {
                     PackageKind.YTDLP_VENV -> venvPresent
                     PackageKind.NODE_RUNTIME -> nodePresent
                     PackageKind.KOTLIN_COMPILER -> kotlinPresent
+                    PackageKind.PANDOC_RUNTIME -> pandocPresent
+                    PackageKind.TYPST_RUNTIME -> typstPresent
                 }
                 installed[spec.id] = present
                 if (!present) continue
@@ -76,6 +85,8 @@ internal object PackageDetector {
                     PackageKind.YTDLP_VENV -> ytdlpVersion(root)
                     PackageKind.NODE_RUNTIME -> nodeVersion(root)
                     PackageKind.KOTLIN_COMPILER -> kotlinVersion(root)
+                    PackageKind.PANDOC_RUNTIME -> markerVersion(root, PANDOC_VERSION_FILE)
+                    PackageKind.TYPST_RUNTIME -> markerVersion(root, TYPST_VERSION_FILE)
                 }
                 if (version != null) versions[spec.id] = version
             }
@@ -142,6 +153,19 @@ internal object PackageDetector {
         if (!file.isFile) return null
         return try {
             file.bufferedReader(Charsets.UTF_8).use { it.readLine() }?.let { KOTLIN_VERSION.find(it.trim())?.value }
+        } catch (e: IOException) {
+            null
+        }
+    }
+
+    /** Versi dari berkas penanda yang ditulis perintah pemasangan; null bila tidak terbaca atau kosong. */
+    private fun markerVersion(root: File, relative: String): String? {
+        val file = File(root, relative)
+        if (!file.isFile) return null
+        return try {
+            file.bufferedReader(Charsets.UTF_8).use { it.readLine() }
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() && it.length <= MAX_MARKER_LENGTH }
         } catch (e: IOException) {
             null
         }

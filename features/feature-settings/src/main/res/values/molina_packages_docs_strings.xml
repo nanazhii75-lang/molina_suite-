@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pkg_pandoc_title">Pandoc</string>
+    <string name="pkg_pandoc_desc">Konverter dokumen (Markdown, HTML, DOCX, EPUB, PDF) di /opt/pandoc. Untuk PDF pasang juga Typst. Opsional: tidak ikut Install semua.</string>
+    <string name="pkg_typst_title">Typst</string>
+    <string name="pkg_typst_desc">Mesin PDF ringan di /opt/typst, dipakai Pandoc untuk ekspor PDF tanpa LaTeX. Opsional: tidak ikut Install semua.</string>
+</resources>

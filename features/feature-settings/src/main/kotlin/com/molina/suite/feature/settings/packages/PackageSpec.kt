@@ -44,6 +44,42 @@ private const val KOTLIN_COMPILER_SETUP =
         """ln -sf /opt/kotlinc/bin/kotlinc /usr/local/bin/kotlinc && ln -sf /opt/kotlinc/bin/kotlin /usr/local/bin/kotlin && """ +
         """rm -f kotlin.zip kotlin.sha)"""
 
+private const val PANDOC_RELEASES = "https://github.com/jgm/pandoc/releases"
+private const val TYPST_RELEASES = "https://github.com/typst/typst/releases"
+
+/**
+ * Pandoc resmi (rilis linux-arm64 dari jgm/pandoc) ke /opt/pandoc. Versi terbaru dibaca dari
+ * pengalihan /releases/latest dan harus berbentuk angka bertitik (3.12.1). Rilis pandoc tidak
+ * menyertakan berkas checksum, jadi keutuhan dijaga lewat HTTPS dan binary baru harus bisa
+ * menjalankan --version sebelum /opt/pandoc lama diganti. Versi ditulis ke .molina-version karena
+ * tarball tidak memuat berkas versi. Dijalankan di subshell supaya direktori kerja tidak berubah.
+ */
+private const val PANDOC_RUNTIME_SETUP =
+    """(cd /tmp && V=${DOLLAR}(curl -fsSLI -o /dev/null -w '%{url_effective}' $PANDOC_RELEASES/latest | sed 's|.*/tag/||') && """ +
+        """echo "${DOLLAR}V" | grep -Eq '^[0-9]+([.][0-9]+)+${DOLLAR}' && """ +
+        """rm -rf pandoc.new pandoc.tgz && """ +
+        """curl -fsSL -o pandoc.tgz $PANDOC_RELEASES/download/${DOLLAR}V/pandoc-${DOLLAR}V-linux-arm64.tar.gz && """ +
+        """mkdir pandoc.new && tar -xzf pandoc.tgz -C pandoc.new --strip-components=1 && """ +
+        """pandoc.new/bin/pandoc --version > /dev/null && echo "${DOLLAR}V" > pandoc.new/.molina-version && """ +
+        """rm -rf /opt/pandoc && mv pandoc.new /opt/pandoc && """ +
+        """ln -sf /opt/pandoc/bin/pandoc /usr/local/bin/pandoc && rm -f pandoc.tgz)"""
+
+/**
+ * Typst resmi (rilis aarch64-unknown-linux-musl dari typst/typst, binary statis) ke /opt/typst,
+ * dipakai pandoc sebagai mesin PDF tanpa LaTeX. Tag harus berbentuk vX.Y.Z; rilis tidak
+ * menyertakan berkas checksum, jadi langkah keamanannya sama dengan Pandoc. Versi tanpa awalan v
+ * ditulis ke .molina-version.
+ */
+private const val TYPST_RUNTIME_SETUP =
+    """(cd /tmp && V=${DOLLAR}(curl -fsSLI -o /dev/null -w '%{url_effective}' $TYPST_RELEASES/latest | sed 's|.*/tag/||') && """ +
+        """echo "${DOLLAR}V" | grep -Eq '^v[0-9]+[.][0-9]+[.][0-9]+${DOLLAR}' && """ +
+        """rm -rf typst.new typst.txz && """ +
+        """curl -fsSL -o typst.txz $TYPST_RELEASES/download/${DOLLAR}V/typst-aarch64-unknown-linux-musl.tar.xz && """ +
+        """mkdir typst.new && tar -xJf typst.txz -C typst.new --strip-components=1 && """ +
+        """typst.new/typst --version > /dev/null && echo "${DOLLAR}V" | sed 's/^v//' > typst.new/.molina-version && """ +
+        """rm -rf /opt/typst && mv typst.new /opt/typst && """ +
+        """ln -sf /opt/typst/typst /usr/local/bin/typst && rm -f typst.txz)"""
+
 /** Berkas tambahan yang ikut dihapus saat alat apt dibuang, di luar yang dibersihkan apt. */
 private val CLEAN_PATHS: Map<String, List<String>> = mapOf(
     "python" to listOf("/root/.cache/pip"),
@@ -52,7 +88,7 @@ private val CLEAN_PATHS: Map<String, List<String>> = mapOf(
     "git" to listOf("/root/.gitconfig", "/root/.git-credentials", "/root/.config/git")
 )
 
-internal enum class PackageKind { APT, YTDLP_VENV, NODE_RUNTIME, KOTLIN_COMPILER }
+internal enum class PackageKind { APT, YTDLP_VENV, NODE_RUNTIME, KOTLIN_COMPILER, PANDOC_RUNTIME, TYPST_RUNTIME }
 
 /**
  * Satu baris pada menu Paket. Untuk [PackageKind.APT] semua [aptPackages] harus terpasang;
@@ -75,6 +111,8 @@ internal data class PackageSpec(
         PackageKind.YTDLP_VENV -> YTDLP_VENV_SETUP
         PackageKind.NODE_RUNTIME -> NODE_RUNTIME_SETUP
         PackageKind.KOTLIN_COMPILER -> KOTLIN_COMPILER_SETUP
+        PackageKind.PANDOC_RUNTIME -> PANDOC_RUNTIME_SETUP
+        PackageKind.TYPST_RUNTIME -> TYPST_RUNTIME_SETUP
     }
 
     /** Perintah yang dijalankan di dalam Debian (satu baris). */
@@ -89,6 +127,8 @@ internal data class PackageSpec(
         PackageKind.YTDLP_VENV -> YTDLP_PIP_UPGRADE
         PackageKind.NODE_RUNTIME -> NODE_RUNTIME_SETUP
         PackageKind.KOTLIN_COMPILER -> KOTLIN_COMPILER_SETUP
+        PackageKind.PANDOC_RUNTIME -> PANDOC_RUNTIME_SETUP
+        PackageKind.TYPST_RUNTIME -> TYPST_RUNTIME_SETUP
     }
 
     /** Paket apt yang versinya ditampilkan di menu; null untuk alat di luar apt. */
@@ -127,6 +167,10 @@ internal data class PackageSpec(
                 steps.add("rm -rf /opt/node /usr/local/bin/node /root/.npm")
             PackageKind.KOTLIN_COMPILER ->
                 steps.add("rm -rf /opt/kotlinc /usr/local/bin/kotlinc /usr/local/bin/kotlin /root/.kotlin")
+            PackageKind.PANDOC_RUNTIME ->
+                steps.add("rm -rf /opt/pandoc /usr/local/bin/pandoc /root/.pandoc /root/.local/share/pandoc")
+            PackageKind.TYPST_RUNTIME ->
+                steps.add("rm -rf /opt/typst /usr/local/bin/typst /root/.cache/typst /root/.local/share/typst")
         }
         CLEAN_PATHS[id]?.let { steps.add("rm -rf " + it.joinToString(" ")) }
         return steps.joinToString(" && ")
@@ -225,6 +269,14 @@ internal object PackageCatalog {
         PackageSpec(
             "mediainfo", R.string.pkg_mediainfo_title, R.string.pkg_mediainfo_desc,
             PackageKind.APT, listOf("mediainfo")
+        ),
+        PackageSpec(
+            "pandoc", R.string.pkg_pandoc_title, R.string.pkg_pandoc_desc,
+            PackageKind.PANDOC_RUNTIME, listOf("curl", "ca-certificates"), optional = true
+        ),
+        PackageSpec(
+            "typst", R.string.pkg_typst_title, R.string.pkg_typst_desc,
+            PackageKind.TYPST_RUNTIME, listOf("curl", "ca-certificates", "xz-utils"), optional = true
         ),
         PackageSpec(
             "tmux", R.string.pkg_tmux_title, R.string.pkg_tmux_desc,
