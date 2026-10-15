@@ -575,12 +575,39 @@ public class TermuxFragment extends Fragment {
         mTermuxTerminalSessionClient.onCreate();
     }
 
+    /** Pendengar drawer untuk log diagnostik daftar sesi; diganti tiap daftar dipasang ulang. */
+    private DrawerLayout.DrawerListener mDiagDrawerListener;
+
     private void setTermuxSessionsListView() {
         ListView termuxSessionsListView = mFragmentView.findViewById(R.id.terminal_sessions_list);
         mTermuxSessionListViewController = new TermuxSessionsListViewController(mHost, mTermuxService.getTermuxSessions());
         termuxSessionsListView.setAdapter(mTermuxSessionListViewController);
         termuxSessionsListView.setOnItemClickListener(mTermuxSessionListViewController);
         termuxSessionsListView.setOnItemLongClickListener(mTermuxSessionListViewController);
+        termuxSessionsListView.setOnTouchListener((touched, event) -> {
+            if (event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN) {
+                android.util.Log.i("TermuxSessions", "sentuh daftar sesi: posisi="
+                    + termuxSessionsListView.pointToPosition((int) event.getX(), (int) event.getY())
+                    + ", jumlah=" + termuxSessionsListView.getCount());
+            }
+            return false;
+        });
+        final DrawerLayout drawer = findDrawer();
+        if (drawer != null) {
+            if (mDiagDrawerListener != null) drawer.removeDrawerListener(mDiagDrawerListener);
+            mDiagDrawerListener = new DrawerLayout.SimpleDrawerListener() {
+                @Override
+                public void onDrawerOpened(@NonNull View drawerView) {
+                    android.util.Log.i("TermuxSessions", "drawer sesi dibuka");
+                }
+
+                @Override
+                public void onDrawerClosed(@NonNull View drawerView) {
+                    android.util.Log.i("TermuxSessions", "drawer sesi ditutup");
+                }
+            };
+            drawer.addDrawerListener(mDiagDrawerListener);
+        }
     }
 
     private void setTerminalToolbarView(Bundle savedInstanceState) {
