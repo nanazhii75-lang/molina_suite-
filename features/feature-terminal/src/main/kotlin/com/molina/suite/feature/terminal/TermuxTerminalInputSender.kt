@@ -33,6 +33,17 @@ class TermuxTerminalInputSender : TerminalInputSender {
         return if (reason == null) TerminalInputResult.Sent else TerminalInputResult.Rejected(reason)
     }
 
+    override fun sendLineWhenReady(line: String): TerminalInputResult {
+        if (line.isEmpty()) return TerminalInputResult.Rejected("Baris kosong")
+        if (line.any { it == '\n' || it == '\r' }) {
+            return TerminalInputResult.Rejected("Teks harus satu baris")
+        }
+        val tab = TerminalTabRegistry.current()
+            ?: return TerminalInputResult.Rejected("Tab Terminal belum dibuka")
+        val reason = tab.writeLineToActiveSessionWhenReady(line)
+        return if (reason == null) TerminalInputResult.Sent else TerminalInputResult.Rejected(reason)
+    }
+
     override fun sendLineInWorkdir(workdir: String, label: String, line: String): TerminalInputResult {
         if (line.isEmpty()) return TerminalInputResult.Rejected("Baris kosong")
         if (line.any { it == '\n' || it == '\r' }) {

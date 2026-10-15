@@ -20,13 +20,13 @@ internal sealed interface CodeRunOutcome {
 
 /**
  * Menjalankan berkas lewat tab Terminal. Baris perintah disusun oleh [ScriptRunLine] di
- * core-common; di sini hanya pengiriman ke sesi aktif, dengan menunggu sesi siap sampai 10 detik
+ * core-common; di sini hanya pengiriman ke sesi aktif, dengan menunggu prompt siap sampai 30 detik
  * bila tab Terminal baru dibuka. Tidak mengenal Settings maupun kelas Terminal.
  */
 internal object CodeScriptRunner {
 
     private const val HEAD_BYTES = 128
-    private const val MAX_ATTEMPTS = 20
+    private const val MAX_ATTEMPTS = 60
     private const val RETRY_DELAY_MS = 500L
 
     /** Awal isi berkas untuk memeriksa shebang; null bila tidak terbaca. Panggil dari Dispatchers.IO. */
@@ -57,12 +57,12 @@ internal object CodeScriptRunner {
         // folder berkas dicapai lewat cd di baris yang sama.
         val workdir = ScriptRunLine.normalizePath(file.absolutePath).substringBeforeLast('/', "").ifEmpty { "/" }
         val typed = "cd " + ScriptRunLine.quote(workdir) + " 2>/dev/null; " + line
-        var result = sender.sendLine(typed)
+        var result = sender.sendLineWhenReady(typed)
         host.showEngine(EngineId.TERMINAL)
         var attempts = 0
         while (result is TerminalInputResult.Rejected && attempts < MAX_ATTEMPTS) {
             delay(RETRY_DELAY_MS)
-            result = sender.sendLine(typed)
+            result = sender.sendLineWhenReady(typed)
             attempts++
         }
         return when (result) {

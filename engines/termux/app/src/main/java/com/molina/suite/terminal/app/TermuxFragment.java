@@ -154,6 +154,35 @@ public class TermuxFragment extends Fragment {
         return null;
     }
 
+    /**
+     * Seperti {@link #writeLineToActiveSession}, tetapi baru mengetik setelah sesi aktif berada di
+     * prompt (baris kursor berakhir $ atau #, kursor setelahnya, bukan layar alternatif). Selama
+     * shell masih login, mencetak banner Welcome, atau menjalankan program, mengembalikan alasan
+     * supaya pemanggil mengulang; perintah tidak terketik di atas banner.
+     */
+    @Nullable
+    public String writeLineToActiveSessionWhenReady(@NonNull String line) {
+        if (mTerminalView == null) return "Tampilan terminal belum siap";
+        TerminalSession session = mTerminalView.getCurrentSession();
+        if (session == null) return "Belum ada sesi terminal aktif";
+        if (!session.isRunning()) return "Sesi terminal aktif sudah berhenti";
+        if (!isSessionAtPrompt(session)) return "Terminal belum siap: menunggu prompt";
+        return writeLineToActiveSession(line);
+    }
+
+    private static boolean isSessionAtPrompt(@NonNull TerminalSession session) {
+        com.molina.suite.terminal.terminal.TerminalEmulator emulator = session.getEmulator();
+        if (emulator == null || emulator.isAlternateBufferActive()) return false;
+        int row = emulator.getCursorRow();
+        String text = emulator.getSelectedText(0, row, emulator.mColumns, row);
+        if (text == null) return false;
+        int end = text.length();
+        while (end > 0 && Character.isWhitespace(text.charAt(end - 1))) end--;
+        if (end == 0) return false;
+        char last = text.charAt(end - 1);
+        return (last == '$' || last == '#') && emulator.getCursorCol() >= end;
+    }
+
     /** Batas tab; sama dengan batas di TermuxTerminalSessionClient. */
     private static final int MAX_WORKDIR_SESSIONS = 8;
 
