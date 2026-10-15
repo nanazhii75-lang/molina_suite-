@@ -175,6 +175,7 @@ public class TermuxFragment extends Fragment {
         java.util.List<TermuxSession> sessions = new java.util.ArrayList<>(mTermuxService.getTermuxSessions());
         java.util.Set<String> liveHandles = new java.util.HashSet<>();
         TerminalSession reusable = null;
+        TerminalSession busy = null;
         boolean pendingStart = false;
         synchronized (WORKDIR_BY_HANDLE) {
             for (TermuxSession termuxSession : sessions) {
@@ -187,12 +188,20 @@ public class TermuxFragment extends Fragment {
                 if (!candidate.isRunning()) continue;
                 if (candidate.getPid() <= 0) {
                     pendingStart = true; // tab sudah dibuat, shell belum mulai
-                } else if (reusable == null && isShellInForeground(candidate.getPid())) {
-                    reusable = candidate;
+                } else if (isShellInForeground(candidate.getPid())) {
+                    if (reusable == null) reusable = candidate;
+                } else if (busy == null) {
+                    busy = candidate;
                 }
             }
         }
         if (reusable == null && pendingStart) return "Tab terminal baru belum siap";
+        if (reusable == null && busy != null) {
+            // Folder sama: tetap di tab ini. Hentikan proses lama (Ctrl+C), lalu pemanggil mengulang.
+            mTermuxTerminalSessionClient.setCurrentSession(busy);
+            busy.write(new byte[]{3}, 0, 1);
+            return "Menghentikan proses di tab ini";
+        }
 
         TerminalSession target = reusable;
         if (target == null) {
