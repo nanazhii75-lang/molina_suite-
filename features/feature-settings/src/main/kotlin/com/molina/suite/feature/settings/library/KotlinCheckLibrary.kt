@@ -56,7 +56,7 @@ DIR={DIR}
 TASK={TASK}
 cd "§DIR" 2>/dev/null || { echo "GAGAL: folder tidak ditemukan: §DIR"; exit 1; }
 [ -f gradlew ] || { echo "GAGAL: gradlew tidak ada di §DIR"; exit 1; }
-command -v java >/dev/null 2>&1 || { echo "GAGAL: Java belum terpasang. Pasang JDK 17 di Setting, menu Paket."; exit 1; }
+command -v java >/dev/null 2>&1 || { echo "GAGAL: Java belum terpasang. Pasang JDK 21 di Setting, menu Paket."; exit 1; }
 if [ -z "§{ANDROID_HOME:-}§{ANDROID_SDK_ROOT:-}" ] && ! grep -qs "^sdk.dir" local.properties; then
   echo "Catatan: ANDROID_HOME dan sdk.dir di local.properties tidak ada; Gradle mungkin tidak menemukan Android SDK."
 fi
@@ -76,7 +76,7 @@ TASK={TASK}
 MEM="§{GRADLE_MEM_MB:-1050}"
 cd "§DIR" 2>/dev/null || { echo "GAGAL: folder tidak ditemukan: §DIR"; exit 1; }
 [ -f gradlew ] || { echo "GAGAL: gradlew tidak ada di §DIR"; exit 1; }
-command -v java >/dev/null 2>&1 || { echo "GAGAL: Java belum terpasang. Pasang JDK 17 di Setting, menu Paket."; exit 1; }
+command -v java >/dev/null 2>&1 || { echo "GAGAL: Java belum terpasang. Pasang JDK 21 di Setting, menu Paket."; exit 1; }
 case "§MEM" in ""|*[!0-9]*) echo "GAGAL: GRADLE_MEM_MB harus angka (MB): §MEM"; exit 1;; esac
 if [ -z "§{MOLINA_ALLOW_FULL_BUILD:-}" ]; then
   for T in §TASK; do
@@ -105,7 +105,7 @@ exit §RC
         content = script,
         note = "Isi DIR dengan folder project yang punya gradlew, dan TASK compile (default " +
             "compileDebugKotlin, atau :modul:compileDebugKotlin). Task build penuh seperti assembleDebug " +
-            "ditolak karena butuh aapt2. Heap Gradle dibatasi 1050 MB. Butuh JDK 17 dari menu Paket.",
+            "ditolak karena butuh aapt2. Heap Gradle dibatasi 1050 MB. Butuh JDK 21 dari menu Paket.",
         runIn = RunMode.DEBIAN,
         builtin = true
     )

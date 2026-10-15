@@ -10,7 +10,6 @@ import com.molina.suite.core.common.ShellResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.IOException
 
 /**
  * Pelaksana [DocumentConverter] untuk sumber PDF (ke Markdown atau teks biasa) di dalam Debian,
@@ -23,11 +22,8 @@ internal class PdfDocumentConverter(
     shell: ShellCommandRunner
 ) : DocumentConverter {
 
-    private val appContext = context.applicationContext
     private val runner = ShellConversionRunner(context, shell)
-
-    /** Isi konverter python3 dari aset; null bila aset tidak terbaca. Dibaca sekali. */
-    private val converterSource: String? by lazy { readConverterAsset() }
+    private val converterAsset = AssetText(context, CONVERTER_ASSET)
 
     override fun targetsFor(extension: String): List<DocumentFormat> =
         if (DocumentFormat.fromExtension(extension) == DocumentFormat.PDF) PdfCommandBuilder.TARGETS else emptyList()
@@ -37,7 +33,7 @@ internal class PdfDocumentConverter(
             return ConversionResult.Failure(NOT_PDF_REASON)
         }
         val source = if (request.target == DocumentFormat.MARKDOWN) {
-            withContext(Dispatchers.IO) { converterSource }
+            withContext(Dispatchers.IO) { converterAsset.text }
                 ?: return ConversionResult.Failure(ASSET_MISSING_REASON)
         } else {
             null
@@ -65,12 +61,6 @@ internal class PdfDocumentConverter(
                 result.exitCode
             )
         }
-
-    private fun readConverterAsset(): String? = try {
-        appContext.assets.open(CONVERTER_ASSET).bufferedReader(Charsets.UTF_8).use { it.readText() }
-    } catch (e: IOException) {
-        null
-    }
 
     private companion object {
         const val CONVERTER_ASSET = "molina-docs/pdf2md.py"

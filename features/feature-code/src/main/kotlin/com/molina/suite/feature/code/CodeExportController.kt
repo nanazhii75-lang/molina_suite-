@@ -158,6 +158,7 @@ internal class CodeExportController(
             DocumentFormat.EPUB -> R.string.code_export_format_epub
             DocumentFormat.RST -> R.string.code_export_format_rst
             DocumentFormat.PDF -> R.string.code_export_format_pdf
+            DocumentFormat.XLSX -> R.string.code_export_format_xlsx
             DocumentFormat.PLAIN -> R.string.code_export_format_plain
         }
     )

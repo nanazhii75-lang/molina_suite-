@@ -12,7 +12,7 @@ internal object LibraryRequirements {
 
     private val requirements: Map<String, List<String>> = mapOf(
         "builtin-aria2-download" to listOf("aria2"),
-        "builtin-kotlin-check" to listOf("jdk17")
+        "builtin-kotlin-check" to listOf("jdk21")
     )
 
     /** Id paket yang dibutuhkan entri; kosong bila tidak ada syarat. */

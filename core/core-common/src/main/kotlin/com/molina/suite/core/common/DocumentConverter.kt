@@ -4,15 +4,16 @@ package com.molina.suite.core.common
  * Format dokumen yang dikenal kontrak ekspor.
  *
  * [reader] dan [writer] adalah nama format di konverter; [reader] null berarti
- * format ini hanya bisa menjadi hasil, bukan sumber.
+ * format ini hanya bisa menjadi hasil, bukan sumber, dan [writer] null berarti sebaliknya.
  *
- * PDF bisa menjadi sumber, tetapi hanya ke [MARKDOWN] dan [PLAIN]: pandoc tidak membaca PDF,
- * jadi nama reader "pdf" hanya penanda dan dibaca oleh pelaksana konversi PDF, bukan pandoc.
+ * PDF dan XLSX bisa menjadi sumber, tetapi tidak dibaca pandoc: PDF hanya ke [MARKDOWN] dan
+ * [PLAIN], XLSX hanya ke [MARKDOWN]. Nama reader keduanya hanya penanda; pembacanya pelaksana
+ * konversi khusus masing-masing, bukan pandoc.
  */
 enum class DocumentFormat(
     val extension: String,
     val reader: String?,
-    val writer: String
+    val writer: String?
 ) {
     MARKDOWN("md", "gfm", "gfm"),
     HTML("html", "html", "html"),
@@ -20,9 +21,12 @@ enum class DocumentFormat(
     EPUB("epub", "epub", "epub"),
     RST("rst", "rst", "rst"),
     PDF("pdf", "pdf", "pdf"),
+    XLSX("xlsx", "xlsx", null),
     PLAIN("txt", null, "plain");
 
     val canBeSource: Boolean get() = reader != null
+
+    val canBeTarget: Boolean get() = writer != null
 
     companion object {
         private val aliases = mapOf("markdown" to MARKDOWN, "htm" to HTML)
@@ -49,7 +53,8 @@ data class ConversionOptions(
 
 /**
  * Permintaan konversi. Path harus absolut; sumber harus format yang bisa dibaca
- * dan target tidak boleh sama dengan sumber. Sumber PDF hanya boleh ke Markdown atau teks biasa.
+ * dan target tidak boleh sama dengan sumber dan harus format yang bisa dihasilkan. Sumber PDF
+ * hanya boleh ke Markdown atau teks biasa, sumber XLSX hanya ke Markdown.
  */
 data class ConversionRequest(
     val inputPath: String,
@@ -63,8 +68,12 @@ data class ConversionRequest(
         require(outputPath.startsWith("/")) { "outputPath harus absolut: $outputPath" }
         require(source.canBeSource) { "Format ${source.name} tidak bisa dijadikan sumber" }
         require(source != target) { "Sumber dan target sama: ${source.name}" }
+        require(target.canBeTarget) { "${target.name} tidak bisa menjadi hasil konversi" }
         require(source != DocumentFormat.PDF || target == DocumentFormat.MARKDOWN || target == DocumentFormat.PLAIN) {
             "PDF hanya bisa dikonversi ke Markdown atau teks, bukan ${target.name}"
+        }
+        require(source != DocumentFormat.XLSX || target == DocumentFormat.MARKDOWN) {
+            "XLSX hanya bisa dikonversi ke Markdown, bukan ${target.name}"
         }
     }
 }

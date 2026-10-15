@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="pkg_kotlin_title">Kotlin</string>
-    <string name="pkg_kotlin_desc">Kompilator Kotlin resmi di /opt/kotlinc (kotlinc dan kotlin); butuh JDK 17. Opsional: tidak ikut Install semua.</string>
+    <string name="pkg_kotlin_desc">Kompilator Kotlin resmi di /opt/kotlinc (kotlinc dan kotlin); butuh JDK 21. Opsional: tidak ikut Install semua.</string>
     <string name="pkg_gcc_title">C dan C++</string>
     <string name="pkg_gcc_desc">gcc, g++, dan make untuk berkas .c dan .cpp. Opsional: tidak ikut Install semua.</string>
     <string name="pkg_go_title">Go</string>

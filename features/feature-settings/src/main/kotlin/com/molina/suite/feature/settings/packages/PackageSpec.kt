@@ -83,7 +83,7 @@ private const val TYPST_RUNTIME_SETUP =
 /** Berkas tambahan yang ikut dihapus saat alat apt dibuang, di luar yang dibersihkan apt. */
 private val CLEAN_PATHS: Map<String, List<String>> = mapOf(
     "python" to listOf("/root/.cache/pip"),
-    "jdk17" to listOf("/root/.java"),
+    "jdk21" to listOf("/root/.java"),
     "aria2" to listOf("/root/.aria2", "/root/.cache/aria2"),
     "git" to listOf("/root/.gitconfig", "/root/.git-credentials", "/root/.config/git")
 )
@@ -201,13 +201,13 @@ internal object PackageCatalog {
             PackageKind.APT, listOf("aria2")
         ),
         PackageSpec(
-            "jdk17", R.string.pkg_jdk_title, R.string.pkg_jdk_desc,
-            PackageKind.APT, listOf("openjdk-17-jdk-headless")
+            "jdk21", R.string.pkg_jdk_title, R.string.pkg_jdk_desc,
+            PackageKind.APT, listOf("openjdk-21-jdk-headless")
         ),
         PackageSpec(
             "kotlin", R.string.pkg_kotlin_title, R.string.pkg_kotlin_desc,
             PackageKind.KOTLIN_COMPILER,
-            listOf("openjdk-17-jdk-headless", "curl", "ca-certificates", "unzip"),
+            listOf("openjdk-21-jdk-headless", "curl", "ca-certificates", "unzip"),
             optional = true
         ),
         PackageSpec(

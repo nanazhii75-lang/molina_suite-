@@ -21,7 +21,7 @@ internal object PdfCommandBuilder {
     const val PYTHON_ID = "python"
 
     /** Kode keluar `timeout` bila perintah dihentikan karena melewati batas waktu. */
-    const val TIMEOUT_EXIT_CODE = 124
+    const val TIMEOUT_EXIT_CODE = ScriptFragments.TIMEOUT_EXIT_CODE
 
     /** Format yang bisa dihasilkan dari PDF. */
     val TARGETS: List<DocumentFormat> = listOf(DocumentFormat.MARKDOWN, DocumentFormat.PLAIN)
@@ -31,8 +31,7 @@ internal object PdfCommandBuilder {
 
     private const val EXTRACT_TIMEOUT_SECONDS = 200
     private const val CONVERT_TIMEOUT_SECONDS = 100
-    /** Tanda dolar untuk dipakai di dalam templat skrip Kotlin tanpa dianggap templat string. */
-    private const val D = "$"
+    private const val D = ScriptFragments.D
 
     /** Id katalog Paket yang harus terpasang agar [target] bisa dihasilkan dari PDF. */
     fun requiredTools(target: DocumentFormat): List<String> =
@@ -66,17 +65,8 @@ internal object PdfCommandBuilder {
             }
             else -> plainSteps(argument, request)
         }
-        return header(partial, outputDir, inputDir) + body + footer(output)
+        return ScriptFragments.header(partial, outputDir, inputDir) + body + ScriptFragments.footer(output)
     }
-
-    private fun header(partial: String, outputDir: String, inputDir: String): String = """
-P=${ScriptRunLine.quote(partial)}
-X=
-trap 'rm -f "${D}P" "${D}X"' EXIT
-fail() { echo "${D}1" >&2; exit 2; }
-mkdir -p ${ScriptRunLine.quote(outputDir)} || fail "Tidak bisa membuat folder hasil."
-cd ${ScriptRunLine.quote(inputDir)} || fail "Tidak bisa membuka folder sumber."
-""".trimStart()
 
     private fun markdownSteps(argument: String, converterSource: String, request: ConversionRequest): String {
         val flags = ArrayList<String>()
@@ -107,9 +97,4 @@ status=${D}?
 grep -q '[^[:space:]]' "${D}P" || { echo "PDF tidak memuat teks (mungkin hasil scan; butuh OCR)." >&2; exit 3; }
 """.trimStart()
     }
-
-    private fun footer(output: String): String = """
-[ -s "${D}P" ] || fail "Hasil kosong."
-mv -f "${D}P" ${ScriptRunLine.quote(output)}
-""".trimStart()
 }

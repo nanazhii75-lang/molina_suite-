@@ -138,9 +138,9 @@ internal object BuiltinLibrary {
             "Python 3 beserta pip dan venv.", RunMode.DEBIAN
         ),
         entry(
-            "builtin-install-jdk17", "Install JDK 17",
-            "apt update && apt install -y openjdk-17-jdk-headless",
-            "OpenJDK 17 resmi Debian 12, tanpa komponen GUI.", RunMode.DEBIAN
+            "builtin-install-jdk21", "Install JDK 21",
+            "apt update && apt install -y openjdk-21-jdk-headless",
+            "OpenJDK 21 resmi Debian 12, tanpa komponen GUI.", RunMode.DEBIAN
         ),
         entry(
             "builtin-install-tools", "Install alat bantu",

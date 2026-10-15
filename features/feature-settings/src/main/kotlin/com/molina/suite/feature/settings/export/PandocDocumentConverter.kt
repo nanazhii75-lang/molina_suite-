@@ -11,8 +11,8 @@ import java.io.File
 
 /**
  * Pelaksana [DocumentConverter] berbasis pandoc (dan Typst untuk PDF sebagai hasil) di dalam
- * Debian. Sumber PDF bukan urusannya: pandoc tidak membaca PDF, jadi itu ditangani
- * [PdfDocumentConverter] lewat [RoutingDocumentConverter]. Kesiapan alat dan penjalanan skrip
+ * Debian. Sumber PDF dan XLSX bukan urusannya: pandoc tidak membacanya, jadi itu ditangani
+ * [PdfDocumentConverter] dan [XlsxDocumentConverter] lewat [RoutingDocumentConverter]. Kesiapan alat dan penjalanan skrip
  * dikerjakan [ShellConversionRunner]; pemakai (mis. tab Code) hanya mengenal [DocumentConverter].
  */
 internal class PandocDocumentConverter(
@@ -24,8 +24,8 @@ internal class PandocDocumentConverter(
 
     override fun targetsFor(extension: String): List<DocumentFormat> {
         val source = DocumentFormat.fromExtension(extension) ?: return emptyList()
-        if (!source.canBeSource || source == DocumentFormat.PDF) return emptyList()
-        return DocumentFormat.entries.filter { it != source }
+        if (!source.canBeSource || source in NOT_READ_BY_PANDOC) return emptyList()
+        return DocumentFormat.entries.filter { it != source && it.canBeTarget }
     }
 
     override suspend fun convert(request: ConversionRequest): ConversionResult {
@@ -55,6 +55,9 @@ internal class PandocDocumentConverter(
 
     private companion object {
         const val TOOL_NAME = "Pandoc"
+
+        /** Sumber yang bukan urusan pandoc; masing-masing punya pelaksana khusus. */
+        val NOT_READ_BY_PANDOC = setOf(DocumentFormat.PDF, DocumentFormat.XLSX)
         const val INVALID_PATH_REASON =
             "Jalur berkas tidak valid. Berkas sumber dan hasil harus ada di penyimpanan bersama " +
                 "(/sdcard), dan nama hasil harus berakhir dengan ekstensi format tujuan."

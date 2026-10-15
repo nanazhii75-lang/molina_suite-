@@ -23,4 +23,5 @@
     <string name="code_export_format_rst">reStructuredText (.rst)</string>
     <string name="code_export_format_pdf">PDF (.pdf)</string>
     <string name="code_export_format_plain">Teks polos (.txt)</string>
+    <string name="code_export_format_xlsx">Excel (.xlsx)</string>
 </resources>
