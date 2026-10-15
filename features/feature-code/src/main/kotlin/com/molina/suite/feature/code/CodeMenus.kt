@@ -16,6 +16,7 @@ internal interface CodeActionMenuListener {
     fun onSendToLibrary()
     fun onExport()
     fun onFileActions()
+    fun onConvertFile()
     fun onGoToLine()
     fun onSyntax()
     fun onEncoding()
@@ -49,6 +50,7 @@ internal object CodeMenus {
     private const val ID_LIBRARY = 21
     private const val ID_EXPORT = 22
     private const val ID_ACTIONS = 23
+    private const val ID_CONVERT = 24
 
     fun showActionMenu(
         context: Context,
@@ -69,6 +71,7 @@ internal object CodeMenus {
         menu.add(Menu.NONE, ID_SHARE, 4, R.string.code_menu_share)
         menu.add(Menu.NONE, ID_LIBRARY, 4, R.string.code_menu_library).isEnabled = hasContent
         menu.add(Menu.NONE, ID_EXPORT, 4, R.string.code_menu_export).isEnabled = canExport
+        menu.add(Menu.NONE, ID_CONVERT, 4, R.string.code_menu_convert)
         menu.add(Menu.NONE, ID_GOTO, 5, R.string.code_menu_goto)
         menu.add(Menu.NONE, ID_SYNTAX, 6, R.string.code_menu_syntax)
         menu.add(Menu.NONE, ID_ENCODING, 7, R.string.code_menu_encoding)
@@ -87,6 +90,7 @@ internal object CodeMenus {
                 ID_LIBRARY -> listener.onSendToLibrary()
                 ID_EXPORT -> listener.onExport()
                 ID_ACTIONS -> listener.onFileActions()
+                ID_CONVERT -> listener.onConvertFile()
                 ID_GOTO -> listener.onGoToLine()
                 ID_SYNTAX -> listener.onSyntax()
                 ID_ENCODING -> listener.onEncoding()

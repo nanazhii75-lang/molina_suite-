@@ -56,6 +56,16 @@ internal class CodeExportController(
             CodeExportDialogs.showMessage(context, R.string.code_export_failed_title, context.getString(R.string.code_export_untitled))
             return
         }
+        startFor(file)
+    }
+
+    /**
+     * Ekspor [file] mana pun di penyimpanan bersama (mis. pilihan picker) tanpa membukanya di
+     * editor. Dokumen aktif hanya disimpan dulu bila [file] adalah dokumen aktif itu sendiri.
+     */
+    fun startFor(file: File) {
+        val context = host.context ?: return
+        val saveFirst = host.currentFile()?.absoluteFile == file.absoluteFile
         val source = DocumentFormat.fromExtension(file.extension)
         val targets = converter.targetsFor(file.extension)
         if (source == null || targets.isEmpty()) {
@@ -63,30 +73,30 @@ internal class CodeExportController(
             return
         }
         CodeChoiceDialog.show(context, R.string.code_export_title, targets.map { label(context, it) }, -1) { index ->
-            confirmAndRun(file, source, targets[index])
+            confirmAndRun(file, source, targets[index], saveFirst)
         }
     }
 
-    private fun confirmAndRun(file: File, source: DocumentFormat, target: DocumentFormat) {
+    private fun confirmAndRun(file: File, source: DocumentFormat, target: DocumentFormat, saveFirst: Boolean) {
         val context = host.context ?: return
         val baseName = file.nameWithoutExtension.ifEmpty { FALLBACK_NAME }
         val output = File(MolinaStorage.exportDir(), baseName + "." + target.extension)
         if (!output.exists()) {
-            run(file, source, target, output)
+            run(file, source, target, output, saveFirst)
             return
         }
         AlertDialog.Builder(context)
             .setTitle(R.string.code_export_overwrite_title)
             .setMessage(context.getString(R.string.code_export_overwrite_message, output.name))
-            .setPositiveButton(R.string.code_export_overwrite_confirm) { _, _ -> run(file, source, target, output) }
+            .setPositiveButton(R.string.code_export_overwrite_confirm) { _, _ -> run(file, source, target, output, saveFirst) }
             .setNegativeButton(R.string.code_picker_cancel, null)
             .show()
     }
 
-    private fun run(file: File, source: DocumentFormat, target: DocumentFormat, output: File) {
+    private fun run(file: File, source: DocumentFormat, target: DocumentFormat, output: File, saveFirst: Boolean) {
         job?.cancel()
         job = host.scope.launch {
-            if (host.isDirty() && !host.save()) return@launch
+            if (saveFirst && host.isDirty() && !host.save()) return@launch
             val context = host.context ?: return@launch
             val request = try {
                 ConversionRequest(file.absolutePath, output.absolutePath, source, target)

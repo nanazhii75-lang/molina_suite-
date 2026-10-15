@@ -394,6 +394,7 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             override fun onStatistics() = showStatistics()
             override fun onCheck() = checkController.start()
             override fun onFileActions() = showFileActions()
+            override fun onConvertFile() = requestConvertFile()
             override fun onShare() = shareText()
             override fun onSendToLibrary() = sendToLibrary()
             override fun onExport() = ensureStorage { exportController.start() }
@@ -493,6 +494,13 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
         return true
     }
 
+    /** Konversi berkas pilihan pengguna lewat picker; berkasnya tidak dibuka di editor. */
+    private fun requestConvertFile() {
+        ensureStorage {
+            showPicker(CodePickerMode.OPEN, R.string.code_picker_title_convert) { exportController.startFor(it) }
+        }
+    }
+
     private fun requestSaveAs(afterSaved: (() -> Unit)? = null) {
         ensureStorage {
             showPicker(CodePickerMode.SAVE_AS) { file ->
@@ -523,14 +531,14 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             .show()
     }
 
-    private fun showPicker(mode: CodePickerMode, onPicked: (File) -> Unit) {
+    private fun showPicker(mode: CodePickerMode, titleRes: Int? = null, onPicked: (File) -> Unit) {
         val context = context ?: return
         val doc = session.document.value
         when (val prepared = MolinaStorage.ensureDirectories()) {
             is MolinaStorage.EnsureResult.Ready -> {
                 val startDir = doc.file?.parentFile?.takeIf { it.isDirectory } ?: prepared.root
                 val suggested = doc.file?.name ?: getString(R.string.code_default_file_name)
-                CodeFilePicker(context, startDir, mode, suggested, onPicked).show()
+                CodeFilePicker(context, startDir, mode, suggested, onPicked, titleRes).show()
             }
             is MolinaStorage.EnsureResult.Failed ->
                 toast(getString(R.string.code_picker_error, prepared.reason))

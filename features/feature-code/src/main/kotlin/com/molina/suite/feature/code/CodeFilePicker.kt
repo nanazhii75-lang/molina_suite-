@@ -42,7 +42,8 @@ internal class CodeFilePicker(
     startDir: File,
     private val mode: CodePickerMode,
     private val suggestedName: String,
-    private val onPicked: (File) -> Unit
+    private val onPicked: (File) -> Unit,
+    private val titleOverride: Int? = null
 ) {
     private enum class Sort(val prefValue: String, val label: Int) {
         NAME("name", R.string.code_picker_sort_name),
@@ -92,7 +93,7 @@ internal class CodeFilePicker(
     }
 
     private fun buildContent(): View {
-        val title = when (mode) {
+        val title = titleOverride ?: when (mode) {
             CodePickerMode.SAVE_AS -> R.string.code_picker_title_save
             CodePickerMode.OPEN_FOLDER -> R.string.code_picker_title_folder
             CodePickerMode.OPEN -> R.string.code_picker_title_open
