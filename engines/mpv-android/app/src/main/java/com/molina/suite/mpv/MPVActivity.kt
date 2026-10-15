@@ -163,6 +163,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             binding.topRotateBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.topPiPBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.openPlaylistBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
+            binding.topBackgroundBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.controls.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION).setListener(listener)
         }
     }
@@ -231,6 +232,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 cycleOrientation()
             }
             openPlaylistBtn.setOnClickListener { openPlaylistMenu({}) }
+            topBackgroundBtn.setOnClickListener { playInBackground() }
             topMenuBtn.setOnClickListener { openTopMenu() }
             unlockBtn.setOnClickListener { unlockUI() }
             playbackDurationTxt.setOnClickListener {
@@ -672,6 +674,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.topRotateBtn.animate().cancel()
         binding.topPiPBtn.animate().cancel()
         binding.openPlaylistBtn.animate().cancel()
+        binding.topBackgroundBtn.animate().cancel()
 
         // reset controls alpha to be visible
         binding.controls.alpha = 1f
@@ -679,6 +682,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.topRotateBtn.alpha = ROTATE_BTN_ALPHA
         binding.topPiPBtn.alpha = ROTATE_BTN_ALPHA
         binding.openPlaylistBtn.alpha = ROTATE_BTN_ALPHA
+        binding.topBackgroundBtn.alpha = ROTATE_BTN_ALPHA
 
         if (binding.controls.visibility != View.VISIBLE) {
             binding.controls.visibility = View.VISIBLE
@@ -686,6 +690,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             binding.topRotateBtn.visibility = if (rotateButtonAvailable) View.VISIBLE else View.GONE
             binding.topPiPBtn.visibility = if (pipButtonAvailable) View.VISIBLE else View.GONE
             binding.openPlaylistBtn.visibility = if (psc.playlistCount > 1) View.VISIBLE else View.GONE
+            // tanpa trek audio tidak ada yang bisa dilanjutkan di latar belakang
+            binding.topBackgroundBtn.visibility = if (player.aid != -1) View.VISIBLE else View.GONE
 
             if (this.statsFPS) {
                 updateStats()
@@ -712,6 +718,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.topRotateBtn.visibility = View.GONE
         binding.topPiPBtn.visibility = View.GONE
         binding.openPlaylistBtn.visibility = View.GONE
+        binding.topBackgroundBtn.visibility = View.GONE
         binding.statsTextView.visibility = View.GONE
 
         val insetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -993,6 +1000,20 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             this.backgroundPlayMode = "never"
             onPauseImpl() // behave as if the app normally went into background
         }
+    }
+
+    /**
+     * Melanjutkan pemutaran di latar belakang sekarang juga, apa pun isi pengaturan
+     * "Background playback": mode diset "always" untuk sesi ini sehingga onPause memulai
+     * layanan latar belakang, lalu aplikasi dipindah ke belakang. Nilai dari pengaturan
+     * dibaca ulang saat aktivitas kembali ke depan (readSettings di onResume).
+     */
+    private fun playInBackground() {
+        if (player.aid == -1) // tanpa trek audio tidak ada yang bisa dilanjutkan
+            return
+        backgroundPlayMode = "always"
+        player.paused = false
+        moveTaskToBack(true)
     }
 
     private fun playlistPrev() = MPVLib.command(arrayOf("playlist-prev"))
@@ -1341,14 +1362,6 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 MenuItem(R.id.playlistBtn) {
                     openPlaylistMenu(restoreState); false
                 },
-                MenuItem(R.id.backgroundBtn) {
-                    // restoring state may (un)pause so do that first
-                    restoreState()
-                    backgroundPlayMode = "always"
-                    player.paused = false
-                    moveTaskToBack(true)
-                    false
-                },
                 MenuItem(R.id.chapterBtn) {
                     val chapters = player.loadChapters()
                     if (chapters.isEmpty())
@@ -1384,8 +1397,6 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 }
         )
 
-        if (player.aid == -1)
-            hiddenButtons.add(R.id.backgroundBtn)
         if (MPVLib.getPropertyInt("chapter-list/count") ?: 0 == 0)
             hiddenButtons.add(R.id.rowChapter)
         /******/
