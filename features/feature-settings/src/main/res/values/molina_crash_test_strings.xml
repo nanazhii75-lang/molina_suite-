@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- molina-crash-test -->
+<resources>
+    <string name="logcat_test_crash_title">Uji crash</string>
+    <string name="logcat_test_crash_message">Aplikasi akan sengaja crash (RuntimeException) untuk menguji notifikasi laporan crash. Lanjutkan?</string>
+    <string name="logcat_test_crash_confirm">Crash sekarang</string>
+    <string name="logcat_test_crash_exception">Uji crash dari Logcat (disengaja)</string>
+</resources>

@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.molina.suite.feature.settings.ExpandableCard
 import com.molina.suite.feature.settings.R
 import kotlinx.coroutines.Dispatchers
@@ -117,6 +118,10 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
         view.findViewById<View>(R.id.logcat_copy_recent).setOnClickListener { copyRecent() }
         lastCrashButton = view.findViewById<MaterialButton>(R.id.logcat_last_crash).also {
             it.setOnClickListener { showLastCrash() }
+            it.setOnLongClickListener {
+                confirmTestCrash()
+                true
+            }
         }
         view.findViewById<EditText>(R.id.logcat_search).doAfterTextChanged { text ->
             filter = filter.copy(query = text?.toString().orEmpty())
@@ -327,6 +332,19 @@ class LogcatFragment : Fragment(R.layout.fragment_logcat) {
     /** Menyalin baris-baris terakhir yang sedang tampil ke papan klip. */
     private fun copyRecent() {
         toast(output.copyRecent(shownEntries))
+    }
+
+    /** Tahan Crash terakhir: setelah konfirmasi, sengaja crash untuk menguji notifikasi laporan crash. */
+    private fun confirmTestCrash() {
+        val ctx = context ?: return
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.logcat_test_crash_title)
+            .setMessage(R.string.logcat_test_crash_message)
+            .setNegativeButton(R.string.library_cancel, null)
+            .setPositiveButton(R.string.logcat_test_crash_confirm) { _, _ ->
+                throw RuntimeException(getString(R.string.logcat_test_crash_exception))
+            }
+            .show()
     }
 
     private fun showLastCrash() {
