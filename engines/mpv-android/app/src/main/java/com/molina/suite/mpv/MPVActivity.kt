@@ -89,16 +89,19 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             if (!fromUser)
                 return
             player.timePos = progress.toDouble() / SEEK_BAR_PRECISION
+            seekPreview.onMove(progress)
             // Note: don't call updatePlaybackPos() here either
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar) {
             userIsOperatingSeekbar = true
+            seekPreview.onStart()
         }
 
         override fun onStopTrackingTouch(seekBar: SeekBar) {
             userIsOperatingSeekbar = false
             showControls() // re-trigger display timeout
+            seekPreview.onStop()
         }
     }
 
@@ -411,6 +414,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
     override fun onDestroy() {
         Log.v(TAG, "Exiting.")
+        if (seekPreviewDelegate.isInitialized()) seekPreview.release()
 
         // Suppress any further callbacks
         activityIsForeground = false
@@ -1362,6 +1366,11 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         androidx.core.widget.ImageViewCompat.setImageTintList(
             binding.topRepeatBtn, android.content.res.ColorStateList.valueOf(color))
     }
+
+    private val seekPreviewDelegate = lazy {
+        SeekPreviewController(this, binding.outside, binding.playbackSeekbar, SEEK_BAR_PRECISION)
+    }
+    private val seekPreview by seekPreviewDelegate
 
     private val resolutionSwitcher = ResolutionSwitcher()
 
