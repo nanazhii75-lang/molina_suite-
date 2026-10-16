@@ -26,9 +26,11 @@ object DaemonStatusBridge {
 
     fun start(engines: EngineRegistry, daemons: DaemonStatusBoard) {
         for ((engineId, daemonId) in daemonFor) {
-            val feature = engines.find(engineId) ?: continue
+            val status = engines.find(engineId)?.status
+                ?: engines.findLauncher(engineId)?.status
+                ?: continue
             scope.launch {
-                feature.status.collect { daemons.publish(daemonId, it) }
+                status.collect { daemons.publish(daemonId, it) }
             }
         }
     }

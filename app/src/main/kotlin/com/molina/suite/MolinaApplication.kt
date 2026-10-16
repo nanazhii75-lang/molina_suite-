@@ -20,6 +20,7 @@ import com.molina.suite.feature.mpv.MpvEngineModule
 import com.molina.suite.feature.settings.SettingsEngineModule
 import com.molina.suite.feature.terminal.TerminalEngineModule
 import com.molina.suite.feature.terminal.TermuxBackgroundKeepAlive
+import com.molina.suite.feature.x11.X11EngineModule
 import kotlin.system.exitProcess
 
 class MolinaApplication : Application() {
@@ -64,6 +65,7 @@ class MolinaApplication : Application() {
         CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft, documents)
         MpvEngineModule.install(this, engines, toolReadiness, toolSetup)
         SettingsEngineModule.install(engines, terminalInput, toolSetup, editorOpen, libraryDraft)
+        X11EngineModule.install(this, engines, shell, keepAlive)
         DaemonStatusBridge.start(engines, daemons)
     }
 
