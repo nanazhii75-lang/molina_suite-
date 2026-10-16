@@ -275,6 +275,10 @@ internal object PackageCatalog {
             PackageKind.APT, listOf("poppler-utils")
         ),
         PackageSpec(
+            "ocr", R.string.pkg_ocr_title, R.string.pkg_ocr_desc,
+            PackageKind.APT, listOf("tesseract-ocr", "tesseract-ocr-ind", "tesseract-ocr-eng"), optional = true
+        ),
+        PackageSpec(
             "pandoc", R.string.pkg_pandoc_title, R.string.pkg_pandoc_desc,
             PackageKind.PANDOC_RUNTIME, listOf("curl", "ca-certificates"), optional = true
         ),

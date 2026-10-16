@@ -9,18 +9,38 @@ Yang dideteksi: heading (dari ukuran font, atau baris tebal yang berdiri sendiri
 bernomor (bertingkat), tabel, blok kode (font monospasi), tebal/miring, tautan, tata letak dua
 kolom, serta header/footer berulang dan nomor halaman (dibuang).
 
+Teks di dalam gambar (diagram, scan): dengan opsi --ocr dan Tesseract terpasang, gambar yang
+cukup besar dibaca dengan OCR dan hasilnya disisipkan di posisi gambar sebagai kutipan berlabel
+(hasil OCR bisa tidak lengkap). Halaman scan penuh menjadi paragraf biasa. Gambar yang sudah
+tertutup teks asli (PDF yang sudah punya lapisan teks) dilewati. XML harus dibuat TANPA `-i`
+supaya elemen <image> beserta berkas gambarnya ada.
+
 Kode keluar: 0 berhasil, 2 argumen salah, 3 PDF tanpa teks (kemungkinan hasil scan),
 4 XML tidak terbaca.
 """
 import math
+import os
 import re
+import subprocess
 import sys
+import time
 import xml.etree.ElementTree as ET
 from collections import Counter
 
 EXIT_USAGE = 2
 EXIT_NO_TEXT = 3
 EXIT_BAD_XML = 4
+
+OCR_LANGS = ("ind", "eng")
+OCR_MIN_CONF = 45.0      # kata dengan keyakinan di bawah ini dibuang
+OCR_MIN_LINES = 3        # hasil mode pertama dianggap cukup bila setidaknya sekian baris
+OCR_MIN_WORDS = 3        # gambar dengan kata terbaca lebih sedikit dari ini dianggap tanpa teks
+OCR_MIN_AREA = 0.02      # gambar lebih kecil dari 2% luas halaman dilewati (logo, ikon, kode QR)
+OCR_MIN_SIDE = 0.07      # sisi terpendek minimal 7% lebar halaman
+OCR_SCAN_COVER = 0.7     # gambar yang menutupi >= 70% halaman dianggap halaman scan
+OCR_COVERED_SPANS = 3    # gambar yang sudah memuat sekian teks asli tidak di-OCR
+OCR_PASS_TIMEOUT = 150   # detik per proses tesseract
+OCR_BUDGET = 420         # detik untuk seluruh dokumen; sisanya dilewati
 
 CONTROL_CHARS = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f]")
 NORMALIZE = str.maketrans({
@@ -78,6 +98,30 @@ class Page:
         self.width = width
         self.height = height
         self.spans = []
+        self.images = []
+        self.pictures = []
+
+
+class Picture:
+    """Gambar di halaman (dari elemen <image> pdftohtml) dan, bila di-OCR, teks hasilnya."""
+    __slots__ = ("top", "left", "width", "height", "src", "paragraphs", "scan")
+
+    def __init__(self, top, left, width, height, src):
+        self.top = top
+        self.left = left
+        self.width = width
+        self.height = height
+        self.src = src
+        self.paragraphs = []
+        self.scan = False
+
+    @property
+    def right(self):
+        return self.left + self.width
+
+    @property
+    def bottom(self):
+        return self.top + self.height
 
 
 class Cell:
@@ -250,8 +294,161 @@ def parse_pages(data):
                 page, float(node.get("top", "0")), float(node.get("left", "0")),
                 float(node.get("width", "0")), height, size or height,
                 bool(MONO_FONT.search(family)), runs, plain))
+        for node in element.findall("image"):
+            src = node.get("src", "")
+            if not src:
+                continue
+            try:
+                page.images.append(Picture(
+                    float(node.get("top", "0")), float(node.get("left", "0")),
+                    float(node.get("width", "0")), float(node.get("height", "0")),
+                    os.path.abspath(src)))
+            except ValueError:
+                continue
         pages.append(page)
     return pages
+
+
+def available_ocr_languages():
+    """Bahasa tesseract yang dipakai (ind dan/atau eng), atau None bila tidak ada satu pun."""
+    try:
+        done = subprocess.run(["tesseract", "--list-langs"], stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT, timeout=30)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    names = [line.strip() for line in done.stdout.decode("utf-8", errors="replace").splitlines()[1:]]
+    chosen = [lang for lang in OCR_LANGS if lang in names]
+    return "+".join(chosen) if chosen else None
+
+
+def usable_line(text):
+    """Baris hasil OCR yang dibersihkan, atau '' bila isinya hanya derau (garis, simbol)."""
+    text = normalize_space(CONTROL_CHARS.sub("", text).translate(NORMALIZE))
+    letters = sum(1 for ch in text if ch.isalnum())
+    visible = sum(1 for ch in text if not ch.isspace())
+    if letters < 2 or letters < 0.5 * visible:
+        return ""
+    return text
+
+
+def read_tsv(text):
+    """Paragraf (daftar baris) dari keluaran TSV tesseract; kata berkeyakinan rendah dibuang."""
+    paragraphs = {}
+    for raw in text.splitlines()[1:]:
+        cols = raw.split("\t")
+        if len(cols) < 12 or cols[0] != "5":
+            continue
+        try:
+            conf = float(cols[10])
+        except ValueError:
+            continue
+        word = cols[11].strip()
+        if not word or conf < OCR_MIN_CONF:
+            continue
+        paragraphs.setdefault((cols[2], cols[3]), {}).setdefault(cols[4], []).append(word)
+    result = []
+    for lines in paragraphs.values():
+        kept = [usable_line(" ".join(words)) for words in lines.values()]
+        kept = [line for line in kept if line]
+        if kept:
+            result.append(kept)
+    return result
+
+
+def run_tesseract(path, lang, mode, timeout):
+    command = ["tesseract", path, "stdout", "-l", lang, "--psm", str(mode), "tsv"]
+    try:
+        done = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        sys.stderr.write("OCR melewati batas waktu untuk %s; dilewati.\n" % os.path.basename(path))
+        return None
+    except OSError as error:
+        sys.stderr.write("Tesseract tidak bisa dijalankan: %s\n" % error)
+        return None
+    if done.returncode != 0:
+        return None
+    return read_tsv(done.stdout.decode("utf-8", errors="replace"))
+
+
+def line_count(paragraphs):
+    return sum(len(p) for p in paragraphs)
+
+
+def word_count(paragraphs):
+    return sum(len(line.split()) for p in paragraphs for line in p)
+
+
+def recognize(path, lang, deadline):
+    """Mode 6 (satu blok) dulu; mode 11 (teks tersebar) hanya bila hasilnya terlalu sedikit."""
+    best = []
+    for mode in (6, 11):
+        remaining = deadline - time.monotonic()
+        if remaining < 10:
+            break
+        found = run_tesseract(path, lang, mode, min(OCR_PASS_TIMEOUT, remaining))
+        if found and line_count(found) > line_count(best):
+            best = found
+        if line_count(best) >= OCR_MIN_LINES:
+            break
+    return best if word_count(best) >= OCR_MIN_WORDS else []
+
+
+def worth_ocr(image, page):
+    if page.width <= 0 or page.height <= 0 or not os.path.isfile(image.src):
+        return False
+    if image.width * image.height < OCR_MIN_AREA * page.width * page.height:
+        return False
+    if min(image.width, image.height) < OCR_MIN_SIDE * page.width:
+        return False
+    covered = sum(1 for s in page.spans
+                  if image.left <= s.left + s.width / 2 <= image.right
+                  and image.top <= s.top + s.height / 2 <= image.bottom)
+    return covered < OCR_COVERED_SPANS
+
+
+def ocr_pictures(pages):
+    """Men-OCR gambar yang layak; hasilnya di page.pictures. Mengembalikan jumlah gambar bersisi teks."""
+    candidates = [(page, image) for page in pages for image in page.images if worth_ocr(image, page)]
+    if not candidates:
+        return 0
+    lang = available_ocr_languages()
+    if lang is None:
+        sys.stderr.write("Tesseract tidak punya data bahasa eng/ind; OCR dilewati.\n")
+        return 0
+    deadline = time.monotonic() + OCR_BUDGET
+    total = 0
+    for page, image in candidates:
+        if deadline - time.monotonic() < 10:
+            sys.stderr.write("Batas waktu OCR habis; gambar yang tersisa dilewati.\n")
+            break
+        paragraphs = recognize(image.src, lang, deadline)
+        if not paragraphs:
+            continue
+        image.paragraphs = paragraphs
+        image.scan = image.width * image.height >= OCR_SCAN_COVER * page.width * page.height
+        page.pictures.append(image)
+        total += 1
+    return total
+
+
+def insert_pictures(items, pictures):
+    for picture in sorted(pictures, key=lambda p: p.top):
+        index = next((i for i, item in enumerate(items) if item.top > picture.top), len(items))
+        items.insert(index, picture)
+
+
+def picture_block(picture):
+    if picture.scan:
+        paragraphs = []
+        for lines in picture.paragraphs:
+            text = lines[0]
+            for line in lines[1:]:
+                text = join_text(text, line)
+            paragraphs.append(start_escape(escape_text(text)))
+        return Block("ocr", "\n\n".join(paragraphs))
+    lines = [escape_text(line) for lines in picture.paragraphs for line in lines]
+    body = "  \n".join("> " + line for line in lines)
+    return Block("ocr", "> *Teks dari gambar (hasil OCR, mungkin tidak lengkap):*\n>\n" + body)
 
 
 def in_band(span, page):
@@ -567,6 +764,9 @@ def assemble(pages_items, options):
         if options["page_breaks"] and page_index > 0 and blocks:
             blocks.append(Block("rule"))
         for item in items:
+            if isinstance(item, Picture):
+                blocks.append(picture_block(item))
+                continue
             if isinstance(item, Table):
                 blocks.append(table_block(item))
                 continue
@@ -720,6 +920,8 @@ def render(blocks):
             text = render_list_item(block)
         elif block.kind == "code":
             text = render_code(block)
+        elif block.kind == "ocr":
+            text = block.text
         elif block.kind == "toc":
             text = "\n".join("- " + r[0] + " \u2026 " + r[1] for r in block.table)
         else:
@@ -800,8 +1002,12 @@ def mark_headings(rows, levels, bold_level):
 
 def convert(data, options):
     pages = parse_pages(data)
-    if not any(p.spans for p in pages):
-        sys.stderr.write("PDF tidak memuat teks (mungkin hasil scan; butuh OCR).\n")
+    pictures = ocr_pictures(pages) if options["ocr"] else 0
+    if not any(p.spans for p in pages) and not pictures:
+        if options["ocr"]:
+            sys.stderr.write("PDF tidak memuat teks dan OCR tidak menemukan teks pada gambarnya.\n")
+        else:
+            sys.stderr.write("PDF tidak memuat teks (mungkin hasil scan; pasang Tesseract di menu Paket untuk OCR).\n")
         return EXIT_NO_TEXT
     if options["strip_repeated"]:
         drop_noise(pages)
@@ -821,6 +1027,7 @@ def convert(data, options):
             right_edges[group_id] = column_right(rows)
             mark_headings(rows, levels, bold_level)
             items.extend(detect_tables(rows, group_id))
+        insert_pictures(items, page.pictures)
         pages_items.append((items, right_edges))
     markdown = render(assemble(pages_items, options))
     if not markdown.strip():
@@ -831,20 +1038,22 @@ def convert(data, options):
 
 
 def main(argv):
-    options = {"strip_repeated": True, "page_breaks": False}
+    options = {"strip_repeated": True, "page_breaks": False, "ocr": False}
     paths = []
     for arg in argv:
         if arg == "--keep-headers":
             options["strip_repeated"] = False
         elif arg == "--page-breaks":
             options["page_breaks"] = True
+        elif arg == "--ocr":
+            options["ocr"] = True
         elif arg.startswith("--"):
             sys.stderr.write("Opsi tidak dikenal: %s\n" % arg)
             return EXIT_USAGE
         else:
             paths.append(arg)
     if len(paths) != 1:
-        sys.stderr.write("Pemakaian: pdf2md.py [--keep-headers] [--page-breaks] berkas.xml\n")
+        sys.stderr.write("Pemakaian: pdf2md.py [--keep-headers] [--page-breaks] [--ocr] berkas.xml\n")
         return EXIT_USAGE
     try:
         with open(paths[0], "rb") as handle:

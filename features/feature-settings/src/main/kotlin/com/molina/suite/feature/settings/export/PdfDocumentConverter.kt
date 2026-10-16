@@ -52,7 +52,7 @@ internal class PdfDocumentConverter(
         when (result.exitCode) {
             0 -> ShellConversionRunner.verifyOutput(request.outputPath, TOOL_NAME)
             PdfCommandBuilder.TIMEOUT_EXIT_CODE -> ConversionResult.Failure(
-                "Waktu habis (${PdfCommandBuilder.TIMEOUT_SECONDS} detik). " +
+                "Waktu habis. " +
                     "PDF mungkin terlalu besar untuk perangkat ini.",
                 result.exitCode
             )

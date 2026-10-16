@@ -26,11 +26,14 @@ internal object PdfCommandBuilder {
     /** Format yang bisa dihasilkan dari PDF. */
     val TARGETS: List<DocumentFormat> = listOf(DocumentFormat.MARKDOWN, DocumentFormat.PLAIN)
 
-    /** Batas waktu total gabungan ekstraksi dan penyusunan, dalam detik. */
-    const val TIMEOUT_SECONDS = 300
+    /** Batas waktu total terpanjang (ekstraksi + penyusunan dengan OCR), dalam detik. */
+    const val TIMEOUT_SECONDS = 740
 
     private const val EXTRACT_TIMEOUT_SECONDS = 200
     private const val CONVERT_TIMEOUT_SECONDS = 100
+
+    /** Penyusunan dengan OCR; konverter membatasi dirinya sendiri (420 detik) sebelum ini tercapai. */
+    private const val OCR_CONVERT_TIMEOUT_SECONDS = 540
     private const val D = ScriptFragments.D
 
     /** Id katalog Paket yang harus terpasang agar [target] bisa dihasilkan dari PDF. */
@@ -73,13 +76,26 @@ internal object PdfCommandBuilder {
         if (!request.options.stripRepeatedHeaders) flags.add("--keep-headers")
         if (request.options.pageBreaks) flags.add("--page-breaks")
         val flagText = if (flags.isEmpty()) "" else flags.joinToString(" ") + " "
+        // OCR otomatis bila tesseract terpasang. Tanpanya skrip sama seperti sebelumnya: `-i` mengabaikan
+        // gambar. Dengan OCR gambar ditulis ke folder sementara W supaya konverter bisa membacanya.
+        // `-hidden`: PDF hasil scan yang sudah punya lapisan teks tak terlihat tetap terbaca.
         return """
-X=${D}(mktemp "${D}{TMPDIR:-/tmp}/molina-pdf.XXXXXX") || fail "Tidak bisa membuat berkas sementara."
-timeout $EXTRACT_TIMEOUT_SECONDS pdftohtml -xml -i -q -fontfullname -enc UTF-8 -stdout $argument > "${D}X"
+W=${D}(mktemp -d "${D}{TMPDIR:-/tmp}/molina-pdf.XXXXXX") || fail "Tidak bisa membuat folder sementara."
+trap 'rm -rf "${D}P" "${D}W"' EXIT
+X="${D}W/p.xml"
+OCR=
+command -v tesseract >/dev/null 2>&1 && OCR=1
+if [ -n "${D}OCR" ]; then
+  timeout $EXTRACT_TIMEOUT_SECONDS pdftohtml -xml -hidden -q -fontfullname -enc UTF-8 $argument "${D}W/p"
+else
+  timeout $EXTRACT_TIMEOUT_SECONDS pdftohtml -xml -i -hidden -q -fontfullname -enc UTF-8 $argument "${D}W/p"
+fi
 status=${D}?
 [ "${D}status" -eq $TIMEOUT_EXIT_CODE ] && exit $TIMEOUT_EXIT_CODE
 [ "${D}status" -eq 0 ] || fail "pdftohtml gagal membaca PDF (terenkripsi atau rusak?)."
-timeout $CONVERT_TIMEOUT_SECONDS python3 -c ${ScriptRunLine.quote(converterSource)} $flagText"${D}X" > "${D}P"
+CT=$CONVERT_TIMEOUT_SECONDS
+[ -n "${D}OCR" ] && CT=$OCR_CONVERT_TIMEOUT_SECONDS
+timeout "${D}CT" python3 -c ${ScriptRunLine.quote(converterSource)} $flagText${D}{OCR:+--ocr }"${D}X" > "${D}P"
 status=${D}?
 [ "${D}status" -eq 0 ] || exit "${D}status"
 """.trimStart()

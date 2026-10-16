@@ -6,4 +6,6 @@
     <string name="pkg_typst_desc">Mesin PDF ringan di /opt/typst, dipakai Pandoc untuk ekspor PDF tanpa LaTeX. Opsional: tidak ikut Install semua.</string>
     <string name="pkg_poppler_title">Poppler</string>
     <string name="pkg_poppler_desc">pdftotext, pdfinfo, dan pdftoppm untuk membaca PDF. Dipakai konversi PDF ke txt/md.</string>
+    <string name="pkg_ocr_title">Tesseract OCR</string>
+    <string name="pkg_ocr_desc">Membaca teks di dalam gambar PDF (diagram, hasil scan) saat konversi PDF ke md, bahasa Indonesia dan Inggris. Opsional: tidak ikut Install semua.</string>
 </resources>

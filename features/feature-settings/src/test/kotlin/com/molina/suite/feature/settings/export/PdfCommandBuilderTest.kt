@@ -76,6 +76,20 @@ class PdfCommandBuilderTest {
         assertEquals(listOf("poppler"), PdfCommandBuilder.requiredTools(DocumentFormat.PLAIN))
     }
 
+    @Test
+    fun ocrHanyaDipakaiBilaTesseractTerpasang() {
+        val script = PdfCommandBuilder.script(request(), "print('x')")!!
+        assertTrue(script.contains("command -v tesseract"))
+        assertTrue(script.contains("pdftohtml -xml -i"))
+        assertTrue(script.contains("--ocr"))
+    }
+
+    @Test
+    fun ocrBukanSyaratAlat() {
+        assertFalse(PdfCommandBuilder.requiredTools(DocumentFormat.MARKDOWN).contains("ocr"))
+        assertFalse(PdfCommandBuilder.requiredTools(DocumentFormat.PLAIN).contains("ocr"))
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun pdfKeDocxDitolakKontrak() {
         request(output = "/sdcard/Molina/Export/a.docx", target = DocumentFormat.DOCX)
