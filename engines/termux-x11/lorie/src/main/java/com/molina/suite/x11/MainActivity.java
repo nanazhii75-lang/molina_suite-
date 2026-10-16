@@ -1,6 +1,5 @@
 package com.molina.suite.x11;
 
-import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.view.KeyEvent.*;
@@ -72,7 +71,6 @@ import com.molina.suite.x11.input.InputEventSender;
 import com.molina.suite.x11.input.InputStub;
 import com.molina.suite.x11.input.TouchInputHandler;
 import com.molina.suite.x11.utils.ImeHeightProvider;
-import com.molina.suite.x11.utils.KeyInterceptor;
 import com.molina.suite.x11.utils.TermuxX11ExtraKeys;
 import com.molina.suite.x11.utils.X11ToolbarViewPager;
 
@@ -784,11 +782,6 @@ public class MainActivity extends AppCompatActivity {
         lorieView.triggerCallback();
 
         filterOutWinKey = prefs.filterOutWinkey.get();
-        if (prefs.enableAccessibilityServiceAutomatically.get())
-            KeyInterceptor.launch(this);
-        else if (checkSelfPermission(WRITE_SECURE_SETTINGS) == PERMISSION_GRANTED)
-            KeyInterceptor.shutdown(true);
-
         useTermuxEKBarBehaviour = prefs.useTermuxEKBarBehaviour.get();
         showIMEWhileExternalConnected = prefs.showIMEWhileExternalConnected.get();
 
@@ -1002,7 +995,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        KeyInterceptor.recheck();
 
         // The system bars come back when the window loses focus.
         if (hasFocus && !redirected) {

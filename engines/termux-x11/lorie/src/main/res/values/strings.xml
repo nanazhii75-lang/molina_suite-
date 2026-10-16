@@ -87,13 +87,9 @@ E.g. <b>META</b> for <i>META key</i>, \n
     <string name="lorie_pref_hardwareKbdScancodesWorkaround_summary">Fixes scancodes on some devices. Might cause problems with multiple layouts.</string>
     <string name="lorie_pref_dexMetaKeyCapture">Intercept system shortcuts</string>
     <string name="lorie_pref_dexMetaKeyCapture_summary">Samsung Dex only. Allows interception of &quot;Alt+F4&quot;, &quot;Meta+D&quot;, &quot;Meta+E&quot;, etc.</string>
-    <string name="lorie_pref_enableAccessibilityService">Enable Accessibility service for intercepting system shortcuts manually.</string>
-    <string name="lorie_pref_enableAccessibilityService_summary">Open Accessibility settings.</string>
-    <string name="lorie_pref_enableAccessibilityServiceAutomatically">Enable Accessibility service for intercepting system shortcuts automatically.</string>
-    <string name="lorie_pref_enableAccessibilityServiceAutomatically_summary">Requires WRITE_SECURE_SETTINGS permission.</string>
     <string name="lorie_pref_pauseKeyInterceptingWithEsc">Pause key intercepting with Esc key</string>
     <string name="lorie_pref_filterOutWinkey">Filter out intercepted Win (Meta/Mod4) key.</string>
-    <string name="lorie_pref_filterOutWinkey_summary">Allows you to use Dex shortcuts while intercepting. Requires Accessibility service to work.</string>
+    <string name="lorie_pref_filterOutWinkey_summary">Allows you to use Dex shortcuts while intercepting.</string>
     <string name="lorie_pref_enforceCharBasedInput">Enforce char based input</string>
     <string name="lorie_pref_enforceCharBasedInput_summary">Suppresses suggestions, predictive typing and CJK languages</string>
 
@@ -123,7 +119,7 @@ E.g. <b>META</b> for <i>META key</i>, \n
     <string name="lorie_pref_mediaKeysAction">Media keys</string>
 
     <string name="lorie_pref_summary_requiresExactOrCustom">Requires "display resolution mode" to be "exact" or "custom"</string>
-    <string name="lorie_pref_summary_requiresIntercepting">Requires intercepting system shortcuts with Dex mode or with Accessibility service</string>
+    <string name="lorie_pref_summary_requiresIntercepting">Requires intercepting system shortcuts with Dex mode</string>
     <string name="lorie_pref_summary_requiresTrackpadAndNative">Requires "Touchscreen input mode" to be "Trackpad" and "Display resolution mode" to be not "native"</string>
     <string name="lorie_pref_summary_screenIdleTimeoutConflict">⚠️ System screen timeout (%s) is longer and takes priority</string>
     <string name="lorie_pref_screenIdleTimeoutSystem">System (%s)</string>
