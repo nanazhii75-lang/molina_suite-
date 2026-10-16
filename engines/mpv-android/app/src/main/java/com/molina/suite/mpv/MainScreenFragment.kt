@@ -5,6 +5,8 @@ import com.molina.suite.mpv.config.SettingsActivity
 import com.molina.suite.mpv.databinding.FragmentMainScreenBinding
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
@@ -97,12 +99,13 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             }
         }
         binding.ytBtn.setOnClickListener { showYoutubeSearchDialog() }
+        binding.clipBtn.setOnClickListener { playClipboardLink() }
         resultsPanel = YoutubeResultsPanel(binding.resultsPanel, binding.ytBtn, binding.resetBtn) { result ->
             playResults(result)
         }.also { it.attach() }
         queueBar = QueueBar(binding.queueBar) { items -> launchPlaylist(items, 0) }.also { it.attach() }
         // Ikon tanpa teks: tekan lama menampilkan labelnya.
-        listOf(binding.x11Btn, binding.ytBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
+        listOf(binding.x11Btn, binding.ytBtn, binding.clipBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
             TooltipCompat.setTooltipText(it, it.contentDescription)
         }
         binding.settingsBtn.setOnClickListener {
@@ -273,6 +276,25 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         MolinaPlaylist.put(intent, items.map { it.watchUrl }, items.map { it.title }, index)
         intent.setClass(requireContext(), MPVActivity::class.java)
         playerLauncher.launch(intent)
+    }
+
+    /** Memutar URL pertama yang ada di clipboard; memberi tahu bila tidak ada. */
+    private fun playClipboardLink() {
+        val context = requireContext()
+        val text = try {
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+            val clip = clipboard?.primaryClip
+            if (clip != null && clip.itemCount > 0) clip.getItemAt(0).coerceToText(context)?.toString() else null
+        } catch (e: Exception) {
+            Log.w(TAG, "Gagal membaca clipboard: $e")
+            null
+        }
+        val url = SharedUrl.extract(text)
+        if (url == null) {
+            Toast.makeText(context, R.string.molina_clipboard_no_link, Toast.LENGTH_SHORT).show()
+            return
+        }
+        UrlPlayback.check(this, url) { playFile(url, MpvOpenKind.URL) }
     }
 
     private fun playFile(filepath: String, kind: MpvOpenKind) {

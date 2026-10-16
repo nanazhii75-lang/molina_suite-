@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="molina_action_play_clipboard">Putar link dari clipboard</string>
+    <string name="molina_clipboard_no_link">Tidak ada link di clipboard</string>
+</resources>

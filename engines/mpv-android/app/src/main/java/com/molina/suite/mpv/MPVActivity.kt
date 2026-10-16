@@ -1059,8 +1059,9 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     private fun parsePathFromIntent(intent: Intent): String? {
         val filepath = when (intent.action) {
             Intent.ACTION_VIEW -> intent.data?.let { resolveUri(it) }
-            Intent.ACTION_SEND -> intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-                val uri = Uri.parse(it.trim())
+            Intent.ACTION_SEND -> intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()?.let {
+                // Teks Bagikan sering berisi judul + tautan: ambil URL-nya saja.
+                val uri = Uri.parse(SharedUrl.extract(it) ?: it)
                 if (uri.isHierarchical && !uri.isRelative) resolveUri(uri) else null
             }
             else -> intent.getStringExtra("filepath")
