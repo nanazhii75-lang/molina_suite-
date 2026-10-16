@@ -3,6 +3,8 @@ package com.molina.suite.mpv
 import android.content.SharedPreferences
 import android.content.res.Resources
 import android.graphics.PointF
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.view.MotionEvent
@@ -19,6 +21,10 @@ enum class PropertyChange {
     SeekFixed,
     PlayPause,
     Custom,
+
+    /* Hold gesture: tahan layar untuk kecepatan 2x, lepas untuk kembali normal */
+    HoldStart,
+    HoldEnd,
 }
 
 internal interface TouchGesturesObserver {
@@ -62,6 +68,18 @@ internal class TouchGestures(private val observer: TouchGesturesObserver) {
     private var tapGestureCenter : PropertyChange? = null
     private var tapGestureRight : PropertyChange? = null
 
+    // jari ditahan tanpa bergerak: kecepatan sementara berlaku dari HoldStart sampai HoldEnd
+    private val holdHandler = Handler(Looper.getMainLooper())
+    private var holding = false
+    private val holdRunnable = Runnable {
+        // hanya bila jari masih diam (belum menjadi gestur geser)
+        if (state == State.Down && !holding) {
+            holding = true
+            lastTapTime = 0
+            sendPropertyChange(PropertyChange.HoldStart, 0f)
+        }
+    }
+
     private inline fun checkFloat(vararg n: Float) {
         if (n.any { it.isInfinite() || it.isNaN() })
             throw IllegalArgumentException()
@@ -98,6 +116,9 @@ internal class TouchGestures(private val observer: TouchGesturesObserver) {
         // do not trigger on X% of screen top/bottom
         // this is so that user can open android status bar
         private const val DEADZONE = 5
+
+        // lama menahan jari tanpa bergerak sebelum kecepatan sementara aktif (ms)
+        private const val HOLD_DELAY = 400L
     }
 
     private fun processTap(p: PointF): Boolean {
@@ -133,6 +154,8 @@ internal class TouchGestures(private val observer: TouchGesturesObserver) {
     }
 
     private fun processMovement(p: PointF): Boolean {
+        // selama tahan-2x aktif, geseran jari tidak memulai gestur lain
+        if (holding) return true
         // throttle events: only send updates when there's some movement compared to last update
         // 3 here is arbitrary
         if (PointF(lastPos.x - p.x, lastPos.y - p.y).length() < trigger / 3)
@@ -207,6 +230,14 @@ internal class TouchGestures(private val observer: TouchGesturesObserver) {
         checkFloat(point)
         when (e.action) {
             MotionEvent.ACTION_UP -> {
+                holdHandler.removeCallbacks(holdRunnable)
+                if (holding) {
+                    holding = false
+                    state = State.Up
+                    lastTapTime = 0
+                    sendPropertyChange(PropertyChange.HoldEnd, 0f)
+                    return true
+                }
                 gestureHandled = processMovement(point) or processTap(point)
                 if (state != State.Down)
                     sendPropertyChange(PropertyChange.Finalize, 0f)
@@ -220,11 +251,21 @@ internal class TouchGestures(private val observer: TouchGesturesObserver) {
                 processTap(point)
                 lastPos.set(point)
                 state = State.Down
+                holdHandler.removeCallbacks(holdRunnable)
+                holdHandler.postDelayed(holdRunnable, HOLD_DELAY)
                 // always return true on ACTION_DOWN to continue receiving events
                 gestureHandled = true
             }
             MotionEvent.ACTION_MOVE -> {
                 gestureHandled = processMovement(point)
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                holdHandler.removeCallbacks(holdRunnable)
+                if (holding) {
+                    holding = false
+                    state = State.Up
+                    sendPropertyChange(PropertyChange.HoldEnd, 0f)
+                }
             }
         }
         return gestureHandled

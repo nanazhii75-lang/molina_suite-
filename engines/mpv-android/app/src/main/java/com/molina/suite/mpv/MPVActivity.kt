@@ -2102,6 +2102,9 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         fadeHandler.postDelayed(fadeRunnable3, 500L)
     }
 
+    // kecepatan sebelum layar ditahan (tahan untuk 2x); null bila tahan tidak aktif
+    private var holdPreviousSpeed: Double? = null
+
     override fun onPropertyChange(p: PropertyChange, diff: Float) {
         val gestureTextView = binding.gestureTextView
         when (p) {
@@ -2200,6 +2203,24 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 val keycode = 0x10002 + diff.toInt()
                 MPVLib.command(arrayOf("keypress", "0x%x".format(keycode)))
             }
+
+            /* Hold gestures */
+            PropertyChange.HoldStart -> {
+                // siaran langsung (durasi tidak diketahui) tidak bisa dipercepat
+                if (psc.duration <= 0)
+                    return
+                if (holdPreviousSpeed == null)
+                    holdPreviousSpeed = player.playbackSpeed ?: 1.0
+                player.playbackSpeed = HOLD_SPEED
+                fadeHandler.removeCallbacks(fadeRunnable3)
+                gestureTextView.visibility = View.VISIBLE
+                gestureTextView.text = getString(R.string.ui_speed, HOLD_SPEED)
+            }
+            PropertyChange.HoldEnd -> {
+                holdPreviousSpeed?.let { player.playbackSpeed = it }
+                holdPreviousSpeed = null
+                gestureTextView.visibility = View.GONE
+            }
         }
     }
 
@@ -2229,5 +2250,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         private const val STREAM_TYPE = AudioManager.STREAM_MUSIC
         // precision used by seekbar (1/s)
         private const val SEEK_BAR_PRECISION = 2
+        // kecepatan selama layar ditahan (seperti YouTube)
+        private const val HOLD_SPEED = 2.0
     }
 }
