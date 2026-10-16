@@ -419,6 +419,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
         // Suppress any further callbacks
         activityIsForeground = false
+        sleepTimer.cancel()
 
         BackgroundPlaybackService.mediaToken = null
         mediaSession?.let {
@@ -1539,6 +1540,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                     MPVLib.command(arrayOf("add", "chapter", "1")); true
                 },
                 MenuItem(R.id.advancedBtn) { openAdvancedMenu(restoreState); false },
+                MenuItem(R.id.sleepTimerBtn) { openSleepTimerDialog(restoreState); false },
                 MenuItem(R.id.orientationBtn) {
                     autoRotationMode = "manual"
                     cycleOrientation()
@@ -1551,6 +1553,42 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         /******/
 
         genericMenu(R.layout.dialog_top_menu, buttons, hiddenButtons, restoreState)
+    }
+
+    private val sleepTimer = SleepTimer { onSleepTimerExpired() }
+
+    /** Timer habis: jeda pemutaran (juga saat berjalan di latar belakang). */
+    private fun onSleepTimerExpired() {
+        if (isFinishing || isDestroyed) return
+        player.paused = true
+        showToast(getString(R.string.molina_sleep_timer_done))
+    }
+
+    private fun openSleepTimerDialog(restoreState: StateRestoreCallback) {
+        val presets = SleepTimer.PRESET_MINUTES
+        val labels = presets.map { getString(R.string.molina_sleep_timer_minutes, it) }.toMutableList()
+        val active = sleepTimer.isActive
+        if (active)
+            labels.add(getString(R.string.molina_sleep_timer_off))
+        val title = if (active)
+            getString(R.string.molina_sleep_timer_remaining, sleepTimer.remainingMinutes())
+        else
+            getString(R.string.molina_sleep_timer_title)
+
+        with (AlertDialog.Builder(this)) {
+            setTitle(title)
+            setItems(labels.toTypedArray()) { _, which ->
+                if (which < presets.size) {
+                    sleepTimer.start(presets[which])
+                    showToast(getString(R.string.molina_sleep_timer_set, presets[which]), true)
+                } else {
+                    sleepTimer.cancel()
+                    showToast(getString(R.string.molina_sleep_timer_cancelled), true)
+                }
+            }
+            setOnDismissListener { restoreState() }
+            create().show()
+        }
     }
 
     private fun genericPickerDialog(

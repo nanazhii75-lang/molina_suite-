@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="molina_sleep_timer_title">Timer tidur</string>
+    <string name="molina_sleep_timer_minutes">%d menit</string>
+    <string name="molina_sleep_timer_remaining">Timer tidur: sisa %d menit</string>
+    <string name="molina_sleep_timer_off">Matikan timer</string>
+    <string name="molina_sleep_timer_set">Timer tidur diatur: %d menit</string>
+    <string name="molina_sleep_timer_cancelled">Timer tidur dimatikan</string>
+    <string name="molina_sleep_timer_done">Timer tidur habis, pemutaran dijeda</string>
+</resources>
