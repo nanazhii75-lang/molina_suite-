@@ -165,6 +165,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             binding.openPlaylistBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.topResolutionBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.topRepeatBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
+            binding.topMoreBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.topBackgroundBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.controls.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION).setListener(listener)
         }
@@ -236,6 +237,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             openPlaylistBtn.setOnClickListener { openPlaylistMenu({}) }
             topResolutionBtn.setOnClickListener { pickResolution() }
             topRepeatBtn.setOnClickListener { toggleRepeatOnce() }
+            topMoreBtn.setOnClickListener { showMoreToolsMenu() }
             topBackgroundBtn.setOnClickListener { playInBackground() }
             topMenuBtn.setOnClickListener { openTopMenu() }
             unlockBtn.setOnClickListener { unlockUI() }
@@ -680,6 +682,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.openPlaylistBtn.animate().cancel()
         binding.topResolutionBtn.animate().cancel()
         binding.topRepeatBtn.animate().cancel()
+        binding.topMoreBtn.animate().cancel()
         binding.topBackgroundBtn.animate().cancel()
 
         // reset controls alpha to be visible
@@ -690,6 +693,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.openPlaylistBtn.alpha = ROTATE_BTN_ALPHA
         binding.topResolutionBtn.alpha = ROTATE_BTN_ALPHA
         binding.topRepeatBtn.alpha = ROTATE_BTN_ALPHA
+        binding.topMoreBtn.alpha = ROTATE_BTN_ALPHA
         binding.topBackgroundBtn.alpha = ROTATE_BTN_ALPHA
 
         if (binding.controls.visibility != View.VISIBLE) {
@@ -702,6 +706,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 if (resolutionSwitcher.isApplicable()) View.VISIBLE else View.GONE
             binding.topRepeatBtn.visibility = View.VISIBLE
             updateRepeatOnceButton()
+            applyToolbarMode()
             // tanpa trek audio tidak ada yang bisa dilanjutkan di latar belakang
             binding.topBackgroundBtn.visibility = if (player.aid != -1) View.VISIBLE else View.GONE
 
@@ -732,6 +737,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.openPlaylistBtn.visibility = View.GONE
         binding.topResolutionBtn.visibility = View.GONE
         binding.topRepeatBtn.visibility = View.GONE
+        binding.topMoreBtn.visibility = View.GONE
         binding.topBackgroundBtn.visibility = View.GONE
         binding.statsTextView.visibility = View.GONE
 
@@ -995,6 +1001,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             }
             rightMargin = leftMargin
         }
+        applyToolbarMode()
     }
 
     private fun onPiPModeChangedImpl(state: Boolean) {
@@ -1288,6 +1295,57 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         genericPickerDialog(picker, R.string.title_speed_dialog, "speed") {
             restore()
         }
+    }
+
+    private fun toolsCollapsed(): Boolean = resources.getBoolean(R.bool.molina_tools_collapsed)
+
+    /**
+     * Landscape: playlist, resolusi, dan ulangi 1x dipindah ke satu tombol menu (dropdown)
+     * supaya kolom toolbar kanan tidak terpotong. Portrait: tiap tombol tampil sendiri.
+     */
+    private fun applyToolbarMode() {
+        val shown = binding.controls.visibility == View.VISIBLE
+        val collapsed = toolsCollapsed()
+        binding.topMoreBtn.visibility = if (shown && collapsed) View.VISIBLE else View.GONE
+        if (collapsed) {
+            binding.openPlaylistBtn.visibility = View.GONE
+            binding.topResolutionBtn.visibility = View.GONE
+            binding.topRepeatBtn.visibility = View.GONE
+        } else if (shown) {
+            binding.openPlaylistBtn.visibility =
+                if (psc.playlistCount > 1) View.VISIBLE else View.GONE
+            binding.topResolutionBtn.visibility =
+                if (resolutionSwitcher.isApplicable()) View.VISIBLE else View.GONE
+            binding.topRepeatBtn.visibility = View.VISIBLE
+            updateRepeatOnceButton()
+        }
+    }
+
+    private fun showMoreToolsMenu() {
+        val idPlaylist = 1
+        val idResolution = 2
+        val idRepeat = 3
+        val popup = androidx.appcompat.widget.PopupMenu(this, binding.topMoreBtn)
+        if (psc.playlistCount > 1)
+            popup.menu.add(0, idPlaylist, 0, R.string.ui_open_playlist)
+        if (resolutionSwitcher.isApplicable())
+            popup.menu.add(0, idResolution, 1, R.string.molina_resolution_title)
+        popup.menu.add(0, idRepeat, 2, R.string.ui_repeat_once).apply {
+            isCheckable = true
+            isChecked = isRepeatOnceActive()
+        }
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                idPlaylist -> { openPlaylistMenu({}); true }
+                idResolution -> { pickResolution(); true }
+                idRepeat -> { toggleRepeatOnce(); true }
+                else -> false
+            }
+        }
+        // menu terbuka: tahan kontrol agar tidak memudar; jadwalkan ulang setelah ditutup
+        fadeHandler.removeCallbacks(fadeRunnable)
+        popup.setOnDismissListener { showControls() }
+        popup.show()
     }
 
     private fun isRepeatOnceActive(): Boolean =
@@ -1713,6 +1771,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     private fun updatePlaylistButtons() {
         binding.openPlaylistBtn.visibility =
             if (binding.controls.visibility == View.VISIBLE && psc.playlistCount > 1) View.VISIBLE else View.GONE
+        applyToolbarMode()
         val plCount = psc.playlistCount
         val plPos = psc.playlistPos
 

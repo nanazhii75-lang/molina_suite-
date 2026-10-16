@@ -2,9 +2,9 @@
 <resources>
     <!-- landscape: tombol lebih kecil dan bar kontrol lebih rendah supaya toolbar kanan muat
          di antara tombol Lock/Setting (atas) dan waktu selesai (bawah) tanpa saling menimpa -->
-    <dimen name="molina_tool_btn_size">32dp</dimen>
+    <dimen name="molina_tool_btn_size">36dp</dimen>
     <dimen name="molina_tool_btn_gap">2dp</dimen>
-    <dimen name="molina_tool_btn_padding">7dp</dimen>
+    <dimen name="molina_tool_btn_padding">8dp</dimen>
     <dimen name="molina_tools_margin_top">8dp</dimen>
     <dimen name="molina_tools_margin_bottom">8dp</dimen>
     <dimen name="molina_controls_margin_bottom">12dp</dimen>

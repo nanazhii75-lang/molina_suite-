@@ -6,4 +6,5 @@
     <string name="molina_resolution_item">%1$dp</string>
     <string name="molina_resolution_failed">Tidak bisa mengganti resolusi.</string>
     <string name="ui_repeat_once" translatable="false">Ulangi 1x</string>
+    <string name="ui_more_tools" translatable="false">Menu lainnya</string>
 </resources>

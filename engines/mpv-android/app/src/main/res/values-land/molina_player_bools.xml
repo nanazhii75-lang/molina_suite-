@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- true: di landscape ketiganya masuk ke satu tombol menu (dropdown) agar tidak terpotong -->
+    <bool name="molina_tools_collapsed">true</bool>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- false: playlist, resolusi, dan ulangi 1x tampil sebagai tombol terpisah di toolbar kanan -->
+    <bool name="molina_tools_collapsed">false</bool>
+</resources>
