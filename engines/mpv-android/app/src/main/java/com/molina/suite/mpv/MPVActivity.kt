@@ -1,6 +1,7 @@
 package com.molina.suite.mpv
 
 import com.molina.suite.mpv.databinding.PlayerBinding
+import com.molina.suite.mpv.search.YoutubeResult
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
@@ -1246,13 +1247,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 dialog.dismiss()
             }
 
-            override fun onPrev() {
-                playlistPrev()
-            }
-
-            override fun onNext() {
-                playlistNext()
-            }
+            override fun openSearch() = openPlayerSearch()
         }
 
         dialog = with (AlertDialog.Builder(this, R.style.PlaylistPanelTheme)) {
@@ -1267,6 +1262,41 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         playlistPanel = impl
         dialog.show()
         dockPlaylistPanel(dialog)
+    }
+
+    /**
+     * Pencarian judul YouTube dari dalam pemutar. Panel playlist tetap terbuka di bawahnya;
+     * memilih hasil menyisipkannya setelah item yang sedang diputar lalu memutarnya.
+     */
+    private fun openPlayerSearch() {
+        lateinit var dialog: AlertDialog
+        val search = PlayerSearchDialog { result ->
+            playSearchResult(result)
+            dialog.dismiss()
+        }
+        dialog = with (AlertDialog.Builder(this, R.style.PlaylistPanelTheme)) {
+            setView(search.buildView(LayoutInflater.from(context)))
+            setOnDismissListener { search.release() }
+            create()
+        }
+        dialog.show()
+        dialog.window?.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE or
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        )
+        dockPlaylistPanel(dialog)
+    }
+
+    private fun playSearchResult(result: YoutubeResult) {
+        playlistTitles = playlistTitles + (result.watchUrl to result.title)
+        playlistPanel?.updateTitles(playlistTitles)
+        val existing = player.loadPlaylist().firstOrNull { it.filename == result.watchUrl }
+        if (existing != null) {
+            MPVLib.setPropertyInt("playlist-pos", existing.index)
+            return
+        }
+        MPVLib.command(arrayOf("loadfile", result.watchUrl, "insert-next"))
+        MPVLib.command(arrayOf("playlist-next"))
     }
 
     /** Menempelkan dialog playlist di tepi kanan sebagai panel setinggi layar. */

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_search_player">Cari</string>
+    <string name="molina_player_search_hint">Cari judul di YouTube</string>
+    <string name="molina_player_search_go">Cari</string>
+    <string name="molina_player_search_idle">Ketik judul lalu tekan Cari. Hasil yang dipilih diputar setelah video ini.</string>
+</resources>

@@ -19,8 +19,9 @@ import com.molina.suite.mpv.R
 /** Adapter daftar hasil pencarian; klik item diteruskan ke [onPlay]. */
 internal class YoutubeResultAdapter(
     private val onPlay: (YoutubeResult) -> Unit,
-    private val isQueued: (String) -> Boolean,
-    private val onToggleQueue: (YoutubeResult) -> Unit
+    private val isQueued: (String) -> Boolean = { false },
+    /** Null menyembunyikan tombol antrean (dipakai pencarian di dalam pemutar). */
+    private val onToggleQueue: ((YoutubeResult) -> Unit)? = null
 ) : RecyclerView.Adapter<YoutubeResultAdapter.Holder>() {
 
     private var items: List<YoutubeResult> = emptyList()
@@ -83,7 +84,8 @@ internal class YoutubeResultAdapter(
             stats.text = buildStats(context, item)
             ThumbnailLoader.load(thumb, item.thumbnailUrl)
             itemView.setOnClickListener { onPlay(item) }
-            queueBtn.setOnClickListener { onToggleQueue(item) }
+            queueBtn.visibility = if (onToggleQueue == null) View.GONE else View.VISIBLE
+            queueBtn.setOnClickListener { onToggleQueue?.invoke(item) }
             bindQueueState(item)
         }
 

@@ -21,26 +21,6 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
         <ImageButton
-            android:id="@+id/plPrevBtn"
-            style="?buttonBarStyle"
-            android:background="?selectableItemBackground"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:paddingHorizontal="8dp"
-            android:contentDescription="@string/dialog_prev"
-            android:src="@drawable/ic_skip_previous_black_24dp" />
-
-        <ImageButton
-            android:id="@+id/plNextBtn"
-            style="?buttonBarStyle"
-            android:background="?selectableItemBackground"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:paddingHorizontal="8dp"
-            android:contentDescription="@string/dialog_next"
-            android:src="@drawable/ic_skip_next_black_24dp" />
-
-        <ImageButton
             android:id="@+id/shuffleBtn"
             style="?buttonBarStyle"
             android:background="?selectableItemBackground"
@@ -97,6 +77,15 @@
             android:layout_weight="1"
             android:textColor="?android:attr/textColorPrimary"
             android:text="@string/action_open_url" />
+
+        <Button
+            android:id="@+id/searchBtn"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="?android:attr/textColorPrimary"
+            android:text="@string/action_search_player" />
 
     </TableRow>
 
