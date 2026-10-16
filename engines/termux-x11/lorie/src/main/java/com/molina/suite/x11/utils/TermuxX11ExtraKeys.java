@@ -38,7 +38,7 @@ public class TermuxX11ExtraKeys implements ExtraKeysView.IExtraKeysView {
     private boolean metaDown;
 
     /** Defines the key for extra keys */
-    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP',{key: 'END', popup: 'ZOOM_IN'},{key: 'PGUP', popup: 'ZOOM_OUT'},{key: 'KEYBOARD', popup: 'ZOOM_RESET'}], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN','PREFERENCES']]"; // Double row
+    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','DRAWER',{key: '-', popup: '|'},'HOME','UP','CLEAR','COPY'], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PASTE']]"; // Double row
 
     public TermuxX11ExtraKeys(@NonNull View.OnKeyListener eventlistener, MainActivity activity, ExtraKeysView extrakeysview) {
         mEventListener = eventlistener;
@@ -184,6 +184,10 @@ public class TermuxX11ExtraKeys implements ExtraKeysView.IExtraKeysView {
             mActivity.toggleMouseAuxButtons();
         else if ("STYLUS_HELPER".equals(key))
             mActivity.toggleStylusAuxButtons();
+        else if ("COPY".equals(key))
+            sendKeyCombo(KeyEvent.KEYCODE_C, KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.KEYCODE_SHIFT_LEFT);
+        else if ("CLEAR".equals(key))
+            sendKeyCombo(KeyEvent.KEYCODE_L, KeyEvent.KEYCODE_CTRL_LEFT);
         else if ("ZOOM_IN".equals(key))
             mActivity.getLorieView().adjustRendererZoom(25);
         else if ("ZOOM_OUT".equals(key))
@@ -192,6 +196,20 @@ public class TermuxX11ExtraKeys implements ExtraKeysView.IExtraKeysView {
             mActivity.getLorieView().resetRendererZoom();
         else
             onTerminalExtraKeyButtonClick(view, key, ctrlDown, altDown, shiftDown, metaDown, fnDown);
+    }
+
+    /**
+     * Mengirim satu kombinasi tombol ke X11: modifier ditekan berurutan, tombol utama ditekan dan
+     * dilepas, lalu modifier dilepas berkebalikan. Modifier yang menempel di extra keys ikut dilepas.
+     */
+    private void sendKeyCombo(int key, int... modifiers) {
+        for (int modifier : modifiers)
+            mActivity.getLorieView().sendKeyEvent(0, modifier, true);
+        mActivity.getLorieView().sendKeyEvent(0, key, true);
+        mActivity.getLorieView().sendKeyEvent(0, key, false);
+        for (int i = modifiers.length - 1; i >= 0; i--)
+            mActivity.getLorieView().sendKeyEvent(0, modifiers[i], false);
+        unsetSpecialKeys();
     }
 
     /**

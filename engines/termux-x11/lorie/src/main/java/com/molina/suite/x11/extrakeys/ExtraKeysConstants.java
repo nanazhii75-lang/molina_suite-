@@ -86,7 +86,6 @@ public class ExtraKeysConstants {
             put("DEL", "⌦"); // U+2326 ⌦ ERASE TO THE RIGHT not well known but easy to understand
             put("DRAWER", "☰"); // U+2630 ☰ TRIGRAM FOR HEAVEN not well known but easy to understand
             put("KEYBOARD", "⌨"); // U+2328 ⌨ KEYBOARD not well known but easy to understand
-            put("PASTE", "⎘"); // U+2398
             put("SCROLL", "⇳"); // U+21F3
             put("PREFERENCES", "⚙"); // U+2699 GEAR not well known but easy to understand
             put("EXIT", "╳"); // U+2573 BOX DRAWINGS LIGHT DIAGONAL CROSS not well known but easy to understand

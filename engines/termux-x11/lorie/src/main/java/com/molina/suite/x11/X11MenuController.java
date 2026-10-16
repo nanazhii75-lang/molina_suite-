@@ -57,6 +57,7 @@ final class X11MenuController {
         menuButton.setOnClickListener(v -> toggle());
         bindTextInput();
 
+        bind(R.id.x11_menu_keyboard, v -> activity.toggleKeyboardVisibility());
         bind(R.id.x11_menu_displays, v -> activity.showDisplaysDialog());
         bind(R.id.x11_menu_zoom_in, v -> activity.getLorieView().adjustRendererZoom(ZOOM_STEP));
         bind(R.id.x11_menu_zoom_out, v -> activity.getLorieView().adjustRendererZoom(-ZOOM_STEP));

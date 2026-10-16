@@ -125,6 +125,7 @@ E.g. <b>META</b> for <i>META key</i>, \n
     <string name="lorie_pref_screenIdleTimeoutSystem">System (%s)</string>
     <string name="x11_connecting">Menghubungkan...</string>
     <string name="x11_menu_button_text">Menu</string>
+    <string name="x11_menu_keyboard_text">Keyboard</string>
     <string name="x11_menu_text_hint">Ketik teks lalu kirim</string>
     <string name="x11_menu_zoom_in_text">Perbesar</string>
     <string name="x11_menu_zoom_out_text">Perkecil</string>

@@ -293,6 +293,16 @@
             android:orientation="horizontal">
 
             <ImageButton
+                android:id="@+id/x11_menu_keyboard"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/x11_menu_keyboard_text"
+                android:padding="10dp"
+                android:src="@drawable/ic_extra_key_keyboard" />
+
+            <ImageButton
                 android:id="@+id/x11_menu_displays"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
