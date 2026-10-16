@@ -518,6 +518,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         activityIsForeground = false
         eventUiHandler.removeCallbacksAndMessages(null)
         if (isFinishing) {
+            recordHistory()
             savePosition()
             // tell mpv to shut down so that any other property changes or such are ignored,
             // preventing useless busywork
@@ -554,7 +555,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             0
         this.backgroundPlayMode = getString("background_play", R.string.pref_background_play_default)
         this.noUIPauseMode = getString("no_ui_pause", R.string.pref_no_ui_pause_default)
-        this.shouldSavePosition = prefs.getBoolean("save_position", false)
+        this.shouldSavePosition = prefs.getBoolean("save_position", true)
         if (this.autoRotationMode != "manual") // don't reset
             this.autoRotationMode = getString("auto_rotation", R.string.pref_auto_rotation_default)
         this.controlsAtBottom = prefs.getBoolean("bottom_controls", true)
@@ -608,6 +609,13 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         refreshUi()
 
         super.onResume()
+    }
+
+    /** Mencatat pemutaran ke riwayat home sebelum mpv dihentikan. */
+    private fun recordHistory() {
+        val hint = MPVLib.getPropertyString("path")?.let { playlistTitles[it] }
+        com.molina.suite.mpv.history.PlayHistoryRecorder.capture(hint)
+            ?.let { com.molina.suite.mpv.history.PlayHistory.put(this, it) }
     }
 
     private fun savePosition() {

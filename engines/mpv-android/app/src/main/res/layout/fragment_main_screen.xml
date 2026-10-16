@@ -100,6 +100,53 @@
                         android:text="@string/molina_results_empty_hint"
                         android:textColor="@color/molina_text_muted"
                         android:textSize="13sp" />
+
+                    <LinearLayout
+                        android:id="@+id/historySection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:text="@string/molina_history_title"
+                            android:textColor="@color/molina_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:id="@+id/historyList"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingStart="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingEnd="8dp"
+                            android:text="@string/molina_history_hint"
+                            android:textColor="@color/molina_text_muted"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/historyClear"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:padding="8dp"
+                            android:text="@string/molina_history_clear"
+                            android:textColor="@color/molina_link"
+                            android:textSize="13sp" />
+                    </LinearLayout>
                 </LinearLayout>
             </ScrollView>
 

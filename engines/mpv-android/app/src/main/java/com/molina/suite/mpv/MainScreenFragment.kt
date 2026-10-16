@@ -30,6 +30,9 @@ import com.molina.suite.mpv.search.YoutubeResultsPanel
 import com.molina.suite.mpv.search.MolinaPlaylist
 import com.molina.suite.mpv.search.YoutubeResult
 import com.molina.suite.mpv.search.YoutubeSearchController
+import com.molina.suite.mpv.history.HistoryPanel
+import com.molina.suite.mpv.history.PlayHistory
+import com.molina.suite.mpv.history.PlayHistoryEntry
 
 class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
     private lateinit var binding: FragmentMainScreenBinding
@@ -46,6 +49,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
     private var lastPath = ""
     private var resultsPanel: YoutubeResultsPanel? = null
     private var queueBar: QueueBar? = null
+    private var historyPanel: HistoryPanel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,6 +108,8 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             playResults(result)
         }.also { it.attach() }
         queueBar = QueueBar(binding.queueBar) { items -> launchPlaylist(items, 0) }.also { it.attach() }
+        historyPanel = HistoryPanel(binding.resultsEmpty) { playHistoryEntry(it) }
+            .also { it.attach(); it.refresh() }
         // Ikon tanpa teks: tekan lama menampilkan labelnya.
         listOf(binding.x11Btn, binding.ytBtn, binding.clipBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
             TooltipCompat.setTooltipText(it, it.contentDescription)
@@ -125,6 +131,8 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         resultsPanel = null
         queueBar?.detach()
         queueBar = null
+        historyPanel?.detach()
+        historyPanel = null
         super.onDestroyView()
     }
 
@@ -152,6 +160,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
 
     override fun onResume() {
         super.onResume()
+        historyPanel?.refresh()
         if (firstRun) {
             restoreChoice()
         } else if (returningFromPlayer) {
@@ -295,6 +304,22 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             return
         }
         UrlPlayback.check(this, url) { playFile(url, MpvOpenKind.URL) }
+    }
+
+    /** Memutar ulang entri riwayat; posisi terakhir dilanjutkan oleh mpv (watch-later). */
+    private fun playHistoryEntry(entry: PlayHistoryEntry) {
+        val path = entry.path
+        if (path.startsWith("http://") || path.startsWith("https://")) {
+            UrlPlayback.check(this, path) { playFile(path, MpvOpenKind.URL) }
+            return
+        }
+        if (!java.io.File(path).exists()) {
+            PlayHistory.remove(requireContext(), path)
+            historyPanel?.refresh()
+            Toast.makeText(requireContext(), R.string.molina_history_missing, Toast.LENGTH_SHORT).show()
+            return
+        }
+        playFile(path, MpvOpenKind.LOCAL)
     }
 
     private fun playFile(filepath: String, kind: MpvOpenKind) {

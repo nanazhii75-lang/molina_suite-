@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="molina_history_title">Terakhir diputar</string>
+    <string name="molina_history_hint">Tekan lama untuk menghapus satu item</string>
+    <string name="molina_history_clear">Hapus riwayat</string>
+    <string name="molina_history_finished">Selesai ditonton</string>
+    <string name="molina_history_progress">%1$s / %2$s</string>
+    <string name="molina_history_missing">Berkas tidak ditemukan, dihapus dari riwayat</string>
+</resources>

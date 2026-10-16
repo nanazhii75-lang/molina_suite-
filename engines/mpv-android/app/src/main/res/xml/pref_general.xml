@@ -36,7 +36,7 @@
         android:title="@string/pref_background_play_title" />
 
     <CheckBoxPreference
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:key="save_position"
         android:summary="@string/pref_save_position_summary"
         android:title="@string/pref_save_position_title" />
