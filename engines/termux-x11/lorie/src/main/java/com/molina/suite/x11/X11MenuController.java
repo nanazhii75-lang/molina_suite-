@@ -38,6 +38,7 @@ final class X11MenuController {
     private final View panel;
     private final ExtraKeysView extraKeysView;
     private boolean open;
+    private X11DisplayOptions displayOptions;
 
     X11MenuController(@NonNull MainActivity activity) {
         this.activity = activity;
@@ -56,6 +57,7 @@ final class X11MenuController {
         menuButton.setAlpha(BUTTON_ALPHA);
         menuButton.setOnClickListener(v -> toggle());
         bindTextInput();
+        displayOptions = new X11DisplayOptions(activity);
 
         bind(R.id.x11_menu_keyboard, v -> activity.toggleKeyboardVisibility());
         bind(R.id.x11_menu_displays, v -> activity.showDisplaysDialog());
@@ -83,6 +85,7 @@ final class X11MenuController {
         open = visible;
         if (visible) {
             layoutPanel();
+            displayOptions.refresh();
             panel.setVisibility(View.VISIBLE);
             panel.bringToFront();
             menuButton.bringToFront();

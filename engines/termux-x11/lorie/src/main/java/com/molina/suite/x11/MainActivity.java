@@ -64,7 +64,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.math.MathUtils;
 import androidx.core.view.ViewCompat;
-import androidx.viewpager.widget.ViewPager;
 
 import com.molina.suite.x11.extrakeys.ExtraKeysInfo;
 import com.molina.suite.x11.input.InputEventSender;
@@ -354,21 +353,18 @@ public class MainActivity extends AppCompatActivity {
         displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
         orientationListener = new OrientationEventListener(this) {
             @Override public void onOrientationChanged(int orientation) {
-                setTerminalToolbarViewLayout();
+                refreshContentInsets();
             }
         };
         frm.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            String savedPos;
             int savedRotation;
 
             @Override
             public void onGlobalLayout() {
                 Display d = frm.getDisplay();
-                String pos = prefs.ekbarPosition.get();
-                if ((d != null && savedRotation != d.getRotation()) || !Objects.equals(savedPos, pos)) {
-                    savedRotation = d == null ? 0 : d.getRotation();
-                    savedPos = pos;
-                    setTerminalToolbarViewLayout();
+                if (d != null && savedRotation != d.getRotation()) {
+                    savedRotation = d.getRotation();
+                    refreshContentInsets();
                 }
             }
         });
@@ -419,7 +415,6 @@ public class MainActivity extends AppCompatActivity {
     //Register the needed events to handle stylus as left, middle and right click
     @SuppressLint("ClickableViewAccessibility")
     private void initStylusAuxButtons() {
-        final ViewPager pager = getTerminalToolbarViewPager();
         boolean stylusMenuEnabled = prefs.showStylusClickOverride.get() && getLorieView().connected();
         final float menuUnselectedTrasparency = 0.66f;
         final float menuSelectedTrasparency = 1.0f;
@@ -529,7 +524,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private RectF getVisibleFrmRect() {
-        final ViewPager pager = getTerminalToolbarViewPager();
         final LorieView lorieView = getLorieView();
         final View sharedParent = (View) frm.getParent(); // also mouse/stylus aux buttons' parent
 
@@ -539,23 +533,10 @@ public class MainActivity extends AppCompatActivity {
 
         // availableRect only excludes the IME when Reseed is on, so clamp against it unconditionally too.
         result.bottom = Math.min(result.bottom, sharedParent.getHeight() - imeHeight);
-
-        // With adjustHeightForEK on, availableRect already excludes the bar's own space.
-        if (pager.getVisibility() == View.VISIBLE && !prefs.adjustHeightForEK.get()) {
-            // getLayoutParams() is up to date immediately; getWidth()/getHeight() lag until the next layout pass.
-            int barThickness = ((FrameLayout.LayoutParams) pager.getLayoutParams()).height;
-            switch (getPagerPosition()) {
-                case PAGER_POSITION_TOP:    result.top    = Math.max(result.top, barThickness); break;
-                case PAGER_POSITION_BOTTOM: result.bottom = Math.min(result.bottom, sharedParent.getHeight() - imeHeight - barThickness); break;
-                case PAGER_POSITION_LEFT:   result.left   = Math.max(result.left, barThickness); break;
-                case PAGER_POSITION_RIGHT:  result.right  = Math.min(result.right, sharedParent.getWidth() - barThickness); break;
-            }
-        }
         return result;
     }
 
     private void makeSureHelpersAreVisibleAndInScreenBounds() {
-        final ViewPager pager = getTerminalToolbarViewPager();
         final RectF frmRect = getVisibleFrmRect();
         View mouseAuxButtons = findViewById(R.id.mouse_buttons);
         View stylusAuxButtons = findViewById(R.id.mouse_helper_visibility);
@@ -593,7 +574,6 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     void initMouseAuxButtons() {
-        final ViewPager pager = getTerminalToolbarViewPager();
         Button left = findViewById(R.id.mouse_button_left_click);
         Button right = findViewById(R.id.mouse_button_right_click);
         Button middle = findViewById(R.id.mouse_button_middle_click);
@@ -750,9 +730,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void onPreferencesChanged(String key) {
-        if ("additionalKbdVisible".equals(key))
-            return;
-
         handler.removeCallbacks(this::onPreferencesChangedCallback);
         handler.postDelayed(this::onPreferencesChangedCallback, 100);
     }
@@ -775,7 +752,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (mExtraKeys != null)
             mExtraKeys.reload();
-        setTerminalToolbarView();
+        refreshMenuAndInsets();
 
         lorieView.triggerCallback();
 
@@ -786,8 +763,6 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.mouse_buttons).setVisibility(prefs.showMouseHelper.get() && "1".equals(prefs.touchMode.get()) && getLorieView().connected() ? View.VISIBLE : View.GONE);
         showMouseAuxButtons(prefs.showMouseHelper.get());
         showStylusAuxButtons(prefs.showStylusClickOverride.get());
-
-        getTerminalToolbarViewPager().setAlpha(isInPictureInPictureMode ? 0.f : prefs.adjustHeightForEK.get() ? 1.f : ((float) prefs.opacityEKBar.get())/100);
 
         lorieView.requestLayout();
         lorieView.invalidate();
@@ -804,7 +779,7 @@ public class MainActivity extends AppCompatActivity {
         app.onActivityResumed(this);
 
         orientationListener.enable();
-        setTerminalToolbarView();
+        refreshMenuAndInsets();
         getLorieView().requestFocus();
     }
 
@@ -827,102 +802,29 @@ public class MainActivity extends AppCompatActivity {
         return findViewById(R.id.lorieView);
     }
 
-    public ViewPager getTerminalToolbarViewPager() {
-        return findViewById(R.id.terminal_toolbar_view_pager);
-    }
-
-    /**
-     * Bar extra keys di bawah layar sudah digantikan menu dropdown (X11MenuController) dan pager
-     * lamanya tidak pernah ditampilkan lagi. Yang tersisa: menyegarkan menu dan tata letak.
-     */
-    private void setTerminalToolbarView() {
-        getTerminalToolbarViewPager().setVisibility(View.GONE);
+    /** Menyegarkan menu dropdown (ikon disembunyikan saat PiP) dan inset layar. */
+    private void refreshMenuAndInsets() {
         if (x11Menu != null)
             x11Menu.refresh(!isInPictureInPictureMode);
 
-        setTerminalToolbarViewLayout();
+        refreshContentInsets();
         getLorieView().requestFocus();
     }
 
-    // Keep in sync with Surface.ROTATION_*
-    public static final int PAGER_POSITION_TOP = 0, PAGER_POSITION_LEFT = 1, PAGER_POSITION_BOTTOM = 2, PAGER_POSITION_RIGHT = 3;
-    public int getPagerPosition() {
-        String _pos = prefs.ekbarPosition.get();
-        int pos = "top".equals(_pos) ? PAGER_POSITION_TOP : "left".equals(_pos) ? PAGER_POSITION_LEFT : "bottom".equals(_pos) ? PAGER_POSITION_BOTTOM : "right".equals(_pos) ? PAGER_POSITION_RIGHT : 0;
-        if (prefs.ekbarPositionIgnoreOrientation.get()) {
-            Display dpy = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
-            if (dpy != null)
-                pos = (pos + dpy.getRotation()) % 4;
-        }
-        return pos;
-    }
+    private int imeHeight = 0;
 
-    @SuppressLint("RtlHardcoded")
-    private void setTerminalToolbarViewLayout() {
+    private void refreshContentInsets() {
         handler.post(() -> {
-            final ViewPager pager = getTerminalToolbarViewPager();
-            boolean showNow = pager.getVisibility() == View.VISIBLE;
-            ExtraKeysInfo extraKeysInfo = mExtraKeys == null ? null : mExtraKeys.getExtraKeysInfo();
-            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) pager.getLayoutParams();
-            int pos = getPagerPosition();
-
-            // The window is not resized for the keyboard, so a bar along a side has to end above it.
-            layoutParams.width = (pos == PAGER_POSITION_LEFT || pos == PAGER_POSITION_RIGHT) ? frm.getHeight() - imeHeight : frm.getWidth();
-            layoutParams.height = Math.round(37.5f * getResources().getDisplayMetrics().density *
-                    (extraKeysInfo == null ? 0 : extraKeysInfo.getMatrix().length));
-
-            switch (pos) {
-                case PAGER_POSITION_TOP:
-                case PAGER_POSITION_BOTTOM:
-                    layoutParams.gravity = (pos == PAGER_POSITION_TOP ? Gravity.TOP : Gravity.BOTTOM) | Gravity.LEFT;
-                    // reset everything we set for "left" and "right"
-                    pager.setPivotX(layoutParams.width / 2f);
-                    pager.setPivotY(layoutParams.width / 2f);
-                    pager.setRotation(0f);
-                    pager.setTranslationX(0);
-                    break;
-                case PAGER_POSITION_LEFT:
-                case PAGER_POSITION_RIGHT:
-                    layoutParams.gravity = (pos == PAGER_POSITION_LEFT ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP;
-                    pager.setPivotX(pos == PAGER_POSITION_LEFT ? 0 : layoutParams.width);
-                    pager.setPivotY(0f);
-                    pager.setRotation(90f * (pos == PAGER_POSITION_LEFT ? 1 : -1));
-                    pager.setTranslationX(layoutParams.height * (pos == PAGER_POSITION_LEFT ? 1 : -1));
-                    break;
-            }
-            pager.setLayoutParams(layoutParams);
-
-            ekbarContentInset = prefs.adjustHeightForEK.get() && showNow ? layoutParams.height : 0;
             applyContentInsets();
             makeSureHelpersAreVisibleAndInScreenBounds();
         });
     }
 
-    private int ekbarContentInset = 0;
-    private int imeHeight = 0;
-
+    /** Keyboard mendorong layar hanya bila Reseed aktif; selain itu ia hanya menutupi bagian bawahnya. */
     private void applyContentInsets() {
-        int pos = getPagerPosition();
-        // Only a bar at the bottom has to step aside for the keyboard.
-        int bottomMargin = pos == PAGER_POSITION_BOTTOM ? imeHeight : 0;
-
-        // A bottom bar reserving its own space always sits right above the keyboard via bottomMargin,
-        // so content must stop there too, regardless of Reseed.
-        boolean barReservesKeyboardSpace = pos == PAGER_POSITION_BOTTOM && ekbarContentInset > 0;
-        int imeContentInset = barReservesKeyboardSpace ? bottomMargin : (prefs.Reseed.get() ? imeHeight : 0);
-
-        getLorieView().setContentInsets(pos == PAGER_POSITION_LEFT ? ekbarContentInset : 0,
-                pos == PAGER_POSITION_TOP ? ekbarContentInset : 0,
-                pos == PAGER_POSITION_RIGHT ? ekbarContentInset : 0,
-                imeContentInset + (pos == PAGER_POSITION_BOTTOM ? ekbarContentInset : 0));
+        int imeContentInset = prefs.Reseed.get() ? imeHeight : 0;
+        getLorieView().setContentInsets(0, 0, 0, imeContentInset);
         getLorieView().setObscuredBottom(imeHeight - imeContentInset);
-
-        ViewPager pager = getTerminalToolbarViewPager();
-        ViewGroup.MarginLayoutParams pagerParams = (ViewGroup.MarginLayoutParams) pager.getLayoutParams();
-        if (pagerParams.bottomMargin != bottomMargin) {
-            pagerParams.bottomMargin = bottomMargin;
-            pager.setLayoutParams(pagerParams);
-        }
     }
 
     public void setImeHeight(int height) {
@@ -931,7 +833,7 @@ public class MainActivity extends AppCompatActivity {
             return;
 
         imeHeight = height;
-        setTerminalToolbarViewLayout();
+        refreshContentInsets();
     }
 
     public void toggleExtraKeys(boolean visible, boolean saveState) {
@@ -974,7 +876,7 @@ public class MainActivity extends AppCompatActivity {
         orientation = newConfig.orientation;
         densityDpi = newConfig.densityDpi;
         applyWindowSettings();
-        setTerminalToolbarView();
+        refreshMenuAndInsets();
     }
 
     @SuppressLint("WrongConstant")
@@ -1179,11 +1081,9 @@ public class MainActivity extends AppCompatActivity {
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, @NonNull Configuration newConfig) {
         this.isInPictureInPictureMode = isInPictureInPictureMode;
         getLorieView().onPictureInPictureModeChanged(isInPictureInPictureMode);
-        final ViewPager pager = getTerminalToolbarViewPager();
-        pager.setAlpha(isInPictureInPictureMode ? 0.f : prefs.adjustHeightForEK.get() ? 1.f : ((float) prefs.opacityEKBar.get())/100);
         findViewById(R.id.mouse_buttons).setAlpha(isInPictureInPictureMode ? 0.f : 0.7f);
         findViewById(R.id.mouse_helper_visibility).setAlpha(isInPictureInPictureMode ? 0.f : 1.f);
-        setTerminalToolbarView();
+        refreshMenuAndInsets();
         if (!isInPictureInPictureMode)
             applyWindowSettings();
 
@@ -1216,7 +1116,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            setTerminalToolbarView();
+            refreshMenuAndInsets();
             findViewById(R.id.mouse_buttons).setVisibility(prefs.showMouseHelper.get() && "1".equals(prefs.touchMode.get()) && connected ? View.VISIBLE : View.GONE);
             findViewById(R.id.stub).setVisibility(connected?View.INVISIBLE:View.VISIBLE);
             getLorieView().setVisibility(connected?View.VISIBLE:View.INVISIBLE);

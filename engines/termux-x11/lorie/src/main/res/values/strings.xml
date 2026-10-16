@@ -77,8 +77,6 @@ E.g. <b>META</b> for <i>META key</i>, \n
     <string name="lorie_pref_ignoreGamepadEvents_summary">Prevent gamepad and joystick events from being forwarded to X server</string>
     <string name="lorie_pref_zoomFollowsCursor">Pan to follow cursor while zoomed in</string>
 
-    <string name="lorie_pref_showAdditionalKbd">Show additional keyboard</string>
-    <string name="lorie_pref_showAdditionalKbd_summary">Show keyboard with additional keys.</string>
     <string name="lorie_pref_showIMEWhileExternalConnected">Show IME with external keyboard</string>
     <string name="lorie_pref_showIMEWhileExternalConnected_summary">Show software keyboard while hardware keyboard is connected.</string>
     <string name="lorie_pref_preferScancodes">Prefer scancodes when possible</string>
@@ -100,12 +98,8 @@ E.g. <b>META</b> for <i>META key</i>, \n
     <string name="lorie_pref_storeSecondaryDisplayPreferencesSeparately">Store preferences for secondary displays separately</string>
     <string name="lorie_pref_storeSecondaryDisplayPreferencesSeparately_summary">Open this screen on display you want to configure</string>
 
-    <string name="lorie_pref_adjustHeightForEK">Prevent extra keys bar from covering the display</string>
     <string name="lorie_pref_useTermuxEKBarBehaviour">Deactivate special keys on additional key bar after each keypress</string>
     <string name="lorie_pref_useTermuxEKBarBehaviour_summary">Use long-tap to lock special keys</string>
-    <string name="lorie_pref_ekbarPosition">Position</string>
-    <string name="lorie_pref_ekbarPositionIgnoreOrientation">Keep position regardless of device orientation</string>
-    <string name="lorie_pref_opacityEKBar">Opacity of extra keys bar, %</string>
     <string name="lorie_pref_extra_keys_config">Extra keys config</string>
 
     <string name="lorie_pref_swipeUpAction">Three finger swipe up</string>
@@ -127,6 +121,12 @@ E.g. <b>META</b> for <i>META key</i>, \n
     <string name="x11_menu_button_text">Menu</string>
     <string name="x11_menu_keyboard_text">Keyboard</string>
     <string name="x11_menu_text_hint">Ketik teks lalu kirim</string>
+    <string name="x11_menu_fullscreen_text">Layar penuh</string>
+    <string name="x11_menu_orientation_text">Orientasi layar</string>
+    <string name="x11_menu_orientation_changed">Orientasi: %1$s</string>
+    <string name="x11_menu_scale_down_text">Kecilkan skala</string>
+    <string name="x11_menu_scale_up_text">Besarkan skala</string>
+    <string name="x11_menu_scale_mode_changed">Mode resolusi diubah ke skala</string>
     <string name="x11_menu_zoom_in_text">Perbesar</string>
     <string name="x11_menu_zoom_out_text">Perkecil</string>
     <string name="x11_menu_zoom_reset_text">Zoom 100%</string>

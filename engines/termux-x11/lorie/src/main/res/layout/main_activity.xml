@@ -218,23 +218,6 @@
             tools:ignore="HardcodedText,PxUsage,SmallSp" />
     </LinearLayout>
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/terminal_toolbar_view_pager"
-        android:visibility="gone"
-        android:pointerIcon="arrow"
-        android:layout_width="match_parent"
-        android:layout_height="37.5dp"
-        android:background="@android:color/black"
-        android:layoutDirection="ltr"
-        android:layout_gravity="bottom|center"/>
-
-    <View
-        android:id="@+id/activity_termux_bottom_space_view"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/transparent"
-        android:layout_gravity="bottom|center" />
-
     <ImageButton
         android:id="@+id/x11_menu_button"
         android:layout_width="44dp"
@@ -285,6 +268,71 @@
             android:textColorHighlight="@android:color/darker_gray"
             android:textColorHint="#66FFFFFF"
             android:textCursorDrawable="@null" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/x11_menu_fullscreen"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/x11_menu_fullscreen_text"
+                android:padding="10dp"
+                android:src="@drawable/x11_ic_fullscreen" />
+
+            <ImageButton
+                android:id="@+id/x11_menu_orientation"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/x11_menu_orientation_text"
+                android:padding="10dp"
+                android:src="@drawable/x11_ic_orientation" />
+
+            <Button
+                android:id="@+id/x11_menu_scale_down"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/x11_menu_scale_down_text"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:text="-"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/x11_menu_scale_label"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.4"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/x11_menu_scale_up"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/x11_menu_scale_up_text"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:text="+"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

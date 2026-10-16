@@ -39,9 +39,6 @@
         <SwitchPreferenceCompat app:key="zoomFollowsCursor" app:defaultValue="true" />
     </PreferenceScreen>
     <PreferenceScreen app:key="kbd">
-        <SwitchPreferenceCompat app:key="showAdditionalKbd" app:defaultValue="true" />
-        <!-- this preference should be a part of `Prefs` but should not appear in PreferenceScreen -->
-        <SwitchPreferenceCompat app:key="additionalKbdVisible" app:defaultValue="true" app:isPreferenceVisible="false" />
         <SwitchPreferenceCompat app:key="showIMEWhileExternalConnected" app:defaultValue="true" />
         <SwitchPreferenceCompat app:key="preferScancodes" app:defaultValue="false" />
         <SwitchPreferenceCompat app:key="hardwareKbdScancodesWorkaround" app:defaultValue="true" />
@@ -57,11 +54,7 @@
         <SwitchPreferenceCompat app:key="storeSecondaryDisplayPreferencesSeparately" app:defaultValue="false" />
     </PreferenceScreen>
     <PreferenceScreen app:key="ekbar">
-        <SwitchPreferenceCompat app:key="adjustHeightForEK" app:defaultValue="true" />
         <SwitchPreferenceCompat app:key="useTermuxEKBarBehaviour" app:defaultValue="true" />
-        <ListPreference app:key="ekbarPosition" app:defaultValue="bottom" app:entries="@array/ekbarPositionValues" app:entryValues="@array/ekbarPositionValues" />
-        <SwitchPreferenceCompat app:key="ekbarPositionIgnoreOrientation" app:defaultValue="false" />
-        <SeekBarPreference app:key="opacityEKBar" app:defaultValue="100" app:min="1" android:max="100" app:seekBarIncrement="1" app:showSeekBarValue="true" app:updatesContinuously="true" />
         <EditTextPreference app:key="extra_keys_config" />
     </PreferenceScreen>
     <PreferenceScreen app:key="userActions">

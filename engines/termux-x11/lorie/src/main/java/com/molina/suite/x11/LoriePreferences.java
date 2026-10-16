@@ -267,7 +267,6 @@ public class LoriePreferences extends AppCompatActivity implements PreferenceFra
                 }
             }
 
-            with("showAdditionalKbd", p -> p.setLayoutResource(R.layout.preference));
             with("version", p -> p.setSummary(BuildConfig.VERSION_NAME));
 
             setSummary("displayStretch", R.string.lorie_pref_summary_requiresExactOrCustom);
@@ -475,9 +474,6 @@ public class LoriePreferences extends AppCompatActivity implements PreferenceFra
                 }
             }
 
-            if ("showAdditionalKbd".contentEquals(key) && (Boolean) newValue)
-                prefs().additionalKbdVisible.put(true);
-
 
             requireContext().sendBroadcast(new Intent(ACTION_PREFERENCES_CHANGED) {{
                 putExtra("key", key);
@@ -602,8 +598,6 @@ public class LoriePreferences extends AppCompatActivity implements PreferenceFra
                                 PrefsProto.Preference pref = p.keys.get(key);
                                 if (pref != null && pref.type == boolean.class) {
                                     edit.putBoolean(key, "true".contentEquals(newValue));
-                                    if ("showAdditionalKbd".contentEquals(key) && "true".contentEquals(newValue))
-                                        edit.putBoolean("additionalKbdVisible", true);
                                 } else if (pref != null && pref.type == int.class) {
                                     try {
                                         edit.putInt(key, Integer.parseInt(newValue));
