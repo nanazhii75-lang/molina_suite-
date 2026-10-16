@@ -10,6 +10,19 @@ internal data class VideoMeta(
     val thumbnail: String?
 )
 
+/** Satu bab video: waktu mulai (detik) dan judul. */
+internal data class ChapterItem(val startSec: Int, val title: String)
+
+/** Satu subtitle untuk requested_subtitles ytdl_hook; [key] dipakai mpv sebagai kode bahasa. */
+internal data class SubtitleItem(val key: String, val ext: String, val url: String, val name: String)
+
+/** Tambahan opsional di JSON: bab dan subtitle. */
+internal data class MediaExtras(val chapters: List<ChapterItem>, val subtitles: List<SubtitleItem>) {
+    companion object {
+        val NONE = MediaExtras(emptyList(), emptyList())
+    }
+}
+
 /**
  * Membuat satu baris JSON berbentuk keluaran `yt-dlp -J` untuk satu video, hanya berisi bidang
  * yang dibaca ytdl_hook mpv. Ditulis tangan (tanpa org.json) agar murni dan bisa diuji di JVM.
@@ -17,13 +30,19 @@ internal data class VideoMeta(
 internal object YtdlJson {
 
     /** Video+audio terpisah (requested_formats) atau satu stream gabungan sesuai [choice]. */
-    fun forChoice(meta: VideoMeta, choice: StreamChoice, userAgent: (StreamClient) -> String): String {
+    fun forChoice(
+        meta: VideoMeta,
+        choice: StreamChoice,
+        userAgent: (StreamClient) -> String,
+        extras: MediaExtras = MediaExtras.NONE
+    ): String {
         val combined = choice.combined
         if (combined != null) {
             // Satu stream: bidang format (format_id, ext, url, header) langsung di tingkat atas.
             return obj(
                 baseFields(meta) +
                     trackFields(combined, video = true, audio = true, userAgent = userAgent) +
+                    extrasFields(extras) +
                     listOf("is_live" to "false")
             )
         }
@@ -38,7 +57,7 @@ internal object YtdlJson {
                 "ext" to str(choice.video?.ext ?: choice.audio?.ext ?: "mp4"),
                 "requested_formats" to "[" + tracks.joinToString(",") + "]",
                 "is_live" to "false"
-            )
+            ) + extrasFields(extras)
         )
     }
 
@@ -53,6 +72,27 @@ internal object YtdlJson {
                 "http_headers" to obj(listOf("User-Agent" to str(userAgent)))
             )
         )
+
+    /** Bidang chapters dan requested_subtitles yang dibaca ytdl_hook; kosong bila tidak ada isinya. */
+    private fun extrasFields(extras: MediaExtras): List<Pair<String, String>> {
+        val fields = mutableListOf<Pair<String, String>>()
+        if (extras.chapters.isNotEmpty()) {
+            val items = extras.chapters.map {
+                obj(listOf("start_time" to it.startSec.toString(), "title" to str(it.title)))
+            }
+            fields += "chapters" to items.joinToString(",", "[", "]")
+        }
+        if (extras.subtitles.isNotEmpty()) {
+            fields += "requested_subtitles" to obj(
+                extras.subtitles.map { sub ->
+                    sub.key to obj(
+                        listOf("ext" to str(sub.ext), "url" to str(sub.url), "name" to str(sub.name))
+                    )
+                }
+            )
+        }
+        return fields
+    }
 
     private fun baseFields(meta: VideoMeta): List<Pair<String, String>> {
         val fields = mutableListOf(
