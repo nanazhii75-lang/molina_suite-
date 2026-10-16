@@ -231,7 +231,7 @@ final class TermuxInstaller {
                         ExecutionCommand executionCommand = new ExecutionCommand(-1,
                             termuxBootstrapSecondStageFile, null, null,
                             null, true, false);
-                        executionCommand.commandLabel = "Termux Bootstrap Second Stage Command";
+                        executionCommand.commandLabel = "Molina Terminal Bootstrap Second Stage Command";
                         executionCommand.backgroundCustomLogLevel = Logger.LOG_LEVEL_NORMAL;
                         TermuxTask termuxTask = TermuxTask.execute(activity, executionCommand, null, new TermuxShellEnvironmentClient(), true);
                         if (termuxTask == null || !executionCommand.isSuccessful() || executionCommand.resultData.exitCode != 0) {

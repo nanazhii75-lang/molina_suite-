@@ -54,10 +54,10 @@
     <!-- ShellUtils -->
     <string name="error_sending_sigkill_to_process">Sending SIGKILL to process on user request or because android is killing the execution service</string>
     <string name="error_execution_cancelled">Execution has been cancelled since execution service is being killed</string>
-    <string name="error_failed_to_execute_termux_session_command">"Failed to execute \"%1$s\" termux session command"</string>
-    <string name="error_failed_to_execute_termux_task_command">"Failed to execute \"%1$s\" termux task command"</string>
-    <string name="error_exception_received_while_executing_termux_session_command">Exception received while to executing \"%1$s\" termux session command.\nException: %2$s</string>
-    <string name="error_exception_received_while_executing_termux_task_command">Exception received while to executing \"%1$s\" termux task command.\nException: %2$s"</string>
+    <string name="error_failed_to_execute_termux_session_command">"Failed to execute \"%1$s\" &TERMUX_APP_NAME; session command"</string>
+    <string name="error_failed_to_execute_termux_task_command">"Failed to execute \"%1$s\" &TERMUX_APP_NAME; task command"</string>
+    <string name="error_exception_received_while_executing_termux_session_command">Exception received while to executing \"%1$s\" &TERMUX_APP_NAME; session command.\nException: %2$s</string>
+    <string name="error_exception_received_while_executing_termux_task_command">Exception received while to executing \"%1$s\" &TERMUX_APP_NAME; task command.\nException: %2$s"</string>
 
 
 
@@ -72,10 +72,10 @@
         **will likely be automatically closed/deleted**. You may optionally remove any device specific info that
         you consider private or don\'t want to share or that is not relevant to the issue.
         \n\nWe do not provide support for any hacking related tools/scripts. Any questions asked about them over email,
-        on github or other official termux community forums **will likely be automatically closed/deleted** and may
+        on github or other official Molina channels **will likely be automatically closed/deleted** and may
         even result in **temporary or permanent** ban. Check %1$s/wiki/Hacking for details.</string>
 
-    <string name="msg_termux_app_required_by_app">The &TERMUX_APP_NAME; is required by the %1$s app to run termux commands."</string>
+    <string name="msg_termux_app_required_by_app">The &TERMUX_APP_NAME; is required by the %1$s app to run &TERMUX_APP_NAME; commands."</string>
     <string name="error_termux_app_package_context_not_accessible">The &TERMUX_APP_NAME; app (package context) is not accessible."</string>
     <string name="error_termux_prefix_dir_path_not_accessible">The &TERMUX_APP_NAME; app $PREFIX directory is not accessible by the %1$s app.
         This may be because you have not installed or setup &TERMUX_APP_NAME; app or
