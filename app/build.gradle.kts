@@ -66,6 +66,13 @@ android {
 configurations.configureEach {
     // Guava 24.1-jre (dipakai engine terminal) sudah memuat ListenableFuture.
     exclude(group = "com.google.guava", module = "listenablefuture")
+
+    // termux-shared (ViewUtils) memakai androidx.window.WindowManager yang hanya ada di
+    // 1.0.0-alpha09. androidx.preference 1.2.x (modul X11) menarik androidx.window 1.0.0
+    // secara transitif sehingga kelas itu hilang dan Terminal crash. Kunci versinya.
+    resolutionStrategy {
+        force("androidx.window:window:1.0.0-alpha09")
+    }
 }
 
 dependencies {
