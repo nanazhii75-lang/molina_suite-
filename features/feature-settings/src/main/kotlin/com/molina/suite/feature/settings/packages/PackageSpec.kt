@@ -283,6 +283,12 @@ internal object PackageCatalog {
             PackageKind.TYPST_RUNTIME, listOf("curl", "ca-certificates", "xz-utils"), optional = true
         ),
         PackageSpec(
+            "x11desktop", R.string.pkg_x11desktop_title, R.string.pkg_x11desktop_desc,
+            PackageKind.APT,
+            listOf("openbox", "xterm", "pcmanfm", "dbus-x11", "x11-xserver-utils", "fonts-dejavu-core"),
+            optional = true
+        ),
+        PackageSpec(
             "tmux", R.string.pkg_tmux_title, R.string.pkg_tmux_desc,
             PackageKind.APT, listOf("tmux")
         ),
