@@ -23,6 +23,30 @@
     <string name="library_load_failed">Gagal memuat Library: %1$s</string>
     <string name="library_run_failed">Gagal menjalankan: %1$s</string>
 
+    <string name="settings_x11_title">Molina X11</string>
+    <string name="settings_x11_subtitle">Server layar, desktop, dan pemasangan</string>
+    <string name="x11_section_server">Server X11</string>
+    <string name="x11_section_desktop">Desktop</string>
+    <string name="x11_status_running">Berjalan</string>
+    <string name="x11_status_starting">Memulai…</string>
+    <string name="x11_status_stopped">Berhenti</string>
+    <string name="x11_status_error">Galat</string>
+    <string name="x11_status_unavailable">Molina X11 tidak tersedia</string>
+    <string name="x11_server_hint">Mulai server membuka jendela X11. Layar tetap hitam sampai desktop atau aplikasi dijalankan.</string>
+    <string name="x11_server_start">Mulai server</string>
+    <string name="x11_server_stop">Hentikan server</string>
+    <string name="x11_desktop_checking">Memeriksa desktop…</string>
+    <string name="x11_desktop_no_debian">Debian belum terpasang</string>
+    <string name="x11_desktop_missing">Desktop X11 belum terpasang</string>
+    <string name="x11_desktop_installed">Desktop X11 terpasang</string>
+    <string name="x11_desktop_failed">Gagal membaca status desktop: %1$s</string>
+    <string name="x11_desktop_hint">Perintah dikirim ke tab Terminal. Server X11 harus sudah berjalan.</string>
+    <string name="x11_desktop_install">Pasang desktop</string>
+    <string name="x11_desktop_start">Jalankan desktop</string>
+    <string name="x11_desktop_stop">Hentikan desktop</string>
+    <string name="x11_run_start_desktop">Molina X11: jalankan desktop</string>
+    <string name="x11_run_stop_desktop">Molina X11: hentikan desktop</string>
+
     <string name="settings_debian_title">Debian</string>
     <string name="settings_debian_subtitle">Install, update, dan panduan login/logout</string>
     <string name="debian_status_checking">Memeriksa status…</string>

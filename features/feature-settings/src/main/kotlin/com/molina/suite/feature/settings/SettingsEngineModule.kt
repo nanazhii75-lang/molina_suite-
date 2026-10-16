@@ -38,7 +38,8 @@ object SettingsEngineModule {
             JsonLibraryRepository.createDefault(),
             toolSetup,
             editorOpen,
-            libraryDraft
+            libraryDraft,
+            engines
         )
         engines.register(SettingsFeature())
     }

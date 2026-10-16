@@ -1,6 +1,7 @@
 package com.molina.suite.feature.settings
 
 import com.molina.suite.core.common.EditorOpenBoard
+import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.LibraryDraftBoard
 import com.molina.suite.core.common.TerminalInputSender
 import com.molina.suite.core.common.ToolSetupBoard
@@ -17,19 +18,22 @@ internal object SettingsDependencies {
     @Volatile private var board: ToolSetupBoard? = null
     @Volatile private var editorBoard: EditorOpenBoard? = null
     @Volatile private var draftBoard: LibraryDraftBoard? = null
+    @Volatile private var registry: EngineRegistry? = null
 
     fun install(
         terminalInput: TerminalInputSender,
         libraryRepository: LibraryRepository,
         toolSetupBoard: ToolSetupBoard,
         editorOpenBoard: EditorOpenBoard,
-        libraryDraftBoard: LibraryDraftBoard
+        libraryDraftBoard: LibraryDraftBoard,
+        engineRegistry: EngineRegistry
     ) {
         sender = terminalInput
         repository = libraryRepository
         board = toolSetupBoard
         editorBoard = editorOpenBoard
         draftBoard = libraryDraftBoard
+        registry = engineRegistry
     }
 
     fun terminalInput(): TerminalInputSender =
@@ -46,4 +50,7 @@ internal object SettingsDependencies {
 
     fun libraryDraft(): LibraryDraftBoard =
         checkNotNull(draftBoard) { "SettingsEngineModule.install belum dipanggil" }
+
+    fun engines(): EngineRegistry =
+        checkNotNull(registry) { "SettingsEngineModule.install belum dipanggil" }
 }
