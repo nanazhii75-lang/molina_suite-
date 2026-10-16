@@ -95,12 +95,14 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
 
     /** Dipakai fragment tab (lewat [HostTabSwitcher]) untuk berpindah tab. */
     override fun showEngine(id: EngineId) {
-        binding.bottomNav.selectedItemId = when (id) {
+        val menuId = when (id) {
             EngineId.MPV -> R.id.nav_mpv
             EngineId.TERMINAL -> R.id.nav_terminal
             EngineId.CODE -> R.id.nav_code
             EngineId.SETTINGS -> R.id.nav_settings
+            EngineId.X11 -> null // X11 tidak punya tab; jendelanya terpisah
         }
+        if (menuId != null) binding.bottomNav.selectedItemId = menuId
     }
 
     private fun engineIdFor(menuId: Int): EngineId? = when (menuId) {

@@ -5,5 +5,8 @@ enum class EngineId {
     MPV,
     TERMINAL,
     CODE,
-    SETTINGS
+    SETTINGS,
+
+    /** X server Molina X11. Tidak punya tab; diluncurkan dari home mpv. */
+    X11
 }

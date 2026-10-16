@@ -23,6 +23,7 @@ fun EngineStatus.daemonColorRes(id: DaemonId): Int =
             DaemonId.TERMINAL -> R.color.daemon_terminal
             DaemonId.MPV -> R.color.daemon_mpv
             DaemonId.CODE -> R.color.molina_status_on
+            DaemonId.X11 -> R.color.daemon_x11
         }
     } else {
         colorRes()
@@ -43,4 +44,5 @@ fun EngineId.labelRes(): Int = when (this) {
     EngineId.TERMINAL -> R.string.nav_terminal
     EngineId.CODE -> R.string.nav_code
     EngineId.SETTINGS -> R.string.nav_settings
+    EngineId.X11 -> R.string.nav_x11
 }
