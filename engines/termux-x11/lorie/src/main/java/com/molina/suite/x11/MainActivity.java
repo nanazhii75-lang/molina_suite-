@@ -72,7 +72,6 @@ import com.molina.suite.x11.input.InputStub;
 import com.molina.suite.x11.input.TouchInputHandler;
 import com.molina.suite.x11.utils.ImeHeightProvider;
 import com.molina.suite.x11.utils.TermuxX11ExtraKeys;
-import com.molina.suite.x11.utils.X11ToolbarViewPager;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -96,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
     TouchInputHandler mInputHandler;
     protected ICmdEntryInterface service = null;
     public TermuxX11ExtraKeys mExtraKeys;
+    X11MenuController x11Menu;
     private DisplayManager displayManager;
     private boolean showIMEWhileExternalConnected = true;
     private boolean externalKeyboardConnected = false;
@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
-    private void showDisplaysDialog() {
+    void showDisplaysDialog() {
         Set<String> tagSet = new TreeSet<>();
         for (Map.Entry<String, WeakReference<MainActivity>> e : instances.entrySet()) {
             MainActivity a = e.getValue().get();
@@ -315,10 +315,8 @@ public class MainActivity extends AppCompatActivity {
         applyWindowSettings();
 
         frm = findViewById(R.id.frame);
-        findViewById(R.id.preferences_button).setOnClickListener((l) -> startActivity(new Intent(this, LoriePreferences.class) {{ setAction(Intent.ACTION_MAIN); }}));
-        findViewById(R.id.help_button).setOnClickListener((l) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/termux/termux-x11/blob/master/README.md#running-graphical-applications"))));
-        findViewById(R.id.exit_button).setOnClickListener((l) -> finish());
-        findViewById(R.id.displays_button).setOnClickListener((l) -> showDisplaysDialog());
+        x11Menu = new X11MenuController(this);
+        x11Menu.install((v, k, e) -> mInputHandler.sendKeyEvent(e));
 
         LorieView lorieView = findViewById(R.id.lorieView);
         View lorieParent = (View) lorieView.getParent();
@@ -833,30 +831,14 @@ public class MainActivity extends AppCompatActivity {
         return findViewById(R.id.terminal_toolbar_view_pager);
     }
 
-    // We can not define function-static variables in Java, so we are defining them outside a function
-    private final X11ToolbarViewPager.PageAdapter mPageAdapter =
-            new X11ToolbarViewPager.PageAdapter(this, (v, k, e) -> mInputHandler.sendKeyEvent(e));
-    private final X11ToolbarViewPager.OnPageChangeListener mOnPageListener = new X11ToolbarViewPager.OnPageChangeListener(this);
+    /**
+     * Bar extra keys di bawah layar sudah digantikan menu dropdown (X11MenuController) dan pager
+     * lamanya tidak pernah ditampilkan lagi. Yang tersisa: menyegarkan menu dan tata letak.
+     */
     private void setTerminalToolbarView() {
-        final ViewPager pager = getTerminalToolbarViewPager();
-        ViewGroup parent = (ViewGroup) pager.getParent();
-
-        boolean showNow = !isInPictureInPictureMode && getLorieView().connected() && prefs.showAdditionalKbd.get() && prefs.additionalKbdVisible.get();
-
-        pager.setVisibility(showNow ? View.VISIBLE : View.INVISIBLE);
-
-        if (showNow) {
-            if (pager.getAdapter() != mPageAdapter)
-                pager.setAdapter(mPageAdapter);
-            pager.clearOnPageChangeListeners();
-            pager.addOnPageChangeListener(mOnPageListener);
-            pager.bringToFront();
-        } else {
-            parent.removeView(pager);
-            parent.addView(pager, 0);
-            if (mExtraKeys != null)
-                mExtraKeys.unsetSpecialKeys();
-        }
+        getTerminalToolbarViewPager().setVisibility(View.GONE);
+        if (x11Menu != null)
+            x11Menu.refresh(!isInPictureInPictureMode);
 
         setTerminalToolbarViewLayout();
         getLorieView().requestFocus();
@@ -953,16 +935,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void toggleExtraKeys(boolean visible, boolean saveState) {
-        boolean enabled = prefs.showAdditionalKbd.get();
-
-        if (enabled && getLorieView().connected() && saveState)
-            prefs.additionalKbdVisible.put(visible);
-
-        setTerminalToolbarView();
+        if (x11Menu != null)
+            x11Menu.setOpen(visible);
     }
 
     public void toggleExtraKeys() {
-        toggleExtraKeys(getTerminalToolbarViewPager().getVisibility() != View.VISIBLE, true);
+        if (x11Menu != null)
+            x11Menu.toggle();
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (x11Menu != null)
+            x11Menu.onDispatchTouchEvent(ev);
+        return super.dispatchTouchEvent(ev);
     }
 
     public boolean handleKey(KeyEvent e) {
