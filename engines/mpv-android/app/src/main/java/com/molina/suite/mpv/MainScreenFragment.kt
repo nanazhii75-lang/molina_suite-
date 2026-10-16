@@ -15,6 +15,7 @@ import android.util.Log
 import android.text.InputType
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.widget.TooltipCompat
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
@@ -90,16 +91,9 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
                 binding.docBtn.isEnabled = false
             }
         }
-        binding.urlBtn.setOnClickListener {
-            saveChoice("url")
-            val helper = Utils.OpenUrlDialog(requireContext())
-            with (helper) {
-                builder.setPositiveButton(R.string.dialog_ok) { _, _ ->
-                    val url = helper.text
-                    UrlPlayback.check(this@MainScreenFragment, url) { playFile(url, MpvOpenKind.URL) }
-                }
-                builder.setNegativeButton(R.string.dialog_cancel) { dialog, _ -> dialog.cancel() }
-                create().show()
+        binding.x11Btn.setOnClickListener {
+            if (!X11Entry.open(requireActivity())) {
+                Toast.makeText(requireContext(), R.string.x11_unavailable, Toast.LENGTH_SHORT).show()
             }
         }
         binding.ytBtn.setOnClickListener { showYoutubeSearchDialog() }
@@ -108,7 +102,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         }.also { it.attach() }
         queueBar = QueueBar(binding.queueBar) { items -> launchPlaylist(items, 0) }.also { it.attach() }
         // Ikon tanpa teks: tekan lama menampilkan labelnya.
-        listOf(binding.urlBtn, binding.ytBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
+        listOf(binding.x11Btn, binding.ytBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
             TooltipCompat.setTooltipText(it, it.contentDescription)
         }
         binding.settingsBtn.setOnClickListener {
@@ -207,7 +201,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
                     i.putExtra("default_path", lastPath)
                 filePickerLauncher.launch(i)
             }
-            "url" -> binding.urlBtn.callOnClick()
+            "url" -> binding.ytBtn.callOnClick()
         }
     }
 
@@ -221,7 +215,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         val dialog = AlertDialog.Builder(requireContext())
             .setTitle(R.string.action_search_youtube)
             .setView(input)
-            .setPositiveButton(R.string.dialog_ok) { _, _ -> searchYoutube(input.text.toString()) }
+            .setPositiveButton(R.string.dialog_ok) { _, _ -> submitSearchInput(input.text.toString()) }
             .setNegativeButton(R.string.dialog_cancel) { d, _ -> d.cancel() }
             .create()
         input.setOnEditorActionListener { _, actionId, _ ->
@@ -233,6 +227,18 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             }
         }
         dialog.show()
+    }
+
+    /** Satu kolom dua fungsi: URL langsung diputar, selain itu dicari di YouTube. */
+    private fun submitSearchInput(raw: String) {
+        val text = raw.trim()
+        if (text.isEmpty()) return
+        val url = SearchInput.asUrl(text)
+        if (url == null) {
+            searchYoutube(text)
+            return
+        }
+        UrlPlayback.check(this, url) { playFile(url, MpvOpenKind.URL) }
     }
 
     /** Memulai pencarian YouTube; hasilnya tampil di panel hasil. */

@@ -281,17 +281,17 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/urlBtn"
+            android:id="@+id/x11Btn"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/action_open_url"
+            android:contentDescription="@string/action_open_x11"
             android:padding="12dp"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_link_48dp"
-            app:tint="@color/molina_link" />
+            app:srcCompat="@drawable/ic_x11_48dp"
+            app:tint="@color/molina_x11" />
 
         <ImageButton
             android:id="@+id/ytBtn"

@@ -67,6 +67,7 @@ class MolinaApplication : Application() {
         SettingsEngineModule.install(engines, terminalInput, toolSetup, editorOpen, libraryDraft)
         X11EngineModule.install(this, engines, shell, keepAlive)
         DaemonStatusBridge.start(engines, daemons)
+        X11ErrorToaster.start(this, engines)
     }
 
     /**

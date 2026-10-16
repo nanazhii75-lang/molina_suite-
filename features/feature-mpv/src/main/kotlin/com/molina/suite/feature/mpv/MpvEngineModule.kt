@@ -6,6 +6,7 @@ import com.molina.suite.core.common.ToolReadinessChecker
 import com.molina.suite.core.common.ToolSetupBoard
 import com.molina.suite.mpv.MpvActivityReporter
 import com.molina.suite.mpv.UrlPlayback
+import com.molina.suite.mpv.X11Entry
 import com.molina.suite.mpv.search.YoutubeSearch
 
 /**
@@ -29,6 +30,7 @@ object MpvEngineModule {
         )
         MpvActivityReporter.install(MpvActivityLogger())
         UrlPlayback.install(MpvToolGate(toolReadiness, toolSetup))
+        X11Entry.install(MpvX11Opener(engines))
         engines.register(MpvFeature())
     }
 }

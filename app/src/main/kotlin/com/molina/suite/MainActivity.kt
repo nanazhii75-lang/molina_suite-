@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
 
         bindDaemon(DaemonId.TERMINAL, binding.dotTerminal)
         bindDaemon(DaemonId.MPV, binding.dotMpv)
+        bindDaemon(DaemonId.X11, binding.dotX11)
         bindMeter()
     }
 

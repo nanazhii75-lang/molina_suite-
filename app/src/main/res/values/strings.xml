@@ -18,6 +18,7 @@
 
     <string name="daemon_terminal">Terminal</string>
     <string name="daemon_mpv">mpv</string>
+    <string name="daemon_x11">X11</string>
 
     <string name="status_unavailable">Tidak tersedia</string>
     <string name="status_stopped">Berhenti</string>
