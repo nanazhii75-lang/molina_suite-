@@ -164,6 +164,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             binding.topPiPBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.openPlaylistBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.topResolutionBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
+            binding.topRepeatBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.topBackgroundBtn.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION)
             binding.controls.animate().alpha(0f).setDuration(CONTROLS_FADE_DURATION).setListener(listener)
         }
@@ -234,6 +235,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             }
             openPlaylistBtn.setOnClickListener { openPlaylistMenu({}) }
             topResolutionBtn.setOnClickListener { pickResolution() }
+            topRepeatBtn.setOnClickListener { toggleRepeatOnce() }
             topBackgroundBtn.setOnClickListener { playInBackground() }
             topMenuBtn.setOnClickListener { openTopMenu() }
             unlockBtn.setOnClickListener { unlockUI() }
@@ -677,6 +679,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.topPiPBtn.animate().cancel()
         binding.openPlaylistBtn.animate().cancel()
         binding.topResolutionBtn.animate().cancel()
+        binding.topRepeatBtn.animate().cancel()
         binding.topBackgroundBtn.animate().cancel()
 
         // reset controls alpha to be visible
@@ -686,6 +689,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.topPiPBtn.alpha = ROTATE_BTN_ALPHA
         binding.openPlaylistBtn.alpha = ROTATE_BTN_ALPHA
         binding.topResolutionBtn.alpha = ROTATE_BTN_ALPHA
+        binding.topRepeatBtn.alpha = ROTATE_BTN_ALPHA
         binding.topBackgroundBtn.alpha = ROTATE_BTN_ALPHA
 
         if (binding.controls.visibility != View.VISIBLE) {
@@ -696,6 +700,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             binding.openPlaylistBtn.visibility = if (psc.playlistCount > 1) View.VISIBLE else View.GONE
             binding.topResolutionBtn.visibility =
                 if (resolutionSwitcher.isApplicable()) View.VISIBLE else View.GONE
+            binding.topRepeatBtn.visibility = View.VISIBLE
+            updateRepeatOnceButton()
             // tanpa trek audio tidak ada yang bisa dilanjutkan di latar belakang
             binding.topBackgroundBtn.visibility = if (player.aid != -1) View.VISIBLE else View.GONE
 
@@ -725,6 +731,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         binding.topPiPBtn.visibility = View.GONE
         binding.openPlaylistBtn.visibility = View.GONE
         binding.topResolutionBtn.visibility = View.GONE
+        binding.topRepeatBtn.visibility = View.GONE
         binding.topBackgroundBtn.visibility = View.GONE
         binding.statsTextView.visibility = View.GONE
 
@@ -1281,6 +1288,21 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         genericPickerDialog(picker, R.string.title_speed_dialog, "speed") {
             restore()
         }
+    }
+
+    private fun isRepeatOnceActive(): Boolean =
+        MPVLib.getPropertyString("loop-file") == "1"
+
+    /** Ulangi 1x: loop-file=1 memutar berkas sekali lagi, lalu mpv mengembalikannya ke "no". */
+    private fun toggleRepeatOnce() {
+        MPVLib.setPropertyString("loop-file", if (isRepeatOnceActive()) "no" else "1")
+        updateRepeatOnceButton()
+    }
+
+    private fun updateRepeatOnceButton() {
+        val color = if (isRepeatOnceActive()) 0xFF26A69A.toInt() else android.graphics.Color.WHITE
+        androidx.core.widget.ImageViewCompat.setImageTintList(
+            binding.topRepeatBtn, android.content.res.ColorStateList.valueOf(color))
     }
 
     private val resolutionSwitcher = ResolutionSwitcher()

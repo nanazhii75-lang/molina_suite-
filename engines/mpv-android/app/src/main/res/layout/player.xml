@@ -325,6 +325,20 @@
                 app:tint="@color/tint_normal" />
 
             <ImageButton
+                android:id="@+id/topRepeatBtn"
+                android:layout_width="@dimen/molina_tool_btn_size"
+                android:layout_height="@dimen/molina_tool_btn_size"
+                android:layout_marginTop="@dimen/molina_tool_btn_gap"
+                android:alpha="0.65"
+                android:background="@drawable/molina_float_button_bg"
+                android:contentDescription="@string/ui_repeat_once"
+                android:padding="@dimen/molina_tool_btn_padding"
+                android:scaleType="fitCenter"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_repeat_one_24dp"
+                app:tint="@color/tint_normal" />
+
+            <ImageButton
                 android:id="@+id/topPiPBtn"
                 android:layout_width="@dimen/molina_tool_btn_size"
                 android:layout_height="@dimen/molina_tool_btn_size"
