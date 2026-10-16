@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- toolbar kanan player: ukuran tombol bulat, jarak antartombol, dan jarak ke bar kontrol -->
+    <dimen name="molina_tool_btn_size">44dp</dimen>
+    <dimen name="molina_tool_btn_gap">4dp</dimen>
+    <dimen name="molina_tool_btn_padding">10dp</dimen>
+    <dimen name="molina_tools_margin_top">8dp</dimen>
+    <dimen name="molina_tools_margin_bottom">12dp</dimen>
+    <dimen name="molina_controls_margin_bottom">60dp</dimen>
+</resources>

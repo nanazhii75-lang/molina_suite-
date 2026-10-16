@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="ui_resolution" translatable="false">Resolusi</string>
+    <string name="molina_resolution_title">Resolusi video</string>
+    <string name="molina_resolution_auto">Otomatis (maks. 1080p)</string>
+    <string name="molina_resolution_item">%1$dp</string>
+    <string name="molina_resolution_failed">Tidak bisa mengganti resolusi.</string>
+</resources>

@@ -26,7 +26,7 @@
             android:layout_marginLeft="24dp"
             android:layout_marginTop="60dp"
             android:layout_marginRight="24dp"
-            android:layout_marginBottom="60dp"
+            android:layout_marginBottom="@dimen/molina_controls_margin_bottom"
             android:background="#bf000000"
             android:orientation="vertical">
 
@@ -266,75 +266,91 @@
 
         </LinearLayout>
 
-        <!-- tombol putar layar: bulat, semi-transparan, paling bawah di kanan, tepat di atas bar kontrol -->
-        <ImageButton
-            android:id="@+id/topRotateBtn"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
+        <!-- toolbar kanan: satu kolom di antara tombol Lock/Setting (atas) dan bar kontrol
+             (bawah), rata bawah; tidak bisa menimpa keduanya. Visibilitas tiap tombol tetap
+             diatur MPVActivity; tombol GONE tidak memakan ruang. -->
+        <LinearLayout
+            android:id="@+id/rightTools"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_above="@id/controls"
             android:layout_alignParentEnd="true"
+            android:layout_below="@id/top_controls"
+            android:layout_marginTop="@dimen/molina_tools_margin_top"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="12dp"
-            android:alpha="0.65"
-            android:background="@drawable/molina_float_button_bg"
-            android:contentDescription="@string/ui_rotate_screen"
-            android:padding="10dp"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_screen_rotation_24dp"
-            app:tint="@color/tint_normal" />
+            android:layout_marginBottom="@dimen/molina_tools_margin_bottom"
+            android:gravity="bottom|end"
+            android:orientation="vertical">
 
-        <!-- tombol layar mengambang (PiP): di bawah ikon playlist, di atas ikon putar layar -->
-        <ImageButton
-            android:id="@+id/topPiPBtn"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:layout_above="@id/topRotateBtn"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="4dp"
-            android:alpha="0.65"
-            android:background="@drawable/molina_float_button_bg"
-            android:contentDescription="@string/ui_pip"
-            android:padding="10dp"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_picture_in_picture_24dp"
-            app:tint="@color/tint_normal" />
+            <ImageButton
+                android:id="@+id/topBackgroundBtn"
+                android:layout_width="@dimen/molina_tool_btn_size"
+                android:layout_height="@dimen/molina_tool_btn_size"
+                android:layout_marginTop="@dimen/molina_tool_btn_gap"
+                android:alpha="0.65"
+                android:background="@drawable/molina_float_button_bg"
+                android:contentDescription="@string/ui_background_play"
+                android:padding="@dimen/molina_tool_btn_padding"
+                android:scaleType="fitCenter"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_headset_24dp"
+                app:tint="@color/tint_normal" />
 
-        <!-- tombol daftar playlist: bulat, semi-transparan, di kanan bawah tepat di atas bar kontrol (area jempol/gesture volume) -->
-        <ImageButton
-            android:id="@+id/openPlaylistBtn"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:layout_above="@id/topPiPBtn"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="4dp"
-            android:alpha="0.65"
-            android:background="@drawable/molina_float_button_bg"
-            android:contentDescription="@string/ui_open_playlist"
-            android:padding="10dp"
-            android:scaleType="fitCenter"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_playlist_24dp"
-            app:tint="@color/tint_normal" />
+            <ImageButton
+                android:id="@+id/openPlaylistBtn"
+                android:layout_width="@dimen/molina_tool_btn_size"
+                android:layout_height="@dimen/molina_tool_btn_size"
+                android:layout_marginTop="@dimen/molina_tool_btn_gap"
+                android:alpha="0.65"
+                android:background="@drawable/molina_float_button_bg"
+                android:contentDescription="@string/ui_open_playlist"
+                android:padding="@dimen/molina_tool_btn_padding"
+                android:scaleType="fitCenter"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_playlist_24dp"
+                app:tint="@color/tint_normal" />
 
-        <!-- tombol putar di latar belakang: paling atas tumpukan kanan, di atas ikon playlist -->
-        <ImageButton
-            android:id="@+id/topBackgroundBtn"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:layout_above="@id/openPlaylistBtn"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="4dp"
-            android:alpha="0.65"
-            android:background="@drawable/molina_float_button_bg"
-            android:contentDescription="@string/ui_background_play"
-            android:padding="10dp"
-            android:scaleType="fitCenter"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_headset_24dp"
-            app:tint="@color/tint_normal" />
+            <ImageButton
+                android:id="@+id/topResolutionBtn"
+                android:layout_width="@dimen/molina_tool_btn_size"
+                android:layout_height="@dimen/molina_tool_btn_size"
+                android:layout_marginTop="@dimen/molina_tool_btn_gap"
+                android:alpha="0.65"
+                android:background="@drawable/molina_float_button_bg"
+                android:contentDescription="@string/ui_resolution"
+                android:padding="@dimen/molina_tool_btn_padding"
+                android:scaleType="fitCenter"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_hd_24dp"
+                app:tint="@color/tint_normal" />
+
+            <ImageButton
+                android:id="@+id/topPiPBtn"
+                android:layout_width="@dimen/molina_tool_btn_size"
+                android:layout_height="@dimen/molina_tool_btn_size"
+                android:layout_marginTop="@dimen/molina_tool_btn_gap"
+                android:alpha="0.65"
+                android:background="@drawable/molina_float_button_bg"
+                android:contentDescription="@string/ui_pip"
+                android:padding="@dimen/molina_tool_btn_padding"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/ic_picture_in_picture_24dp"
+                app:tint="@color/tint_normal" />
+
+            <ImageButton
+                android:id="@+id/topRotateBtn"
+                android:layout_width="@dimen/molina_tool_btn_size"
+                android:layout_height="@dimen/molina_tool_btn_size"
+                android:layout_marginTop="@dimen/molina_tool_btn_gap"
+                android:alpha="0.65"
+                android:background="@drawable/molina_float_button_bg"
+                android:contentDescription="@string/ui_rotate_screen"
+                android:padding="@dimen/molina_tool_btn_padding"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/ic_screen_rotation_24dp"
+                app:tint="@color/tint_normal" />
+
+        </LinearLayout>
 
         <!-- mismatching width/height so that the button appears exactly square?! -->
         <ImageButton
