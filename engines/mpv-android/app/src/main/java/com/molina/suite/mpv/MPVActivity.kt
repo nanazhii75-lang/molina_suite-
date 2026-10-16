@@ -366,6 +366,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         activityWatcher = MpvActivityReporter.watch(MpvOpenKind.fromIntent(intent))
             ?.also { MPVLib.addLogObserver(it) }
         player.addObserver(this)
+        player.addObserver(audioOnly)
         player.initialize(filesDir.path, cacheDir.path)
         player.playFile(filepath)
 
@@ -442,6 +443,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         }
         activityWatcher = null
 
+        player.removeObserver(audioOnly)
         player.removeObserver(this)
         player.destroy()
         super.onDestroy()
@@ -1512,6 +1514,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 MenuItem(R.id.playlistBtn) {
                     openPlaylistMenu(restoreState); false
                 },
+                MenuItem(R.id.audioOnlyBtn) { toggleAudioOnly(); true },
                 MenuItem(R.id.chapterBtn) {
                     val chapters = player.loadChapters()
                     if (chapters.isEmpty())
@@ -1553,6 +1556,17 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         /******/
 
         genericMenu(R.layout.dialog_top_menu, buttons, hiddenButtons, restoreState)
+    }
+
+    private val audioOnly = AudioOnlyMode()
+
+    private fun toggleAudioOnly() {
+        val enable = !audioOnly.isActive
+        if (!audioOnly.set(enable)) {
+            showToast(getString(R.string.molina_audio_only_unavailable), true)
+            return
+        }
+        showToast(getString(if (enable) R.string.molina_audio_only_on else R.string.molina_audio_only_off), true)
     }
 
     private val sleepTimer = SleepTimer { onSleepTimerExpired() }

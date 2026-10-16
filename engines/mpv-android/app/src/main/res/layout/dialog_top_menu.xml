@@ -28,13 +28,28 @@
             android:textAllCaps="false" />
     </TableRow>
 
-    <Button
-        android:id="@+id/playlistBtn"
-        style="@style/Widget.AppCompat.Button.Borderless"
+    <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/action_playlist"
-        android:textAllCaps="false" />
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/playlistBtn"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/action_playlist"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/audioOnlyBtn"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/molina_audio_only_title"
+            android:textAllCaps="false" />
+    </TableRow>
 
     <TableRow
         android:id="@+id/rowChapter"

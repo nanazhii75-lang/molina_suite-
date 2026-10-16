@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="molina_audio_only_title">Audio saja</string>
+    <string name="molina_audio_only_on">Audio saja aktif: video tidak diputar</string>
+    <string name="molina_audio_only_off">Audio saja dimatikan</string>
+    <string name="molina_audio_only_unavailable">Tidak ada trek audio untuk diputar</string>
+</resources>
