@@ -1270,7 +1270,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
      */
     private fun openPlayerSearch() {
         lateinit var dialog: AlertDialog
-        val search = PlayerSearchDialog { result ->
+        val search = PlayerSearchDialog({ MPVLib.getPropertyString("path") }) { result ->
             playSearchResult(result)
             dialog.dismiss()
         }

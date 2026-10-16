@@ -14,6 +14,7 @@ import org.schabi.newpipe.extractor.exceptions.ExtractionException
 import org.schabi.newpipe.extractor.exceptions.ReCaptchaException
 import org.schabi.newpipe.extractor.search.SearchExtractor
 import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeSearchQueryHandlerFactory
+import org.schabi.newpipe.extractor.stream.StreamInfo
 import org.schabi.newpipe.extractor.stream.StreamInfoItem
 import java.io.IOException
 import java.io.InterruptedIOException
@@ -34,6 +35,10 @@ internal class NewPipeSearchSource : YoutubeSearchSource {
 
     private val lock = Any()
     private var pool: Pool? = null
+
+    private class Related(val id: String, val items: List<YoutubeResult>, val builtAt: Long)
+
+    private var relatedCache: Related? = null
 
     override fun search(
         query: String,
@@ -132,6 +137,63 @@ internal class NewPipeSearchSource : YoutubeSearchSource {
             .take(POOL_TARGET)
     }
 
+    override fun related(watchUrl: String, limit: Int): List<YoutubeResult> =
+        Activities.log.track(ActivitySource.MPV, "Video terkait (NewPipe)") { entry ->
+            try {
+                runRelated(watchUrl, limit).also { entry.end(true, "${it.size} video") }
+            } catch (e: YoutubeSearchException) {
+                if (e.cause is InterruptedException) {
+                    entry.end(false, "dibatalkan", ActivityPriority.WARN)
+                } else {
+                    entry.end(false, MpvLogText.redact(e.message ?: e.reason.name))
+                }
+                throw e
+            }
+        }
+
+    private fun runRelated(watchUrl: String, limit: Int): List<YoutubeResult> {
+        // Hanya URL video YouTube yang dikenal; sumber lain (berkas, stream) tidak punya saran.
+        val id = YoutubeWatchUrl.videoId(watchUrl) ?: return emptyList()
+        val count = limit.coerceIn(1, MAX_RELATED)
+        synchronized(lock) {
+            val cached = relatedCache
+            if (cached != null && cached.id == id &&
+                SystemClock.elapsedRealtime() - cached.builtAt < POOL_TTL_MS
+            ) {
+                return cached.items.take(count)
+            }
+        }
+        val built = fetchRelated(id)
+        synchronized(lock) { relatedCache = Related(id, built, SystemClock.elapsedRealtime()) }
+        return built.take(count)
+    }
+
+    private fun fetchRelated(id: String): List<YoutubeResult> {
+        NewPipeRuntime.ensureReady()
+        throwIfInterrupted()
+        val info = try {
+            StreamInfo.getInfo(ServiceList.YouTube, WATCH_URL + id)
+        } catch (e: ReCaptchaException) {
+            throw YoutubeSearchException(Reason.FAILED, "YouTube meminta verifikasi (HTTP 429)", e)
+        } catch (e: ExtractionException) {
+            throw YoutubeSearchException(Reason.FAILED, "Gagal membaca video terkait: " + e.message, e)
+        } catch (e: SocketTimeoutException) {
+            throw YoutubeSearchException(Reason.TIMEOUT, "Koneksi ke YouTube melebihi batas waktu", e)
+        } catch (e: InterruptedIOException) {
+            throw YoutubeSearchException(Reason.FAILED, "Pengambilan dibatalkan", InterruptedException())
+        } catch (e: IOException) {
+            throw YoutubeSearchException(Reason.FAILED, "Jaringan: " + e.message, e)
+        } catch (e: RuntimeException) {
+            throw YoutubeSearchException(Reason.FAILED, "Extractor galat: " + e.message, e)
+        }
+        return info.relatedItems.asSequence()
+            .filterIsInstance<StreamInfoItem>()
+            .mapNotNull { NewPipeResultMapper.map(it) }
+            .filter { it.id != id }
+            .distinctBy { it.id }
+            .toList()
+    }
+
     private fun throwIfInterrupted() {
         if (Thread.currentThread().isInterrupted) {
             throw YoutubeSearchException(Reason.FAILED, "Pencarian dibatalkan", InterruptedException())
@@ -143,6 +205,8 @@ internal class NewPipeSearchSource : YoutubeSearchSource {
         const val POOL_TARGET = YoutubeSearchController.PAGE_SIZE * YoutubeSearchController.MAX_PAGES
         const val MAX_FETCH_PAGES = 3
         const val MAX_RESULTS = 20
+        const val MAX_RELATED = 20
+        const val WATCH_URL = "https://www.youtube.com/watch?v="
         const val POOL_TTL_MS = 5 * 60 * 1000L
     }
 }

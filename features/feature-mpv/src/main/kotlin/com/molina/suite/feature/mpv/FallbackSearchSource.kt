@@ -34,6 +34,10 @@ internal class FallbackSearchSource(
             secondary.search(query, offset, limit, onProgress)
         }
 
+    /** Video terkait hanya ada di sumber utama (NewPipe); yt-dlp tidak punya padanannya. */
+    override fun related(watchUrl: String, limit: Int): List<YoutubeResult> =
+        primary.related(watchUrl, limit)
+
     private companion object {
         const val TAG = "FallbackSearch"
     }

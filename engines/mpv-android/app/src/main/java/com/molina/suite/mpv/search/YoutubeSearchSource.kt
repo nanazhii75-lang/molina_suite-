@@ -19,6 +19,18 @@ interface YoutubeSearchSource {
         limit: Int,
         onProgress: (Int) -> Unit = {}
     ): List<YoutubeResult>
+
+    /**
+     * Video yang disarankan untuk video pada [watchUrl], paling banyak [limit]. Kosong bila
+     * [watchUrl] bukan video YouTube atau tidak ada saran. Sumber yang tidak mendukungnya
+     * melempar UNAVAILABLE. Memblokir thread pemanggil: panggil dari thread latar.
+     */
+    @Throws(YoutubeSearchException::class)
+    fun related(watchUrl: String, limit: Int): List<YoutubeResult> =
+        throw YoutubeSearchException(
+            YoutubeSearchException.Reason.UNAVAILABLE,
+            "Sumber pencarian ini tidak menyediakan video terkait"
+        )
 }
 
 /** Kegagalan pencarian; [reason] membedakan pesan yang perlu ditampilkan UI. */
