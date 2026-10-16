@@ -25,6 +25,8 @@ internal class PlaylistDialog(
         fun pickFile()
         fun openUrl()
         fun onItemPicked(item: MPVView.PlaylistItem)
+        fun onPrev()
+        fun onNext()
     }
 
     var listeners: Listeners? = null
@@ -39,6 +41,8 @@ internal class PlaylistDialog(
 
         binding.fileBtn.setOnClickListener { listeners?.pickFile() }
         binding.urlBtn.setOnClickListener { listeners?.openUrl() }
+        binding.plPrevBtn.setOnClickListener { listeners?.onPrev() }
+        binding.plNextBtn.setOnClickListener { listeners?.onNext() }
 
         binding.shuffleBtn.setOnClickListener {
             player.changeShuffle(true)
@@ -83,6 +87,24 @@ internal class PlaylistDialog(
         binding.repeatBtn.apply {
             imageTintList = if (repeatState > 0) ColorStateList.valueOf(accent) else null
             setImageResource(if (repeatState == 2) R.drawable.ic_repeat_one_24dp else R.drawable.ic_repeat_24dp)
+        }
+        updateNavButtons(repeatState == 1)
+    }
+
+    /** Prev/Next abu-abu di ujung daftar, kecuali ulangi-playlist menyala (mpv berputar). */
+    private fun updateNavButtons(wraps: Boolean) {
+        val context = binding.root.context
+        val normal = ContextCompat.getColor(context, R.color.tint_normal)
+        val disabled = ContextCompat.getColor(context, R.color.tint_disabled)
+        val position = playlist.indexOfFirst { it.index == selectedIndex }
+        val hasMany = playlist.size > 1
+        binding.plPrevBtn.apply {
+            isEnabled = hasMany && (wraps || position > 0)
+            imageTintList = ColorStateList.valueOf(if (isEnabled) normal else disabled)
+        }
+        binding.plNextBtn.apply {
+            isEnabled = hasMany && (wraps || position < playlist.size - 1)
+            imageTintList = ColorStateList.valueOf(if (isEnabled) normal else disabled)
         }
     }
 

@@ -1210,6 +1210,9 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         dialog.show()
     }
 
+    /** Panel playlist yang sedang terbuka; disegarkan saat posisi atau isi playlist berubah. */
+    private var playlistPanel: PlaylistDialog? = null
+
     private fun openPlaylistMenu(restore: StateRestoreCallback) {
         val impl = PlaylistDialog(player, playlistTitles)
         lateinit var dialog: AlertDialog
@@ -1242,14 +1245,26 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 MPVLib.setPropertyInt("playlist-pos", item.index)
                 dialog.dismiss()
             }
+
+            override fun onPrev() {
+                playlistPrev()
+            }
+
+            override fun onNext() {
+                playlistNext()
+            }
         }
 
         dialog = with (AlertDialog.Builder(this, R.style.PlaylistPanelTheme)) {
             val inflater = LayoutInflater.from(context)
             setView(impl.buildView(inflater))
-            setOnDismissListener { restore() }
+            setOnDismissListener {
+                if (playlistPanel === impl) playlistPanel = null
+                restore()
+            }
             create()
         }
+        playlistPanel = impl
         dialog.show()
         dockPlaylistPanel(dialog)
     }
@@ -1923,7 +1938,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         if (!activityIsForeground) return
         when (property) {
             "time-pos" -> updatePlaybackPos(psc.positionSec)
-            "playlist-pos", "playlist-count" -> updatePlaylistButtons()
+            "playlist-pos", "playlist-count" -> {
+                updatePlaylistButtons()
+                playlistPanel?.refresh()
+            }
         }
     }
 

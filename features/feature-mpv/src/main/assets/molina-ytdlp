@@ -8,4 +8,17 @@ export HOME="${PREFIX%/usr}/home"
 export TMPDIR="$PREFIX/tmp"
 export PATH="$PREFIX/bin"
 mkdir -p "$TMPDIR"
-exec proot-distro login debian --shared-tmp -- /usr/local/bin/yt-dlp "$@" </dev/null
+# proot-distro mencetak peringatan tak berbahaya ke stderr; buang hanya baris itu.
+filter_stderr() {
+    local line
+    while IFS= read -r line || [ -n "$line" ]; do
+        case "$line" in
+            "proot warning: can't sanitize binding"*) ;;
+            *) printf '%s\n' "$line" >&2 ;;
+        esac
+    done
+}
+proot-distro login debian --shared-tmp -- /usr/local/bin/yt-dlp "$@" </dev/null 2> >(filter_stderr)
+status=$?
+wait
+exit "$status"
