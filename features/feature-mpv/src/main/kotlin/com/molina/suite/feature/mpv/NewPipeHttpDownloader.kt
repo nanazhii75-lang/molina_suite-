@@ -55,7 +55,7 @@ internal class NewPipeHttpDownloader private constructor(
     }
 
     companion object {
-        private const val USER_AGENT =
+        internal const val USER_AGENT =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0"
         private const val HTTP_TOO_MANY_REQUESTS = 429
         private val METHODS_WITH_BODY = setOf("POST", "PUT", "PATCH")

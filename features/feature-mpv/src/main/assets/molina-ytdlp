@@ -8,6 +8,44 @@ export HOME="${PREFIX%/usr}/home"
 export TMPDIR="$PREFIX/tmp"
 export PATH="$PREFIX/bin"
 mkdir -p "$TMPDIR"
+
+# Jalur cepat YouTube: aplikasi menyelesaikan URL lewat NewPipeExtractor (tanpa proot). Hanya
+# dipakai untuk "-J" (ytdl_hook) dengan URL YouTube; jawaban apa pun selain "OK" atau server yang
+# tidak ada jatuh ke yt-dlp di bawah. Hentikan jalur ini dengan: touch ~/../mpv-newpipe.off
+BRIDGE="${PREFIX%/usr}/mpv-newpipe.bridge"
+OFF="${PREFIX%/usr}/mpv-newpipe.off"
+try_newpipe() {
+    local arg prev="" url="" format="" want_json=0 port token status json
+    for arg in "$@"; do
+        [ "$arg" = "-J" ] && want_json=1
+        [ "$prev" = "--format" ] && format="$arg"
+        prev="$arg"
+        url="$arg"
+    done
+    [ "$want_json" = 1 ] || return 1
+    case "$url" in
+        https://youtu.be/*|https://youtube.com/*|https://www.youtube.com/*|\
+        https://m.youtube.com/*|https://music.youtube.com/*) ;;
+        *) return 1 ;;
+    esac
+    [ -e "$OFF" ] && return 1
+    [ -r "$BRIDGE" ] || return 1
+    read -r port token < "$BRIDGE" || return 1
+    [ -n "$port" ] && [ -n "$token" ] || return 1
+    exec 3<>"/dev/tcp/127.0.0.1/$port" || return 1
+    printf '%s\n%s\n%s\n' "$token" "$url" "$format" >&3 || return 1
+    IFS= read -r -t 45 status <&3 || return 1
+    [ "$status" = "OK" ] || return 1
+    IFS= read -r -t 10 json <&3 || return 1
+    [ -n "$json" ] || return 1
+    printf '%s\n' "$json"
+}
+# Dalam subshell: kegagalan membuka koneksi tidak boleh menghentikan pembungkus ini.
+if json="$(try_newpipe "$@" 2>/dev/null)" && [ -n "$json" ]; then
+    printf '%s\n' "$json"
+    exit 0
+fi
+
 # proot-distro mencetak peringatan tak berbahaya ke stderr; buang hanya baris itu.
 filter_stderr() {
     local line

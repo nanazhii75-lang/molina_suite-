@@ -29,6 +29,8 @@ internal object MpvYtdlBridge {
 
     fun install(application: Application) {
         val target = wrapperFile(application)
+        // Jalur cepat YouTube: pembungkus bertanya ke server lokal ini sebelum memakai yt-dlp di proot.
+        NewPipeYtdlServer.start(application)
         MolinaMpvOptions.set("ytdl", "yes")
         MolinaMpvOptions.set("ytdl-format", YTDL_FORMAT)
         // Log mpv lengkap (termasuk ytdl_hook dan jaringan) agar kegagalan putar bisa dibaca dari
