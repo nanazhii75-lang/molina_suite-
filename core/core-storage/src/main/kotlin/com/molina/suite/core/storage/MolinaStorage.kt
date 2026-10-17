@@ -22,6 +22,9 @@ object MolinaStorage {
     /** Sub-folder hasil ekspor dokumen: /sdcard/Molina/Export/. */
     const val EXPORT_DIR_NAME = "Export"
 
+    /** Sub-folder playlist (m3u/m3u8): /sdcard/Molina/Playlists/. */
+    const val PLAYLISTS_DIR_NAME = "Playlists"
+
     sealed interface EnsureResult {
         data class Ready(val root: File) : EnsureResult
         data class Failed(val dir: File, val reason: String) : EnsureResult
@@ -34,6 +37,9 @@ object MolinaStorage {
 
     /** Folder hasil ekspor dokumen; dibuat oleh pelaksana konversi saat dibutuhkan. */
     fun exportDir(): File = File(sharedRoot(), EXPORT_DIR_NAME)
+
+    /** Folder playlist; dibuat oleh pelaksana penyalinan saat dibutuhkan. */
+    fun playlistsDir(): File = File(sharedRoot(), PLAYLISTS_DIR_NAME)
 
     /** Membuat folder bersama beserta sub-foldernya bila belum ada. */
     fun ensureDirectories(): EnsureResult {
