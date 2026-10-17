@@ -81,7 +81,7 @@ import org.json.JSONObject;
  * "-_-" will input the string "-_-"
  * }
  *
- * For more info, check https://wiki.termux.com/wiki/Touch_Keyboard.
+ * Formatnya mengikuti extra-keys Molina Terminal; daftar tombol khusus ada di deskripsi Pengaturan X11.
  */
 public class ExtraKeysInfo {
 

@@ -34,11 +34,22 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/x11_wordmark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:text="@string/x11_wordmark"
+                android:textColor="@color/x11_accent"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="@string/x11_connecting"
-                android:textColor="#99FFFFFF"
+                android:textColor="@color/x11_accent_soft"
                 android:textSize="14sp" />
         </LinearLayout>
 
