@@ -1,5 +1,8 @@
 package com.molina.suite.feature.mpv
 
+import com.molina.suite.core.common.ActivitySource
+import com.molina.suite.core.common.ConnectionLedger
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.schabi.newpipe.extractor.downloader.Downloader
@@ -60,12 +63,19 @@ internal class NewPipeHttpDownloader private constructor(
         private const val HTTP_TOO_MANY_REQUESTS = 429
         private val METHODS_WITH_BODY = setOf("POST", "PUT", "PATCH")
 
+        /** Mencatat tiap permintaan jaringan (termasuk pengalihan) ke catatan koneksi sesi ini. */
+        private fun ledgerInterceptor() = Interceptor { chain ->
+            ConnectionLedger.shared.record(ActivitySource.MPV, chain.request().url.toString())
+            chain.proceed(chain.request())
+        }
+
         fun create(): NewPipeHttpDownloader = NewPipeHttpDownloader(
             OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
                 .callTimeout(25, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
+                .addNetworkInterceptor(ledgerInterceptor())
                 .build()
         )
     }
