@@ -25,4 +25,5 @@ dependencies {
     implementation(project(":core:core-common"))
     implementation(project(":engines:termux-x11-lorie"))
     implementation("androidx.core:core-ktx:1.13.1")
+    testImplementation("junit:junit:4.13.2")
 }

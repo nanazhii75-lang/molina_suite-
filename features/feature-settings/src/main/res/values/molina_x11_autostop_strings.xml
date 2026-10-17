@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="x11_section_auto_stop">Berhenti otomatis</string>
+    <string name="x11_auto_stop_off">Mati. Desktop tetap berjalan sampai kamu menghentikannya.</string>
+    <string name="x11_auto_stop_on">Desktop dihentikan otomatis bila aplikasi berada di latar belakang %1$d menit.</string>
+    <string name="x11_auto_stop_hint">Menghemat memori, tetapi pekerjaan panjang di desktop (misalnya kompilasi) ikut berhenti saat kamu meninggalkan aplikasi.</string>
+    <string name="x11_auto_stop_change">Ubah…</string>
+    <string name="x11_auto_stop_dialog_title">Berhenti otomatis setelah</string>
+    <string name="x11_auto_stop_option_off">Mati</string>
+    <string name="x11_auto_stop_option_minutes">%1$d menit di latar belakang</string>
+</resources>

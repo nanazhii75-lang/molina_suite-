@@ -4,6 +4,7 @@ import android.app.Application
 import com.molina.suite.core.common.BackgroundKeepAlive
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.ShellCommandRunner
+import com.molina.suite.core.common.X11AutoStopPrefs
 import com.molina.suite.core.common.X11Controller
 
 /**
@@ -23,5 +24,6 @@ object X11EngineModule {
         engines.registerLauncher(launcher)
         X11StopHandler.controller = controller
         X11StatusNotifier(application, launcher, controller).start()
+        X11IdleWatcher(application, launcher, controller, X11AutoStopPrefs(application)).start()
     }
 }

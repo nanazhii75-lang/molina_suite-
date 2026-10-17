@@ -17,6 +17,7 @@ import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.EngineLauncher
 import com.molina.suite.core.common.EngineStatus
 import com.molina.suite.core.common.ToolSetupTarget
+import com.molina.suite.core.common.X11AutoStopPrefs
 import com.molina.suite.feature.settings.R
 import com.molina.suite.feature.settings.Refreshable
 import com.molina.suite.feature.settings.SettingsDependencies
@@ -47,6 +48,7 @@ class X11Fragment : Fragment(R.layout.fragment_x11), Refreshable {
     private var ramSummary: TextView? = null
     private var stopResult: TextView? = null
     private var stopChoose: MaterialButton? = null
+    private var autoStopSummary: TextView? = null
     private var desktopState = DesktopState.CHECKING
 
     private fun launcher(): EngineLauncher? =
@@ -64,6 +66,9 @@ class X11Fragment : Fragment(R.layout.fragment_x11), Refreshable {
         ramSummary = view.findViewById(R.id.x11_ram_summary)
         stopResult = view.findViewById(R.id.x11_stop_result)
         stopChoose = view.findViewById(R.id.x11_stop_choose)
+        autoStopSummary = view.findViewById(R.id.x11_auto_stop_summary)
+        view.findViewById<View>(R.id.x11_auto_stop_change).setOnClickListener { chooseAutoStop() }
+        renderAutoStop()
 
         view.findViewById<View>(R.id.x11_refresh).setOnClickListener { refresh() }
         serverStart?.setOnClickListener { startServer() }
@@ -95,6 +100,7 @@ class X11Fragment : Fragment(R.layout.fragment_x11), Refreshable {
         ramSummary = null
         stopResult = null
         stopChoose = null
+        autoStopSummary = null
         super.onDestroyView()
     }
 
@@ -255,6 +261,39 @@ class X11Fragment : Fragment(R.layout.fragment_x11), Refreshable {
             showStopResult(message)
             stopChoose?.isEnabled = true
         }
+    }
+
+    private fun renderAutoStop() {
+        val appContext = context?.applicationContext ?: return
+        val minutes = X11AutoStopPrefs(appContext).minutes
+        autoStopSummary?.text = if (minutes == X11AutoStopPrefs.OFF) {
+            getString(R.string.x11_auto_stop_off)
+        } else {
+            getString(R.string.x11_auto_stop_on, minutes)
+        }
+    }
+
+    /** Dialog pilihan tunggal: Mati, 10, 30, atau 60 menit di latar belakang; tersimpan saat dipilih. */
+    private fun chooseAutoStop() {
+        val host = activity ?: return
+        val prefs = X11AutoStopPrefs(host.applicationContext)
+        val options = X11AutoStopPrefs.OPTIONS
+        val labels = Array(options.size) { index ->
+            if (options[index] == X11AutoStopPrefs.OFF) {
+                getString(R.string.x11_auto_stop_option_off)
+            } else {
+                getString(R.string.x11_auto_stop_option_minutes, options[index])
+            }
+        }
+        MaterialAlertDialogBuilder(host)
+            .setTitle(R.string.x11_auto_stop_dialog_title)
+            .setSingleChoiceItems(labels, options.indexOf(prefs.minutes).coerceAtLeast(0)) { dialog, which ->
+                prefs.minutes = options[which]
+                renderAutoStop()
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.x11_stop_cancel, null)
+            .show()
     }
 
     private fun showStopResult(text: String) {

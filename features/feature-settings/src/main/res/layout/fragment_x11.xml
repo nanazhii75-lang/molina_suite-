@@ -216,6 +216,46 @@
                     android:layout_marginTop="@dimen/ms_space_sm"
                     android:text="@string/x11_stop_choose" />
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/ms_space_md"
+                android:layout_marginEnd="@dimen/ms_space_md"
+                android:layout_marginBottom="@dimen/ms_card_gap"
+                android:background="@drawable/ms_bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/ms_space_md">
+
+                <TextView
+                    style="@style/Molina.Text.Item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/x11_section_auto_stop" />
+
+                <TextView
+                    android:id="@+id/x11_auto_stop_summary"
+                    style="@style/Molina.Text.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_xs"
+                    android:text="@string/x11_auto_stop_off" />
+
+                <TextView
+                    style="@style/Molina.Text.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_xs"
+                    android:text="@string/x11_auto_stop_hint" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/x11_auto_stop_change"
+                    style="@style/Molina.Button.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_sm"
+                    android:text="@string/x11_auto_stop_change" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
