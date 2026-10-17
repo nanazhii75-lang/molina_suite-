@@ -14,9 +14,11 @@ export TMPDIR="$PREFIX/tmp"
 export PATH="$PREFIX/bin"
 mkdir -p "$TMPDIR"
 
-# Jejak singkat tiap pemanggilan di files/mpv-ytdl.log (hanya baca-tulis aplikasi; dipangkas
+# Jejak singkat tiap pemanggilan di usr/var/log/mpv-ytdl.log (di dalam prefix agar terlihat
+# juga dari Terminal yang berjalan di Debian/proot; dipangkas
 # bila > 200 KB). Tidak menulis ke stdout: stdout dibaca ytdl_hook sebagai JSON.
-LOG="${PREFIX%/usr}/mpv-ytdl.log"
+LOG="$PREFIX/var/log/mpv-ytdl.log"
+mkdir -p "$PREFIX/var/log" 2>/dev/null
 LAST_ARG=""
 for LAST_ARG in "$@"; do :; done
 log_line() {
