@@ -56,7 +56,14 @@ filter_stderr() {
         esac
     done
 }
-proot-distro login debian --shared-tmp -- /usr/local/bin/yt-dlp "$@" </dev/null 2> >(filter_stderr)
+# stderr ditampung ke berkas lalu disaring setelah proses selesai. Substitusi proses
+# (2> >(...)) dan "wait" dulu bisa menggantung selamanya karena subshell penyaring tidak
+# pernah menerima EOF, sehingga pembungkus tidak selesai dan ytdl_hook mpv menunggu terus.
+errfile="$TMPDIR/ytdlp-err.$$"
+trap 'rm -f "$errfile"' EXIT
+proot-distro login debian --shared-tmp -- /usr/local/bin/yt-dlp "$@" </dev/null 2>"$errfile"
 status=$?
-wait
+if [ -s "$errfile" ]; then
+    filter_stderr < "$errfile"
+fi
 exit "$status"
