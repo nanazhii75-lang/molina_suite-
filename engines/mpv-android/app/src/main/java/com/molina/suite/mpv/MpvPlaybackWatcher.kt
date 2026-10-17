@@ -28,8 +28,25 @@ internal class MpvPlaybackWatcher(
 
     /** Dipanggil dari [MPVActivity.event] untuk setiap kejadian mpv. */
     fun onEvent(eventId: Int) {
+        when (eventId) {
+            MPVLib.mpvEventId.MPV_EVENT_START_FILE -> reportOrigins("path")
+            MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> reportOrigins("stream-open-filename")
+        }
         if (eventId == MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED && loaded.compareAndSet(false, true)) {
             deliver { listener.note(session, "berkas termuat", false) }
+        }
+    }
+
+    /** Melaporkan asal jaringan dari properti mpv [property]; gagal baca atau lapor tidak mengganggu pemutar. */
+    private fun reportOrigins(property: String) {
+        if (closed.get()) return
+        val value = try {
+            MPVLib.getPropertyString(property)
+        } catch (e: Exception) {
+            return
+        }
+        for (origin in MpvOrigins.extract(value)) {
+            deliver { listener.reached(session, origin) }
         }
     }
 

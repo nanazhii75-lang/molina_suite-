@@ -35,7 +35,11 @@ object MpvEngineModule {
         )
         playback.setControls(MpvPlaybackControls())
         MpvActivityReporter.install(
-            CompositeMpvActivityListener(MpvActivityLogger(), MpvPlaybackPublisher(playback))
+            CompositeMpvActivityListener(
+                MpvActivityLogger(),
+                MpvPlaybackPublisher(playback),
+                MpvConnectionRecorder()
+            )
         )
         UrlPlayback.install(MpvToolGate(toolReadiness, toolSetup))
         X11Entry.install(MpvX11Opener(engines))

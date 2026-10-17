@@ -16,6 +16,8 @@ internal class CompositeMpvActivityListener(
     override fun closed(session: Long, played: Boolean, failure: String?) =
         each { it.closed(session, played, failure) }
 
+    override fun reached(session: Long, origin: String) = each { it.reached(session, origin) }
+
     private inline fun each(call: (MpvActivityListener) -> Unit) {
         for (part in parts) {
             try {

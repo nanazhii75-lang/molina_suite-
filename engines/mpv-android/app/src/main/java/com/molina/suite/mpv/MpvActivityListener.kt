@@ -37,6 +37,12 @@ interface MpvActivityListener {
      * dari mpv bila berkas tidak pernah termuat, selain itu null.
      */
     fun closed(session: Long, played: Boolean, failure: String?)
+
+    /**
+     * Pemutar membuka koneksi ke [origin] (skema://host[:port], tanpa jalur, query, atau
+     * user:password; lihat [MpvOrigins]). Bawaan tidak melakukan apa-apa.
+     */
+    fun reached(session: Long, origin: String) {}
 }
 
 /** Titik pertemuan longgar antara pemutar mpv dan pencatat. Tanpa pendengar, tidak ada yang dicatat. */
