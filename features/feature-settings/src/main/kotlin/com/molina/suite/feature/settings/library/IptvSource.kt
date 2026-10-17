@@ -27,6 +27,7 @@ internal object IptvSource {
     private const val PREFS = "molina_iptv"
     private const val KEY_URL = "source_url"
     private const val KEY_UPDATED = "updated_at"
+    private const val KEY_BUNDLE = "bundle_id"
     private const val ASSET = "iptv/indonesia.m3u"
     private const val DIR_NAME = "iptv"
     private const val FILE_NAME = "indonesia.m3u"
@@ -60,6 +61,7 @@ internal object IptvSource {
         val file = activeFile(context)
         val parsed = readParsed(file)
         if (parsed != null) {
+            if (bundleStale(context)) return seed(context)
             if (parsed.dropped == 0) return LibraryResult.Ok(file)
             return writeAtomic(context, parsed.text)
         }
@@ -138,6 +140,21 @@ internal object IptvSource {
         }
     }
 
+    /** Penanda isi bundel di APK; berubah bila daftar bawaan diganti lewat pembaruan aplikasi. */
+    private fun bundleId(context: Context): String? = try {
+        context.assets.open(ASSET).use { readLimited(it) }?.hashCode()?.toString()
+    } catch (e: IOException) {
+        null
+    }
+
+    /** Pengguna yang belum memakai sumber sendiri mendapat bundel baru saat bundel APK berubah. */
+    private fun bundleStale(context: Context): Boolean {
+        val p = prefs(context)
+        if (p.getLong(KEY_UPDATED, 0L) > 0L) return false
+        val id = bundleId(context) ?: return false
+        return p.getString(KEY_BUNDLE, null) != id
+    }
+
     private fun seed(context: Context): LibraryResult<File> {
         val text = try {
             context.assets.open(ASSET).use { readLimited(it) }
@@ -148,7 +165,11 @@ internal object IptvSource {
             is LibraryResult.Failure -> return LibraryResult.Failure("Bundel IPTV rusak: ${r.reason}")
             is LibraryResult.Ok -> r.value
         }
-        return writeAtomic(context, parsed.text)
+        val written = writeAtomic(context, parsed.text)
+        if (written is LibraryResult.Ok) {
+            bundleId(context)?.let { prefs(context).edit().putString(KEY_BUNDLE, it).apply() }
+        }
+        return written
     }
 
     private fun writeAtomic(context: Context, text: String): LibraryResult<File> {
