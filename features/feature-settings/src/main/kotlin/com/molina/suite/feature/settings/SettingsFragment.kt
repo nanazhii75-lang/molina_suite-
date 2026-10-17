@@ -11,6 +11,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.molina.suite.core.common.HostBackPressHandler
 import com.molina.suite.core.common.ToolSetupRequest
 import com.molina.suite.core.common.ToolSetupTarget
+import com.molina.suite.feature.settings.connections.ConnectionsFragment
 import com.molina.suite.feature.settings.debian.DebianFragment
 import com.molina.suite.feature.settings.integration.IntegrationFragment
 import com.molina.suite.feature.settings.library.LibraryFragment
@@ -53,6 +54,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         view.findViewById<View>(R.id.settings_row_packages).setOnClickListener { openPackages() }
         view.findViewById<View>(R.id.settings_row_integration).setOnClickListener { openIntegration() }
         view.findViewById<View>(R.id.settings_row_logcat).setOnClickListener { openLogcat() }
+        view.findViewById<View>(R.id.settings_row_connections).setOnClickListener { openConnections() }
         logcatSubtitle = view.findViewById<TextView>(R.id.settings_logcat_subtitle).also {
             logcatSubtitleColor = it.currentTextColor
         }
@@ -167,6 +169,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
             .commit()
     }
 
+    private fun openConnections() {
+        if (childFragmentManager.backStackEntryCount > 0) return
+        childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.settings_child_container, ConnectionsFragment())
+            .addToBackStack(BACKSTACK_CONNECTIONS)
+            .commit()
+    }
+
     private fun openDebian() {
         if (childFragmentManager.backStackEntryCount > 0) return
         childFragmentManager.beginTransaction()
@@ -231,5 +242,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         const val BACKSTACK_LOGCAT = "logcat"
         const val BACKSTACK_INTEGRATION = "integration"
         const val BACKSTACK_X11 = "x11"
+        const val BACKSTACK_CONNECTIONS = "connections"
     }
 }

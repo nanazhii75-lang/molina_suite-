@@ -204,6 +204,32 @@
                     android:id="@+id/settings_logcat_subtitle"
                     android:text="@string/settings_logcat_subtitle" />
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/settings_row_connections"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/ms_card_gap"
+                android:background="@drawable/ms_bg_card_ripple"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="64dp"
+                android:orientation="vertical"
+                android:padding="@dimen/ms_space_md">
+
+                <TextView
+                    style="@style/Molina.Text.Item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_connections_title" />
+
+                <TextView
+                    style="@style/Molina.Text.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_xs"
+                    android:text="@string/settings_connections_subtitle" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

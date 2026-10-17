@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_connections_title">Catatan Koneksi</string>
+    <string name="settings_connections_subtitle">Host yang dihubungi sesi ini, tanpa pelacak</string>
+    <string name="connections_hint">Hanya nama host dan port yang dicatat, dari pemutaran dan pencarian mpv. Jalur, query, dan akun tidak disimpan. Catatan ada di memori saja dan hilang saat aplikasi ditutup. Host segmen siaran di server lain tidak ikut tercatat. Tanda gembok terbuka berarti tanpa enkripsi (http).</string>
+    <string name="connections_refresh">Segarkan</string>
+    <string name="connections_clear">Bersihkan catatan</string>
+    <string name="connections_summary">%1$d host, %2$d tanpa enkripsi</string>
+    <string name="connections_summary_none">Belum ada koneksi tercatat sesi ini</string>
+    <string name="connections_empty">Putar video atau cari di mpv, lalu tekan Segarkan.</string>
+    <string name="connections_host_secure">\uD83D\uDD12 %1$s</string>
+    <string name="connections_host_insecure">\uD83D\uDD13 %1$s</string>
+    <string name="connections_row_meta">%1$s · %2$d× · %3$s</string>
+</resources>
