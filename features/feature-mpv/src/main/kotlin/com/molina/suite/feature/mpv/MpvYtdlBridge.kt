@@ -34,12 +34,27 @@ internal object MpvYtdlBridge {
         MolinaMpvOptions.set("ytdl", "yes")
         MolinaMpvOptions.set("ytdl-format", YTDL_FORMAT)
         // Log mpv lengkap (termasuk ytdl_hook dan jaringan) agar kegagalan putar bisa dibaca dari
-        // Terminal molina; ditimpa setiap pemutar baru dibuat.
-        MolinaMpvOptions.set("log-file", File(application.filesDir, "mpv.log").absolutePath)
+        // Terminal molina; ditimpa setiap pemutar baru dibuat. Disimpan di usr/var/log karena
+        // Terminal berjalan di Debian/proot dan hanya melihat isi usr/ (bukan akar files/).
+        mpvLogFile(application)?.let {
+            MolinaMpvOptions.set("log-file", it.absolutePath)
+            MolinaMpvOptions.set("msg-level", "all=v")
+        }
         MolinaMpvOptions.set("script-opts", "ytdl_hook-ytdl_path=" + target.absolutePath)
         Thread({ writeWrapperWhenPrefixReady(application, target) }, "mpv-ytdl-bridge")
             .apply { isDaemon = true }
             .start()
+    }
+
+    /**
+     * Lokasi log mpv di usr/var/log. Null sebelum bootstrap selesai (usr/bin/bash belum ada),
+     * supaya usr/ tidak terbuat lebih dulu dan prefix tampak sudah terpasang.
+     */
+    private fun mpvLogFile(application: Application): File? {
+        if (!File(application.filesDir, "usr/bin/bash").isFile) return null
+        val dir = File(application.filesDir, "usr/var/log")
+        if (!dir.isDirectory && !dir.mkdirs()) return null
+        return File(dir, "mpv.log")
     }
 
     /** Lokasi pembungkus molina-ytdlp di prefix aplikasi. */
