@@ -29,6 +29,17 @@ log_line() {
     return 0
 }
 
+# URL media langsung (HLS, DASH, TS, FLV) tidak perlu yt-dlp. Tanpa ini, channel IPTV yang gagal
+# dibuka langsung diteruskan ke yt-dlp di proot (sekitar 8 detik per channel) dan perpindahan
+# channel yang cepat menumpuk proses proot. Gagal cepat saja; mpv menampilkan kegagalannya.
+case "${LAST_ARG%%[?#]*}" in
+    *.m3u8|*.m3u|*.mpd|*.ts|*.flv)
+        log_line "lewati yt-dlp (media langsung) url=$LAST_ARG"
+        echo "ERROR: URL media langsung, tidak diproses yt-dlp" >&2
+        exit 1
+        ;;
+esac
+
 # Jalur cepat YouTube: aplikasi menyelesaikan URL lewat NewPipeExtractor (tanpa proot). Hanya
 # dipakai untuk "-J" (ytdl_hook) dengan URL YouTube; jawaban apa pun selain "OK" atau server yang
 # tidak ada jatuh ke yt-dlp di bawah. Hentikan jalur ini dengan: touch ~/../mpv-newpipe.off
