@@ -96,4 +96,15 @@ class NewPipeBridgeLogicTest {
         assertNull(YoutubeWatchUrl.videoId("ytsearch10:kucing"))
         assertNull(YoutubeWatchUrl.videoId("https://vt.tiktok.com/ZS9UAj58sCH2F-LRl0p/"))
     }
+
+    @Test
+    fun selectorBawaanMendahulukanH264DanTetapMembacaBatasTinggi() {
+        val f = MpvYtdlBridge.YTDL_FORMAT
+        assertEquals(1080, StreamPicker.maxHeight(f))
+        assertTrue(f.startsWith("bestvideo[height<=?1080]"))
+        assertTrue(f.indexOf("[vcodec^=avc]") in 1 until f.indexOf("[vcodec!*=?av01]/best"))
+        assertTrue(f.contains("[vcodec^=h264]"))
+        assertTrue(f.endsWith("/best"))
+        assertFalse(f.contains("'"))
+    }
 }

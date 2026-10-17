@@ -101,6 +101,8 @@ internal class ResolutionSwitcher {
 
     private fun formatFor(height: Int): String =
         "bestvideo[height<=?$height][vcodec!*=?av01]+bestaudio/" +
+            "best[height<=?$height][vcodec^=avc]/" +
+            "best[height<=?$height][vcodec^=h264]/" +
             "best[height<=?$height][vcodec!*=?av01]/best"
 
     private companion object {

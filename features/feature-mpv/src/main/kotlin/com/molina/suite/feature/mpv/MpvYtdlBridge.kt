@@ -20,11 +20,16 @@ internal object MpvYtdlBridge {
 
     /**
      * Target perangkat Android 8 (tanpa dekoder AV1 perangkat keras): hindari AV1 dan batasi
-     * 1080p. Format tanpa info codec/tinggi tetap boleh (tanda ? setelah operator), dan
-     * alternatif terakhir "best" menjaga situs lain tetap bisa diputar.
+     * 1080p. Situs yang hanya menawarkan format utuh (video+audio, mis. TikTok) memilih H.264
+     * lebih dulu: peringkat bawaan yt-dlp mengunggulkan H.265, yang di perangkat ini bisa
+     * menghasilkan suara tanpa gambar. Format tanpa info codec/tinggi tetap boleh (tanda ?
+     * setelah operator), dan alternatif terakhir "best" menjaga situs lain tetap bisa diputar.
+     * Tanpa tanda kutip supaya aman melewati pembungkus shell.
      */
-    private const val YTDL_FORMAT =
+    internal const val YTDL_FORMAT =
         "bestvideo[height<=?1080][vcodec!*=?av01]+bestaudio/" +
+            "best[height<=?1080][vcodec^=avc]/" +
+            "best[height<=?1080][vcodec^=h264]/" +
             "best[height<=?1080][vcodec!*=?av01]/best"
 
     fun install(application: Application) {
