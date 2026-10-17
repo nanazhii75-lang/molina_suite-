@@ -56,8 +56,7 @@ internal class LibraryAdapter(
             } else {
                 preview
             }
-        // Isi entri IPTV hanya penanda; playlist-nya dibuka lewat dialog, bukan skrip.
-        holder.content.visibility = if (entry.id == IptvIndonesia.ENTRY_ID) View.GONE else View.VISIBLE
+        holder.content.visibility = View.VISIBLE
         holder.note.text = entry.note
         holder.note.visibility = if (entry.note.isEmpty()) View.GONE else View.VISIBLE
         val missing = missingByEntry[entry.id]

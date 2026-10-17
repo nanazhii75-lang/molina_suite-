@@ -17,7 +17,10 @@ internal object BuiltinRetirer {
         var removed = 0
         for (old in BuiltinLibrary.retiredEntries) {
             val current = byId[old.id] ?: continue
-            if (!current.builtin || current.content != old.content) continue
+            // Versi lama entri IPTV (skrip heredoc) ikut dipensiunkan walau isinya berbeda.
+            val legacyIptv = old.id == BuiltinLibrary.IPTV_RETIRED_ID &&
+                current.content.contains("MOLINA_IPTV_EOF")
+            if (!current.builtin || (current.content != old.content && !legacyIptv)) continue
             when (val result = repository.remove(old.id)) {
                 is LibraryResult.Failure -> return result
                 is LibraryResult.Ok -> removed++

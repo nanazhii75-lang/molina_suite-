@@ -32,14 +32,6 @@ internal object BuiltinUpgrader {
                 is LibraryResult.Ok -> updated++
             }
         }
-        val iptv = stored.firstOrNull { it.id == IptvIndonesia.ENTRY_ID }
-        if (iptv != null && iptv.builtin && iptv.content.contains("MOLINA_IPTV_EOF")) {
-            val fresh = iptv.copy(content = IptvIndonesia.entry.content, note = IptvIndonesia.entry.note)
-            when (val result = repository.upsert(fresh)) {
-                is LibraryResult.Failure -> return result
-                is LibraryResult.Ok -> updated++
-            }
-        }
         return LibraryResult.Ok(updated)
     }
 }

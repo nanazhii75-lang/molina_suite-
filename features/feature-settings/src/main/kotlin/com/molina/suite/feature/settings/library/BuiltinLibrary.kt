@@ -22,8 +22,10 @@ internal object BuiltinLibrary {
             """v jq jq --version; v rsync rsync --version; v nano nano --version; """ +
             """printf '%-12s' mediainfo; command -v mediainfo >/dev/null 2>&1 && mediainfo --Version 2>&1 | sed -n '/v[0-9]/{p;q}' || echo 'belum terpasang'"""
 
+    /** Id entri "IPTV Indonesia" lama; kini hanya dipakai BuiltinRetirer. */
+    const val IPTV_RETIRED_ID = "builtin-iptv-indonesia"
+
     val entries: List<LibraryEntry> = listOf(
-        IptvIndonesia.entry,
         DocumentConvertLibrary.entry,
         KotlinCheckLibrary.entry,
         entry(
@@ -91,6 +93,11 @@ internal object BuiltinLibrary {
      * hanya dipakai BuiltinRetirer untuk menghapus salinan lama yang belum diubah pengguna.
      */
     val retiredEntries: List<LibraryEntry> = listOf(
+        entry(
+            IPTV_RETIRED_ID, "IPTV Indonesia",
+            "echo 'IPTV Indonesia dibuka dari tombol jalankan (dialog sumber IPTV).'",
+            "", RunMode.ANDROID
+        ),
         entry(
             "builtin-ytdlp-version", "Versi yt-dlp",
             "yt-dlp --version",
