@@ -39,6 +39,7 @@ final class X11MenuController {
     private final ExtraKeysView extraKeysView;
     private boolean open;
     private X11DisplayOptions displayOptions;
+    private X11MenuPlacement placement;
 
     X11MenuController(@NonNull MainActivity activity) {
         this.activity = activity;
@@ -58,6 +59,8 @@ final class X11MenuController {
         menuButton.setOnClickListener(v -> toggle());
         bindTextInput();
         displayOptions = new X11DisplayOptions(activity);
+        placement = new X11MenuPlacement(activity, menuButton, panel);
+        placement.attach();
 
         bind(R.id.x11_menu_keyboard, v -> activity.toggleKeyboardVisibility());
         bind(R.id.x11_menu_displays, v -> activity.showDisplaysDialog());
@@ -74,6 +77,12 @@ final class X11MenuController {
         return open;
     }
 
+    /** Tinggi keyboard berubah: ikon dan panel naik supaya tidak tertutup. */
+    void onImeHeightChanged(int height) {
+        if (placement != null)
+            placement.setImeHeight(height);
+    }
+
     void toggle() {
         setOpen(!open);
     }
@@ -87,6 +96,7 @@ final class X11MenuController {
             layoutPanel();
             displayOptions.refresh();
             panel.setVisibility(View.VISIBLE);
+            placement.update();
             panel.bringToFront();
             menuButton.bringToFront();
         } else {

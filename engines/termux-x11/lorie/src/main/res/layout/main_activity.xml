@@ -222,7 +222,7 @@
         android:id="@+id/x11_menu_button"
         android:layout_width="44dp"
         android:layout_height="44dp"
-        android:layout_gravity="top|end"
+        android:layout_gravity="bottom|end"
         android:layout_margin="8dp"
         android:background="@drawable/x11_menu_background"
         android:contentDescription="@string/x11_menu_button_text"

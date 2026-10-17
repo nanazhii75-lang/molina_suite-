@@ -833,6 +833,8 @@ public class MainActivity extends AppCompatActivity {
             return;
 
         imeHeight = height;
+        if (x11Menu != null)
+            x11Menu.onImeHeightChanged(height);
         refreshContentInsets();
     }
 
