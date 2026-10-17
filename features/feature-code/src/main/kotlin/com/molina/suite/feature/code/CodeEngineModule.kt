@@ -5,6 +5,7 @@ import com.molina.suite.core.common.DocumentConverter
 import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.LibraryDraftBoard
+import com.molina.suite.core.common.PrefixScripts
 import com.molina.suite.core.common.ShellCommandRunner
 import com.molina.suite.core.common.TerminalInputSender
 import com.molina.suite.core.common.ToolReadinessChecker
@@ -49,6 +50,7 @@ object CodeEngineModule {
     ) {
         engine = CodeEngine(application, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft, documents)
         engines.register(CodeFeature())
+        PrefixScripts.installWhenReady(application, listOf("molina-open"))
     }
 
     internal fun requireEngine(): CodeEngine =

@@ -9,5 +9,11 @@
             android:label="@string/code_preview_title"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
             android:theme="@android:style/Theme.Material.NoActionBar" />
+        <!-- Pintu masuk privat perintah Terminal (molina-open). Tidak diekspor. -->
+        <activity
+            android:name=".MolinaOpenActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@android:style/Theme.NoDisplay" />
     </application>
 </manifest>

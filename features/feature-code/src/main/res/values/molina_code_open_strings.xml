@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="molina_open_invalid_target">molina-open: sumber harus jalur berkas yang ada</string>
+    <string name="molina_open_no_suite">Jendela utama Molina tidak bisa dibuka</string>
+    <string name="molina_open_unknown">Perintah Molina tidak dikenal</string>
+    <string name="molina_open_failed">Perintah Molina gagal dijalankan</string>
+</resources>

@@ -1,0 +1,18 @@
+#!/data/data/com.molina.suite/files/usr/bin/bash
+# molina-open: membuka berkas di Molina Code dari Terminal.
+# Pemakaian: molina-open <berkas>
+# Memanggil komponen privat aplikasi lewat am; aplikasi lain tidak bisa memicunya.
+if [ "$#" -ne 1 ] || [ -z "$1" ]; then
+  echo "Pemakaian: molina-open <berkas>" >&2
+  exit 2
+fi
+case "$1" in
+  /*) target="$1" ;;
+  *) target="$PWD/$1" ;;
+esac
+if [ ! -f "$target" ]; then
+  echo "molina-open: berkas tidak ditemukan: $1" >&2
+  exit 1
+fi
+exec am start -n com.molina.suite/com.molina.suite.feature.code.MolinaOpenActivity \
+  -a com.molina.suite.code.action.OPEN --es target "$target" > /dev/null
