@@ -4,10 +4,11 @@ import android.app.Application
 import com.molina.suite.core.common.BackgroundKeepAlive
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.ShellCommandRunner
+import com.molina.suite.core.common.X11Controller
 
 /**
  * Satu-satunya titik masuk shell ke engine X11: mendaftarkan peluncur ke
- * [EngineRegistry]. Shell tidak mengenal kelas lorie.
+ * [EngineRegistry] dan menyalakan notifikasi status. Shell tidak mengenal kelas lorie.
  */
 object X11EngineModule {
 
@@ -15,8 +16,12 @@ object X11EngineModule {
         application: Application,
         engines: EngineRegistry,
         shell: ShellCommandRunner,
-        keepAlive: BackgroundKeepAlive
+        keepAlive: BackgroundKeepAlive,
+        controller: X11Controller
     ) {
-        engines.registerLauncher(X11Launcher(application, shell, keepAlive))
+        val launcher = X11Launcher(application, shell, keepAlive)
+        engines.registerLauncher(launcher)
+        X11StopHandler.controller = controller
+        X11StatusNotifier(application, launcher, controller).start()
     }
 }

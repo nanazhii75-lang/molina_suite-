@@ -16,6 +16,7 @@ import com.molina.suite.core.common.ShellCommandRunner
 import com.molina.suite.core.common.TerminalInputSender
 import com.molina.suite.core.common.ToolReadinessChecker
 import com.molina.suite.core.common.ToolSetupBoard
+import com.molina.suite.core.common.X11Controller
 import com.molina.suite.feature.code.CodeEngineModule
 import com.molina.suite.feature.mpv.MpvEngineModule
 import com.molina.suite.feature.settings.SettingsEngineModule
@@ -57,6 +58,9 @@ class MolinaApplication : Application() {
     /** Penjaga CPU untuk proses latar belakang berumur panjang (server code-server). */
     val keepAlive: BackgroundKeepAlive by lazy { TermuxBackgroundKeepAlive(this) }
 
+    /** Pengendali X11 (pantau memori, hentikan tuntas) untuk notifikasi X11; pelaksananya modul Settings. */
+    val x11Controller: X11Controller by lazy { SettingsEngineModule.createX11Controller(this, engines) }
+
     /** Papan permintaan keluar; fitur (mis. Exit di notifikasi Terminal) meminta, shell menutup aplikasi. */
     val appExit = AppExitBoard()
 
@@ -69,7 +73,7 @@ class MolinaApplication : Application() {
         CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft, documents)
         MpvEngineModule.install(this, engines, toolReadiness, toolSetup, playback, terminalInput)
         SettingsEngineModule.install(engines, terminalInput, toolSetup, editorOpen, libraryDraft)
-        X11EngineModule.install(this, engines, shell, keepAlive)
+        X11EngineModule.install(this, engines, shell, keepAlive, x11Controller)
         DaemonStatusBridge.start(engines, daemons)
         X11ErrorToaster.start(this, engines)
     }
