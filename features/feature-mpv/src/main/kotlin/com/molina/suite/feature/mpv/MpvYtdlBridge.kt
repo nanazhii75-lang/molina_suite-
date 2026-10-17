@@ -19,6 +19,13 @@ internal object MpvYtdlBridge {
     private const val PREFIX_POLL_MS = 2000L
 
     /**
+     * URL media langsung (HLS, DASH, TS, FLV) tidak perlu yt-dlp. Tanpa pengecualian ini, channel
+     * IPTV yang gagal dibuka langsung masih diteruskan ke yt-dlp di proot (belasan detik), dan
+     * perpindahan channel yang cepat menumpuk proses proot. Pola Lua dipisah "|".
+     */
+    private const val YTDL_EXCLUDE = "%.m3u8|%.mpd|%.ts\$|%.flv\$"
+
+    /**
      * Target perangkat Android 8 (tanpa dekoder AV1 perangkat keras): hindari AV1 dan batasi
      * 1080p. Format tanpa info codec/tinggi tetap boleh (tanda ? setelah operator), dan
      * alternatif terakhir "best" menjaga situs lain tetap bisa diputar.
@@ -40,7 +47,10 @@ internal object MpvYtdlBridge {
             MolinaMpvOptions.set("log-file", it.absolutePath)
             MolinaMpvOptions.set("msg-level", "all=v")
         }
-        MolinaMpvOptions.set("script-opts", "ytdl_hook-ytdl_path=" + target.absolutePath)
+        MolinaMpvOptions.set(
+            "script-opts",
+            "ytdl_hook-ytdl_path=" + target.absolutePath + ",ytdl_hook-exclude=" + YTDL_EXCLUDE,
+        )
         Thread({ writeWrapperWhenPrefixReady(application, target) }, "mpv-ytdl-bridge")
             .apply { isDaemon = true }
             .start()

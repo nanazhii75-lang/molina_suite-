@@ -294,9 +294,6 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
     // Perintah pelengkap playlist hasil pencarian; dijalankan sekali saat file mulai dimuat.
     @Volatile
     private var pendingPlaylist: List<Array<String>>? = null
-    // Benar sampai file pertama termuat; lalu access-references dimatikan (lihat MolinaReferences).
-    @Volatile
-    private var lockReferencesPending = false
     // judul per URL yang dibawa intent pencarian; dipakai panel playlist
     private var playlistTitles: Map<String, String> = emptyMap()
     // pengamat catatan aktivitas untuk satu pemutaran; null bila tidak ada pencatat terpasang
@@ -357,7 +354,6 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             return
         }
 
-        lockReferencesPending = MolinaReferences.requested(intent)
         pendingPlaylist = com.molina.suite.mpv.search.MolinaPlaylist.read(intent, filepath)
         playlistTitles = if (pendingPlaylist != null)
             com.molina.suite.mpv.search.MolinaPlaylist.titles(intent)
@@ -467,7 +463,6 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             showToast(getString(R.string.notice_file_appended))
             moveTaskToBack(true)
         } else {
-            lockReferencesPending = MolinaReferences.requested(intent)
             MPVLib.command(arrayOf("set", "access-references", "yes"))
             pendingPlaylist = com.molina.suite.mpv.search.MolinaPlaylist.read(intent, filepath)
             playlistTitles = if (pendingPlaylist != null)
@@ -2179,11 +2174,6 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 for (c in commands) MPVLib.command(c)
             }
             playbackHasStarted = true
-        }
-
-        if (eventId == MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED && lockReferencesPending) {
-            lockReferencesPending = false
-            MPVLib.command(arrayOf("set", "access-references", "no"))
         }
 
         if (!activityIsForeground) return
