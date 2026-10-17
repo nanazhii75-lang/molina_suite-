@@ -9,6 +9,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.molina.suite.core.common.Activities
+import com.molina.suite.core.common.ActivityPriority
+import com.molina.suite.core.common.ActivitySource
 import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.EngineLauncher
 import com.molina.suite.core.common.EngineStatus
@@ -20,10 +24,12 @@ import com.molina.suite.feature.settings.TerminalCommandRunner
 import com.molina.suite.feature.settings.packages.PackageDetection
 import com.molina.suite.feature.settings.packages.PackageDetector
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val DESKTOP_PACKAGE_ID = "x11desktop"
+private const val USAGE_POLL_MS = 3_000L
 
 /** Layar Molina X11: status dan kendali server, status dan kendali desktop, pemasangan desktop. */
 class X11Fragment : Fragment(R.layout.fragment_x11), Refreshable {
@@ -38,6 +44,9 @@ class X11Fragment : Fragment(R.layout.fragment_x11), Refreshable {
     private var desktopInstall: MaterialButton? = null
     private var desktopStart: MaterialButton? = null
     private var desktopStop: MaterialButton? = null
+    private var ramSummary: TextView? = null
+    private var stopResult: TextView? = null
+    private var stopChoose: MaterialButton? = null
     private var desktopState = DesktopState.CHECKING
 
     private fun launcher(): EngineLauncher? =
@@ -52,6 +61,9 @@ class X11Fragment : Fragment(R.layout.fragment_x11), Refreshable {
         desktopInstall = view.findViewById(R.id.x11_desktop_install)
         desktopStart = view.findViewById(R.id.x11_desktop_start)
         desktopStop = view.findViewById(R.id.x11_desktop_stop)
+        ramSummary = view.findViewById(R.id.x11_ram_summary)
+        stopResult = view.findViewById(R.id.x11_stop_result)
+        stopChoose = view.findViewById(R.id.x11_stop_choose)
 
         view.findViewById<View>(R.id.x11_refresh).setOnClickListener { refresh() }
         serverStart?.setOnClickListener { startServer() }
@@ -64,6 +76,8 @@ class X11Fragment : Fragment(R.layout.fragment_x11), Refreshable {
             runInTerminal(R.string.x11_run_stop_desktop, X11Commands.stopDesktop())
         }
 
+        stopChoose?.setOnClickListener { confirmStop() }
+        observeUsage()
         observeLauncher()
         renderDesktop()
         refresh()
@@ -78,6 +92,9 @@ class X11Fragment : Fragment(R.layout.fragment_x11), Refreshable {
         desktopInstall = null
         desktopStart = null
         desktopStop = null
+        ramSummary = null
+        stopResult = null
+        stopChoose = null
         super.onDestroyView()
     }
 
@@ -148,6 +165,102 @@ class X11Fragment : Fragment(R.layout.fragment_x11), Refreshable {
         desktopInstall?.isEnabled = desktopState == DesktopState.MISSING || desktopState == DesktopState.NO_DEBIAN
         desktopStart?.isEnabled = installed
         desktopStop?.isEnabled = installed
+    }
+
+    private fun observeUsage() {
+        val appContext = context?.applicationContext ?: return
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    val usage = withContext(Dispatchers.IO) { X11Control.usage(appContext) }
+                    renderUsage(usage)
+                    delay(USAGE_POLL_MS)
+                }
+            }
+        }
+    }
+
+    private fun renderUsage(usage: X11Usage) {
+        val view = ramSummary ?: return
+        view.text = if (usage.isIdle) {
+            getString(R.string.x11_ram_idle)
+        } else {
+            getString(
+                R.string.x11_ram_summary,
+                X11Usage.format(usage.serverKb),
+                usage.serverCount,
+                X11Usage.format(usage.desktopKb),
+                usage.desktopCount,
+                X11Usage.format(usage.totalKb)
+            )
+        }
+    }
+
+    /** Dialog pilihan: centang desktop, server, atau keduanya (semua) lalu hentikan sampai tuntas. */
+    private fun confirmStop() {
+        val host = activity ?: return
+        val items = arrayOf(
+            getString(R.string.x11_stop_item_desktop),
+            getString(R.string.x11_stop_item_server)
+        )
+        val checked = booleanArrayOf(true, true)
+        MaterialAlertDialogBuilder(host)
+            .setTitle(R.string.x11_stop_dialog_title)
+            .setMultiChoiceItems(items, checked) { _, which, isChecked -> checked[which] = isChecked }
+            .setNegativeButton(R.string.x11_stop_cancel, null)
+            .setPositiveButton(R.string.x11_stop_confirm) { _, _ ->
+                if (checked[0] || checked[1]) {
+                    stopSelected(desktop = checked[0], server = checked[1])
+                }
+            }
+            .show()
+    }
+
+    /**
+     * Menghentikan langsung lewat /proc (tanpa mengetik ke Terminal): desktop dulu supaya aplikasi
+     * X menutup rapi, lalu server. Hasil diperiksa ulang dan dilaporkan, termasuk perkiraan
+     * memori yang dibebaskan.
+     */
+    private fun stopSelected(desktop: Boolean, server: Boolean) {
+        val appContext = context?.applicationContext ?: return
+        stopChoose?.isEnabled = false
+        showStopResult(getString(R.string.x11_stop_working))
+        viewLifecycleOwner.lifecycleScope.launch {
+            val message = Activities.log.track(ActivitySource.SETTING, "Molina X11: hentikan tuntas") { entry ->
+                val before = withContext(Dispatchers.IO) { X11Control.usage(appContext) }
+                val desktopOutcome = if (desktop) X11Control.stopDesktop(appContext) else null
+                val serverOutcome = if (server) {
+                    launcher()?.stop()
+                    X11Control.stopServer()
+                } else {
+                    null
+                }
+                val remaining = desktopOutcome?.remaining.orEmpty() + serverOutcome?.remaining.orEmpty()
+                if (remaining.isEmpty()) {
+                    val freedKb = (if (desktop) before.desktopKb else 0L) + (if (server) before.serverKb else 0L)
+                    val text = appContext.getString(
+                        R.string.x11_stop_done,
+                        desktopOutcome?.stopped ?: 0,
+                        serverOutcome?.stopped ?: 0,
+                        X11Usage.format(freedKb)
+                    )
+                    entry.note(text)
+                    text
+                } else {
+                    val pids = remaining.sorted().joinToString(", ")
+                    entry.end(false, "proses tersisa: $pids", ActivityPriority.WARN)
+                    appContext.getString(R.string.x11_stop_remaining, pids)
+                }
+            }
+            showStopResult(message)
+            stopChoose?.isEnabled = true
+        }
+    }
+
+    private fun showStopResult(text: String) {
+        val view = stopResult ?: return
+        view.text = text
+        view.visibility = View.VISIBLE
     }
 
     /** Membuka menu Paket (paket desktop disorot), atau menu Debian bila rootfs belum ada. */

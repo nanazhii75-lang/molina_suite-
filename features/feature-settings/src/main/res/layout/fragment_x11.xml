@@ -168,6 +168,54 @@
                         android:text="@string/x11_desktop_stop" />
                 </LinearLayout>
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/ms_space_md"
+                android:layout_marginEnd="@dimen/ms_space_md"
+                android:layout_marginBottom="@dimen/ms_card_gap"
+                android:background="@drawable/ms_bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/ms_space_md">
+
+                <TextView
+                    style="@style/Molina.Text.Item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/x11_section_ram" />
+
+                <TextView
+                    android:id="@+id/x11_ram_summary"
+                    style="@style/Molina.Text.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_xs"
+                    android:text="@string/x11_ram_idle" />
+
+                <TextView
+                    style="@style/Molina.Text.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_xs"
+                    android:text="@string/x11_ram_hint" />
+
+                <TextView
+                    android:id="@+id/x11_stop_result"
+                    style="@style/Molina.Text.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_xs"
+                    android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/x11_stop_choose"
+                    style="@style/Molina.Button.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/ms_space_sm"
+                    android:text="@string/x11_stop_choose" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

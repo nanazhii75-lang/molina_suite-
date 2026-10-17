@@ -1,6 +1,7 @@
 package com.molina.suite.feature.x11
 
 import com.molina.suite.core.common.ShellCommand
+import com.molina.suite.core.common.X11Contract
 
 /**
  * Menyusun perintah shell yang menjalankan X server lorie di proses terpisah
@@ -8,7 +9,7 @@ import com.molina.suite.core.common.ShellCommand
  */
 internal object X11ServerCommand {
     /** Kelas titik masuk X server; juga dipakai untuk mengenali prosesnya. */
-    const val ENTRY_POINT = "com.molina.suite.x11.CmdEntryPoint"
+    const val ENTRY_POINT = X11Contract.SERVER_ENTRY_POINT
 
     /** Activity jendela X11 (lorie). Dipanggil lewat nama agar modul ini tidak bergantung pada kelasnya. */
     const val WINDOW_ACTIVITY = "com.molina.suite.x11.MainActivity"
