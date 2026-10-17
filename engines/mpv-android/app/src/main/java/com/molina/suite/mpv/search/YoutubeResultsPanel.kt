@@ -17,6 +17,7 @@ internal class YoutubeResultsPanel(
     root: View,
     private val highlight: View,
     private val resetButton: View,
+    onLongPress: (YoutubeResult) -> Unit,
     onPlay: (YoutubeResult) -> Unit
 ) {
     private val context: Context = root.context
@@ -37,7 +38,8 @@ internal class YoutubeResultsPanel(
     private val adapter = YoutubeResultAdapter(
         onPlay = onPlay,
         isQueued = { id -> MolinaQueue.contains(id) },
-        onToggleQueue = { item -> toggleQueue(item) }
+        onToggleQueue = { item -> toggleQueue(item) },
+        onLongPress = onLongPress
     )
     private val idleBackground: Drawable? = highlight.background
     private val observer: (SearchState) -> Unit = { render(it) }

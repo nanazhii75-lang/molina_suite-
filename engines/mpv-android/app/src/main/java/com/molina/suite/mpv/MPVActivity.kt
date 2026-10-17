@@ -1555,6 +1555,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                 },
                 MenuItem(R.id.advancedBtn) { openAdvancedMenu(restoreState); false },
                 MenuItem(R.id.sleepTimerBtn) { openSleepTimerDialog(restoreState); false },
+                MenuItem(R.id.formatInfoBtn) { openFormatInfo(); true },
                 MenuItem(R.id.orientationBtn) {
                     autoRotationMode = "manual"
                     cycleOrientation()
@@ -1564,9 +1565,18 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
         if (MPVLib.getPropertyInt("chapter-list/count") ?: 0 == 0)
             hiddenButtons.add(R.id.rowChapter)
+        if (!FormatInfoEntry.isSupported(MPVLib.getPropertyString("path")))
+            hiddenButtons.add(R.id.formatInfoBtn)
         /******/
 
         genericMenu(R.layout.dialog_top_menu, buttons, hiddenButtons, restoreState)
+    }
+
+    /** Info format: mengetik yt-dlp -F untuk tautan yang sedang diputar ke tab Terminal. */
+    private fun openFormatInfo() {
+        val url = MPVLib.getPropertyString("path") ?: ""
+        if (!FormatInfoEntry.open(this, url))
+            showToast(getString(R.string.molina_format_info_unavailable))
     }
 
     private val audioOnly = AudioOnlyMode()

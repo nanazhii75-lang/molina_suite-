@@ -67,7 +67,7 @@ class MolinaApplication : Application() {
         appExit.setHandler { exitApp() }
         TerminalEngineModule.install(this, engines, appExit)
         CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft, documents)
-        MpvEngineModule.install(this, engines, toolReadiness, toolSetup, playback)
+        MpvEngineModule.install(this, engines, toolReadiness, toolSetup, playback, terminalInput)
         SettingsEngineModule.install(engines, terminalInput, toolSetup, editorOpen, libraryDraft)
         X11EngineModule.install(this, engines, shell, keepAlive)
         DaemonStatusBridge.start(engines, daemons)

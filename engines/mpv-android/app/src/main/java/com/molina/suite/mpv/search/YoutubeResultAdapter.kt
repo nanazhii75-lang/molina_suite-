@@ -21,7 +21,9 @@ internal class YoutubeResultAdapter(
     private val onPlay: (YoutubeResult) -> Unit,
     private val isQueued: (String) -> Boolean = { false },
     /** Null menyembunyikan tombol antrean (dipakai pencarian di dalam pemutar). */
-    private val onToggleQueue: ((YoutubeResult) -> Unit)? = null
+    private val onToggleQueue: ((YoutubeResult) -> Unit)? = null,
+    /** Tekan lama pada baris; null menonaktifkannya. */
+    private val onLongPress: ((YoutubeResult) -> Unit)? = null
 ) : RecyclerView.Adapter<YoutubeResultAdapter.Holder>() {
 
     private var items: List<YoutubeResult> = emptyList()
@@ -84,6 +86,13 @@ internal class YoutubeResultAdapter(
             stats.text = buildStats(context, item)
             ThumbnailLoader.load(thumb, item.thumbnailUrl)
             itemView.setOnClickListener { onPlay(item) }
+            val longPress = onLongPress
+            if (longPress == null) {
+                itemView.setOnLongClickListener(null)
+                itemView.isLongClickable = false
+            } else {
+                itemView.setOnLongClickListener { longPress(item); true }
+            }
             queueBtn.visibility = if (onToggleQueue == null) View.GONE else View.VISIBLE
             queueBtn.setOnClickListener { onToggleQueue?.invoke(item) }
             bindQueueState(item)

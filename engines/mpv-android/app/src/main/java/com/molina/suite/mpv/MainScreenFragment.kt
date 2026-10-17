@@ -107,11 +107,14 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         }
         binding.ytBtn.setOnClickListener { showYoutubeSearchDialog() }
         binding.clipBtn.setOnClickListener { playClipboardLink() }
-        resultsPanel = YoutubeResultsPanel(binding.resultsPanel, binding.ytBtn, binding.resetBtn) { result ->
+        resultsPanel = YoutubeResultsPanel(
+            binding.resultsPanel, binding.ytBtn, binding.resetBtn,
+            onLongPress = { showResultActions(it) }
+        ) { result ->
             playResults(result)
         }.also { it.attach() }
         queueBar = QueueBar(binding.queueBar) { items -> launchPlaylist(items, 0) }.also { it.attach() }
-        historyPanel = HistoryPanel(binding.resultsEmpty) { playHistoryEntry(it) }
+        historyPanel = HistoryPanel(binding.resultsEmpty, onActions = { showHistoryActions(it) }) { playHistoryEntry(it) }
             .also { it.attach(); it.refresh() }
         MpvSearchEntry.attach(searchReceiver)
         // Ikon tanpa teks: tekan lama menampilkan labelnya.
@@ -309,6 +312,42 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             return
         }
         UrlPlayback.check(this, url) { playFile(url, MpvOpenKind.URL) }
+    }
+
+    /** Menu aksi satu baris (hasil pencarian atau riwayat); [actions] berpasangan label dan tindakan. */
+    private fun showRowActions(title: String, actions: List<Pair<String, () -> Unit>>) {
+        if (actions.isEmpty()) return
+        AlertDialog.Builder(requireContext())
+            .setTitle(title)
+            .setItems(actions.map { it.first }.toTypedArray()) { _, which -> actions[which].second() }
+            .show()
+    }
+
+    /** Tekan lama pada hasil pencarian. */
+    private fun showResultActions(item: YoutubeResult) {
+        showRowActions(
+            item.title,
+            listOf(getString(R.string.molina_format_info_title) to { openFormatInfo(item.watchUrl) })
+        )
+    }
+
+    /** Tekan lama pada riwayat: Info format (hanya tautan) dan hapus dari riwayat. */
+    private fun showHistoryActions(entry: PlayHistoryEntry) {
+        val actions = ArrayList<Pair<String, () -> Unit>>()
+        if (FormatInfoEntry.isSupported(entry.path)) {
+            actions.add(getString(R.string.molina_format_info_title) to { openFormatInfo(entry.path) })
+        }
+        actions.add(getString(R.string.molina_history_remove_one) to {
+            PlayHistory.remove(requireContext(), entry.path)
+            historyPanel?.refresh()
+        })
+        showRowActions(entry.title, actions)
+    }
+
+    private fun openFormatInfo(url: String) {
+        if (!FormatInfoEntry.open(requireActivity(), url)) {
+            Toast.makeText(requireContext(), R.string.molina_format_info_unavailable, Toast.LENGTH_SHORT).show()
+        }
     }
 
     /** Memutar ulang entri riwayat; posisi terakhir dilanjutkan oleh mpv (watch-later). */

@@ -10,10 +10,11 @@ import com.molina.suite.mpv.Utils
 
 /**
  * Bagian riwayat di home mpv. Hanya menampilkan [PlayHistory]; apa yang terjadi saat item diketuk
- * diserahkan ke [onOpen]. Tekan lama sebuah item untuk menghapusnya dari riwayat.
+ * diserahkan ke [onOpen]; tekan lama diserahkan ke [onActions] (menu aksi item).
  */
 internal class HistoryPanel(
     root: View,
+    private val onActions: (PlayHistoryEntry) -> Unit,
     private val onOpen: (PlayHistoryEntry) -> Unit
 ) {
     private val context = root.context
@@ -51,8 +52,7 @@ internal class HistoryPanel(
             }
             row.setOnClickListener { onOpen(entry) }
             row.setOnLongClickListener {
-                PlayHistory.remove(context, entry.path)
-                refresh()
+                onActions(entry)
                 true
             }
             list.addView(row)

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="molina_format_info_title">Info format</string>
+    <string name="molina_format_info_unavailable">Info format hanya untuk tautan dan perlu Terminal siap</string>
+    <string name="molina_history_remove_one">Hapus dari riwayat</string>
+</resources>

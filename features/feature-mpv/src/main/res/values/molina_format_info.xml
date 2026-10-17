@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="molina_format_info_busy">Terminal sedang sibuk atau belum siap. Info format tidak dikirim; coba lagi saat prompt muncul.</string>
+</resources>

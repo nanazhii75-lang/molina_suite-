@@ -125,6 +125,15 @@
             android:layout_weight="1"
             android:text="@string/molina_sleep_timer_title"
             android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/formatInfoBtn"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/molina_format_info_title"
+            android:textAllCaps="false" />
     </TableRow>
 
 </LinearLayout>
