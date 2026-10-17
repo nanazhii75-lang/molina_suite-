@@ -1,6 +1,11 @@
 #!/data/data/com.molina.suite/files/usr/bin/bash
 # Pembungkus yt-dlp untuk mpv: menjalankan yt-dlp di dalam Debian (proot-distro).
 # stdout hanya berisi keluaran yt-dlp agar JSON bisa di-parse oleh ytdl_hook.
+# Terminal yang sudah di dalam Debian: proot-distro tidak boleh dipanggil dari sana
+# (host Android tidak punya /etc/debian_version), jadi yt-dlp dijalankan langsung.
+if [ -f /etc/debian_version ] && [ -x /usr/local/bin/yt-dlp ]; then
+    exec /usr/local/bin/yt-dlp "$@"
+fi
 SELF="${0%/*}"
 PREFIX="${SELF%/bin}"
 export PREFIX
@@ -8,6 +13,19 @@ export HOME="${PREFIX%/usr}/home"
 export TMPDIR="$PREFIX/tmp"
 export PATH="$PREFIX/bin"
 mkdir -p "$TMPDIR"
+
+# Jejak singkat tiap pemanggilan di files/mpv-ytdl.log (hanya baca-tulis aplikasi; dipangkas
+# bila > 200 KB). Tidak menulis ke stdout: stdout dibaca ytdl_hook sebagai JSON.
+LOG="${PREFIX%/usr}/mpv-ytdl.log"
+LAST_ARG=""
+for LAST_ARG in "$@"; do :; done
+log_line() {
+    if [ -f "$LOG" ] && [ "$(wc -c < "$LOG" 2>/dev/null || echo 0)" -gt 204800 ]; then
+        tail -n 200 "$LOG" > "$LOG.tmp" 2>/dev/null && mv "$LOG.tmp" "$LOG" 2>/dev/null
+    fi
+    printf '%s %s\n' "$(date '+%m-%d %H:%M:%S' 2>/dev/null)" "$*" >> "$LOG" 2>/dev/null
+    return 0
+}
 
 # Jalur cepat YouTube: aplikasi menyelesaikan URL lewat NewPipeExtractor (tanpa proot). Hanya
 # dipakai untuk "-J" (ytdl_hook) dengan URL YouTube; jawaban apa pun selain "OK" atau server yang
@@ -42,6 +60,7 @@ try_newpipe() {
 }
 # Dalam subshell: kegagalan membuka koneksi tidak boleh menghentikan pembungkus ini.
 if json="$(try_newpipe "$@" 2>/dev/null)" && [ -n "$json" ]; then
+    log_line "newpipe ok ${SECONDS}s url=$LAST_ARG"
     printf '%s\n' "$json"
     exit 0
 fi
@@ -61,8 +80,10 @@ filter_stderr() {
 # pernah menerima EOF, sehingga pembungkus tidak selesai dan ytdl_hook mpv menunggu terus.
 errfile="$TMPDIR/ytdlp-err.$$"
 trap 'rm -f "$errfile"' EXIT
+log_line "yt-dlp mulai url=$LAST_ARG"
 proot-distro login debian --shared-tmp -- /usr/local/bin/yt-dlp "$@" </dev/null 2>"$errfile"
 status=$?
+log_line "yt-dlp selesai exit=$status ${SECONDS}s err=$(head -c 300 "$errfile" 2>/dev/null | tr '\n' ' ')"
 if [ -s "$errfile" ]; then
     filter_stderr < "$errfile"
 fi
