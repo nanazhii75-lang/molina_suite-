@@ -289,7 +289,7 @@ internal object PackageCatalog {
         PackageSpec(
             "x11desktop", R.string.pkg_x11desktop_title, R.string.pkg_x11desktop_desc,
             PackageKind.APT,
-            listOf("openbox", "xterm", "pcmanfm", "dbus-x11", "x11-xserver-utils", "xkb-data", "python3-xdg", "fonts-dejavu-core"),
+            listOf("openbox", "xterm", "pcmanfm", "dbus-x11", "x11-xserver-utils", "xkb-data", "python3-xdg", "xclip", "fonts-dejavu-core"),
             optional = true
         ),
         PackageSpec(
