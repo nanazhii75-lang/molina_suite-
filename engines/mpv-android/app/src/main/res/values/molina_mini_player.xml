@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="molina_mini_player_title">Mini-player</string>
+    <string name="molina_mini_player_unavailable">Tidak ada audio untuk dilanjutkan di latar belakang</string>
+    <string name="molina_mini_player_no_suite">Jendela utama Molina tidak bisa dibuka</string>
+</resources>

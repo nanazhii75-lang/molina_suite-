@@ -22,6 +22,7 @@ import com.molina.suite.meter.SystemMeterSampler
 import com.molina.suite.ui.daemonColorRes
 import com.molina.suite.ui.EngineUnavailableFragment
 import com.molina.suite.ui.MeterBarPresenter
+import com.molina.suite.ui.MiniPlayerPresenter
 import com.molina.suite.ui.labelRes
 import kotlinx.coroutines.launch
 
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
 
     private lateinit var binding: ActivityMainBinding
     private val molina get() = application as MolinaApplication
+    private lateinit var miniPlayer: MiniPlayerPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +57,7 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
         bindDaemon(DaemonId.MPV, binding.dotMpv)
         bindDaemon(DaemonId.X11, binding.dotX11)
         bindMeter()
+        bindMiniPlayer()
     }
 
     /** Ikon tab aktif penuh warna, tab lain sedikit redup; ikon berwarna sendiri-sendiri. */
@@ -89,6 +92,7 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
         binding.header.visibility = visibility
         binding.meterBar.visibility = visibility
         binding.bottomNav.visibility = visibility
+        if (::miniPlayer.isInitialized) miniPlayer.setSuppressed(compact)
     }
 
     private fun visibleFragment(): Fragment? =
@@ -139,6 +143,16 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 sampler.readings().collect { presenter.render(it) }
+            }
+        }
+    }
+
+    /** Mini-player pemutaran mpv; hanya mengamati papan pemutaran selama layar tampil (STARTED). */
+    private fun bindMiniPlayer() {
+        miniPlayer = MiniPlayerPresenter(this, molina.playback, binding)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                molina.playback.snapshot.collect { miniPlayer.render(it) }
             }
         }
     }

@@ -49,6 +49,15 @@
             android:layout_weight="1"
             android:text="@string/molina_audio_only_title"
             android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/miniPlayerBtn"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/molina_mini_player_title"
+            android:textAllCaps="false" />
     </TableRow>
 
     <TableRow

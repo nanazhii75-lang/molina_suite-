@@ -367,6 +367,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             ?.also { MPVLib.addLogObserver(it) }
         player.addObserver(this)
         player.addObserver(audioOnly)
+        MpvSessionControl.attach(sessionCloser)
         player.initialize(filesDir.path, cacheDir.path)
         player.playFile(filepath)
 
@@ -443,6 +444,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         }
         activityWatcher = null
 
+        MpvSessionControl.detach(sessionCloser)
         player.removeObserver(audioOnly)
         player.removeObserver(this)
         player.destroy()
@@ -1523,6 +1525,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
                     openPlaylistMenu(restoreState); false
                 },
                 MenuItem(R.id.audioOnlyBtn) { toggleAudioOnly(); true },
+                MenuItem(R.id.miniPlayerBtn) { minimizeToSuite(); true },
                 MenuItem(R.id.chapterBtn) {
                     val chapters = player.loadChapters()
                     if (chapters.isEmpty())
@@ -1575,6 +1578,38 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             return
         }
         showToast(getString(if (enable) R.string.molina_audio_only_on else R.string.molina_audio_only_off), true)
+    }
+
+    private val sessionCloser = Runnable { runOnUiThread { closeFromSuite() } }
+
+    /**
+     * Mini-player: pemutaran dilanjutkan di latar belakang lalu shell aplikasi dibawa ke depan,
+     * sehingga Terminal atau Code bisa dipakai sambil mendengarkan. Mode latar belakang diset
+     * "always" untuk sesi ini dan dibaca ulang dari pengaturan saat pemutar kembali ke depan.
+     */
+    private fun minimizeToSuite() {
+        if (player.aid == -1) {
+            showToast(getString(R.string.molina_mini_player_unavailable), true)
+            return
+        }
+        backgroundPlayMode = "always"
+        if (!MpvSessionControl.showSuite(this)) {
+            readSettings()
+            showToast(getString(R.string.molina_mini_player_no_suite), true)
+        }
+    }
+
+    /**
+     * Permintaan tutup dari mini-player. Saat pemutar sedang di latar belakang onPause tidak
+     * dipanggil lagi, jadi riwayat dan posisi dicatat di sini sebelum menutup.
+     */
+    private fun closeFromSuite() {
+        if (isFinishing || isDestroyed) return
+        if (!activityIsForeground) {
+            recordHistory()
+            savePosition()
+        }
+        finishWithResult(RESULT_OK)
     }
 
     private val sleepTimer = SleepTimer { onSleepTimerExpired() }

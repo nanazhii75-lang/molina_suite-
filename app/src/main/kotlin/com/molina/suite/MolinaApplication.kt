@@ -9,6 +9,7 @@ import com.molina.suite.core.common.DaemonStatusBoard
 import com.molina.suite.core.common.DocumentConverter
 import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.LibraryDraftBoard
+import com.molina.suite.core.common.PlaybackBoard
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.LoggingShellCommandRunner
 import com.molina.suite.core.common.ShellCommandRunner
@@ -26,6 +27,9 @@ import kotlin.system.exitProcess
 class MolinaApplication : Application() {
     val engines = EngineRegistry()
     val daemons = DaemonStatusBoard()
+
+    /** Papan status pemutaran untuk mini-player; modul mpv mempublikasikan, shell mengamati. */
+    val playback = PlaybackBoard()
 
     /** Papan permintaan membuka menu pemasangan alat; fitur meminta, Settings yang menangani. */
     val toolSetup = ToolSetupBoard()
@@ -63,7 +67,7 @@ class MolinaApplication : Application() {
         appExit.setHandler { exitApp() }
         TerminalEngineModule.install(this, engines, appExit)
         CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft, documents)
-        MpvEngineModule.install(this, engines, toolReadiness, toolSetup)
+        MpvEngineModule.install(this, engines, toolReadiness, toolSetup, playback)
         SettingsEngineModule.install(engines, terminalInput, toolSetup, editorOpen, libraryDraft)
         X11EngineModule.install(this, engines, shell, keepAlive)
         DaemonStatusBridge.start(engines, daemons)

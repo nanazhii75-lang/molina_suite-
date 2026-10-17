@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="molina_mini_untitled">Memutar media</string>
+    <string name="molina_mini_time">%1$s / %2$s</string>
+    <string name="molina_mini_play">Putar</string>
+    <string name="molina_mini_pause">Jeda</string>
+    <string name="molina_mini_prev">Sebelumnya</string>
+    <string name="molina_mini_next">Berikutnya</string>
+    <string name="molina_mini_close">Tutup pemutar</string>
+</resources>
