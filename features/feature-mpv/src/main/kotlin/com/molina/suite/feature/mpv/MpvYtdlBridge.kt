@@ -66,6 +66,7 @@ internal object MpvYtdlBridge {
             }
         }
         writeWrapper(application, target)
+        target.parentFile?.let { MolinaCommandScripts.install(application, it) }
     }
 
     private fun writeWrapper(application: Application, target: File) {

@@ -51,6 +51,9 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
     private var queueBar: QueueBar? = null
     private var historyPanel: HistoryPanel? = null
 
+    /** Permintaan cari dari Terminal (molina-cari); satu kolom dua fungsi seperti pencarian biasa. */
+    private val searchReceiver: (String) -> Unit = { query -> if (isAdded) submitSearchInput(query) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         firstRun = savedInstanceState == null
@@ -110,6 +113,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
         queueBar = QueueBar(binding.queueBar) { items -> launchPlaylist(items, 0) }.also { it.attach() }
         historyPanel = HistoryPanel(binding.resultsEmpty) { playHistoryEntry(it) }
             .also { it.attach(); it.refresh() }
+        MpvSearchEntry.attach(searchReceiver)
         // Ikon tanpa teks: tekan lama menampilkan labelnya.
         listOf(binding.x11Btn, binding.ytBtn, binding.clipBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
             TooltipCompat.setTooltipText(it, it.contentDescription)
@@ -127,6 +131,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
     }
 
     override fun onDestroyView() {
+        MpvSearchEntry.detach(searchReceiver)
         resultsPanel?.detach()
         resultsPanel = null
         queueBar?.detach()

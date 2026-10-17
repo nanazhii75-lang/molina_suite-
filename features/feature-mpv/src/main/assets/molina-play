@@ -1,0 +1,15 @@
+#!/data/data/com.molina.suite/files/usr/bin/bash
+# molina-play: memutar URL atau berkas di Molina mpv dari Terminal.
+# Pemakaian: molina-play <url|berkas>
+# Memanggil komponen privat aplikasi lewat am; aplikasi lain tidak bisa memicunya.
+if [ "$#" -ne 1 ] || [ -z "$1" ]; then
+  echo "Pemakaian: molina-play <url|berkas>" >&2
+  exit 2
+fi
+case "$1" in
+  *://*) target="$1" ;;
+  /*) target="$1" ;;
+  *) target="$PWD/$1" ;;
+esac
+exec am start -n com.molina.suite/com.molina.suite.feature.mpv.MolinaCommandActivity \
+  -a com.molina.suite.mpv.action.PLAY --es target "$target" > /dev/null

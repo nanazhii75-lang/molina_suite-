@@ -1,5 +1,6 @@
 package com.molina.suite
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.Menu
@@ -16,6 +17,7 @@ import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.HostBackPressHandler
 import com.molina.suite.core.common.HostChromeController
 import com.molina.suite.core.common.HostContextMenuListener
+import com.molina.suite.core.common.HostIntents
 import com.molina.suite.core.common.HostTabSwitcher
 import com.molina.suite.databinding.ActivityMainBinding
 import com.molina.suite.meter.SystemMeterSampler
@@ -84,6 +86,13 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
     override fun onContextMenuClosed(menu: Menu) {
         super.onContextMenuClosed(menu)
         (visibleFragment() as? HostContextMenuListener)?.onHostContextMenuClosed(menu)
+    }
+
+    /** Modul fitur membawa shell ke depan dan meminta tab tertentu lewat [HostIntents.EXTRA_SHOW_ENGINE]. */
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        val name = intent?.getStringExtra(HostIntents.EXTRA_SHOW_ENGINE) ?: return
+        EngineId.values().firstOrNull { it.name == name }?.let { showEngine(it) }
     }
 
     /** Mode ringkas: sembunyikan header dan navigasi bawah agar area kerja fragment lebih luas. */

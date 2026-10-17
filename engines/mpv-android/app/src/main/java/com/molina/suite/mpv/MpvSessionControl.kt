@@ -3,6 +3,7 @@ package com.molina.suite.mpv
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 
 /**
@@ -42,12 +43,13 @@ object MpvSessionControl {
     }
 
     /** Membawa shell (activity peluncur aplikasi) ke depan tanpa membuat instans baru. */
-    fun showSuite(host: Activity): Boolean {
+    fun showSuite(host: Activity, extras: Bundle? = null): Boolean {
         val launcher = host.packageManager.getLaunchIntentForPackage(host.packageName)?.component
             ?: return false
         val intent = Intent()
             .setComponent(launcher)
             .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        if (extras != null) intent.putExtras(extras)
         return try {
             host.startActivity(intent)
             true

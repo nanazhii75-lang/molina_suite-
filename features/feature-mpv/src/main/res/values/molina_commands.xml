@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="molina_cmd_invalid_target">molina-play: sumber harus URL http(s), rtmp, rtsp, atau berkas yang ada</string>
+    <string name="molina_cmd_empty_query">molina-cari: kata kunci kosong</string>
+    <string name="molina_cmd_no_suite">Jendela utama Molina tidak bisa dibuka</string>
+    <string name="molina_cmd_unknown">Perintah Molina tidak dikenal</string>
+    <string name="molina_cmd_failed">Perintah Molina gagal dijalankan</string>
+</resources>

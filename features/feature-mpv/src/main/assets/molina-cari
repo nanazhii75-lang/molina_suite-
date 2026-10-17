@@ -1,0 +1,10 @@
+#!/data/data/com.molina.suite/files/usr/bin/bash
+# molina-cari: mencari di YouTube lewat tab mpv Molina dari Terminal.
+# Pemakaian: molina-cari <kata kunci...>
+# Memanggil komponen privat aplikasi lewat am; aplikasi lain tidak bisa memicunya.
+if [ "$#" -eq 0 ]; then
+  echo "Pemakaian: molina-cari <kata kunci...>" >&2
+  exit 2
+fi
+exec am start -n com.molina.suite/com.molina.suite.feature.mpv.MolinaCommandActivity \
+  -a com.molina.suite.mpv.action.SEARCH --es query "$*" > /dev/null
