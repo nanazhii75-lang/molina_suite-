@@ -12,6 +12,7 @@ import com.molina.suite.core.common.LibraryDraftBoard
 import com.molina.suite.core.common.PlaybackBoard
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.LoggingShellCommandRunner
+import com.molina.suite.core.common.MediaOpener
 import com.molina.suite.core.common.ShellCommandRunner
 import com.molina.suite.core.common.TerminalInputSender
 import com.molina.suite.core.common.ToolReadinessChecker
@@ -52,6 +53,9 @@ class MolinaApplication : Application() {
     /** Pelaksana konversi dokumen (pandoc dan Typst di Debian) untuk modul lain, mis. Ekspor di tab Code. */
     val documents: DocumentConverter by lazy { SettingsEngineModule.createDocumentConverter(this, shell) }
 
+    /** Pembuka media (pemutar mpv) untuk modul lain, mis. aksi Putar di tab Code. */
+    val media: MediaOpener by lazy { MpvEngineModule.createMediaOpener() }
+
     /** Pengetik teks ke sesi aktif tab Terminal, dipakai modul Settings (Library). */
     val terminalInput: TerminalInputSender by lazy { TerminalEngineModule.createInputSender() }
 
@@ -70,7 +74,7 @@ class MolinaApplication : Application() {
         SettingsEngineModule.installLogRecorder(this)
         appExit.setHandler { exitApp() }
         TerminalEngineModule.install(this, engines, appExit)
-        CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft, documents)
+        CodeEngineModule.install(this, engines, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft, documents, media)
         MpvEngineModule.install(this, engines, toolReadiness, toolSetup, playback, terminalInput)
         SettingsEngineModule.install(engines, terminalInput, toolSetup, editorOpen, libraryDraft)
         X11EngineModule.install(this, engines, shell, keepAlive, x11Controller)

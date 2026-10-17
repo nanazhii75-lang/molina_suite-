@@ -5,6 +5,7 @@ import com.molina.suite.core.common.DocumentConverter
 import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.LibraryDraftBoard
+import com.molina.suite.core.common.MediaOpener
 import com.molina.suite.core.common.PrefixScripts
 import com.molina.suite.core.common.ShellCommandRunner
 import com.molina.suite.core.common.TerminalInputSender
@@ -20,7 +21,8 @@ internal class CodeEngine(
     val toolSetup: ToolSetupBoard,
     shell: ShellCommandRunner,
     val libraryDraft: LibraryDraftBoard,
-    val documents: DocumentConverter
+    val documents: DocumentConverter,
+    val media: MediaOpener
 ) {
     val textMate = CodeTextMate(application.assets)
     val session = CodeEditorSession(CodeFileRepository(), textMate)
@@ -46,9 +48,10 @@ object CodeEngineModule {
         toolSetup: ToolSetupBoard,
         shell: ShellCommandRunner,
         libraryDraft: LibraryDraftBoard,
-        documents: DocumentConverter
+        documents: DocumentConverter,
+        media: MediaOpener
     ) {
-        engine = CodeEngine(application, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft, documents)
+        engine = CodeEngine(application, editorOpen, terminalInput, toolReadiness, toolSetup, shell, libraryDraft, documents, media)
         engines.register(CodeFeature())
         PrefixScripts.installWhenReady(application, listOf("molina-open"))
     }

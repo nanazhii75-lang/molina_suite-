@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="molina_media_unreadable">berkas tidak ditemukan atau tidak bisa dibaca</string>
+    <string name="molina_media_no_player">pemutar mpv tidak bisa dibuka</string>
+</resources>

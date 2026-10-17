@@ -7,8 +7,6 @@ import android.util.Log
 import android.widget.Toast
 import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.HostIntents
-import com.molina.suite.mpv.MPVActivity
-import com.molina.suite.mpv.MpvOpenKind
 import com.molina.suite.mpv.MpvSearchEntry
 import com.molina.suite.mpv.MpvSessionControl
 
@@ -48,12 +46,7 @@ class MolinaCommandActivity : Activity() {
             toast(R.string.molina_cmd_invalid_target)
             return
         }
-        val kind = if (target.source == PlaySource.URL) MpvOpenKind.URL else MpvOpenKind.LOCAL
-        val player = Intent()
-            .putExtra("filepath", target.value)
-            .putExtra(MpvOpenKind.EXTRA, kind.name)
-            .setClass(this, MPVActivity::class.java)
-        startActivity(player)
+        startActivity(MpvPlayIntent.create(this, target))
     }
 
     private fun search(raw: String?) {

@@ -2,6 +2,7 @@ package com.molina.suite.feature.mpv
 
 import android.app.Application
 import com.molina.suite.core.common.EngineRegistry
+import com.molina.suite.core.common.MediaOpener
 import com.molina.suite.core.common.PlaybackBoard
 import com.molina.suite.core.common.TerminalInputSender
 import com.molina.suite.core.common.ToolReadinessChecker
@@ -46,4 +47,7 @@ object MpvEngineModule {
         FormatInfoEntry.install(MpvFormatInfoOpener(terminalInput))
         engines.register(MpvFeature())
     }
+
+    /** Pembuka media untuk modul lain (mis. Code); modul pemanggil hanya mengenal [MediaOpener]. */
+    fun createMediaOpener(): MediaOpener = MpvMediaOpener()
 }
