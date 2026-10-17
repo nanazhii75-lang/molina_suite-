@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_integration_title">Integrasi</string>
+    <string name="settings_integration_subtitle">Lintasan antar tab: Terminal, Code, dan mpv</string>
+    <string name="integration_intro">Matikan lintasan yang tidak ingin dipakai. Perintah atau menu yang bersangkutan akan menolak dengan pesan yang jelas.</string>
+    <string name="integration_terminal_code_title">Terminal ke Code</string>
+    <string name="integration_terminal_code_desc">molina-open berkas membuka berkas itu di editor Code.</string>
+    <string name="integration_terminal_mpv_title">Terminal ke mpv</string>
+    <string name="integration_terminal_mpv_desc">molina-play dan molina-cari memutar atau mencari di mpv.</string>
+    <string name="integration_code_mpv_title">Code ke mpv</string>
+    <string name="integration_code_mpv_desc">Aksi Putar di mpv pada dialog Lakukan untuk berkas media dan playlist.</string>
+    <string name="integration_state_ready">Siap</string>
+    <string name="integration_state_disabled">Nonaktif</string>
+    <string name="integration_state_engine">Mesin yang dibutuhkan belum tersedia</string>
+    <string name="integration_state_script">Perintah Terminal belum terpasang; buka aplikasi sebentar lalu muat ulang</string>
+    <string name="integration_state_component">Komponen privat tidak ditemukan</string>
+    <string name="integration_check">Periksa</string>
+    <string name="integration_check_enabled">%1$s Lintasan diaktifkan</string>
+    <string name="integration_check_engines">%1$s Mesin yang dibutuhkan tersedia</string>
+    <string name="integration_check_script">%1$s Perintah %2$s terpasang</string>
+    <string name="integration_check_entry">%1$s Komponen privat ditemukan</string>
+</resources>

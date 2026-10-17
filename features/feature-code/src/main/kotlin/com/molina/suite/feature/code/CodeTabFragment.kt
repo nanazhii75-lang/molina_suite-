@@ -28,6 +28,8 @@ import com.molina.suite.core.common.Activities
 import com.molina.suite.core.common.ActivitySource
 import com.molina.suite.core.common.EditorOpenBoard
 import com.molina.suite.core.common.EditorOpenRequest
+import com.molina.suite.core.common.IntegrationRoute
+import com.molina.suite.core.common.IntegrationSettings
 import com.molina.suite.core.common.MediaOpenResult
 import com.molina.suite.core.common.HostBackPressHandler
 import com.molina.suite.core.common.HostChromeController
@@ -621,7 +623,8 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
             file,
             exportController.isAvailableFor(file),
             session.hasContent.value,
-            CodeEngineModule.requireEngine().media.canOpen(file)
+            canPlay = CodeEngineModule.requireEngine().media.canOpen(file),
+            playEnabled = IntegrationSettings(requireContext()).isEnabled(IntegrationRoute.CODE_TO_MPV)
         )
         if (actions.isEmpty()) {
             toast(getString(R.string.code_actions_none))
@@ -633,11 +636,18 @@ class CodeTabFragment : Fragment(), HostBackPressHandler {
                 CodeFileAction.RUN_HOST -> saveThenRun(file, ScriptRunTarget.HOST)
                 CodeFileAction.PREVIEW -> openPreview(file)
                 CodeFileAction.PLAY_MPV -> saveThenPlay(file)
+                CodeFileAction.PLAY_MPV_OFF -> showPlayDisabled()
                 CodeFileAction.CHECK -> checkController.start()
                 CodeFileAction.EXPORT -> ensureStorage { exportController.start() }
                 CodeFileAction.LIBRARY -> sendToLibrary()
             }
         }
+    }
+
+    /** Lintasan Code ke mpv dimatikan di Setting: beri tahu, lalu bawa pengguna ke tab Setting. */
+    private fun showPlayDisabled() {
+        toast(getString(R.string.code_play_disabled))
+        (activity as? HostTabSwitcher)?.showEngine(EngineId.SETTINGS)
     }
 
     /** Menyimpan dulu bila ada perubahan (mis. playlist yang baru disunting), lalu memutar [file] di mpv. */

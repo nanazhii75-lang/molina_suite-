@@ -11,6 +11,7 @@ internal enum class CodeFileAction(@StringRes val label: Int) {
     RUN_HOST(R.string.code_tree_run_host),
     PREVIEW(R.string.code_action_preview),
     PLAY_MPV(R.string.code_action_play_mpv),
+    PLAY_MPV_OFF(R.string.code_action_play_mpv_off),
     CHECK(R.string.code_action_check),
     EXPORT(R.string.code_menu_export),
     LIBRARY(R.string.code_menu_library)
@@ -27,7 +28,8 @@ internal object CodeFileActions {
         file: File?,
         canExport: Boolean,
         hasContent: Boolean,
-        canPlay: Boolean = false
+        canPlay: Boolean = false,
+        playEnabled: Boolean = true
     ): List<CodeFileAction> {
         if (file == null) return emptyList()
         val name = file.name
@@ -35,7 +37,7 @@ internal object CodeFileActions {
         if (CodeRunCommand.isRunnable(name)) actions.add(CodeFileAction.RUN_DEBIAN)
         if (ScriptRunLine.isRunnableName(name)) actions.add(CodeFileAction.RUN_HOST)
         if (CodePreviewKind.of(name) != null) actions.add(CodeFileAction.PREVIEW)
-        if (canPlay) actions.add(CodeFileAction.PLAY_MPV)
+        if (canPlay) actions.add(if (playEnabled) CodeFileAction.PLAY_MPV else CodeFileAction.PLAY_MPV_OFF)
         if (CodeCheckLanguage.of(name) != null) actions.add(CodeFileAction.CHECK)
         if (canExport) actions.add(CodeFileAction.EXPORT)
         if (hasContent) actions.add(CodeFileAction.LIBRARY)

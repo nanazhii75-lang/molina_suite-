@@ -8,6 +8,8 @@ import android.util.Log
 import android.widget.Toast
 import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.HostIntents
+import com.molina.suite.core.common.IntegrationRoute
+import com.molina.suite.core.common.IntegrationSettings
 
 /**
  * Pintu masuk privat untuk perintah Terminal molina-open. Komponen ini tidak diekspor: hanya
@@ -32,6 +34,10 @@ class MolinaOpenActivity : Activity() {
         if (command?.action != ACTION_OPEN) {
             Log.w(TAG, "aksi tidak dikenal: ${command?.action}")
             toast(R.string.molina_open_unknown)
+            return
+        }
+        if (!IntegrationSettings(this).isEnabled(IntegrationRoute.TERMINAL_TO_CODE)) {
+            toast(R.string.molina_open_disabled)
             return
         }
         val file = OpenInput.fileTarget(command.getStringExtra(EXTRA_TARGET))

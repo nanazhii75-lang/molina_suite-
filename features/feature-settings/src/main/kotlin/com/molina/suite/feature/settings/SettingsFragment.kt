@@ -12,6 +12,7 @@ import com.molina.suite.core.common.HostBackPressHandler
 import com.molina.suite.core.common.ToolSetupRequest
 import com.molina.suite.core.common.ToolSetupTarget
 import com.molina.suite.feature.settings.debian.DebianFragment
+import com.molina.suite.feature.settings.integration.IntegrationFragment
 import com.molina.suite.feature.settings.library.LibraryFragment
 import com.molina.suite.feature.settings.logcat.LogcatFragment
 import com.molina.suite.feature.settings.logcat.ProcessTracking
@@ -50,6 +51,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         view.findViewById<View>(R.id.settings_row_debian).setOnClickListener { openDebian() }
         view.findViewById<View>(R.id.settings_row_x11).setOnClickListener { openX11() }
         view.findViewById<View>(R.id.settings_row_packages).setOnClickListener { openPackages() }
+        view.findViewById<View>(R.id.settings_row_integration).setOnClickListener { openIntegration() }
         view.findViewById<View>(R.id.settings_row_logcat).setOnClickListener { openLogcat() }
         logcatSubtitle = view.findViewById<TextView>(R.id.settings_logcat_subtitle).also {
             logcatSubtitleColor = it.currentTextColor
@@ -147,6 +149,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
             .commit()
     }
 
+    private fun openIntegration() {
+        if (childFragmentManager.backStackEntryCount > 0) return
+        childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.settings_child_container, IntegrationFragment())
+            .addToBackStack(BACKSTACK_INTEGRATION)
+            .commit()
+    }
+
     private fun openLogcat() {
         if (childFragmentManager.backStackEntryCount > 0) return
         childFragmentManager.beginTransaction()
@@ -218,6 +229,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         const val BACKSTACK_DEBIAN = "debian"
         const val BACKSTACK_PACKAGES = "packages"
         const val BACKSTACK_LOGCAT = "logcat"
+        const val BACKSTACK_INTEGRATION = "integration"
         const val BACKSTACK_X11 = "x11"
     }
 }

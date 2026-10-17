@@ -2,4 +2,6 @@
 <resources>
     <string name="code_action_play_mpv">Putar di mpv</string>
     <string name="code_play_failed">Tidak bisa memutar di mpv: %1$s</string>
+    <string name="code_action_play_mpv_off">Putar di mpv (nonaktif, buka Setting)</string>
+    <string name="code_play_disabled">Lintasan Code ke mpv dinonaktifkan. Aktifkan di Setting, Integrasi.</string>
 </resources>

@@ -7,6 +7,8 @@ import android.util.Log
 import android.widget.Toast
 import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.HostIntents
+import com.molina.suite.core.common.IntegrationRoute
+import com.molina.suite.core.common.IntegrationSettings
 import com.molina.suite.mpv.MpvSearchEntry
 import com.molina.suite.mpv.MpvSessionControl
 
@@ -30,6 +32,12 @@ class MolinaCommandActivity : Activity() {
     }
 
     private fun handle(command: Intent?) {
+        val action = command?.action
+        val gated = action == ACTION_PLAY || action == ACTION_SEARCH
+        if (gated && !IntegrationSettings(this).isEnabled(IntegrationRoute.TERMINAL_TO_MPV)) {
+            toast(R.string.molina_cmd_disabled)
+            return
+        }
         when (command?.action) {
             ACTION_PLAY -> play(command.getStringExtra(EXTRA_TARGET))
             ACTION_SEARCH -> search(command.getStringExtra(EXTRA_QUERY))

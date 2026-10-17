@@ -5,4 +5,5 @@
     <string name="molina_cmd_no_suite">Jendela utama Molina tidak bisa dibuka</string>
     <string name="molina_cmd_unknown">Perintah Molina tidak dikenal</string>
     <string name="molina_cmd_failed">Perintah Molina gagal dijalankan</string>
+    <string name="molina_cmd_disabled">Lintasan Terminal ke mpv dinonaktifkan. Aktifkan di Setting, Integrasi.</string>
 </resources>
