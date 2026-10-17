@@ -20,8 +20,8 @@ import static com.molina.suite.terminal.shared.termux.TermuxConstants.TERMUX_PRE
  *       proot-distro. Sebelum setiap login skrip ini menyisipkan blok prompt ke {@code ~/.bashrc}
  *       rootfs (root, user, /etc/skel) dan menulis penanda {@code ~/.molina/in-debian} (PID shell
  *       host) selama sesi Debian berjalan. Rootfs belum terpasang berarti shell host dipakai.</li>
- *   <li>{@code etc/molina/prompt-block.bashrc}: isi blok prompt: nama hijau, path hijau muda,
- *       tanda akhir {@code $} untuk root dan user.</li>
+ *   <li>{@code etc/molina/prompt-block.bashrc}: isi blok prompt: seluruh prompt (nama, path,
+ *       tanda akhir {@code $}) satu hijau Molina seperti judul; teks sesudahnya putih polos.</li>
  * </ul>
  */
 final class MolinaShellProfile {
@@ -198,7 +198,7 @@ final class MolinaShellProfile {
     private static final String PROMPT_BLOCK =
               "# >>> molina-prompt (dikelola aplikasi; jangan diedit) >>>\n"
             + "if [ -n \"${PS1-}\" ]; then\n"
-            + "\tPS1='\\[\\e[32m\\]\\u@localhost\\[\\e[0m\\]:\\[\\e[92m\\]\\w\\[\\e[0m\\] $ '\n"
+            + "\tPS1='\\[\\e[0;38;5;120m\\]\\u@localhost:\\w $ \\[\\e[0m\\]'\n"
             + "\t__molina_banner() {\n"
             + "\t\t[ -n \"${MOLINA_NO_BANNER_REDRAW-}\" ] && return 0\n"
             + "\t\t[ -f \"$HOME/.hushlogin\" ] && return 0\n"

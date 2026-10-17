@@ -1,0 +1,187 @@
+MATI (<urlopen error [Errno -2] Name or servic) https://afbtv.siar.us/live/afbtv.m3u8
+HIDUP                        https://5bf7b725107e5.streamlock.net/ahsantv/ahsantv/playlist.m3u8
+MATI (HTTP Error 404: Not Found) https://akativi.siar.us/live/akativi.m3u8
+BUKAN-PLAYLIST               http://202.150.161.117:8000/play/AlBahjahTV
+MATI (HTTP Error 404: Not Found) https://tv.aliman.id/aliman/live.m3u8
+MATI (<urlopen error [SSL: CERTIFICATE_VERIFY_) https://ammedia.siar.us/ammedia/live/playlist.m3u8
+MATI (HTTP Error 401: Unauthorized) http://103.58.160.157:8278/720-ANTV/playlist.m3u8
+HIDUP                        https://5bf7b725107e5.streamlock.net/ashiiltv/ashiiltv/playlist.m3u8
+HIDUP                        https://wahyu1ptv.pages.dev/AshiilTV-HD.m3u8
+MATI (HTTP Error 404: Not Found) https://hgmtv.com:19360/asthatv/asthatv.m3u8
+MATI (HTTP Error 404: Not Found) https://5bf7b725107e5.streamlock.net/abtv/abtv/playlist.m3u8
+HIDUP                        http://122.248.43.242:1935/ATAMBUATV/_definst_/myStream/playlist.m3u8
+HIDUP                        http://122.248.43.242:1935/BALIKPAPANTV/_definst_/myStream/playlist.m3u8
+HIDUP                        http://202.150.153.254:65500/bandungtvWEBSITE.m3u8
+HIDUP                        https://banjartv.siar.us/banjartv/live/playlist.m3u8
+HIDUP                        https://5bf7b725107e5.streamlock.net/bantentv/bantentv/playlist.m3u8
+HIDUP                        https://5bf7b725107e5.streamlock.net/bmstv/bmstv/playlist.m3u8
+HIDUP                        http://122.248.43.242:1935/BATAMTV/_definst_/myStream/playlist.m3u8
+MATI (<urlopen error [Errno -2] Name or servic) https://xtdslboppkkv-pull.bpmedialive.com/live/beritasatu/abr.m3u8
+MATI ([Errno 104] Connection reset by peer) http://livestream.biznetvideo.net/biznet_adventure/smil:adventure.smil/playlist.m3u8
+MATI ([Errno 104] Connection reset by peer) http://livestream.biznetvideo.net/biznet_kids/smil:kids.smil/index.m3u8
+MATI ([Errno 104] Connection reset by peer) http://livestream.biznetvideo.net/biznet_lifestyle/smil:lifestyle.smil/index.m3u8
+HIDUP                        https://flv.intechmedia.net/live/ch112.m3u8
+MATI (timed out)             http://175.158.57.130:8888/stream/channelid/1402218159
+HIDUP                        https://5bf7b725107e5.streamlock.net/brtv/brtv/playlist.m3u8
+HIDUP                        https://5bf7b725107e5.streamlock.net/bungotv/bungotv/playlist.m3u8
+HIDUP                        https://stream.carubantv.id/hls/0/stream.m3u8
+MATI (<urlopen error [Errno -5] No address ass) https://ams.juraganstreaming.com:5443/LiveApp/streams/celebesmedia.m3u8
+HIDUP                        https://pull.daaiplus.com/live-DAAIPLUS/live-DAAIPLUS_HD.m3u8
+HIDUP                        https://5bf7b725107e5.streamlock.net/davika/davika/playlist.m3u8
+HIDUP                        https://b.webcache.maxindo.net.id/dhamma/dhamma.m3u8
+HIDUP                        https://dhohotv.siar.us/dhohotv/live/playlist.m3u8
+HIDUP                        https://tvstreamcast.com/tawaftv.m3u8
+MATI (HTTP Error 404: Not Found) https://e.siar.us/live/dtvi.m3u8
+HIDUP                        https://dutatv.siar.us/dutatv/live/playlist.m3u8
+CURIGA (dilewati)            https://gist.githubusercontent.com/iptvonlinetv/cf56ccf36d1c0827e4dc470db7b7912d/raw/066b1c9755b2496805575f16d413bd1207ca8117/udp315.520.789:8060.m3u8
+HIDUP                        https://vodcdn.bamboo-cloud.com/livehls/69a123b780c99d28cc0f0016/master.m3u8
+CURIGA (dilewati)            https://gist.githubusercontent.com/iptvonlinetv/cf56ccf36d1c0827e4dc470db7b7912d/raw/066b1c9755b2496805575f16d413bd1207ca8117/udp120.510.450:6060.m3u8
+CURIGA (dilewati)            https://gist.githubusercontent.com/iptvonlinetv/cf56ccf36d1c0827e4dc470db7b7912d/raw/066b1c9755b2496805575f16d413bd1207ca8117/udp410.310.578:2020.m3u8
+HIDUP                        https://live.efarinatv.com/hls/bgtaufikganteng.m3u8
+HIDUP                        http://122.248.43.242:1935/FAJARTV/_definst_/myStream/playlist.m3u8
+HIDUP                        https://v3.siar.us/ficomchannel/live/playlist.m3u8
+HIDUP                        https://hgmtv.com:19360/garudatvlivestreaming/garudatvlivestreaming.m3u8
+CURIGA (dilewati)            https://gist.githubusercontent.com/iptvonlinetv/02d209207082846012c15305f7471c55/raw/4439b54b986e696e6fcfba7a53380d85b27bbbc1/udp450.500.723:6050.m3u8
+CURIGA (dilewati)            https://gist.githubusercontent.com/iptvonlinetv/244b66c61f162a7c0c2b4fa59b528139/raw/2376b7ba1989ebbd383301ec7d645e222a6c9338/udp780.510.345:4545.m3u8
+MATI (HTTP Error 404: Not Found) https://v3.siar.us/humabetangtv/live/playlist.m3u8
+HIDUP                        https://61146e7ab7a66.streamlock.net:8089/tes/1/chunklist.m3u8
+MATI (<urlopen error [Errno -2] Name or servic) https://b1world.beritasatumedia.com/Beritasatu/B1World_manifest.m3u8
+HIDUP                        https://tvstreamcast.com/indonesiana.m3u8
+MATI (<urlopen error _ssl.c:975: The handshake) https://jambitv.globaldigitalcore.com/hls/sah5tu7Eiveepohyieyie3OoteL2anga.m3u8
+HIDUP                        http://122.248.43.242:1935/JAWAPOSTVJKT/_definst_/myStream/playlist.m3u8
+HIDUP                        http://27.124.81.245:1935/jektv/myStream/playlist.m3u8
+HIDUP                        http://103.255.15.222:1935/tv/jitv_720p/playlist.m3u8
+HIDUP                        https://stream.jogjatv.co.id/jtvlive/stream/index.m3u8
+HIDUP                        http://122.248.43.242:1935/JTVSURABAYA/_definst_/myStream/playlist.m3u8
+HIDUP                        http://122.248.43.242:1935/JTVMADIUN/_definst_/myStream/playlist.m3u8
+HIDUP                        http://122.248.43.242:1935/JTVMADURA/_definst_/myStream/playlist.m3u8
+HIDUP                        http://122.248.43.242:1935/JTVMALANG/_definst_/myStream/playlist.m3u8
+HIDUP                        http://122.248.43.242:1935/KAWANUATV/_definst_/myStream/playlist.m3u8
+MATI (HTTP Error 503: Service Unavailable) http://origin5.mediacdn.ru/live/kidstv/index.m3u8
+HIDUP                        https://5bf7b725107e5.streamlock.net/kstv/kstv/playlist.m3u8
+MATI (HTTP Error 404: Not Found) https://flv.intechmedia.net/live/ch118.m3u8
+HIDUP                        https://lingkartv.my.id/hls/lingkartv.m3u8
+HIDUP                        https://stream.asianastream.com/madani/madanitv.smil/playlist.m3u8
+HIDUP                        https://re1.siar.us/madutv/hd720/playlist.m3u8
+HIDUP                        https://edge.medcom.id/live-edge/smil:magna.smil/playlist.m3u8
+MATI (<urlopen error [Errno -2] Name or servic) https://stream.matrixtv.id/hls/0/stream.m3u8
+HIDUP                        https://stream.convergen.co/mbg_stream/smil:mbStream.smil/playlist.m3u8
+MATI (HTTP Error 404: Not Found) https://wahyu1ptv.pages.dev/MDTV-HD.m3u8
+HIDUP                        https://edge.medcom.id/live-edge/smil:metro.smil/playlist.m3u8
+MATI (<urlopen error _ssl.c:975: The handshake) https://tv.rodja.live/tasik/ngrp:mgitv_all/playlist.m3u8
+HIDUP                        https://mgstv.siar.us/live/mgstv.m3u8
+HIDUP                        https://5bf7b725107e5.streamlock.net/mqtv/mqtv/playlist.m3u8
+MATI (<urlopen error [SSL: CERTIFICATE_VERIFY_) https://mic.siar.us/mic/live/mic.m3u8
+MATI (HTTP Error 403: Forbidden) https://cdn10jtedge.indihometv.com/atm/DASH/mykids/manifest.mpd
+BUKAN-PLAYLIST               https://www.naajiyatv.com/live/livestream.m3u8
+BUKAN-PLAYLIST               http://202.150.161.117:8000/play/NabawiTV
+HIDUP                        https://nusantaratv.siar.us/nusantaratv/live/playlist.m3u8
+MATI (HTTP Error 404: Not Found) https://5bf7b725107e5.streamlock.net/onlinetvnusantara/onlinetvnusantara/playlist.m3u8
+HIDUP                        http://122.248.43.242:1935/PADANGTV/_definst_/myStream/playlist.m3u8
+HIDUP                        https://streaming.id18.tunnel.my.id/hls/stream.m3u8
+HIDUP                        http://122.248.43.242:1935/PONTV/_definst_/myStream/playlist.m3u8
+HIDUP                        https://pujatv.siar.us/live/pujatv.m3u8
+MATI (<urlopen error _ssl.c:975: The handshake) https://www.streaming.radartv.co.id/hls/test.m3u8
+HIDUP                        https://v2.siar.us/radartasikmalaya/live/playlist.m3u8
+MATI (timed out)             http://175.158.57.130:8888/stream/channelid/412436804
+HIDUP                        https://rtvstream.rtv.co.id:4555/hls/rtv.m3u8
+MATI (<urlopen error [SSL: CERTIFICATE_VERIFY_) https://v10.siar.us/rctv/live/playlist.m3u8
+HIDUP                        http://122.248.43.242:1935/RIAUTV/_definst_/myStream/playlist.m3u8
+HIDUP                        https://rinjanitv.cloud/hls/tvkabel.m3u8
+HIDUP                        https://rodjatv.com/rodjatv/live.m3u8
+HIDUP                        https://private-streaming.rri.go.id/memfs/6f77c7b5-feb2-4935-9f89-e7e9fca0a54a_output_0.m3u8
+HIDUP                        https://live.salira.tv/p/3870/hybrid/play.m3u8
+HIDUP                        https://live.salira.tv:3870/stream/play.m3u8
+HIDUP                        https://sampit-tv.siar.us/live/sampit-tv.m3u8
+HIDUP                        https://cdn.adyadigitalteknologi.com:8090/vod/relay.m3u8
+MATI ([Errno 104] Connection reset by peer) http://116.254.112.74/hls/cakralive.m3u8
+MATI (HTTP Error 404: Not Found) http://122.248.43.242:1935/SIMPANG5TV/_definst_/myStream/playlist.m3u8
+HIDUP                        http://122.248.43.242:1935/SMTV/_definst_/myStream/playlist.m3u8
+HIDUP                        https://e.siar.us/live/smtv.m3u8
+HIDUP                        https://sriwijayatv.siar.us/live/sriwijayatv.m3u8
+HIDUP                        https://stream.staratv.id/hls/0/stream.m3u8
+HIDUP                        https://bandung.staratv.id/hls/0/stream.m3u8
+HIDUP                        https://bojonegoro.staratv.id/hls/stream.m3u8
+HIDUP                        https://cianjur.staratv.id/hls/0/stream.m3u8
+HIDUP                        https://jakarta.staratv.id/hls/0/stream.m3u8
+HIDUP                        https://malang.staratv.id/hls/0/stream.m3u8
+HIDUP                        https://parahyangan.staratv.id/hls/0/stream.m3u8
+HIDUP                        http://122.248.43.242:1935/SAMARINDATV/_definst_/myStream/playlist.m3u8
+HIDUP                        https://ssfm.siar.us/ssfm/live/playlist.m3u8
+MATI (HTTP Error 404: Not Found) http://122.248.43.242:1935/SULTRATV/_definst_/myStream/playlist.m3u8
+HIDUP                        https://wahyu1ptv.pages.dev/SurauTV-HD.m3u8
+HIDUP                        https://v2.siar.us/tatv/live.sdp/playlist.m3u8
+MATI (HTTP Error 404: Not Found) http://wms.klikhost.com:1935/tegartv/tegartv/playlist.m3u8
+MATI (HTTP Error 404: Not Found) https://5bf7b725107e5.streamlock.net/tegartv/tegartv/playlist.m3u8
+HIDUP                        https://restreamer.indonusa.id:8443/d5f4ad43-1b5a-4b0f-8bef-5b37224ed221.m3u8
+HIDUP                        https://5bf7b725107e5.streamlock.net/tv9/tv9/playlist.m3u8
+MATI (HTTP Error 404: Not Found) https://e.siar.us/live/tvmu.m3u8
+HIDUP                        https://5bf7b725107e5.streamlock.net/tvtabalong/tvtabalong/playlist.m3u8
+MATI (HTTP Error 404: Not Found) https://tvku.tv/hlsstream/hls/live.m3u8
+MATI (timed out)             http://103.18.181.69:1935/golive/livestream/playlist.m3u8
+MATI (<urlopen error _ssl.c:975: The handshake) https://ssv1.dpr.go.id/golive/livestream/playlist.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Nasional/hls/Nasional.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Aceh/hls/Aceh.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Bali/hls/Bali.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Babel/hls/Babel.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Bengkulu/hls/Bengkulu.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Gorontalo/hls/Gorontalo.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/DKI/hls/DKI.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Jambi/hls/Jambi.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Jabar/hls/Jabar.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Jateng/hls/Jateng.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Jatim/hls/Jatim.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Kalbar/hls/Kalbar.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Kalsel/hls/Kalsel.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Kalteng/hls/Kalteng.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Kaltim/hls/Kaltim.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Lampung/hls/Lampung.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Ambon/hls/Ambon.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Sulut/hls/Sulut.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Sumut/hls/Sumut.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/NTB/hls/NTB.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/NTT/hls/NTT.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Papua/hls/Papua.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Riau/hls/Riau.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Sulbar/hls/Sulbar.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Sulsel/hls/Sulsel.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Sulteng/hls/Sulteng.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Sultra/hls/Sultra.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Sumbar/hls/Sumbar.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Sumsel/hls/Sumsel.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Pabar/hls/Pabar.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/TVRIWorld/hls/TVRIWorld.m3u8
+HIDUP                        https://ott-balancer.tvri.go.id/live/eds/Jogjakarta/hls/Jogjakarta.m3u8
+HIDUP                        https://srs.u-channel.tv/live/uchannel-tv.m3u8
+HIDUP                        https://cdn.gunadarma.ac.id/streams/ugtv/ingestugtv.m3u8
+HIDUP                        https://flv.intechmedia.net/live/ch107.m3u8
+CURIGA (dilewati)            https://gist.githubusercontent.com/iptvonlinetv/8a6b2f12e5e968537378f1245cea02c9/raw/78bf84476f8e24cc8ea9d5ac24855078c61b18db/udp305.575.530:3030.m3u8
+CURIGA (dilewati)            https://mncmedia.malingtv.workers.dev/rcti.m3u8
+CURIGA (dilewati)            https://mncmedia.malingtv.workers.dev/gtv.m3u8
+CURIGA (dilewati)            https://mncmedia.malingtv.workers.dev/inews.m3u8
+MATI (HTTP Error 404: Not Found) http://ikitv.sqn.at:8000/play/a00j/index.m3u8
+MATI (HTTP Error 404: Not Found) http://ikitv.sqn.at:8000/play/a01l/index.m3u8
+HIDUP                        http://122.248.43.242:1935/JTVKEDIRI/_definst_/myStream/playlist.m3u8
+HIDUP                        https://op-flashcon-digdayahd-1.dens.tv/h/h223/index.m3u8
+MATI (HTTP Error 404: Not Found) http://ikitv.sqn.at:8000/play/a044/index.m3u8
+HIDUP                        https://live.salamtelevisi.com/hls/0/stream.m3u8
+HIDUP                        https://selaparangtv.siar.us/live/selaparangtv.m3u8
+MATI (HTTP Error 404: Not Found) http://ikitv.sqn.at:8000/play/a00l/index.m3u8
+MATI (HTTP Error 404: Not Found) http://ikitv.sqn.at:8000/play/a023/index.m3u8
+HIDUP                        http://202.150.161.212:5000/live/channel23/playlist.m3u8
+MATI (timed out)             http://58.8.186.128:10006/bysid/2614
+MATI (timed out)             http://58.8.186.128:10006/bysid/2630
+HIDUP                        https://op-flashcon-digdayahd-1.dens.tv/h/h221/02.m3u8
+MATI (timed out)             http://202.150.172.59/MNCTV/tracks-v1a1/mono.m3u8
+MATI (timed out)             http://202.150.172.59/SCTV/tracks-v1a1/mono.m3u8
+MATI (timed out)             http://202.150.172.59/RCTIHD/index.m3u8
+MATI (timed out)             http://202.150.172.59/GTVHD/index.m3u8
+MATI (timed out)             http://202.150.172.59/iNews/index.m3u8
+MATI (timed out)             http://202.150.172.59/Indosiar/index.m3u8
+MATI (timed out)             http://202.150.172.59/TVRI/index.m3u8
+MATI (timed out)             http://202.150.172.59/TVRISport/index.m3u8
+MATI (timed out)             http://202.150.172.59/RajawaliTV/index.m3u8
+MATI (timed out)             http://202.150.172.59/MagnaChannel/index.m3u8
+MATI (timed out)             http://202.150.172.59/VTVHD/index.m3u8
+HIDUP                        https://video.detik.com/livecnn/smil:cnntv/chunklist_w268557525_b384000_sleng.m3u8
+HIDUP                        https://video.detik.com/livecnbc/smil:cnbctv/chunklist_w1279679883_b384000_sleng.m3u8
