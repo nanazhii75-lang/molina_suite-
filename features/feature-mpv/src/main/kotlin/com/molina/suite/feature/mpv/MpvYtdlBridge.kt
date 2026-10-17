@@ -22,8 +22,12 @@ internal object MpvYtdlBridge {
      * URL media langsung (HLS, DASH, TS, FLV) tidak perlu yt-dlp. Tanpa pengecualian ini, channel
      * IPTV yang gagal dibuka langsung masih diteruskan ke yt-dlp di proot (belasan detik), dan
      * perpindahan channel yang cepat menumpuk proses proot. Pola Lua dipisah "|".
+     *
+     * Jangan mulai nilai dengan "%": di daftar opsi mpv, "%" membuka format "%panjang%nilai", jadi
+     * nilai seperti "%.m3u8" membuat seluruh script-opts ditolak (ytdl_path ikut hilang dan semua
+     * pemutaran yt-dlp gagal). Titik literal ditulis "[.]" agar aman.
      */
-    private const val YTDL_EXCLUDE = "%.m3u8|%.mpd|%.ts\$|%.flv\$"
+    private const val YTDL_EXCLUDE = "[.]m3u8|[.]mpd|[.]ts\$|[.]flv\$"
 
     /**
      * Target perangkat Android 8 (tanpa dekoder AV1 perangkat keras): hindari AV1 dan batasi
