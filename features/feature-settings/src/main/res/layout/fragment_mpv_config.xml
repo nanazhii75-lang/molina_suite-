@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ms_bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/ms_space_md">
+
+        <TextView
+            style="@style/Molina.Text.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_mpvconfig_title" />
+
+        <TextView
+            style="@style/Molina.Text.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/ms_space_xs"
+            android:layout_marginBottom="@dimen/ms_space_md"
+            android:text="@string/mpvconfig_hint" />
+
+        <LinearLayout
+            android:id="@+id/mpvconfig_row_conf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/ms_card_gap"
+            android:background="@drawable/ms_bg_card_ripple"
+            android:clickable="true"
+            android:focusable="true"
+            android:minHeight="64dp"
+            android:orientation="vertical"
+            android:padding="@dimen/ms_space_md">
+
+            <TextView
+                style="@style/Molina.Text.Item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/mpvconfig_conf_title" />
+
+            <TextView
+                style="@style/Molina.Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_xs"
+                android:text="@string/mpvconfig_conf_subtitle" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/mpvconfig_row_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/ms_card_gap"
+            android:background="@drawable/ms_bg_card_ripple"
+            android:clickable="true"
+            android:focusable="true"
+            android:minHeight="64dp"
+            android:orientation="vertical"
+            android:padding="@dimen/ms_space_md">
+
+            <TextView
+                style="@style/Molina.Text.Item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/mpvconfig_input_title" />
+
+            <TextView
+                style="@style/Molina.Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ms_space_xs"
+                android:text="@string/mpvconfig_input_subtitle" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/Molina.Text.Item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/ms_space_sm"
+            android:layout_marginBottom="@dimen/ms_space_sm"
+            android:text="@string/mpvconfig_scripts_title" />
+
+        <LinearLayout
+            android:id="@+id/mpvconfig_scripts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <TextView
+            android:id="@+id/mpvconfig_scripts_empty"
+            style="@style/Molina.Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/ms_space_sm"
+            android:text="@string/mpvconfig_scripts_empty" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/mpvconfig_new_script"
+            style="@style/Molina.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/mpvconfig_new_script" />
+    </LinearLayout>
+</ScrollView>

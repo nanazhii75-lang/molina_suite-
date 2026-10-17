@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/ms_card_gap"
+    android:background="@drawable/ms_bg_card_ripple"
+    android:clickable="true"
+    android:focusable="true"
+    android:minHeight="56dp"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:padding="@dimen/ms_space_md">
+
+    <TextView
+        android:id="@+id/mpv_script_name"
+        style="@style/Molina.Text.Item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

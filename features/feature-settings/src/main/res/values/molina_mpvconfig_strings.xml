@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_mpvconfig_title">Konfigurasi mpv</string>
+    <string name="settings_mpvconfig_subtitle">mpv.conf, input.conf, dan skrip Lua di editor Code</string>
+    <string name="mpvconfig_hint">Berkas dibuka di tab Code dan berlaku saat mpv dibuka berikutnya. Skrip .lua di folder scripts dimuat otomatis. Sintaks Lua dapat diperiksa dari Code bila luac5.4 terpasang di Debian.</string>
+    <string name="mpvconfig_conf_title">mpv.conf</string>
+    <string name="mpvconfig_conf_subtitle">Opsi pemutar</string>
+    <string name="mpvconfig_input_title">input.conf</string>
+    <string name="mpvconfig_input_subtitle">Pintasan tombol dan gestur</string>
+    <string name="mpvconfig_scripts_title">Skrip Lua</string>
+    <string name="mpvconfig_scripts_empty">Belum ada skrip.</string>
+    <string name="mpvconfig_new_script">Skrip baru</string>
+    <string name="mpvconfig_new_title">Skrip Lua baru</string>
+    <string name="mpvconfig_new_hint">nama-skrip</string>
+    <string name="mpvconfig_create">Buat</string>
+    <string name="mpvconfig_cancel">Batal</string>
+    <string name="mpvconfig_name_empty">Nama tidak boleh kosong</string>
+    <string name="mpvconfig_name_too_long">Nama terlalu panjang (maksimal 48 karakter)</string>
+    <string name="mpvconfig_name_illegal">Awali dengan huruf atau angka; hanya huruf, angka, titik, minus, dan garis bawah</string>
+    <string name="mpvconfig_open_failed">Gagal menyiapkan %1$s: %2$s</string>
+</resources>

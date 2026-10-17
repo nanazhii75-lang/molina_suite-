@@ -17,6 +17,7 @@ import com.molina.suite.feature.settings.integration.IntegrationFragment
 import com.molina.suite.feature.settings.library.LibraryFragment
 import com.molina.suite.feature.settings.logcat.LogcatFragment
 import com.molina.suite.feature.settings.logcat.ProcessTracking
+import com.molina.suite.feature.settings.mpvconfig.MpvConfigFragment
 import com.molina.suite.feature.settings.packages.PackagesFragment
 import com.molina.suite.feature.settings.tools.ToolsFragment
 import com.molina.suite.feature.settings.x11.X11Fragment
@@ -55,6 +56,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         view.findViewById<View>(R.id.settings_row_integration).setOnClickListener { openIntegration() }
         view.findViewById<View>(R.id.settings_row_logcat).setOnClickListener { openLogcat() }
         view.findViewById<View>(R.id.settings_row_connections).setOnClickListener { openConnections() }
+        view.findViewById<View>(R.id.settings_row_mpvconfig).setOnClickListener { openMpvConfig() }
         logcatSubtitle = view.findViewById<TextView>(R.id.settings_logcat_subtitle).also {
             logcatSubtitleColor = it.currentTextColor
         }
@@ -169,6 +171,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
             .commit()
     }
 
+    private fun openMpvConfig() {
+        if (childFragmentManager.backStackEntryCount > 0) return
+        childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.settings_child_container, MpvConfigFragment())
+            .addToBackStack(BACKSTACK_MPVCONFIG)
+            .commit()
+    }
+
     private fun openConnections() {
         if (childFragmentManager.backStackEntryCount > 0) return
         childFragmentManager.beginTransaction()
@@ -243,5 +254,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         const val BACKSTACK_INTEGRATION = "integration"
         const val BACKSTACK_X11 = "x11"
         const val BACKSTACK_CONNECTIONS = "connections"
+        const val BACKSTACK_MPVCONFIG = "mpvconfig"
     }
 }
