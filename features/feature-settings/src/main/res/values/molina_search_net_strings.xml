@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_failed_certificate">Sertifikat tidak cocok dengan DuckDuckGo. Jaringan atau ISP kemungkinan mengalihkan atau menyadap koneksi, jadi pencarian dihentikan demi keamanan.</string>
+    <string name="search_failed_dns">DNS aman (DoH) gagal pada semua penyedia. Aplikasi tidak memakai DNS jaringan karena bisa dibajak.</string>
+</resources>

@@ -45,7 +45,8 @@ data class SearchSettings(
  */
 class SearchViewModel(
     private val engine: PrivateSearch,
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
+    private val onRelease: () -> Unit = {}
 ) : ViewModel() {
 
     private val mutableState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
@@ -139,6 +140,7 @@ class SearchViewModel(
 
     override fun onCleared() {
         scope.cancel()
+        runCatching { onRelease() }
         job = null
         lastResults = emptyList()
         super.onCleared()

@@ -155,14 +155,20 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 hideSummary()
                 showMessage(getString(R.string.search_invalid), canRetry = false)
             }
-            is SearchUiState.Failed -> failure(failureText(state))
+            is SearchUiState.Failed -> failure(failureText(state), canRetry = isRetryable(state.reason))
         }
     }
 
-    private fun failure(text: String) {
+    private fun failure(text: String, canRetry: Boolean = true) {
         resultAdapter.submitList(emptyList())
         hideSummary()
-        showMessage(text, canRetry = true)
+        showMessage(text, canRetry = canRetry)
+    }
+
+    /** Coba lagi hanya untuk galat sementara; sertifikat salah atau pengalihan tidak aman tidak diulang. */
+    private fun isRetryable(reason: SearchFailure): Boolean = when (reason) {
+        SearchFailure.NETWORK, SearchFailure.TIMEOUT, SearchFailure.SERVER, SearchFailure.DNS_FAILED -> true
+        else -> false
     }
 
     private fun failureText(state: SearchUiState.Failed): String = when (state.reason) {
@@ -172,6 +178,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         SearchFailure.TOO_LARGE -> getString(R.string.search_failed_large)
         SearchFailure.UNSAFE_REDIRECT -> getString(R.string.search_failed_redirect)
         SearchFailure.UNEXPECTED_FORMAT -> getString(R.string.search_failed_format)
+        SearchFailure.CERTIFICATE_MISMATCH -> getString(R.string.search_failed_certificate)
+        SearchFailure.DNS_FAILED -> getString(R.string.search_failed_dns)
     }
 
     private fun showSummary(count: Int, blocked: Int, droppedHttp: Int) {
@@ -265,8 +273,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val fetcher = RecordingPageFetcher(HardenedPageFetcher(setOf(DuckDuckGoSearch.HOST)))
-                return SearchViewModel(DuckDuckGoSearch(fetcher)) as T
+                val http = OkHttpPageFetcher.duckDuckGo()
+                val fetcher = RecordingPageFetcher(http)
+                return SearchViewModel(DuckDuckGoSearch(fetcher), onRelease = { http.close() }) as T
             }
         }
     }

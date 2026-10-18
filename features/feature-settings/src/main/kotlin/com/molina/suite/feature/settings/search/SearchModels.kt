@@ -29,7 +29,9 @@ enum class SearchFailure {
     SERVER,
     TOO_LARGE,
     UNSAFE_REDIRECT,
-    UNEXPECTED_FORMAT
+    UNEXPECTED_FORMAT,
+    CERTIFICATE_MISMATCH,
+    DNS_FAILED
 }
 
 sealed interface SearchOutcome {

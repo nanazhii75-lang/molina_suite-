@@ -9,7 +9,7 @@
     <string name="search_chip_safe_strict">Aman: ketat</string>
     <string name="search_chip_safe_moderate">Aman: sedang</string>
     <string name="search_chip_safe_off">Aman: mati</string>
-    <string name="search_privacy_note">Hanya html.duckduckgo.com yang dihubungi. Tanpa cookie, riwayat, atau cache. Kata kunci hilang saat menu ini ditutup. Tautan yang dibuka di browser tidak lagi dilindungi aplikasi ini.</string>
+    <string name="search_privacy_note">Alamat DuckDuckGo dicari lewat DNS terenkripsi (1.1.1.1, lalu 9.9.9.9), bukan DNS jaringan yang bisa dibajak. Sertifikat dipin, TLS 1.2+, dan proxy sistem diabaikan. Tanpa cookie, riwayat, atau cache. Kata kunci hilang saat menu ini ditutup. Tautan yang dibuka di browser tidak lagi dilindungi aplikasi ini.</string>
     <string name="search_loading">Mencari…</string>
     <string name="search_summary">%1$d hasil · %2$d iklan/pelacak dibuang</string>
     <string name="search_summary_http_dropped">%1$d hasil · %2$d iklan/pelacak dibuang · %3$d tautan http dibuang</string>

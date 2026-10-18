@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
  * html.duckduckgo.com lewat HTTPS; tidak ada cookie, riwayat, atau data yang disimpan.
  */
 class DuckDuckGoSearch(
-    private val fetcher: PageFetcher = HardenedPageFetcher(setOf(HOST))
+    private val fetcher: PageFetcher = OkHttpPageFetcher.duckDuckGo()
 ) : PrivateSearch {
 
     override suspend fun search(query: String, options: SearchOptions): SearchOutcome {
