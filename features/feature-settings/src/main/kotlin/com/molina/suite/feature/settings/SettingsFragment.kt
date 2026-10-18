@@ -19,6 +19,7 @@ import com.molina.suite.feature.settings.logcat.LogcatFragment
 import com.molina.suite.feature.settings.logcat.ProcessTracking
 import com.molina.suite.feature.settings.mpvconfig.MpvConfigFragment
 import com.molina.suite.feature.settings.packages.PackagesFragment
+import com.molina.suite.feature.settings.search.SearchFragment
 import com.molina.suite.feature.settings.tools.ToolsFragment
 import com.molina.suite.feature.settings.x11.X11Fragment
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +58,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         view.findViewById<View>(R.id.settings_row_logcat).setOnClickListener { openLogcat() }
         view.findViewById<View>(R.id.settings_row_connections).setOnClickListener { openConnections() }
         view.findViewById<View>(R.id.settings_row_mpvconfig).setOnClickListener { openMpvConfig() }
+        view.findViewById<View>(R.id.settings_row_search).setOnClickListener { openSearch() }
         logcatSubtitle = view.findViewById<TextView>(R.id.settings_logcat_subtitle).also {
             logcatSubtitleColor = it.currentTextColor
         }
@@ -207,6 +209,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
             .commit()
     }
 
+    private fun openSearch() {
+        if (childFragmentManager.backStackEntryCount > 0) return
+        childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.settings_child_container, SearchFragment())
+            .addToBackStack(BACKSTACK_SEARCH)
+            .commit()
+    }
+
     /** Menandai baris Logcat dengan jumlah laporan crash yang belum dibuka. */
     private fun updateCrashNotice() {
         if (view == null) return
@@ -255,5 +266,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         const val BACKSTACK_X11 = "x11"
         const val BACKSTACK_CONNECTIONS = "connections"
         const val BACKSTACK_MPVCONFIG = "mpvconfig"
+        const val BACKSTACK_SEARCH = "search"
     }
 }

@@ -40,9 +40,9 @@ class DuckDuckGoSearch(
         }
     }
 
-    private companion object {
+    companion object {
         const val HOST = "html.duckduckgo.com"
-        const val ENDPOINT = "https://$HOST/html/"
-        val CHALLENGE_CODES = setOf(202, 403, 418, 429)
+        private const val ENDPOINT = "https://$HOST/html/"
+        private val CHALLENGE_CODES = setOf(202, 403, 418, 429)
     }
 }
