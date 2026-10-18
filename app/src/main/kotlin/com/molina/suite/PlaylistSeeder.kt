@@ -3,14 +3,16 @@ package com.molina.suite
 import android.content.Context
 import android.util.Log
 import com.molina.suite.core.storage.MolinaStorage
+import com.molina.suite.iptv.M3uNormalizer
 import java.io.File
 import java.io.IOException
 import kotlin.concurrent.thread
 
 /**
  * Menyalin playlist IPTV bawaan (aset molina-iptv) ke /sdcard/Molina/Playlists/ supaya bisa
- * dipilih lewat Open Local di mpv. Berkas yang sudah ada tidak pernah ditimpa, sehingga
- * playlist yang diubah pengguna tetap aman. Lokasi folder berasal dari [MolinaStorage].
+ * dipilih lewat Open Local di mpv. Playlist dirapikan oleh [M3uNormalizer] (nama kapital,
+ * grup baku). Berkas yang isinya sudah berbeda dari aset (diubah pengguna atau sudah
+ * dirapikan) tidak pernah ditimpa. Lokasi folder berasal dari [MolinaStorage].
  */
 internal object PlaylistSeeder {
 
@@ -62,15 +64,14 @@ internal object PlaylistSeeder {
         val kept = mutableListOf<String>()
         for (name in names) {
             val target = File(dir, name)
-            if (target.exists()) {
-                kept += name
-                continue
-            }
             val tmp = File(dir, ".$name.tmp")
             try {
-                context.assets.open("$ASSET_DIR/$name").use { input ->
-                    tmp.outputStream().use { output -> input.copyTo(output) }
+                val raw = context.assets.open("$ASSET_DIR/$name").use { it.readBytes() }
+                if (target.exists() && !target.readBytes().contentEquals(raw)) {
+                    kept += name
+                    continue
                 }
+                tmp.writeBytes(M3uNormalizer.normalizeBytes(raw))
                 if (!tmp.renameTo(target)) {
                     tmp.delete()
                     return Outcome.Failed("Gagal mengganti nama ${tmp.name} menjadi $name")
