@@ -201,11 +201,6 @@
                 <action android:name="com.molina.suite.mpv.ACTION_NEXT" />
             </intent-filter>
         </receiver>
-        <activity
-        android:name="com.molina.suite.mpv.tv.TvNasionalActivity"
-        android:label="TV NASIONAL"
-        android:exported="false"
-        android:theme="@android:style/Theme.DeviceDefault" />
 </application>
 
 </manifest>

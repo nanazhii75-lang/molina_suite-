@@ -105,9 +105,6 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
                 Toast.makeText(requireContext(), R.string.x11_unavailable, Toast.LENGTH_SHORT).show()
             }
         }
-        binding.tvBtn.setOnClickListener {
-            startActivity(Intent(requireContext(), com.molina.suite.mpv.tv.TvNasionalActivity::class.java))
-        }
         binding.ytBtn.setOnClickListener { showYoutubeSearchDialog() }
         binding.clipBtn.setOnClickListener { playClipboardLink() }
         resultsPanel = YoutubeResultsPanel(
@@ -121,7 +118,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             .also { it.attach(); it.refresh() }
         MpvSearchEntry.attach(searchReceiver)
         // Ikon tanpa teks: tekan lama menampilkan labelnya.
-        listOf(binding.x11Btn, binding.tvBtn, binding.ytBtn, binding.clipBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
+        listOf(binding.x11Btn, binding.ytBtn, binding.clipBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
             TooltipCompat.setTooltipText(it, it.contentDescription)
         }
         binding.settingsBtn.setOnClickListener {

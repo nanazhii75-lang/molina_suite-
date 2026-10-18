@@ -43,8 +43,3 @@ Grammar penyorotan sintaks di features/feature-code/src/main/assets/textmate (js
 - Sumber: https://github.com/termux/termux-x11 (modul lorie), di-vendor pada commit 9509625 repositori ini
 - Lisensi: lihat engines/termux-x11/LICENSE (tidak diubah); header lisensi dan nama author asli di berkas sumber dipertahankan
 - Perubahan Molina: paket com.termux.x11 diganti com.molina.suite.x11; AccessibilityService KeyInterceptor dan izin WRITE_SECURE_SETTINGS dihapus; tautan bantuan diarahkan ke repositori molina-suite
-
-<!-- molina-iptv-playlist -->
-## Playlist IPTV (aset)
-
-`app/src/main/assets/molina-iptv/dhanytv.m3u` diturunkan dari https://github.com/dhasap/dhanytv (`dhanytv.m3u`): disaring ke grup Indonesia dan Local tanpa entri DRM, nama channel dirapikan, dan stream yang tidak aktif dibuang. Hak atas daftar dan stream tetap milik pemilik masing-masing.

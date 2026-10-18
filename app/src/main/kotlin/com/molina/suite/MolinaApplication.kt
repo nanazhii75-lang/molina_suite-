@@ -80,7 +80,6 @@ class MolinaApplication : Application() {
         X11EngineModule.install(this, engines, shell, keepAlive, x11Controller)
         DaemonStatusBridge.start(engines, daemons)
         X11ErrorToaster.start(this, engines)
-        PlaylistSeeder.seedAsync(this)
     }
 
     /**

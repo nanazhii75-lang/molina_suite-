@@ -341,19 +341,6 @@
             app:tint="@color/molina_x11" />
 
         <ImageButton
-            android:id="@+id/tvBtn"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/action_tv_nasional"
-            android:padding="12dp"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_tv_48dp"
-            app:tint="@color/molina_tv" />
-
-        <ImageButton
             android:id="@+id/ytBtn"
             android:layout_width="48dp"
             android:layout_height="48dp"
