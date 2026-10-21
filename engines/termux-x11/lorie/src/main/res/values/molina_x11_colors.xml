@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Aksen identitas Molina: hijau muda yang sama dengan banner Molina Terminal (warna 256 nomor 120). -->
-    <color name="x11_accent">#87FF87</color>
-    <color name="x11_accent_soft">#B387FF87</color>
-    <color name="x11_accent_border">#8087FF87</color>
-</resources>
