@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="x11_idle_stopped">Molina X11 dihentikan otomatis karena aplikasi di latar belakang %1$d menit. Memori dibebaskan sekitar %2$s.</string>
-    <string name="x11_idle_remaining">Berhenti otomatis belum tuntas: masih ada %1$d proses X11.</string>
-    <string name="x11_idle_failed">Berhenti otomatis Molina X11 gagal.</string>
-</resources>
