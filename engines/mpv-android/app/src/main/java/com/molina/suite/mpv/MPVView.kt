@@ -103,10 +103,11 @@ internal class MPVView(context: Context, attrs: AttributeSet) : BaseMPVView(cont
             MPVLib.setOptionString(name, value)
         }
         MPVLib.setOptionString("input-default-bindings", "yes")
-        // Limit demuxer cache since the defaults are too high for mobile devices
-        val cacheMegs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) 64 else 32
-        MPVLib.setOptionString("demuxer-max-bytes", "${cacheMegs * 1024 * 1024}")
-        MPVLib.setOptionString("demuxer-max-back-bytes", "${cacheMegs * 1024 * 1024}")
+        // Cache demuxer dibatasi kecil: 16 MB ke depan, 8 MB ke belakang, paling lama 60 detik.
+        // Terukur di perangkat uji: pemutaran menambah sekitar 70-90 MB memori native.
+        MPVLib.setOptionString("demuxer-max-bytes", "${16 * 1024 * 1024}")
+        MPVLib.setOptionString("demuxer-max-back-bytes", "${8 * 1024 * 1024}")
+        MPVLib.setOptionString("cache-secs", "60")
         //
         // Folder bersama molina-suite (sejalan dengan MolinaStorage: /sdcard/Molina).
         val screenshotDir = java.io.File(Environment.getExternalStorageDirectory(), "Molina/Screenshots")

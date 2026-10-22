@@ -33,7 +33,7 @@ class MeterBarPresenter(
             size(reading.ramUsedBytes),
             size(reading.ramTotalBytes)
         )
-        ram.setTextColor(severity(reading.ramPercent))
+        ram.setTextColor(if (reading.ramSystemLow) critical else severity(reading.ramPercent))
     }
 
     private fun severity(percent: Int): Int = when {

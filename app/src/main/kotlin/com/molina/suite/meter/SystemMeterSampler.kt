@@ -3,6 +3,8 @@ package com.molina.suite.meter
 import android.app.ActivityManager
 import android.content.Context
 import android.net.TrafficStats
+import android.os.Process
+import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +28,8 @@ data class MeterReading(
     val cpuPercent: Int,
     val cpuScope: CpuScope,
     val ramUsedBytes: Long,
-    val ramTotalBytes: Long
+    val ramTotalBytes: Long,
+    val ramSystemLow: Boolean = false
 ) {
     val ramPercent: Int
         get() = if (ramTotalBytes > 0) ((ramUsedBytes * 100) / ramTotalBytes).toInt().coerceIn(0, 100) else 0
@@ -36,7 +39,10 @@ data class MeterReading(
  * Pengukur real time: jaringan (seluruh perangkat), CPU, dan RAM.
  *
  * - Jaringan: [TrafficStats] total semua antarmuka (selisih per detik).
- * - RAM: [ActivityManager.MemoryInfo] (total dikurangi tersedia).
+ * - RAM: PSS seluruh proses milik UID aplikasi ini (proses utama, Terminal, proot dan
+ *   turunannya); total adalah RAM perangkat. Sistem yang hampir kehabisan RAM ditandai
+ *   lewat [MeterReading.ramSystemLow]. PSS dibaca tiap [RAM_EVERY_TICKS] detik karena
+ *   membaca smaps tiap proses cukup mahal.
  * - CPU: /proc/stat bila bisa dibaca. Android 8 memblokir berkas itu untuk aplikasi biasa,
  *   maka dipakai cadangan: jumlah waktu CPU semua proses milik UID aplikasi ini
  *   (mpv, terminal, proot dan turunannya), dibagi kapasitas seluruh inti.
@@ -57,6 +63,8 @@ class SystemMeterSampler(context: Context, private val intervalMs: Long = 1000L)
         var prevTx = TrafficStats.getTotalTxBytes()
         var prevSys = readSystemCpu()
         var prevApp: Long? = if (prevSys == null) readOwnUidCpuTicks() else null
+        var appRamBytes = readAppRamBytes()
+        var ramTick = 1
 
         while (true) {
             delay(intervalMs)
@@ -87,6 +95,7 @@ class SystemMeterSampler(context: Context, private val intervalMs: Long = 1000L)
             }
             prevSys = sys
 
+            if (ramTick++ % RAM_EVERY_TICKS == 0) appRamBytes = readAppRamBytes()
             val memory = ActivityManager.MemoryInfo().also { activityManager.getMemoryInfo(it) }
             emit(
                 MeterReading(
@@ -94,8 +103,9 @@ class SystemMeterSampler(context: Context, private val intervalMs: Long = 1000L)
                     txBytesPerSec = txRate,
                     cpuPercent = cpuPercent.coerceIn(0, 100),
                     cpuScope = scope,
-                    ramUsedBytes = (memory.totalMem - memory.availMem).coerceAtLeast(0L),
-                    ramTotalBytes = memory.totalMem
+                    ramUsedBytes = appRamBytes,
+                    ramTotalBytes = memory.totalMem,
+                    ramSystemLow = memory.lowMemory
                 )
             )
 
@@ -104,6 +114,43 @@ class SystemMeterSampler(context: Context, private val intervalMs: Long = 1000L)
             prevTx = tx
         }
     }.flowOn(Dispatchers.IO)
+
+    /** Total PSS (byte) semua proses milik UID aplikasi ini; 0 bila tidak terbaca. */
+    private fun readAppRamBytes(): Long {
+        val pids = ownPids()
+        val infos = try {
+            activityManager.getProcessMemoryInfo(pids)
+        } catch (e: RuntimeException) {
+            try {
+                activityManager.getProcessMemoryInfo(intArrayOf(Process.myPid()))
+            } catch (e2: RuntimeException) {
+                return 0L
+            }
+        }
+        var kb = 0L
+        for (info in infos) kb += info.totalPss.toLong()
+        return kb * 1024L
+    }
+
+    /** Pid proses milik UID ini yang terlihat di /proc (selalu memuat proses utama). */
+    private fun ownPids(): IntArray {
+        val own = Process.myPid()
+        val uid = Process.myUid()
+        val entries = File("/proc").listFiles() ?: return intArrayOf(own)
+        val pids = ArrayList<Int>(entries.size)
+        for (entry in entries) {
+            val pid = entry.name.toIntOrNull() ?: continue
+            if (pid <= 0) continue
+            val sameUid = try {
+                Os.stat(entry.path).st_uid == uid
+            } catch (e: ErrnoException) {
+                false
+            }
+            if (sameUid) pids.add(pid)
+        }
+        if (!pids.contains(own)) pids.add(own)
+        return pids.toIntArray()
+    }
 
     /** Byte per detik; -1 bila statistik tidak didukung, 0 bila penghitung di-reset. */
     private fun rate(previous: Long, current: Long, dtNanos: Long): Long {
@@ -160,5 +207,10 @@ class SystemMeterSampler(context: Context, private val intervalMs: Long = 1000L)
         val utime = fields.getOrNull(11)?.toLongOrNull() ?: return null
         val stime = fields.getOrNull(12)?.toLongOrNull() ?: return null
         return utime + stime
+    }
+
+    private companion object {
+        /** RAM (PSS) dibaca tiap berapa kali sampel; sampel lain memakai nilai terakhir. */
+        const val RAM_EVERY_TICKS = 3
     }
 }

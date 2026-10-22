@@ -7,7 +7,7 @@
     <string name="meter_up">↑ %1$s</string>
     <string name="meter_cpu">CPU %1$d%%</string>
     <string name="meter_cpu_app">CPU app %1$d%%</string>
-    <string name="meter_ram">RAM %1$s/%2$s</string>
+    <string name="meter_ram">RAM app %1$s/%2$s</string>
     <string name="meter_unavailable">—</string>
 
     <string name="nav_mpv">mpv</string>
