@@ -21,7 +21,6 @@ import com.molina.suite.feature.settings.mpvconfig.MpvConfigFragment
 import com.molina.suite.feature.settings.packages.PackagesFragment
 import com.molina.suite.feature.settings.search.SearchFragment
 import com.molina.suite.feature.settings.tools.ToolsFragment
-import com.molina.suite.feature.settings.x11.X11Fragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -52,7 +51,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         view.findViewById<View>(R.id.settings_row_tools).setOnClickListener { openTools() }
         view.findViewById<View>(R.id.settings_row_library).setOnClickListener { openLibrary() }
         view.findViewById<View>(R.id.settings_row_debian).setOnClickListener { openDebian() }
-        view.findViewById<View>(R.id.settings_row_x11).setOnClickListener { openX11() }
         view.findViewById<View>(R.id.settings_row_packages).setOnClickListener { openPackages() }
         view.findViewById<View>(R.id.settings_row_integration).setOnClickListener { openIntegration() }
         view.findViewById<View>(R.id.settings_row_logcat).setOnClickListener { openLogcat() }
@@ -200,15 +198,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
             .commit()
     }
 
-    private fun openX11() {
-        if (childFragmentManager.backStackEntryCount > 0) return
-        childFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
-            .replace(R.id.settings_child_container, X11Fragment())
-            .addToBackStack(BACKSTACK_X11)
-            .commit()
-    }
-
     private fun openSearch() {
         if (childFragmentManager.backStackEntryCount > 0) return
         childFragmentManager.beginTransaction()
@@ -263,7 +252,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), HostBackPressHand
         const val BACKSTACK_PACKAGES = "packages"
         const val BACKSTACK_LOGCAT = "logcat"
         const val BACKSTACK_INTEGRATION = "integration"
-        const val BACKSTACK_X11 = "x11"
         const val BACKSTACK_CONNECTIONS = "connections"
         const val BACKSTACK_MPVCONFIG = "mpvconfig"
         const val BACKSTACK_SEARCH = "search"

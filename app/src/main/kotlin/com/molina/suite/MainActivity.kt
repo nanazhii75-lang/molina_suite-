@@ -57,7 +57,6 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
 
         bindDaemon(DaemonId.TERMINAL, binding.dotTerminal)
         bindDaemon(DaemonId.MPV, binding.dotMpv)
-        bindDaemon(DaemonId.X11, binding.dotX11)
         bindMeter()
         bindMiniPlayer()
     }
@@ -114,7 +113,6 @@ class MainActivity : AppCompatActivity(), HostChromeController, HostTabSwitcher 
             EngineId.TERMINAL -> R.id.nav_terminal
             EngineId.CODE -> R.id.nav_code
             EngineId.SETTINGS -> R.id.nav_settings
-            EngineId.X11 -> null // X11 tidak punya tab; jendelanya terpisah
         }
         if (menuId != null) binding.bottomNav.selectedItemId = menuId
     }

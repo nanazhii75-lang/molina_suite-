@@ -5,14 +5,12 @@ import android.content.Context
 import com.molina.suite.core.common.DocumentConverter
 import com.molina.suite.core.common.DocumentFormat
 import com.molina.suite.core.common.EditorOpenBoard
-import com.molina.suite.core.common.EngineId
 import com.molina.suite.core.common.EngineRegistry
 import com.molina.suite.core.common.LibraryDraftBoard
 import com.molina.suite.core.common.ShellCommandRunner
 import com.molina.suite.core.common.TerminalInputSender
 import com.molina.suite.core.common.ToolReadinessChecker
 import com.molina.suite.core.common.ToolSetupBoard
-import com.molina.suite.core.common.X11Controller
 import com.molina.suite.feature.settings.export.PandocDocumentConverter
 import com.molina.suite.feature.settings.export.PdfDocumentConverter
 import com.molina.suite.feature.settings.export.RoutingDocumentConverter
@@ -24,7 +22,6 @@ import com.molina.suite.feature.settings.logcat.CrashRecorder
 import com.molina.suite.feature.settings.logcat.LogRecorder
 import com.molina.suite.feature.settings.logcat.ProcessTracking
 import com.molina.suite.feature.settings.packages.PackageToolReadinessChecker
-import com.molina.suite.feature.settings.x11.SettingsX11Controller
 
 /** Titik masuk shell ke modul Settings: menyiapkan dependensi lalu mendaftarkan fitur. */
 object SettingsEngineModule {
@@ -86,10 +83,4 @@ object SettingsEngineModule {
         )
     }
 
-    /**
-     * Pengendali X11 untuk notifikasi: memantau memori dan menghentikan desktop serta server sampai
-     * tuntas. Peluncur X11 dicari saat dipakai, jadi aman dibuat sebelum modul X11 terpasang.
-     */
-    fun createX11Controller(context: Context, engines: EngineRegistry): X11Controller =
-        SettingsX11Controller(context.applicationContext) { engines.findLauncher(EngineId.X11) }
 }

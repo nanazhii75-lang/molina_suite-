@@ -4,6 +4,5 @@ package com.molina.suite.core.common
 enum class DaemonId {
     TERMINAL,
     MPV,
-    CODE,
-    X11
+    CODE
 }

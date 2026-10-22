@@ -100,11 +100,6 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
                 binding.docBtn.isEnabled = false
             }
         }
-        binding.x11Btn.setOnClickListener {
-            if (!X11Entry.open(requireActivity())) {
-                Toast.makeText(requireContext(), R.string.x11_unavailable, Toast.LENGTH_SHORT).show()
-            }
-        }
         binding.ytBtn.setOnClickListener { showYoutubeSearchDialog() }
         binding.clipBtn.setOnClickListener { playClipboardLink() }
         resultsPanel = YoutubeResultsPanel(
@@ -118,7 +113,7 @@ class MainScreenFragment : Fragment(R.layout.fragment_main_screen) {
             .also { it.attach(); it.refresh() }
         MpvSearchEntry.attach(searchReceiver)
         // Ikon tanpa teks: tekan lama menampilkan labelnya.
-        listOf(binding.x11Btn, binding.ytBtn, binding.clipBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
+        listOf(binding.ytBtn, binding.clipBtn, binding.docBtn, binding.settingsBtn, binding.resetBtn).forEach {
             TooltipCompat.setTooltipText(it, it.contentDescription)
         }
         binding.settingsBtn.setOnClickListener {

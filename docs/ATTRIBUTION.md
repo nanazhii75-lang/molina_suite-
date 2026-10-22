@@ -6,7 +6,6 @@ catatan hak cipta, dan header author asli pada source upstream tidak diubah.
 | Modul molina-suite | Proyek upstream | Sumber |
 |---|---|---|
 | Terminal (`com.molina.suite.terminal`) | Termux (termux-app v0.118.3) | https://github.com/termux/termux-app |
-| X11 (`com.molina.suite.x11`) | Termux:X11 (lorie) | https://github.com/termux/termux-x11 |
 | Media (`com.molina.suite.mpv`) | mpv-android | https://github.com/mpv-android/mpv-android |
 | Code (`features/feature-code`) | Sora Editor | https://github.com/Rosemoe/sora-editor |
 
@@ -38,8 +37,3 @@ Grammar penyorotan sintaks di features/feature-code/src/main/assets/textmate (js
 - Sumber: https://github.com/mpv-android/mpv-android, tag 2024-11-16 (commit 4258ae5)
 - Lisensi: lihat engines/mpv-android/LICENSE (tidak diubah); header lisensi dan nama author asli di berkas sumber dipertahankan
 - Perubahan Molina: paket is.xyz.mpv dan is.xyz.filepicker diganti menjadi com.molina.suite.mpv
-
-## Termux:X11 (engines/termux-x11)
-- Sumber: https://github.com/termux/termux-x11 (modul lorie), di-vendor pada commit 9509625 repositori ini
-- Lisensi: lihat engines/termux-x11/LICENSE (tidak diubah); header lisensi dan nama author asli di berkas sumber dipertahankan
-- Perubahan Molina: paket com.termux.x11 diganti com.molina.suite.x11; AccessibilityService KeyInterceptor dan izin WRITE_SECURE_SETTINGS dihapus; tautan bantuan diarahkan ke repositori molina-suite

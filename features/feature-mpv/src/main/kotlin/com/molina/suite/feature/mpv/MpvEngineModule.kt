@@ -10,7 +10,6 @@ import com.molina.suite.core.common.ToolSetupBoard
 import com.molina.suite.mpv.FormatInfoEntry
 import com.molina.suite.mpv.MpvActivityReporter
 import com.molina.suite.mpv.UrlPlayback
-import com.molina.suite.mpv.X11Entry
 import com.molina.suite.mpv.search.YoutubeSearch
 
 /**
@@ -43,7 +42,6 @@ object MpvEngineModule {
             )
         )
         UrlPlayback.install(MpvToolGate(toolReadiness, toolSetup))
-        X11Entry.install(MpvX11Opener(engines))
         FormatInfoEntry.install(MpvFormatInfoOpener(terminalInput))
         engines.register(MpvFeature())
     }

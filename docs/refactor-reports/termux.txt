@@ -249,8 +249,6 @@ https://github.com/termux/termux-widget/issues  [termux-shared/src/main/java/com
 https://github.com/termux/unstable-packages  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
 https://github.com/termux/unstable-packages/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
 https://github.com/termux/wcwidth  [terminal-emulator/src/main/java/com/termux/terminal/WcWidth.java]
-https://github.com/termux/x11-packages  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
-https://github.com/termux/x11-packages/issues  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
 https://termux.dev  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
 https://termux.dev/donate  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]
 https://wiki.termux.com  [termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java]

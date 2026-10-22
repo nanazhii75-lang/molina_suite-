@@ -22,6 +22,4 @@
     <string name="pkg_tmux_desc">Beberapa sesi dalam satu terminal; sesi bertahan saat terputus.</string>
     <string name="pkg_ssh_title">OpenSSH client</string>
     <string name="pkg_ssh_desc">ssh, scp, dan sftp untuk terhubung ke server lain.</string>
-    <string name="pkg_x11desktop_title">Desktop X11</string>
-    <string name="pkg_x11desktop_desc">Openbox, PCManFM, dan xterm untuk layar Molina X11. Jalankan dengan molina-x11 desktop.</string>
 </resources>

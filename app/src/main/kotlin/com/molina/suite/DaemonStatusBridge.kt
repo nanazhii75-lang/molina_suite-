@@ -18,8 +18,7 @@ object DaemonStatusBridge {
     private val daemonFor = mapOf(
         EngineId.TERMINAL to DaemonId.TERMINAL,
         EngineId.MPV to DaemonId.MPV,
-        EngineId.CODE to DaemonId.CODE,
-        EngineId.X11 to DaemonId.X11
+        EngineId.CODE to DaemonId.CODE
     )
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
