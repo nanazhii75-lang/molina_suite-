@@ -79,3 +79,9 @@ tercatat sebagai commit terpisah.
 
 ## Persetujuan login root
 - Login sebagai root meminta persetujuan: di Terminal lewat pertanyaan `Setuju? [y/N]` (pilihan 2 di menu awal dan `molina-login root`), di Setting lewat dialog Lanjutkan/Batal pada kartu "Masuk sebagai root". Kartu Setting menjalankan `molina-login root --yes` agar tidak bertanya dua kali. Login otomatis dengan pilihan root yang sudah tersimpan tidak bertanya lagi. Login sebagai user tidak meminta persetujuan.
+
+## Debian trixie (proot-distro 4.27.0)
+- Workflow bootstrap mem-patch `packages/proot-distro/build.sh` dari 4.26.0 ke **4.27.0** (SHA256 arsip diperiksa dini dan dipin). Alias `debian` kini menunjuk Debian 13 (trixie); tarball rootfs diunduh dari GitHub Releases proot-distro dan diverifikasi SHA256 oleh plugin. Commit termux-packages tidak diganti.
+- Langkah "Verifikasi hasil" memastikan zip bootstrap memuat `bin/proot-distro` 4.27.0, `etc/proot-distro/debian.sh` trixie, dan `DISTRO_PLUGINS_DIR` berprefix `com.molina.suite`.
+- Pemasangan Debian baru otomatis trixie. Pengguna lama tetap di bookworm sampai Debian dihapus dan dipasang ulang; venv `/opt/ytdlp` harus dibuat ulang karena versi Python berubah.
+- proot-distro 5.x sengaja tidak dipakai: arsitektur berbeda (Python, image OCI, rootfs di `containers/<n>/rootfs`) dan memutus `DebianStatus` serta `MolinaShellProfile`.

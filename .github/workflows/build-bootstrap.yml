@@ -825,6 +825,41 @@ jobs:
           echo "=== hasil (baris 70-85)"
           sed -n '70,85p' "$F"
 
+      - name: Patch proot-distro ke 4.27.0 (Debian trixie)
+        run: |
+          [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
+          cd tp
+          F=packages/proot-distro/build.sh
+          [ -f "$F" ] || { echo "GAGAL: $F tidak ada"; exit 1; }
+          NEW_VER=4.27.0
+          NEW_SHA=d4d5e7962c80cfc980d95da207abd8eb03377590edc2ba68c5ab96fe66db6c7b
+          echo "=== cek dini: SHA256 arsip sumber proot-distro v$NEW_VER"
+          GOT=$(curl -fsSL --retry 3 "https://github.com/termux/proot-distro/archive/v${NEW_VER}.tar.gz" | sha256sum | cut -d' ' -f1)
+          echo "diharapkan: $NEW_SHA"
+          echo "didapat   : $GOT"
+          [ "$GOT" = "$NEW_SHA" ] || { echo "GAGAL: SHA256 arsip tidak cocok"; exit 1; }
+          python3 - <<'PYX'
+          import sys
+          from pathlib import Path
+          p = Path("packages/proot-distro/build.sh")
+          t = p.read_text(encoding="utf-8")
+          rep = [
+              ("TERMUX_PKG_VERSION=4.26.0\n", "TERMUX_PKG_VERSION=4.27.0\n"),
+              ("TERMUX_PKG_SHA256=31f75fc2a2a4c41884cac223b65bb8b7cdf51335b464389c98a853f205e576d3\n",
+               "TERMUX_PKG_SHA256=d4d5e7962c80cfc980d95da207abd8eb03377590edc2ba68c5ab96fe66db6c7b\n"),
+          ]
+          for old, new in rep:
+              n = t.count(old)
+              if n != 1:
+                  print("GAGAL: pola harus tepat 1 kali, ditemukan %d: %s" % (n, old.strip()))
+                  sys.exit(1)
+              t = t.replace(old, new)
+          p.write_text(t, encoding="utf-8")
+          print("OK: proot-distro dipin ke 4.27.0 (alias debian = trixie)")
+          PYX
+          bash -n "$F" && echo "OK: sintaks bash valid"
+          grep -n -E '^TERMUX_PKG_(VERSION|SHA256|DEPENDS)=' "$F"
+
       - name: Diagnosa opsi tambah paket dan proot-distro
         run: |
           [ -d tp ] || { echo "GAGAL: direktori tp tidak ada"; exit 1; }
@@ -999,6 +1034,17 @@ jobs:
           done
           echo "=== paket bertanda selesai (seharusnya tanpa termux-tools, apt, ncurses) ==="
           docker exec termux-package-builder ls /data/data/.built-packages | head -60 || true
+
+      - name: Hapus penanda built proot-distro (paksa bangun ulang)
+        if: ${{ inputs.build }}
+        run: |
+          docker exec termux-package-builder sudo rm -f /data/data/.built-packages/proot-distro
+          docker exec termux-package-builder sudo rm -rf /home/builder/.termux-build/proot-distro
+          if docker exec termux-package-builder test -e /data/data/.built-packages/proot-distro; then
+            echo "GAGAL: penanda proot-distro masih ada"
+            exit 1
+          fi
+          echo "OK: penanda dan direktori build proot-distro dihapus"
 
       - name: Build bootstrap aarch64
         if: ${{ inputs.build }}
@@ -1291,6 +1337,17 @@ jobs:
           echo "OK: bin/pkg memuat penjaga molina"
           sed -n '/^select_mirror() {$/,+6p' bin/pkg
           grep -n 'com.molina.suite' bin/pkg | head -5 || true
+          # [molina] penjaga proot-distro 4.27.0 dan Debian trixie
+          [ -f bin/proot-distro ] || { echo "GAGAL: bin/proot-distro tidak ada di zip"; exit 1; }
+          [ -f etc/proot-distro/debian.sh ] || { echo "GAGAL: etc/proot-distro/debian.sh tidak ada di zip"; exit 1; }
+          grep -q '^PROGRAM_VERSION="4.27.0"$' bin/proot-distro || { echo "GAGAL: bin/proot-distro bukan versi 4.27.0"; grep -n '^PROGRAM_VERSION=' bin/proot-distro; exit 1; }
+          grep -q '^DISTRO_NAME="Debian (trixie)"$' etc/proot-distro/debian.sh || { echo "GAGAL: plugin debian bukan trixie"; grep -n '^DISTRO_NAME=' etc/proot-distro/debian.sh; exit 1; }
+          grep -q 'debian-trixie-aarch64-pd-' etc/proot-distro/debian.sh || { echo "GAGAL: tarball trixie aarch64 tidak ada di plugin"; exit 1; }
+          grep -q "DISTRO_PLUGINS_DIR=\"/data/data/$NEW_PKG/files/usr/etc/proot-distro\"" bin/proot-distro || { echo "GAGAL: DISTRO_PLUGINS_DIR tidak berprefix $NEW_PKG"; grep -n '^DISTRO_PLUGINS_DIR=' bin/proot-distro; exit 1; }
+          bash -n bin/proot-distro || { echo "GAGAL: bin/proot-distro tidak lolos bash -n"; exit 1; }
+          echo "OK: proot-distro 4.27.0 dengan plugin Debian trixie"
+          grep -n -E '^(PROGRAM_VERSION|DISTRO_PLUGINS_DIR|RUNTIME_DIR)=' bin/proot-distro
+          grep -n -E '^(DISTRO_NAME|TARBALL_URL\[.aarch64.\])=' etc/proot-distro/debian.sh
 
       - name: Unggah log build
         if: ${{ always() && inputs.build }}
