@@ -231,51 +231,17 @@
             android:visibility="gone"
             tools:text="[gesture]" />
 
-        <LinearLayout
-            android:id="@+id/top_controls"
-            style="?buttonBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:alpha="0.5"
-            android:background="#bf000000"
-            android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/topLockBtn"
-                style="?buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="40dp"
-                android:minHeight="40dp"
-                android:padding="4dp"
-                app:srcCompat="@drawable/ic_lock_24dp"
-                app:tint="@color/tint_normal" />
-
-            <ImageButton
-                android:id="@+id/topMenuBtn"
-                style="?buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="40dp"
-                android:minHeight="40dp"
-                android:padding="4dp"
-                app:srcCompat="@drawable/ic_settings_black_24dp"
-                app:tint="@color/tint_normal" />
-
-        </LinearLayout>
-
-        <!-- toolbar kanan: satu kolom di antara tombol Lock/Setting (atas) dan bar kontrol
-             (bawah), rata bawah; tidak bisa menimpa keduanya. Visibilitas tiap tombol tetap
+        <!-- toolbar kanan: satu kolom rata bawah di atas bar kontrol; Lock & Setting ada
+             di paling bawah kolom (di bawah tombol rotasi) agar mudah dijangkau jempol. Visibilitas tiap tombol tetap
              diatur MPVActivity; tombol GONE tidak memakan ruang. -->
         <LinearLayout
             android:id="@+id/rightTools"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@id/controls"
+            android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_below="@id/top_controls"
             android:layout_marginTop="@dimen/molina_tools_margin_top"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="@dimen/molina_tools_margin_bottom"
@@ -377,6 +343,41 @@
                 android:scaleType="fitCenter"
                 app:srcCompat="@drawable/ic_screen_rotation_24dp"
                 app:tint="@color/tint_normal" />
+
+            <!-- Lock & Setting: di bawah tombol rotasi (id top_controls dipertahankan agar
+                 fade/visibilitas/dpad di MPVActivity tetap bekerja) -->
+            <LinearLayout
+                android:id="@+id/top_controls"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/topLockBtn"
+                    android:layout_width="@dimen/molina_tool_btn_size"
+                    android:layout_height="@dimen/molina_tool_btn_size"
+                    android:layout_marginTop="@dimen/molina_tool_btn_gap"
+                    android:alpha="0.65"
+                    android:background="@drawable/molina_float_button_bg"
+                    android:contentDescription="@string/ui_lock"
+                    android:padding="@dimen/molina_tool_btn_padding"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_lock_24dp"
+                    app:tint="@color/tint_normal" />
+
+                <ImageButton
+                    android:id="@+id/topMenuBtn"
+                    android:layout_width="@dimen/molina_tool_btn_size"
+                    android:layout_height="@dimen/molina_tool_btn_size"
+                    android:layout_marginTop="@dimen/molina_tool_btn_gap"
+                    android:alpha="0.65"
+                    android:background="@drawable/molina_float_button_bg"
+                    android:contentDescription="@string/ui_settings"
+                    android:padding="@dimen/molina_tool_btn_padding"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_settings_black_24dp"
+                    app:tint="@color/tint_normal" />
+            </LinearLayout>
 
         </LinearLayout>
 

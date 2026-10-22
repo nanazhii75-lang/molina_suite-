@@ -56,6 +56,8 @@
     <!-- Action buttons -->
     <string name="switch_orientation">Switch Orientation</string>
     <string name="ui_rotate_screen" translatable="false">Putar layar</string>
+    <string name="ui_lock" translatable="false">Kunci layar</string>
+    <string name="ui_settings" translatable="false">Pengaturan pemutar</string>
     <string name="ui_open_playlist" translatable="false">Daftar playlist</string>
     <string name="ui_pip" translatable="false">Layar mengambang</string>
     <string name="ui_background_play" translatable="false">Putar di latar belakang</string>
